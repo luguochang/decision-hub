@@ -15,6 +15,7 @@ Decision Hub 是一个可插拔、可审计的事件驱动决策智能平台。
 - [工程索引](INDEX.md)
 - [产品架构基线](DECISION_HUB_PRODUCT_ARCHITECTURE_V1.md)
 - [执行路线图](docs/ROADMAP.md)
+- [分阶段执行设计](docs/EXECUTION_PLAN.md)
 - [实现状态](docs/IMPLEMENTATION_STATUS.md)
 - [TDD/SDD 与自测规范](docs/engineering/TDD_SDD_SELF_TEST_STANDARD.md)
 - [ADR 目录](docs/decisions/README.md)

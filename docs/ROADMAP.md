@@ -1,7 +1,7 @@
 # Decision Hub 执行路线图
 
 版本：`ROADMAP-2026-08-26.v1`  
-用途：把 [产品架构基线](../DECISION_HUB_PRODUCT_ARCHITECTURE_V1.md) 中的 R0-R3 规划转换为 GitHub 可逐项追踪的执行清单。本文是任务状态入口，不替代架构基线、契约和 ADR。
+用途：把 [产品架构基线](../DECISION_HUB_PRODUCT_ARCHITECTURE_V1.md) 中的 R0-R3 规划转换为 GitHub 可逐项追踪的执行清单。本文是里程碑状态入口；每个任务的实现边界、框架复用和 Codex 提示词见 [分阶段执行设计](EXECUTION_PLAN.md)，不替代架构基线、契约和 ADR。
 
 ## 使用规则
 

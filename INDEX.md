@@ -1,6 +1,6 @@
 # Decision Hub 工程入口
 
-项目简介见 [README](README.md)，阶段执行状态见 [ROADMAP](docs/ROADMAP.md)。
+项目简介见 [README](README.md)，阶段执行状态见 [ROADMAP](docs/ROADMAP.md)，逐任务实施约束见 [EXECUTION_PLAN](docs/EXECUTION_PLAN.md)。
 
 ## 当前状态
 
@@ -10,11 +10,12 @@ Decision Hub 正在实现 R0 Owner Production。当前首要目标是把已经�
 
 1. [产品架构基线](DECISION_HUB_PRODUCT_ARCHITECTURE_V1.md)
 2. [执行路线图](docs/ROADMAP.md)
-3. [ADR 目录](docs/decisions/README.md)
-4. [模块地图](docs/modules/README.md)
-5. [TDD/SDD 与自测规范](docs/engineering/TDD_SDD_SELF_TEST_STANDARD.md)
-6. `contracts/schemas/` 中的 canonical schema
-7. 受影响模块的 `README.md`、测试和 ReleaseManifest
+3. [分阶段执行设计](docs/EXECUTION_PLAN.md)
+4. [ADR 目录](docs/decisions/README.md)
+5. [模块地图](docs/modules/README.md)
+6. [TDD/SDD 与自测规范](docs/engineering/TDD_SDD_SELF_TEST_STANDARD.md)
+7. `contracts/schemas/` 中的 canonical schema
+8. 受影响模块的 `README.md`、测试和 ReleaseManifest
 
 `DECISION_HUB_FINAL_ARCHITECTURE.md` 和 `DSH_RESEARCH_DECISION_LOG.md` 是历史研究/审查材料；若与 V1 基线冲突，以 V1、ADR、canonical schema 和受影响模块文档为准。
 
