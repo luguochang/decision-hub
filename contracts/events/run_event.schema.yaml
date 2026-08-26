@@ -1,0 +1,14 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/run-event.schema.json
+title: RunEvent
+type: object
+additionalProperties: false
+required: [event_version, run_id, sequence_no, event_type, occurred_at]
+properties:
+  event_version: {type: string, const: 'run-event.v1'}
+  run_id: {type: string}
+  step_id: {type: [string, 'null']}
+  sequence_no: {type: integer, minimum: 0}
+  event_type: {type: string}
+  occurred_at: {type: string, format: date-time}
+  payload_ref: {type: [string, 'null']}

@@ -1,0 +1,16 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/common.schema.json
+title: Decision Hub common types
+definitions:
+  utcDateTime:
+    type: string
+    format: date-time
+  id:
+    type: string
+    pattern: '^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,127}$'
+  direction:
+    type: string
+    enum: [long, short, neutral, no_trade]
+  runStatus:
+    type: string
+    enum: [admitted, running, completed, degraded, failed, cancelled]

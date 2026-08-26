@@ -1,0 +1,13 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/outcome.schema.json
+title: OutcomeCreate
+type: object
+additionalProperties: false
+required: [forecast_id, return_pct, direction_correct]
+properties:
+  forecast_id: {type: string}
+  return_pct: {type: number}
+  direction_correct: {type: boolean}
+  fees: {type: number, default: 0}
+  slippage: {type: number, default: 0}
+  quality_status: {type: string, default: estimated}

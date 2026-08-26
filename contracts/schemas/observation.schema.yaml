@@ -1,0 +1,15 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/observation.schema.json
+title: ObservationCreate
+type: object
+additionalProperties: false
+required: [text]
+properties:
+  text: {type: string, minLength: 1, maxLength: 200000}
+  source_id: {type: string, default: manual-text}
+  source_type: {type: string, enum: [manual, transcript, official_feed, web, document], default: manual}
+  observed_at: {type: [string, 'null'], format: date-time}
+  published_at: {type: [string, 'null'], format: date-time}
+  language: {type: string, default: zh}
+  event_hint: {type: [string, 'null'], maxLength: 128}
+  source_url: {type: [string, 'null'], format: uri}

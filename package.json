@@ -1,0 +1,10 @@
+{
+  "name": "decision-hub-workspace",
+  "private": true,
+  "packageManager": "pnpm@11.19.0",
+  "scripts": {
+    "web:dev": "pnpm --dir apps/decision-desk dev",
+    "web:test": "pnpm --dir apps/decision-desk test",
+    "web:build": "pnpm --dir apps/decision-desk build"
+  }
+}

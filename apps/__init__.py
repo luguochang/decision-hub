@@ -1,0 +1,1 @@
+"""Decision Hub application entrypoints."""

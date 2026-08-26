@@ -1,0 +1,10 @@
+manifest_version: contracts.v1
+schemas:
+  contracts/events/run_event.schema.yaml: 8a41bfb20cfa552caba9c9af3711269b8b83c6697736c4dcb6c611d28554f2dd
+  contracts/policies/gate_policy.schema.yaml: ee9664cdcc93f1619ae3454d953235263ab1bbc0d6432cb57f908c099888321b
+  contracts/schemas/artifact.schema.yaml: 7eb372a42d40aac1ddf3717f23b6786fc4b6803c2097b1412466e006053eb9f1
+  contracts/schemas/common.schema.yaml: 2d210425d08c160bbb31861e6ae114efffc0c95aced9f0eab905a90a56a23196
+  contracts/schemas/forecast.schema.yaml: 0ce75395087a0404dfedbb5f05a52bfd3836c7cc425d29e5dea53728f229cf2f
+  contracts/schemas/observation.schema.yaml: b499ffe56c11eb0c1e52c7d9744c124a53f4fb326b74154800c522669b3f685d
+  contracts/schemas/outcome.schema.yaml: b477937b57c50fa07c20802c4b5f2a6cd89bf1127fd6d58a48974615296d5340
+  contracts/schemas/text_envelope.schema.yaml: 56e5e1948ef05ae2b53ab2f52691b4edbefc333cc604b0576d49c6ebb7deb380

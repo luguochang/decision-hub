@@ -1,0 +1,4 @@
+schema_version: contracts.v1
+compatibility:
+  policy: additive-by-default
+  breaking_change: ADR-required

@@ -1,0 +1,1 @@
+# Deprecated compatibility pointer. Use `uv sync --all-groups` and uv.lock.

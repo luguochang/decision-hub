@@ -1,0 +1,1 @@
+"""Decision Desk query views."""

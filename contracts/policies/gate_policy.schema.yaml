@@ -1,0 +1,11 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/gate-policy.schema.json
+title: GatePolicy
+type: object
+additionalProperties: false
+required: [policy_version, required_citation_ratio, max_probability_without_calibration, required_capabilities]
+properties:
+  policy_version: {type: string}
+  required_citation_ratio: {type: number, minimum: 0, maximum: 1}
+  max_probability_without_calibration: {type: number, minimum: 0, maximum: 1}
+  required_capabilities: {type: array, items: {type: string}}

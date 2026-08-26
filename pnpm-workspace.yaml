@@ -1,0 +1,5 @@
+packages:
+  - apps/decision-desk
+  - packages/contracts_ts
+allowBuilds:
+  esbuild: true

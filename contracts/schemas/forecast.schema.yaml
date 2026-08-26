@@ -1,0 +1,16 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/forecast.schema.json
+title: Forecast
+type: object
+additionalProperties: false
+required: [forecast_id, artifact_id, instrument, horizon, direction, probability, trigger, invalidation, expires_at]
+properties:
+  forecast_id: {type: string}
+  artifact_id: {type: string}
+  instrument: {type: string}
+  horizon: {type: string, enum: ['30m', '24h', '72h']}
+  direction: {type: string, enum: [long, short, neutral, no_trade]}
+  probability: {type: number, minimum: 0, maximum: 1}
+  trigger: {type: string}
+  invalidation: {type: string}
+  expires_at: {type: string, format: date-time}
