@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-Decision Hub 已完成 R0 Owner Production Core（提交 `2ee2f8d`）、R1 Realtime Event Engine 和 R1-L 离线代码门；Live Pilot Gate 尚未授权。[R2 Decision Workbench 与自主进化 Stage Charter](docs/stages/R2_DECISION_WORKBENCH_EVOLUTION.md) 已接受并进入实现，R2-00 Kernel/Orchestration 边界对齐已完成，下一张任务是 R2-01。fixture 证据不等于真实网络稳定性、预测准确率或收益证明；R2 完成后进入观察期，不自动开始 R3。
+Decision Hub 已完成 R0 Owner Production Core、R1 Realtime Event Engine、R1-L 离线代码门，以及 R2-00 至 R2-05 的离线 U2 工程退出门；当前进入观察期，不自动开始 R3。Live Pilot Gate、真实 DSH/Pi/Provider canary、真实 shadow 优势、预测准确率和收益仍未证明或未授权。
 
 ## 唯一有效事实源
 
@@ -17,10 +17,10 @@ Decision Hub 已完成 R0 Owner Production Core（提交 `2ee2f8d`）、R1 Realt
 7. [全局开发治理规范](docs/engineering/DEVELOPMENT_GOVERNANCE.md)
 8. [当前 R1 Stage Charter](docs/stages/R1_REALTIME_EVENT_ENGINE.md)
 9. [R1 adapter 边界 ADR](docs/decisions/ADR-0003-r1-realtime-plugin-boundary.md)
-10. [ADR-0005 DSH Harness 与插件生态桥接边界（待 owner 接受）](docs/decisions/ADR-0005-dsh-harness-plugin-bridge.md)
+10. [ADR-0005 DSH Harness 与插件生态桥接边界](docs/decisions/ADR-0005-dsh-harness-plugin-bridge.md)（已接受）
 11. [R0 Core Completion 实现方案](docs/stages/R0_CORE_COMPLETION_PLAN.md) 和 [R0-B 历史阶段记录](docs/stages/R0-B_PROVIDER_RELIABILITY_BOUNDARY.md)
 12. [TDD/SDD 与自测规范](docs/engineering/TDD_SDD_SELF_TEST_STANDARD.md)
-13. [R2 Decision Workbench 与自主进化 Stage Charter（待确认提案）](docs/stages/R2_DECISION_WORKBENCH_EVOLUTION.md)
+13. [R2 Decision Workbench 与自主进化 Stage Charter](docs/stages/R2_DECISION_WORKBENCH_EVOLUTION.md)（R2-00 至 R2-05 离线 U2 退出门已完成，观察期）
 14. `contracts/schemas/` 中的 canonical schema
 15. 受影响模块的 `README.md`、测试和 ReleaseManifest
 

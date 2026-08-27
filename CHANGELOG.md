@@ -4,15 +4,23 @@
 
 ## [Unreleased]
 
+### R2 Decision Workbench v1 offline U2 complete (2026-08-28)
+
+- R2-01 至 R2-05 已形成离线 U2 工程闭环：canonical codegen、官方 MCP stdio/streamable HTTP、Workbench/Capability 边界、Run Inspector、评测/经验资产、LangGraph Supervisor、候选 Runtime 和人工 Promotion/Rollback。
+- Promotion 使用 owner-only command、确定性 Gate、generation/CAS 和原子事务；并发只有一个赢家，事务故障不会留下 pointer/candidate/audit 半状态，Agent/DSH/前端不能直接修改 active pointer。
+- Decision Desk 新增 Run/Evidence/Experiment/Asset/Promotion 人可读视图和 Promote/Reject/Rollback 交互；375/768/1024/1440 四个视口无横向溢出。
+- Alembic head 为 `0015_evolution_provenance`；当前离线质量门为 Python `128 passed`、前端 `5 passed`，Ruff/Pyright/contract/module docs/Core/Pilot acceptance/MCP 双 transport/前端 build 均通过。
+- R2 当前进入观察期，不自动开始 R3；真实 DSH/Pi/Provider canary、长期 shadow、预测准确率和盈利能力仍未证明。
+
 ### Governance alignment (2026-08-27)
 
 - 对齐产品架构总表与当前 R0 交付证据：明确 R0/R1/R2 边界，修正实际仓库路径，并将动态 Supervisor、六层 grader、Version Registry、Evolution 和 DSH/Pi Workbench 保留为后续阶段能力；本次仅修改文档，不改变运行时行为。
 - 重新运行 R0 core acceptance，确认文档修正没有改变契约、迁移、回放、恢复、前端或安全门禁结果。
 
-### Next
+### Observation period
 
-- R2 Decision Workbench 与自主进化：Stage Charter 已接受并开始按 R2-00 至 R2-05 实施；当前 R2-00 done，R2-01 next。
-- DSH 插件生态核对：官方 Harness 采用 “everything is a plugin” 且仍处于 developer preview；社区目录本次公开 count 为约 `2322`。新增 [ADR-0005](docs/decisions/ADR-0005-dsh-harness-plugin-bridge.md) 提案，推荐通过 `ResearchWorkbenchPort`、`CapabilityManifest` 和 `DshCapabilityAdapter` 复用插件，不把 DSH 作为 Product Kernel。
+- 只运行、观测、记录 FailurePattern 和补充前瞻评测证据；真实插件、Live Pilot、生产 Promotion、R3 多领域或远程部署必须另立授权。
+- DSH 继续作为可替换 Workbench/Harness 生态，通过 `ResearchWorkbenchPort`、`CapabilityManifest` 和 `DshCapabilityAdapter` 接入，不成为 Product Kernel 或业务账本。
 
 ### R2 in progress (2026-08-27)
 
@@ -21,7 +29,7 @@
 
 ### R1-L offline complete (2026-08-27)
 
-- R1-L 单 owner 试运行就绪的代码、离线 acceptance 和文档已完成，包含脱敏 readiness 契约与 API、worker `--preflight`/`--pilot` 启动门，以及 local/email outbox 组合根。本次变更已形成独立提交但尚未推送；真实来源、SMTP、长期运行和业务效果仍需 Live Pilot Gate。
+- R1-L 单 owner 试运行就绪的代码、离线 acceptance 和文档已完成，包含脱敏 readiness 契约与 API、worker `--preflight`/`--pilot` 启动门，以及 local/email outbox 组合根。真实来源、SMTP、长期运行和业务效果仍需 Live Pilot Gate。
 
 ### Delivered (2026-08-27)
 

@@ -12,9 +12,9 @@ Decision Hub 是一个可插拔、可审计的事件驱动决策智能平台。
 
 `R1 Realtime Event Engine` 已完成离线验收并提交：来源、市场和通知以可替换 adapter 接入既有 Kernel，固定 fixture 覆盖来源到 Outcome/outbox 的完整链路、游标/PIT、失败恢复和升级路径。真实来源、行情、邮件和 ASR 的网络稳定性、授权范围、预测准确率及盈利能力均未声称完成；`R2` 必须获得新的 owner Stage Gate。
 
-进入 R2 前的 `R1-L Single-Owner Pilot Readiness` 离线代码门也已完成：readiness、worker 预检/启动门、local/email outbox 组合根和只读 readiness API 已实现并通过 `tools/pilot_acceptance.py`。本次变更已形成独立提交但尚未推送；真实连续运行仍需 owner 单独授权的 Live Pilot Gate。
+进入 R2 前的 `R1-L Single-Owner Pilot Readiness` 离线代码门也已完成：readiness、worker 预检/启动门、local/email outbox 组合根和只读 readiness API 已实现并通过 `tools/pilot_acceptance.py`。真实连续运行仍需 owner 单独授权的 Live Pilot Gate。
 
-`R2 Decision Workbench v1` 已获得 Stage Gate 并开始实现。R2-00 已把 LangGraph 编排和 checkpoint 组装移出 Kernel application，保持 R0/R1 行为不变；R2-01 至 R2-05 将交付研究、实验、资产、候选比较和人工 Promotion/Rollback。R2 完成后进入观察期，不自动扩大到 R3。
+`R2 Decision Workbench v1` 已完成 R2-00 至 R2-05 的离线 U2 工程退出门：Core MCP、Workbench/Capability 边界、Run Inspector、评测资产、LangGraph Supervisor、候选 Runtime、人工 Promotion/Rollback 和可观测前端已形成闭环。当前进入观察期，不自动扩大到 R3；真实 DSH/Pi/Provider、长期 shadow 和收益优势仍需独立授权与证据。
 
 ## 文档入口
 
@@ -28,7 +28,7 @@ Decision Hub 是一个可插拔、可审计的事件驱动决策智能平台。
 - [R0-B Stage Charter](docs/stages/R0-B_PROVIDER_RELIABILITY_BOUNDARY.md)
 - [R0 Core Completion 实现方案](docs/stages/R0_CORE_COMPLETION_PLAN.md)
 - [R1 Realtime Event Engine Stage Charter](docs/stages/R1_REALTIME_EVENT_ENGINE.md)
-- [R2 Decision Workbench 与自主进化 Stage Charter（待 owner 确认）](docs/stages/R2_DECISION_WORKBENCH_EVOLUTION.md)
+- [R2 Decision Workbench 与自主进化 Stage Charter（离线 U2 工程退出门已完成，观察期）](docs/stages/R2_DECISION_WORKBENCH_EVOLUTION.md)
 - [TDD/SDD 与自测规范](docs/engineering/TDD_SDD_SELF_TEST_STANDARD.md)
 - [ADR 目录](docs/decisions/README.md)，包括 [R1 adapter 边界](docs/decisions/ADR-0003-r1-realtime-plugin-boundary.md)
 - [模块地图](docs/modules/README.md)

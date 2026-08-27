@@ -3,7 +3,7 @@
 版本：`ROADMAP-2026-08-26.v1`  
 用途：把 [产品架构基线](../DECISION_HUB_PRODUCT_ARCHITECTURE_V1.md) 中的 R0-R3 规划转换为 GitHub 可逐项追踪的执行清单。本文是里程碑状态入口；每个任务的实现边界、框架复用和 Codex 提示词见 [分阶段执行设计](EXECUTION_PLAN.md)，不替代架构基线、契约和 ADR。
 
-R0/R1/R1-L 离线代码门已完成。R2 的 [Stage Charter](stages/R2_DECISION_WORKBENCH_EVOLUTION.md) 已接受并进入实现；R2-00 已完成，R2-01 是下一张任务卡。
+R0/R1/R1-L 离线代码门和 R2-00 至 R2-05 的离线 U2 工程退出门已完成。R2 的 [Stage Charter](stages/R2_DECISION_WORKBENCH_EVOLUTION.md) 当前进入观察期；不自动开始 R3。
 
 ## 使用规则
 
@@ -68,14 +68,14 @@ R1 开始真实直播监听或外部通知前，必须新增对应 ADR、Provide
 
 ## R2：Decision Workbench 与自主进化
 
-详细边界、拟议契约、DSH 插件生态核对、桥接方案、任务依赖、BDD/TDD 验收门、允许/禁止路径和 owner 决策项见 [R2 Stage Charter](stages/R2_DECISION_WORKBENCH_EVOLUTION.md) 及 [ADR-0005](decisions/ADR-0005-dsh-harness-plugin-bridge.md)。当前状态：`accepted / in_progress`；只授权 R2-00 至 R2-05，R2 完成后进入观察期。
+详细边界、契约、DSH 插件桥接、任务依赖、BDD/TDD 验收门和 owner 决策项见 [R2 Stage Charter](stages/R2_DECISION_WORKBENCH_EVOLUTION.md) 及 [ADR-0005](decisions/ADR-0005-dsh-harness-plugin-bridge.md)。当前状态：`done (offline U2) / observation`；真实运行效果仍需独立证据。
 
 - [x] `R2-00` Kernel/Orchestration 边界对齐：移除 Kernel application 对 LangGraph/LangChain 编排细节的直接依赖，保持 R0/R1 行为不变（见 [ADR-0006](decisions/ADR-0006-kernel-orchestration-boundary-alignment.md)）。
-- [ ] `R2-01` Core MCP 和 DSH ResearchMemo adapter；DSH 只能提交研究候选，不能写业务账本或默认发布版本。
-- [ ] `R2-02` 完整 Run Inspector：证据血缘、步骤、调用、成本、Gate、版本和回放对比。
-- [ ] `R2-03` Evaluation 数据集、失败样本、反馈和策略实验登记。
-- [ ] `R2-04` Evolution Engine：只生成 candidate，经过 replay/holdout/shadow 后由 owner promotion。
-- [ ] `R2-05` Asset Promotion、回滚、版本 registry 和候选/默认策略对比。
+- [x] `R2-01` Core MCP、Workbench/Capability contract 与 DSH ResearchMemo adapter；DSH 只能提交研究候选，不能写业务账本或默认发布版本。
+- [x] `R2-02` 完整 Run Inspector：证据血缘、步骤、调用、成本、Gate、版本和回放对比。
+- [x] `R2-03` Evaluation 数据集、失败样本、反馈、Experience/FailurePattern 和策略实验登记。
+- [x] `R2-04` LangGraph Supervisor/Evolution candidate：统一 Runtime contract、有限 replan、replay/holdout/离线 shadow 对照，不改变正式 pointer。
+- [x] `R2-05` Promotion Gate、CAS active pointer、原子回滚、版本 registry 和人工 Promotion Desk。
 
 ## R3：领域与部署扩展
 
@@ -112,5 +112,5 @@ R2 通过后进入观察期，不自动开启 R3。新领域、公共插件市�
 | `R0-Core` | 文本到 Forecast/Outcome/Evaluation、Gate、账本、回放边界、TDD/SDD | `done` |
 | `R0-Release` | Provider contract、backup/recovery、可观测 Run Inspector、ReleaseManifest | `done` |
 | `R1-Realtime` | 授权来源、事件调度、行情基准、Outcome 到期和通知 | `done`（离线 fixture） |
-| `R2-Workbench` | DSH MCP、完整观测、实验、候选晋级和回滚 | `in_progress`（R2-00 done；R2-01 next） |
+| `R2-Workbench` | DSH MCP、完整观测、实验、候选晋级和回滚 | `done`（离线 U2；观察期，未证明真实收益） |
 | `R3-Domains` | 第二领域真实复用和按需远程部署 | `planned` |

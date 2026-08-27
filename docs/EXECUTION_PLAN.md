@@ -77,7 +77,7 @@ TextEnvelope
 | R0-C | 观测、恢复和可回放评测 | LangGraph checkpoint、SQLite、pytest | `done` | Run Inspector、backup/recovery、PIT replay 通过 |
 | R0-D | R0 发布基线 | ReleaseManifest、runbook、CI | `done` | R0 Definition of Done 全部满足 |
 | R1 | 真实事件来源和按需触发 | SourcePlugin、scheduler、outbox | `done`（离线 fixture） | 授权来源、事件游标、行情基准和通知测试通过 |
-| R2 | Workbench 与自主进化 | DSH MCP、replay/shadow、Promotion | `in_progress` | 候选可比较、人工晋级、可回滚 |
+| R2 | Workbench 与自主进化 | DSH MCP、replay/shadow、Promotion | `done`（离线 U2；观察期） | 候选可比较、人工晋级、可回滚 |
 | R3 | 第二领域和按需部署扩展 | Domain Extension、PostgreSQL 迁移出口 | `planned` | 第二领域复用 Kernel，不复制主链 |
 
 ### 阶段门的固定顺序
@@ -312,7 +312,7 @@ R1-L-01 readiness contract/service
 
 ## 11. R2：Decision Workbench 与自主进化
 
-R2 的目标不是“让 Agent 自己改代码”，而是把失败样本、反馈和候选版本沉淀成可比较的个人资产。完整边界见 [R2 Stage Charter](stages/R2_DECISION_WORKBENCH_EVOLUTION.md)。该 Charter 已接受；R2-00 已完成且未改变 R0/R1 行为，当前按顺序执行 R2-01。
+R2 的目标不是“让 Agent 自己改代码”，而是把失败样本、反馈和候选版本沉淀成可比较的个人资产。完整边界见 [R2 Stage Charter](stages/R2_DECISION_WORKBENCH_EVOLUTION.md)。R2-00 至 R2-05 的离线 U2 工程退出门已完成且未改变 R0/R1 行为；当前进入观察期，不自动执行 R3。
 
 ### R2-00：Kernel/Orchestration Boundary Alignment
 

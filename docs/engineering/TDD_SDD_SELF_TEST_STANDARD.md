@@ -138,4 +138,4 @@ Live canary 的通过条件是：Provider 返回可解析的 `AgentPayload`，�
 
 ## 9. 当前基线与剩余缺口
 
-截至 2026-08-26，Fake/Replay 路径的文本纵向链、API E2E、Gate、Outcome/Evaluation、outbox、checkpoint 和前端构建已通过本地测试。外部 Provider live canary、官方事件/新闻源、实时行情、ASR、通知适配器、完整六层评测、时间切分 holdout/shadow、Asset Promotion 和自动 scheduler 仍是未完成项；任何实现或报告必须保持这一边界。
+截至 2026-08-28，R0/R1/R1-L 离线代码门和 R2-00 至 R2-05 的离线 U2 工程退出门已通过：文本纵向链、来源/调度/outbox、PIT replay/holdout/离线 shadow、Run Inspector、Workbench/Core MCP、评测资产、候选 Runtime、Supervisor 和人工 Promotion/Rollback 均有可重复测试证据。外部 Provider 的一次兼容性 canary 不能证明生产稳定性；真实来源/行情/通知、实时 ASR、真实 DSH/Pi 插件、长期 production shadow、预测准确率和盈利能力仍未完成验证。任何实现或报告必须保持这一边界。

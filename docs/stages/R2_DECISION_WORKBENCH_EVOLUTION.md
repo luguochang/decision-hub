@@ -1,7 +1,7 @@
 # R2 Decision Workbench 与自主进化 Stage Charter
 
 版本：`STAGE-R2-2026-08-27.v0.3`
-状态：`accepted`（owner 已于 2026-08-27 授权按本文完成 R2-00 至 R2-05；不得扩大范围）
+状态：`done (offline U2) / observation`（R2-00 至 R2-05 工程退出门已完成；不得扩大范围）
 前置：`R0-CORE-COMPLETE`、`R1-REALTIME-EVENT-ENGINE`、`R1-L-SINGLE-OWNER-PILOT-READINESS`
 适用范围：Decision Workbench、Core MCP、ResearchMemo、评测数据集、候选 Runtime、replay/holdout/shadow、版本注册、人工 Promotion/Rollback 和个人资产沉淀。
 
@@ -147,15 +147,15 @@ DSH/Codex/Decision Desk command
 
 插件是可调用能力，不只是界面按钮；但每个插件必须有 manifest、输入/输出 schema、权限 allowlist、deadline/retry/cost policy、版本和 contract tests。插件不得直接调用另一个插件的私有代码、SQL 或 DSH session。Supervisor 通过 capability ID 和公开 ToolPort 组合它们，Core 负责最终审计和状态。
 
-## 4. R2 拟议公开契约（待 owner 锁定）
+## 4. R2 公开契约基线（已锁定并完成 codegen）
 
-以下是契约设计提案，不代表已经加入 `contracts/`。owner 确认后才能写 canonical YAML、生成 Python/TypeScript 镜像和迁移；字段命名以最终 schema 为准。
+本节是 owner 已接受的契约基线，已落入 `contracts/schemas/workbench_assets.schema.yaml` 与 `run_inspector.schema.yaml`，由 codegen 生成 Python/TypeScript/Zod 镜像，并通过 `0011`-`0015` 迁移持久化。后续字段变化必须先更新 canonical YAML、必要时补 ADR，再重新生成镜像。
 
 ### 4.1 ResearchMemo
 
 用途：保存 DSH/Codex/人工研究对既有 Snapshot/Run 的补充解释、反证、证据缺口或后续问题。它是可审计研究资产，不是发布 Artifact 的替代品。
 
-拟议必备语义：
+必备语义：
 
 | 字段组 | 约束 |
 |---|---|
@@ -359,19 +359,19 @@ pnpm --dir apps/decision-desk build
 
 真实 DSH/Pi/Provider/通知 canary 必须显式 opt-in，结果只记录兼容性和运行指标，不写成业务准确率或盈利证明。
 
-## 11. 阶段退出门（提案）
+## 11. 阶段退出门与证据（离线 U2 已通过）
 
-R2 只有在以下条件全部满足且 owner 通过 Stage Gate 后才能标记 `done`：
-
-1. `R2-00` 至 `R2-05` 均有独立 commit、测试、模块 README、状态和 CHANGELOG 证据；不存在未记录的临时模块。
-2. Core MCP/Workbench Query 与受限 Memo/Feedback command 经过契约、权限、幂等和审计测试；DSH 未启动时 Core 仍可工作。
-3. Decision Desk 能以人可读视图展示 Run、Evidence、Experiment、Asset、Promotion 和 Health；默认不显示无用 raw JSON。
-4. 至少一组固定 PIT replay、一个时间切分 holdout 和一个 shadow 对照完成；baseline/candidate 使用相同 schema、Gate、Outcome/Evaluation 和版本记录。
-5. Pi（若 owner 选择启用）通过同一 `AgentRuntime` contract suite；失败/超时/成本未知不会污染正式链；Pi 未证明优势时 active pointer 保持 LangGraph-native。
-6. Evolution candidate 必须经历 replay -> holdout -> shadow -> owner Promotion；Promotion/Rollback 可审计、原子、可回放，Agent/DSH 不能自动晋级。
-7. 个人资产至少能查询 Doctrine/Profile/Strategy、ResearchMemo/Feedback、Experience/FailurePattern、Dataset 和 Promotion/Rollback 的来源与评测关系。
-8. PIT leakage、Gate 越权、secret 泄漏、重复写账本、第二 runtime/账本/队列和前端直读内部状态的自动化检查通过。
-9. 全量 Python、契约、类型、前端、文档、replay、backup/restore 和安全检查继续通过；外部 canary 与离线结果明确分开。
+| # | 退出条件 | 离线证据 | 结论边界 |
+|---|---|---|---|
+| 1 | R2-00 至 R2-05 可追溯 | 独立阶段提交、模块 README、`CHANGELOG.md` 与本表 | 提交完成后以 Git 历史为准 |
+| 2 | Core MCP/Workbench 安全可用 | `tests/workbench`；官方 MCP stdio 与 streamable HTTP client 均完成握手、发现和结构化查询 | 未安装或启动 DSH 时 Core 仍可用；未接任意社区插件 |
+| 3 | 人可读 Decision Desk | `App.test.tsx`、Vitest/Vite build；浏览器验证 375/768/1024/1440 均无横向溢出 | 默认不展示 raw provider/graph JSON |
+| 4 | 公平 replay/holdout/shadow | `tests/evals`、固定 PIT fixture、`EvaluationRunner` 的独立数据库/raw artifact/manifest hash | shadow 为离线 prospective fixture，不代表真实市场运行 |
+| 5 | 候选 Runtime 同契约、失败隔离 | `tests/runtime/test_candidate_runtime_contract.py` 覆盖 Pi/DSH candidate、timeout/429/5xx/tool denied/非 JSON | 未证明优势，正式 LangGraph active pointer 不因 adapter 存在而改变 |
+| 6 | 有序晋级与原子回滚 | `tests/evolution` 覆盖三阶段 readiness、owner-only、CAS 并发单赢家、事务故障回滚和审计 | 只完成离线人工晋级闭环，生产晋级仍受第 13 节样本门限制 |
+| 7 | 个人资产可查询与追溯 | `/v1/workbench/assets`、`/v1/evolution/*`、Run Inspector 和对应 `tests/workbench`/`tests/evolution` | 资产归 Core，不依赖 DSH/Pi session |
+| 8 | PIT、Gate、权限和边界 fail-closed | `tests/evals` leakage reject、MCP owner/schema/permission、Promotion challenger 归属、架构边界和 secret scan | 不授权自动交易、Agent 写账本或前端直读内部状态 |
+| 9 | 全量工程门 | 128 Python tests、Ruff、Pyright、contract/module docs、Core/Pilot acceptance、5 个前端测试、Vite build、fresh `0015` migration | 全部是离线工程证据；真实 canary、准确率和盈利另行验证 |
 
 退出门不要求“模型一定盈利”或“每个候选都优于 baseline”。若候选没有统计/业务优势，正确结果是保留 candidate、记录 FailurePattern 或回滚，而不是放宽 Gate。
 
@@ -412,14 +412,14 @@ R2 只有在以下条件全部满足且 owner 通过 Stage Gate 后才能标记 
 9. 允许先完成离线 U2 工程闭环；真实 DSH/Pi/Provider canary 和 Live Pilot 仍需显式授权，离线结果不表述为实际收益。
 10. R2 默认继续使用单机 SQLite + 同源 API；出现可量化的并发/高可用瓶颈前不引入 Postgres、Redis、队列、Temporal 或 DBOS。
 
-Stage Gate 只授权本文范围。第一张代码任务是 `R2-00 Kernel/Orchestration Boundary Alignment`；每张卡仍须独立满足 SDD/BDD/TDD、文档同步和回归门。
+Stage Gate 只授权本文范围。R2-00 至 R2-05 已完成离线 U2 工程退出门；当前进入观察期。任何 R3、真实插件、Live Pilot 或生产 Promotion 都必须另行授权。
 
 ## 14. 文档同步清单
 
 owner 确认本 Charter 后，实施每张任务卡必须同步：
 
 - `INDEX.md`：把本 Charter、当前 R2 task 和事实源入口列入短上下文地图。
-- `docs/ROADMAP.md`：R2 状态从 `planned` 改为 `accepted / in_progress`，每个 Task ID 只在对应证据完成后标记 `done`。
+- `docs/ROADMAP.md`：R2 实施时标记 `accepted / in_progress`，退出门通过后改为 `done (offline U2) / observation`；每个 Task ID 只在对应证据完成后标记 `done`。
 - `docs/EXECUTION_PLAN.md`：链接本 Charter，删除重复或冲突的 R2 任务描述；本 Charter 是 R2 的详细边界。
 - `docs/IMPLEMENTATION_STATUS.md`：记录已验证、partial、blocked、live canary 和未声称完成的能力。
 - 受影响模块 README：职责、公开入口、依赖方向、禁止事项、验证命令和最近验证提交。
@@ -501,9 +501,9 @@ DSH plugin / MCP server / standalone tool
 
 `R2-04` 再根据通过审计的具体插件决定是否实现 DSH/Pi candidate runtime；没有真实候选和评测数据时，只保留 adapter seam，不创建空的插件市场或 Node sidecar。
 
-### 15.6 最终架构决策（待 owner 接受）
+### 15.6 最终架构决策（已接受）
 
-推荐接受 [ADR-0005 DSH Harness 与插件生态桥接边界](../decisions/ADR-0005-dsh-harness-plugin-bridge.md) 的 proposed 决策：
+已接受 [ADR-0005 DSH Harness 与插件生态桥接边界](../decisions/ADR-0005-dsh-harness-plugin-bridge.md)：
 
 > DSH 是可替换的 Workbench/Harness 生态，不是 Decision Hub 的业务核心。Decision Hub 通过 Core MCP、`ResearchWorkbenchPort`、`CapabilityManifest`、`DshCapabilityAdapter` 和可选 `DshAgentRuntime` 复用 DSH 插件与 Harness 能力；所有业务事实、PIT、Gate、Outcome、Evaluation、资产版本和 Promotion/Rollback 仍由 Product Kernel 所有。插件只有在许可证/安全/契约/回放审计通过后才能被 owner 启用，候选 Runtime 必须经过 replay/holdout/shadow，不能自动替换正式链。
 
@@ -513,4 +513,4 @@ DSH plugin / MCP server / standalone tool
 
 R2 的建立方式不是直接创建一堆“DSH 插件目录”或从 Python 重新写一个 Agent 平台，而是先把 Core-owned 契约、资产生命周期、Supervisor/Plugin 权限边界和评测/Promotion 门锁定，再用 LangGraph/LangChain/DSH/Pi 各自擅长的 adapter 接入。这样后续替换 DSH、Pi、模型、前端或新增 A 股/PPT Pack 时，保留的是 Event/Evidence/Snapshot/Run/Asset/Evaluation/Version 等个人产品资产，而不是某个 Harness 的内部状态。
 
-当前状态是 `accepted`：产品可用阶段、R0/R1 兼容性审计、R2-00 边界对齐、DSH 桥接、评测默认和阶段停止条件均已锁定。实现从 R2-00 开始；任何超出本文的范围必须停止并另立 Stage Charter。
+当前状态是 `done (offline U2) / observation`：R2-00 至 R2-05 已形成研究、观测、评测、候选和人工 Promotion/Rollback 的离线工程闭环。任何超出本文的范围必须停止并另立 Stage Charter；真实网络稳定性、预测准确率和盈利能力仍未由本阶段证明。

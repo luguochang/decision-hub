@@ -9,9 +9,9 @@ Decision Hub 持续把有时间边界的文本和事件证据，转换为可证�
 
 ## 当前大阶段
 
-**R2-DECISION-WORKBENCH-V1（已授权；R2-00 done，R2-01 next）**
+**R2-DECISION-WORKBENCH-V1（R2-00 至 R2-05 离线 U2 工程退出门已完成；观察期）**
 
-R0/R1/R1-L 离线代码门已完成，Live Pilot Gate 仍独立待授权。当前只按已接受的 [R2 Decision Workbench 与自主进化 Stage Charter](../stages/R2_DECISION_WORKBENCH_EVOLUTION.md) 完成 R2-00 至 R2-05：研究、实验、资产、插件桥接、候选比较和人工 Promotion/Rollback；R2 结束后进入观察期，不自动开始 R3。本页只保留稳定的产品目的、不变量和当前阶段锚点。
+R0/R1/R1-L 离线代码门和 [R2 Decision Workbench 与自主进化 Stage Charter](../stages/R2_DECISION_WORKBENCH_EVOLUTION.md) 的 R2-00 至 R2-05 离线 U2 工程退出门已完成。当前只运行、观测、记录 FailurePattern 和补充真实评测证据；不自动开始 R3。Live Pilot、真实 DSH/Pi/Provider、外部通知和生产 shadow 仍需独立授权。本页只保留稳定的产品目的、不变量和当前阶段锚点。
 
 最近完成的总目标是 [R1 Realtime Event Engine](../stages/R1_REALTIME_EVENT_ENGINE.md)：来源文本、市场事实和已提交 outbox 已复用 R0 主链，并未创建第二个 Agent runtime、账本或 Gate。它证明离线工程闭环，不证明真实网络稳定性、预测准确率或盈利能力。
 

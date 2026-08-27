@@ -1,9 +1,9 @@
 # 实施状态
 
-日期：2026-08-27（Asia/Shanghai）
-状态：`R0-CORE-COMPLETE` 和 `R1-REALTIME-EVENT-ENGINE` 已完成离线验收并提交；`R1-L-SINGLE-OWNER-PILOT-READINESS` 离线代码门已通过，Live Pilot Gate 尚未授权。R2 Stage Charter 已由 owner 接受，`R2-00` Kernel/Orchestration 边界对齐已实现并通过相关回归，下一张任务为 `R2-01`。
+日期：2026-08-28（Asia/Shanghai）
+状态：`R0-CORE-COMPLETE`、`R1-REALTIME-EVENT-ENGINE`、`R1-L-SINGLE-OWNER-PILOT-READINESS` 离线代码门，以及 R2-00 至 R2-05 的离线 U2 工程退出门已完成。当前进入 R2 观察期，不自动开始 R3；Live Pilot Gate 仍未授权。
 
-最后复核：2026-08-27。R1 的固定 fixture、契约、迁移和端到端退出门已通过；这是可重复的离线工程证据，不是生产稳定性证明。真实网络、来源授权、预测准确率和盈利能力仍需独立验证。
+最后复核：2026-08-28。R2 的 canonical codegen、官方 MCP transport、Run Inspector、评测/经验资产、LangGraph Supervisor、候选 Runtime、Promotion/Rollback 和 Decision Desk 已通过离线退出门。这些是可重复的工程证据，不是生产稳定性、真实 shadow 优势、预测准确率或盈利能力证明。
 
 ## 治理状态
 
@@ -12,18 +12,21 @@
 - 最近完成 Stage Charter：`R1 Realtime Event Engine`，`done`，见 `docs/stages/R1_REALTIME_EVENT_ENGINE.md`；可插拔边界见 `docs/decisions/ADR-0003-r1-realtime-plugin-boundary.md`。
 - `R0-B1 ProviderConfig + capability manifest`：`done`；R0-B Provider Reliability Boundary 整体已完成。
 - `R0-CORE-COMPLETE`：`done`；证据入口为 `tools/core_acceptance.py` 和 `docs/RELEASE_MANIFEST.json`。
-- `R1-L-SINGLE-OWNER-PILOT-READINESS`：`done (offline)`；Stage Charter 见 `docs/stages/R1_L_SINGLE_OWNER_PILOT_READINESS.md`。readiness 契约、控制层、API 只读入口、worker 预检/启动门、通知组合根、离线 acceptance 与文档收口均已通过；本次变更已形成独立提交但尚未推送，真实 Live Pilot Gate 仍未授权。
+- `R1-L-SINGLE-OWNER-PILOT-READINESS`：`done (offline)`；Stage Charter 见 `docs/stages/R1_L_SINGLE_OWNER_PILOT_READINESS.md`。readiness 契约、控制层、API 只读入口、worker 预检/启动门、通知组合根和离线 acceptance 均已通过；真实 Live Pilot Gate 仍未授权。
 - Run/Step/Attempt/Call normalized projection + Run Inspector API：`done`，新 Run 可查询四个 Step、三角色 Call、错误/成本/重试和 `/v1/runs/{run_id}/inspector`。
 - SQLite backup/integrity 和固定 PIT Replay：`done`，已验证固定 clock、future-information reject、baseline/candidate、Outcome/Brier/net return、restore replay smoke。
 
 ## R2 实施状态
 
-- Stage Charter：[R2 Decision Workbench 与自主进化](stages/R2_DECISION_WORKBENCH_EVOLUTION.md)，状态 `accepted / in_progress`；U2 完成后停止扩张并进入观察期。
+- Stage Charter：[R2 Decision Workbench 与自主进化](stages/R2_DECISION_WORKBENCH_EVOLUTION.md)，状态 `done (offline U2) / observation`；当前停止扩张，不自动进入 R3。
 - [ADR-0005 DSH Harness 与插件生态桥接边界](decisions/ADR-0005-dsh-harness-plugin-bridge.md) 和 [ADR-0006 Kernel/Orchestration 边界对齐](decisions/ADR-0006-kernel-orchestration-boundary-alignment.md) 已接受；尚未接入任意 DSH 社区插件。
-- 已明确的提案范围：Core MCP/DSH ResearchMemo、统一 Query/View、Evaluation Dataset/FailurePattern/Experience、baseline/candidate replay/holdout/shadow、Pi candidate adapter、Version Registry、owner Promotion/Rollback 和资产目录。
+- 已交付范围：Core MCP/DSH ResearchMemo、统一 Query/View、Evaluation Dataset/FailurePattern/Experience、baseline/candidate replay/holdout/离线 shadow、Pi/DSH candidate adapter、Version Registry、owner Promotion/Rollback 和资产目录。
 - `R2-00 done`：新增 `DecisionWorkflowExecutor` Port 和 `LangGraphDecisionExecutor`/composition root；Kernel 不再直接导入 LangGraph/LangChain，PIT、Gate、账本、checkpoint/recovery 和 API 行为保持不变。
-- 未开始：R2 canonical schema、数据库迁移、MCP server、DSH/Pi adapter、evolution graph、Promotion/Rollback API、R2 前端页面和任何 active pointer 变更。
-- 当前下一张任务：`R2-01 Core MCP Query + ResearchMemo/Feedback canonical contract`。
+- `R2-01 done`：canonical YAML 通过真实 codegen 生成 Python/TypeScript/Zod；Core MCP 使用官方 SDK，stdio 与 streamable HTTP 客户端均通过真实握手、发现和结构化查询；Capability 默认拒绝并要求 owner audit、schema、timeout、权限和 executor。
+- `R2-02 done`：Run Inspector 和 Decision Desk 展示 PIT 证据血缘、版本、Step/Call、Gate、实验、资产和 Promotion；375/768/1024/1440 视口均无横向溢出，默认不显示 raw provider/graph JSON。
+- `R2-03 done`：不可变 Dataset manifest、fixture hash、PIT/未来标签泄漏拒绝、raw artifact 先保存后评分、FailurePattern 和 Experience 均可追溯。
+- `R2-04 done`：Supervisor 复用 LangGraph `StateGraph`/`Send`/checkpointer，specialist 结构化失败、最多一次 replan 且只补缺失 capability；Pi/DSH candidate runtime 通过统一 contract suite，失败保持 fail-closed。
+- `R2-05 done`：Promotion Gate、owner-only command、CAS active pointer、原子 Promotion/Rollback、并发单赢家、事务故障回滚和审计历史已通过测试与浏览器交互验收。
 
 ## R1 已交付与退出门
 
@@ -43,7 +46,7 @@ R1 退出门已完成：`R1-01` 至 `R1-07` 均有可回滚提交、固定 fixtu
 | 能力 | 当前实现 | 证据 |
 |---|---|---|
 | 文本入口 | `ObservationCreate -> TextEnvelope`，content hash 去重 | `tests/contracts`, `tests/e2e` |
-| 账本 | SQLite WAL + Alembic `0001` 至 `0010`，Event/Observation/Run/Snapshot/Artifact/Forecast/Outcome/Evaluation/Outbox/Step/Call；业务状态与 checkpoint 分离 | `tests/kernel`, `tests/e2e`, `tests/migrations`, fresh migration/SQLite PRAGMA |
+| 账本 | SQLite WAL + Alembic `0001` 至 `0015`，Event/Observation/Run/Snapshot/Artifact/Forecast/Outcome/Evaluation/Outbox/Step/Call 与 R2 Workbench/Evolution 资产；业务状态与 checkpoint 分离 | `tests/kernel`, `tests/e2e`, `tests/migrations`, `tests/workbench`, `tests/evolution`, fresh migration/SQLite PRAGMA |
 | PIT | `SnapshotService.freeze()` 保存 cutoff、证据 hash 和不可变 snapshot | `tests/kernel/test_core_flow.py` |
 | Agent 编排 | LangGraph decision/research graph；研究层 policy/counter 并行；Fake/Replay 和 LangGraph-native `create_agent` seam | graph integration in core flow |
 | Gate | facts/citations/counter-thesis/action fields/probability cap 的确定性检查 | `test_gate_fails_closed_without_evidence` |
@@ -65,16 +68,16 @@ R1 退出门已完成：`R1-01` 至 `R1-07` 均有可回滚提交、固定 fixtu
 | 通知组合根 | local JSONL 或显式 email SMTP adapter，均消费 committed outbox；复用现有 bounded retry/dedupe | `packages/pilot_runtime/bootstrap.py`、`tests/providers`；不重新分析、不改账本 |
 | API readiness | 只读 `/v1/pilot/readiness`，仅返回 canonical Pydantic DTO，不返回密钥、密码、原始 provider JSON | `tests/pilot/test_entrypoints.py` |
 
-以上条目是离线实现证据，不等于真实来源、真实 SMTP、长期运行、预测准确率或盈利验证；这些需要单独的 Live Pilot Gate。本次代码已提交但尚未推送。
+以上条目是离线实现证据，不等于真实来源、真实 SMTP、长期运行、预测准确率或盈利验证；这些需要单独的 Live Pilot Gate。
 
 ## 尚未声称完成
 
 - 外部 LLM live canary 已能通过 `gpt-5.5` Responses 路径完成三角色调用、结构化解析和 Artifact/Forecast 持久化；这只是 Provider 兼容性证据，不代表预测准确率或盈利能力。默认 CI 继续使用 fake/replay 保持确定性。
 - 真实 Email/IM 通知、默认真实 Provider 运行、长期后台进程稳定性和真实来源的授权/限流协议仍未验收；本地 worker 与 local JSONL 只用于单机/fixture 证据。
 - 直播音频 capture、ASR 推理、OCR、未授权新闻抓取、自动交易和第二领域仍未接入。
-- 完整六层评测、长期样本量和 Asset Promotion。
-- 完整 Playwright 375/768/1024/1440 视觉回归仍未建立；当前已完成浏览器 DOM、提交文本、桌面截图和 375px Inspector 无横向溢出 smoke。
-这些是后续 R1/R2 工作项，不改变 R0 文本核心和 ASR 适配器边界；R0 的工程闭环已完成，但不能把有限 fixture 结果宣传为市场收益。
+- 真实长期样本量、生产 shadow 优势和满足生产 Promotion 阈值的候选。
+- 自动化 Playwright 视觉回归仍未建立；本轮已人工验证 375/768/1024/1440 四个视口及完整 Promote 交互。
+这些是观察期或新 Stage Gate 的工作，不改变 R0 文本核心和 ASR 适配器边界；不能把有限 fixture 结果宣传为市场收益。
 
 ## 本地验证命令
 
@@ -88,17 +91,20 @@ Inspector 证据归一化已由研究图汇合边界保证：Facts/Citations 取
 
 长期规范见 [`docs/engineering/TDD_SDD_SELF_TEST_STANDARD.md`](engineering/TDD_SDD_SELF_TEST_STANDARD.md)。当前测试已覆盖从文本输入到 Evaluation 的可执行链：文本哈希、Event/Observation/Snapshot、LangGraph research、Gate、Artifact、30m/24h/72h Forecast、Outcome、Brier/net return、Query View、Timeline、Step/Attempt/Call、Provider failure safety、checkpoint recovery、backup/restore 和 Outbox。
 
-2026-08-27 R1/R1-L 离线验收结果：
+2026-08-28 当前离线质量门结果：
 
 ```text
-Python pytest: 87 passed, 1 warning
+Python pytest (not live): 128 passed
 Ruff: passed
 Pyright: 0 errors, 0 warnings
 Canonical schema check: passed
 Module documentation check: passed
-Frontend Vitest: 1 passed
+Frontend Vitest: 5 passed
 Frontend Vite build: passed
-Core acceptance: passed（含 fresh Alembic `0001 -> 0010`、PIT compare、backup/restore/integrity、secret scan、前端 Vitest/Vite）
+Migrations: 3 passed；fresh Alembic 到 `0015_evolution_provenance`
+Core MCP: 官方 stdio 与 streamable HTTP client 验收通过
+Browser: 375/768/1024/1440 无横向溢出；人工 Promote/审计历史通过
+Core acceptance: passed（含 durability/replay、backup/restore/integrity、secret scan、前端 Vitest/Vite）
 Pilot acceptance: passed（readiness、worker preflight fail-closed、notification composition、入口 API、PIT/recovery/backup 复用检查）
 ```
 
