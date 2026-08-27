@@ -60,7 +60,7 @@ SDD 规格/契约
 
 大阶段未通过 owner 的 Stage Gate 前，不得开始其中的代码任务。通过后再按 Task ID 串行执行，每个任务一个可回滚 commit。
 
-最近完成的 Stage Charter 是 [R0-B Stage Charter](../stages/R0-B_PROVIDER_RELIABILITY_BOUNDARY.md) 中的 `R0-B Provider Reliability Boundary`；当前没有执行中的 Stage Charter。R1 开始前必须另立并经 owner 确认新的 Stage Charter；项目宪章只作为短上下文锚点，本文件负责全局治理。
+R0-B 和 R1 都是已完成的历史 Stage Charter。R1 的 adapter 边界由 [ADR-0003](../decisions/ADR-0003-r1-realtime-plugin-boundary.md) 锁定；下一阶段必须新建 Charter 并经过 owner Stage Gate。项目宪章只作为短上下文锚点，本文件负责全局治理。
 
 ## 4. BDD 规范：把价值写成可观察场景
 
@@ -228,4 +228,4 @@ Codex 在以下情况必须停止实现并报告，而不是自动扩展：
 
 ## 10. Owner 确认后的任务执行规则
 
-本规范已被 owner 接受；`R0-B1 ProviderConfig 和 capability manifest` 以及 R0 核心总目标均已完成。下一张任务卡必须隶属于新的 R1/R2 Stage Charter，单独定义并通过范围确认，不得以“顺手修复”为理由绕过 Stage Charter。
+本规范已被 owner 接受；R0 核心总目标和 R1 离线阶段均已完成。下一阶段代码任务必须先有新的 Stage Charter 和 owner Stage Gate；任何超出已接受范围的改动都必须新立 ADR 和 Stage Gate，不得以“顺手修复”为理由绕过边界。

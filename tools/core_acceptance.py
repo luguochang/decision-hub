@@ -67,7 +67,7 @@ def _durability_and_replay_smoke() -> None:
             revision = session.execute(
                 __import__("sqlalchemy").text("SELECT version_num FROM alembic_version")
             ).scalar_one()
-        if revision != "0007_run_cost_nullable":
+        if revision != "0010_source_poll_schedule":
             raise SystemExit(f"unexpected migration head: {revision}")
 
         live_path = temp / "live.sqlite3"
@@ -81,9 +81,7 @@ def _durability_and_replay_smoke() -> None:
         if not integrity(restored_path):
             raise SystemExit("restore integrity check failed")
         restored = Database(f"sqlite+pysqlite:///{restored_path}")
-        restored_inspector = restored.get_run_inspector(
-            restored.latest_runs(1)[0].run_id
-        )
+        restored_inspector = restored.get_run_inspector(restored.latest_runs(1)[0].run_id)
         if restored_inspector is None or restored_inspector.artifact is None:
             raise SystemExit("restored database lost the run inspector artifact")
         print(json.dumps({"replay": "ok", "durability": "ok"}, sort_keys=True))
@@ -103,10 +101,12 @@ def main() -> int:
         [sys.executable, str(ROOT / "tools" / "docs" / "check_module_docs.py")],
     ]
     if not args.skip_frontend:
-        commands.extend([
-            ["pnpm", "--dir", "apps/decision-desk", "test"],
-            ["pnpm", "--dir", "apps/decision-desk", "build"],
-        ])
+        commands.extend(
+            [
+                ["pnpm", "--dir", "apps/decision-desk", "test"],
+                ["pnpm", "--dir", "apps/decision-desk", "build"],
+            ]
+        )
     try:
         for command in commands:
             _run(command)

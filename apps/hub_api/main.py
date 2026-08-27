@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Sequence
 from pathlib import Path
 
 from fastapi import BackgroundTasks, FastAPI, Header, HTTPException, status
@@ -12,16 +13,26 @@ from packages.contracts_py.decision_hub_contracts.models import (
     OutcomeCreate,
     RunStatus,
 )
+from packages.kernel.decision_hub_kernel.application.admission import AdmissionService
 from packages.kernel.decision_hub_kernel.application.analyze import AnalyzeTextService
 from packages.kernel.decision_hub_kernel.application.health import HealthService
 from packages.kernel.decision_hub_kernel.application.outcome import OutcomeService
+from packages.kernel.decision_hub_kernel.application.source_ingest import SourceIngestionService
 from packages.kernel.decision_hub_kernel.persistence.db import Database
 from packages.kernel.decision_hub_kernel.ports.runtime import AgentExecutionError
+from packages.kernel.decision_hub_kernel.ports.sources import SourceConnector
 from packages.query_views.decision_desk.service import DecisionDeskQueryService
 from packages.runtime_adapters.langgraph_agent.runtime import LangGraphAgentRuntime
+from packages.source_adapters.official_feeds import official_source_presets
+from packages.source_adapters.registry import SourceRegistry
 
 
-def create_app(database: Database | None = None) -> FastAPI:
+def create_app(
+    database: Database | None = None,
+    *,
+    source_connectors: Sequence[SourceConnector] | None = None,
+    sources_enabled: bool | None = None,
+) -> FastAPI:
     db = database or Database()
     if database is None:
         db.initialize()
@@ -41,9 +52,22 @@ def create_app(database: Database | None = None) -> FastAPI:
     desk = DecisionDeskQueryService(db)
     health = HealthService(db)
     outcomes = OutcomeService(db)
+    source_registry = SourceRegistry()
+    for source in (
+        list(source_connectors) if source_connectors is not None else official_source_presets()
+    ):
+        source_registry.register(source)
+    source_ingestion = SourceIngestionService(db, source_registry, admission=AdmissionService(db))
     app = FastAPI(title="Decision Hub API", version="0.1.0")
     app.state.database = db
     app.state.analyzer = analyzer
+    app.state.source_registry = source_registry
+    app.state.source_ingestion = source_ingestion
+    app.state.sources_enabled = (
+        sources_enabled
+        if sources_enabled is not None
+        else os.getenv("DECISION_HUB_SOURCES_ENABLED", "0") == "1"
+    )
 
     async def execute(event_id: str, run_id: str) -> None:
         try:
@@ -68,8 +92,30 @@ def create_app(database: Database | None = None) -> FastAPI:
         return {"status": "ready"}
 
     @app.get("/v1/health")
-    async def product_health() -> dict[str, object]:
+    async def product_health():
         return health.status()
+
+    @app.get("/v1/sources")
+    async def sources() -> list[dict[str, object]]:
+        return [
+            {
+                "manifest": manifest.model_dump(mode="json"),
+                "health": source_ingestion.health(manifest.source_id).model_dump(mode="json"),
+            }
+            for manifest in source_registry.manifests()
+        ]
+
+    @app.post("/v1/sources/{source_id}/poll")
+    async def poll_source(source_id: str, background_tasks: BackgroundTasks) -> dict[str, object]:
+        if not app.state.sources_enabled:
+            raise HTTPException(status_code=409, detail="sources_disabled")
+        try:
+            result = await source_ingestion.poll_once(source_id)
+            for target in result.run_targets:
+                background_tasks.add_task(execute, target.event_id, target.run_id)
+            return result.model_dump(mode="json")
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail="source_not_found") from exc
 
     @app.post("/v1/observations", status_code=status.HTTP_202_ACCEPTED)
     async def observations(

@@ -9,11 +9,11 @@ Decision Hub 持续把有时间边界的文本和事件证据，转换为可证�
 
 ## 当前大阶段
 
-**R0-CORE-COMPLETE（已完成）**
+**R1-REALTIME-EVENT-ENGINE（离线验收已完成）**
 
-完整核心执行约束和验收证据见 [R0 Core Completion](../stages/R0_CORE_COMPLETION_PLAN.md)；Provider 子阶段记录见 [R0-B Stage Charter](../stages/R0-B_PROVIDER_RELIABILITY_BOUNDARY.md)。本页只保留稳定的产品目的、阶段目标、不变量和非目标。
+R0 核心已完成，执行约束和历史验收证据见 [R0 Core Completion](../stages/R0_CORE_COMPLETION_PLAN.md)；Provider 子阶段记录见 [R0-B Stage Charter](../stages/R0-B_PROVIDER_RELIABILITY_BOUNDARY.md)。R1 已通过离线退出门，输入、输出、失败语义和退出门见 [R1 Realtime Event Engine](../stages/R1_REALTIME_EVENT_ENGINE.md)，可插拔边界见 [ADR-0003](../decisions/ADR-0003-r1-realtime-plugin-boundary.md)。R2 仍须新建 Stage Charter 并取得 owner 授权。本页只保留稳定的产品目的、不变量和非目标。
 
-最近完成的总目标是 [R0 Core Completion](../stages/R0_CORE_COMPLETION_PLAN.md)：R0-B、R0-C、R0-D 已作为一个完整核心闭环通过验收。下一阶段必须另立 Stage Charter，先锁定 R1 实时事件来源的授权和契约边界。
+最近完成的总目标是 [R1 Realtime Event Engine](../stages/R1_REALTIME_EVENT_ENGINE.md)：来源文本、市场事实和已提交 outbox 已复用 R0 主链，并未创建第二个 Agent runtime、账本或 Gate。它证明离线工程闭环，不证明真实网络稳定性、预测准确率或盈利能力。
 
 目标：在单机本地环境完成文本到决策、预测、评测、观测、恢复、回放和发布自测闭环；外部 LLM Runtime 可以在不绑定 Core、不自写协议栈的前提下，被配置、限时、重试、观测和安全降级；同一 `AgentRequest -> AgentResult` 契约支持 Responses 和 Chat 两种 OpenAI-compatible 模式。
 
@@ -39,7 +39,8 @@ Decision Hub 持续把有时间边界的文本和事件证据，转换为可证�
 
 ## 当前明确不做
 
-- 不做实时新闻、日历、行情、ASR、直播监听或通知。
+- 不做音频捕获、ASR 推理、OCR、自动交易或直播自动执行；R1 只接收已经转写的文本。
+- 不把未经授权的网页抓取、搜索摘要或模型总结作为唯一 canonical source。
 - 不接入 DSH/Pi 生产主链，不 clone DSH，不创建第二个业务账本。
 - 不做自动交易、自动晋级、在线修改 Gate 或用户系统。
 - 不因为 Provider 不兼容而重写 LangChain/LangGraph/OpenAI SDK；先在 Adapter 边界记录证据。

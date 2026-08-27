@@ -11,8 +11,12 @@
 
 ### Next
 
-- R1 Realtime Event Engine：在新的 Stage Charter 和 owner 授权后接入来源 registry、官方日历/新闻、行情基准、ASR 适配器、scheduler 和通知；不改变 R0 文本主链。
 - R2 Decision Workbench 与自主进化：在 R1 真实数据和 R0 replay 证据稳定后，再接入 DSH/Pi ResearchMemo、实验、shadow 和人工晋级。
+
+### Delivered (2026-08-27)
+
+- R1 Realtime Event Engine：来源 registry、官方 feed/calendar、文本转写边界、行情基准、scheduler、到期 Outcome、local notification、健康 API 和 Decision Desk 摘要已完成离线验收。固定 fixture 覆盖 cursor/PIT、重复与修订、失败恢复、到期幂等、通知重试、迁移升级和来源到 Outcome/outbox 的端到端链路。
+- R1 使用 canonical schema/codegen、Kernel-owned durable state 和 R0 的 LangGraph/Gate/账本；未新增第二个 Agent runtime、账本、队列或工作流引擎。真实网络稳定性、来源授权、预测准确率和盈利能力均不在本次验收结论内。
 
 ### Delivered (2026-08-26)
 

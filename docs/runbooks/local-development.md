@@ -47,7 +47,19 @@ curl -X POST http://127.0.0.1:8000/v1/observations \
 
 SQLite backup、restore、integrity check 和 retention command 在 R0 运维补齐前，不得把手工删除数据库文件当清理方式。
 
-升级已有本地数据库时始终先执行 `./.venv/bin/alembic upgrade head`。`0007_run_cost_nullable` 会把旧版 `runs.cost_usd` 的 `NOT NULL` 约束迁移为可空，以准确表示 Provider 未返回 usage 的 unknown 成本；迁移前应按下方命令做一次 backup。
+升级已有本地数据库时始终先执行 `./.venv/bin/alembic upgrade head`。`0007_run_cost_nullable` 会把旧版 `runs.cost_usd` 的 `NOT NULL` 约束迁移为可空，`0008` 至 `0010` 增加 durable source cursor/health、通知重试状态和 `next_poll_at`；迁移前应按下方命令做一次 backup。`0001_initial` 是冻结的 R0 schema snapshot，不能再导入当前 ORM metadata。
+
+## R1 来源、调度与通知
+
+R1 的来源只接受已授权的 source preset 或人工转写文本。普通开发/测试使用 fixture，不触网。需要手工验证 source worker 时显式开启来源；需要行情评估时再显式开启市场 adapter：
+
+```bash
+DECISION_HUB_SOURCES_ENABLED=1 ./.venv/bin/python -m apps.hub_worker.main --once
+DECISION_HUB_SOURCES_ENABLED=1 DECISION_HUB_MARKET_ENABLED=1 \
+  ./.venv/bin/python -m apps.hub_worker.main --once
+```
+
+本地通知输出到 `data/decision-hub/exports/notifications.jsonl`。来源/行情/通知失败只更新健康或 outbox 重试状态，不能重新触发分析或改变已提交 Artifact/Forecast。真实 endpoint、邮件和市场执行质量必须分别以 opt-in canary 验证。
 
 ## Core durability and replay
 

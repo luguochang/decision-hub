@@ -26,3 +26,5 @@
 
 ## 最近验证
 Fake/Replay 与 LangGraph Runtime 适配器测试通过；三角色调用、Provider timeout/429/5xx/structured-output failure、成本估算和预算耗尽均已投影到 Run Inspector 并有测试。外部 endpoint 兼容性仍以 canary 结果为准，当前未宣称预测质量或生产稳定性。
+
+R1 的 Source/Market/Notification adapter 不属于 AgentRuntime；它们通过 `kernel.ports.sources` 的 Protocol 接入，不能把 HTTP、交易所或邮件 SDK 类型泄漏到 Kernel 或 LangGraph。

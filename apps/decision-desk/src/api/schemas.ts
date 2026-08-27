@@ -10,6 +10,7 @@ export {
   callViewSchema,
   stepViewSchema,
   runInspectorSchema,
+  productHealthSchema,
 } from '@decision-hub/contracts-ts'
 export type {
   ArtifactView,
@@ -20,4 +21,5 @@ export type {
   CallView,
   StepView,
   RunInspector,
+  ProductHealth,
 } from '@decision-hub/contracts-ts'

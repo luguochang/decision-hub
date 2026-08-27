@@ -8,7 +8,7 @@
 
 `DECISION_HUB_PRODUCT_ARCHITECTURE_V1.md` 是架构、契约和边界的唯一基线；`docs/ROADMAP.md` 是里程碑清单。本文件是两者之间的执行层，解决每次交给 Codex 一个小目标时容易出现的四类问题：
 
-本文件必须与 [项目宪章](engineering/PROJECT_CHARTER.md)、[R0-B Stage Charter](stages/R0-B_PROVIDER_RELIABILITY_BOUNDARY.md)（已完成的历史阶段记录）、[R0 Core Completion 实现方案](stages/R0_CORE_COMPLETION_PLAN.md) 和 [全局开发治理规范](engineering/DEVELOPMENT_GOVERNANCE.md) 一起使用：宪章负责保持产品目的短而稳定，Stage Charter 负责工作包边界和验收门，Core Completion 方案负责总目标及完整闭环，治理规范负责 SDD/BDD/TDD、上下文压缩和变更留痕，本文件负责任务拆分。
+本文件必须与 [项目宪章](engineering/PROJECT_CHARTER.md)、[当前 R1 Stage Charter](stages/R1_REALTIME_EVENT_ENGINE.md)、[R1 adapter 边界 ADR](decisions/ADR-0003-r1-realtime-plugin-boundary.md)、[R0 Core Completion 实现方案](stages/R0_CORE_COMPLETION_PLAN.md) 和 [全局开发治理规范](engineering/DEVELOPMENT_GOVERNANCE.md) 一起使用：宪章负责保持产品目的短而稳定，Stage Charter 负责工作包边界和验收门，ADR 锁定可插拔边界，Core Completion 方案负责已完成的核心闭环，治理规范负责 SDD/BDD/TDD、上下文压缩和变更留痕，本文件负责任务拆分。
 
 1. 没有先定义任务边界，开发过程中不断添加无调用方的抽象。
 2. 把 LangChain、LangGraph、Pydantic、OpenTelemetry 等已有能力重新实现一遍。
@@ -76,7 +76,7 @@ TextEnvelope
 | R0-B | Provider 兼容和失败语义 | LangChain OpenAI、LangGraph RetryPolicy、OpenTelemetry | `done` | Chat/Responses canary、错误和预算测试通过 |
 | R0-C | 观测、恢复和可回放评测 | LangGraph checkpoint、SQLite、pytest | `done` | Run Inspector、backup/recovery、PIT replay 通过 |
 | R0-D | R0 发布基线 | ReleaseManifest、runbook、CI | `done` | R0 Definition of Done 全部满足 |
-| R1 | 真实事件来源和按需触发 | SourcePlugin、scheduler、outbox | `planned` | 授权来源、事件游标、行情基准和通知测试通过 |
+| R1 | 真实事件来源和按需触发 | SourcePlugin、scheduler、outbox | `done`（离线 fixture） | 授权来源、事件游标、行情基准和通知测试通过 |
 | R2 | Workbench 与自主进化 | DSH MCP、replay/shadow、Promotion | `planned` | 候选可比较、人工晋级、可回滚 |
 | R3 | 第二领域和按需部署扩展 | Domain Extension、PostgreSQL 迁移出口 | `planned` | 第二领域复用 Kernel，不复制主链 |
 
@@ -259,72 +259,19 @@ R0 退出条件：文本输入到 Outcome/Evaluation 可回放；Provider 失败
 
 ## 9. R1：Realtime Event Engine
 
-R1 只有在 R0 退出后启动。它增加真实来源，不改文本之后的主链。
+R1 已完成离线退出门。它只把来源、市场和通知 adapter 接入 R0 文本主链，不改变既有 LangGraph、确定性 Gate、业务账本或 Product Kernel；完整 SDD/BDD/TDD 边界以 [R1 Stage Charter](stages/R1_REALTIME_EVENT_ENGINE.md) 为准。
 
-### R1-A：SourcePlugin Registry
+| Task ID | 已交付的最小产品资产 | 复用能力 | 离线验收证据 |
+|---|---|---|---|
+| `R1-01` | `SourceManifest`、registry、Kernel-owned cursor/health/backoff、admission 后游标提交 | Pydantic、SQLAlchemy/Alembic、既有 `TextEnvelope`/Admission | 重复、非法 payload、失败保留 cursor、revision、upgrade-path 测试 |
+| `R1-02` | RSS/Atom/JSON/iCalendar parser 与 Fed/BLS/BEA preset | 注入式 HTTP fetcher、标准 XML/日历库 | 固定 feed/calendar fixture、malformed/429/批次 cursor 测试 |
+| `R1-03` | Meeting Copilot fragment/revision 到 `TextEnvelope` 的文本边界 | Pydantic、既有 transcript 契约 | 时间戳/revision/hash 保留；拒绝非 transcript；无音频/ASR 路径 |
+| `R1-04` | `MarketDataPort`、OKX public quote/window、quality downgrade、Due Outcome | 既有 Outcome/Evaluation、HTTP adapter | bid/ask、VWAP fallback、unavailable、不伪造收益、幂等 fixture |
+| `R1-05` | 单进程 `RealtimeScheduler` 与 durable source/due-outcome tick | asyncio、SQLite durable state、既有 R0 graph | 重复 tick、重启/失败恢复、到期只处理一次且不重新分析 |
+| `R1-06` | committed outbox 的 local JSONL / SMTP notification adapter 和有限 retry | 既有事务 outbox、Pydantic Protocol | dedupe、retry/permanent failure、失败不改 Artifact/Forecast/Gate |
+| `R1-07` | Source/Product health API、Decision Desk 摘要、完整 E2E | FastAPI、React/TanStack Query、Zod | source -> Run -> Forecast -> Outcome -> outbox fixture E2E |
 
-复用：Python Protocol/Pydantic、FastAPI background worker、现有 `TextEnvelope`。新增 source_id、cursor、revision、health 和 backoff 契约。
-
-任务：
-
-- [ ] Manual/Transcript/OfficialFeed/Web source registry。
-- [ ] cursor、去重、revision、重连和来源健康。
-- [ ] fragment/provisional observation 到完整 revision 的关联。
-- [ ] 每个来源的授权、延迟、失败和回放 fixture。
-
-不做：来源插件直接产出交易方向；未授权网页抓取作为 canonical source；来源层复制 Gate。
-
-### R1-B：官方事件和新闻
-
-复用：HTTP/RSS 客户端、SourcePlugin、Pydantic、定时调度器；不自写搜索引擎。
-
-任务：
-
-- [ ] Fed/BLS/BEA 官方日历、RSS、正文和发布时间。
-- [ ] 事件去重、修订和 PIT cutoff。
-- [ ] 授权范围内的新闻/搜索补证。
-- [ ] provider health、rate limit 和 fallback。
-
-验收：事件到达能创建 Observation/Run；重复更新形成 revision；断网/429 不阻塞已有账本。
-
-### R1-C：市场数据和执行基准
-
-复用：官方/授权 Provider SDK 或 HTTP client、现有 Outcome schema；不自建交易所 SDK。
-
-任务：
-
-- [ ] OKX 公共行情和事件后价格窗口。
-- [ ] `15s` 首个可执行 bid/ask、1m VWAP fallback 和 estimated 标记。
-- [ ] fees/slippage/funding/benchmark 统一计分。
-- [ ] 跨资产数据缺失时 Gate 降级。
-
-验收：历史样本可重算；未来数据不会进入 PIT；缺数据不会伪造高置信 PnL。
-
-### R1-D：Scheduler、Outcome 和通知
-
-复用：现有 outbox、LangGraph recovery、操作系统 scheduler 或轻量 worker；不引入 Temporal/DBOS/Redis，除非真实需求已证明。
-
-任务：
-
-- [ ] 日历触发和周期性扫描。
-- [ ] Forecast 到期 Outcome 标记和重试。
-- [ ] Email/桌面/IM notification adapter。
-- [ ] 通知 dedupe、失败重试和不重新触发分析。
-
-验收：调度重复安全；通知失败不改决策；已发布 Artifact 只发送一次。
-
-### R1-E：ASR/直播转写适配
-
-复用：已验证的 Meeting Copilot 或本地 ASR 模型；Core 只接收 `TextEnvelope`。
-
-任务：
-
-- [ ] 中文/英文 ASR provider contract。
-- [ ] fragment 时间戳、revision、WER/延迟测试。
-- [ ] 音频只留在来源层或本地受控目录，不进 Core 账本。
-- [ ] 讲话中关键片段的 provisional/revision 回放。
-
-验收：ASR 可替换；音频失败不会破坏文本链；相同转写能回放。
+R1 不包含：音频采集、ASR 推理、OCR、未授权网页抓取、搜索摘要 canonical source、自动交易、DSH/Pi 自动热路径、Redis/Kafka/Temporal/DBOS/微服务。真实来源、行情、邮件和 ASR 的授权、网络稳定性、低延迟、预测准确率与盈利能力必须在后续 Stage Charter 中单独定义可验证目标，不能由 R1 fixture 代替。
 
 ## 10. R2：Decision Workbench 与自主进化
 
@@ -459,7 +406,7 @@ docs/ROADMAP.md 或 ADR（按需）。
 8. `R0-C5` Run Inspector 前端（`done`）。
 9. `R0-D` ReleaseManifest 和 R0 release gate（`done`）。
 
-下一目标：先由 owner 确认 R1 实时来源 Stage Charter；在确认前不创建 R1 代码任务。
+当前目标：在既有 R1 Stage Charter 内完成来源到 Outcome/outbox 的总验收和文档收口；不得顺势启动 R2 DSH/Pi Workbench 或第二领域。
 
 每个任务结束时必须形成一个独立 commit；commit message 使用 `<type>: <single outcome>`，例如：
 
@@ -498,4 +445,4 @@ Owner 已确认以下执行纪律，不重新讨论已冻结的产品架构：
 - 是否接受所有超时/重试/结构化输出优先使用 LangChain/LangGraph 能力，本项目只做策略配置、错误映射和产品状态投影。
 - 是否接受每次 Codex 只执行一个 Task ID，并以独立 commit、测试和文档作为完成单位。
 
-本文件和 R0-B Stage Charter 已进入 `accepted`；`R0-CORE-COMPLETE` 已完成。下一目标必须重新生成 Task Context Manifest，并先由 owner 确认 R1 的实时来源契约和授权边界，不能把 R0 的授权扩展到后续任务。
+本文件、R0-B 历史记录和 R1 Stage Charter 均已进入 `accepted`；`R0-CORE-COMPLETE` 已完成。R1 的实时来源契约和授权边界已锁定，任务仍必须重新生成 Task Context Manifest，不能把 R1 授权扩展到 R2/第二领域。

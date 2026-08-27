@@ -8,7 +8,9 @@ Decision Hub 是一个可插拔、可审计的事件驱动决策智能平台。
 
 ## 当前状态
 
-`R0 Owner Production Core` 已完成：文本输入到决策、预测、结果评估、观测、恢复、回放和备份自测的纵向链已能在本地运行；外部 GPT-5.5 Responses 兼容性 canary 已通过，业务 Gate 仍保持独立裁决。ASR、实时新闻/日历、实时行情、通知和长期样本评测尚未标记为生产完成。
+`R0 Owner Production Core` 已完成（提交 `2ee2f8d`）：文本输入到决策、预测、结果评估、观测、恢复、回放和备份自测的纵向链已能在本地运行；外部 GPT-5.5 Responses 兼容性 canary 已通过，业务 Gate 仍保持独立裁决。
+
+`R1 Realtime Event Engine` 已完成离线验收并提交：来源、市场和通知以可替换 adapter 接入既有 Kernel，固定 fixture 覆盖来源到 Outcome/outbox 的完整链路、游标/PIT、失败恢复和升级路径。真实来源、行情、邮件和 ASR 的网络稳定性、授权范围、预测准确率及盈利能力均未声称完成；`R2` 必须获得新的 owner Stage Gate。
 
 ## 文档入口
 
@@ -21,8 +23,9 @@ Decision Hub 是一个可插拔、可审计的事件驱动决策智能平台。
 - [全局开发治理规范](docs/engineering/DEVELOPMENT_GOVERNANCE.md)
 - [R0-B Stage Charter](docs/stages/R0-B_PROVIDER_RELIABILITY_BOUNDARY.md)
 - [R0 Core Completion 实现方案](docs/stages/R0_CORE_COMPLETION_PLAN.md)
+- [R1 Realtime Event Engine Stage Charter](docs/stages/R1_REALTIME_EVENT_ENGINE.md)
 - [TDD/SDD 与自测规范](docs/engineering/TDD_SDD_SELF_TEST_STANDARD.md)
-- [ADR 目录](docs/decisions/README.md)
+- [ADR 目录](docs/decisions/README.md)，包括 [R1 adapter 边界](docs/decisions/ADR-0003-r1-realtime-plugin-boundary.md)
 - [模块地图](docs/modules/README.md)
 - [本地运行手册](docs/runbooks/local-development.md)
 

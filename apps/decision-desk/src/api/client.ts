@@ -1,4 +1,4 @@
-import { artifactViewSchema, deskSummarySchema, runInspectorSchema, runViewSchema, type ArtifactView, type DeskSummary, type RunInspector, type RunView } from './schemas'
+import { artifactViewSchema, deskSummarySchema, productHealthSchema, runInspectorSchema, runViewSchema, type ArtifactView, type DeskSummary, type RunInspector, type RunView } from './schemas'
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, { headers: { Accept: 'application/json', ...init?.headers }, ...init })
@@ -8,6 +8,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   summary: async () => deskSummarySchema.parse(await request<unknown>('/v1/decision-desk/summary')),
+  health: async () => productHealthSchema.parse(await request<unknown>('/v1/health')),
   run: async (id: string) => runViewSchema.parse(await request<unknown>(`/v1/runs/${id}`)),
   runDetail: async (id: string) => {
     const value = await request<{ run: unknown; artifact: unknown | null }>(`/v1/runs/${id}/view`)

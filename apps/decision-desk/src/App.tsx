@@ -3,7 +3,7 @@ import { Activity, AlertTriangle, ArrowUpRight, BarChart3, Bell, BookOpen, Brain
 import { useState } from 'react'
 import { api, fallbackSummary } from './api/client'
 import type { RunInspector } from './api/types'
-import type { GateStatus, RunView } from './api/types'
+import type { GateStatus, ProductHealth, RunView } from './api/types'
 
 const nav = [
   { label: 'Inbox', icon: Inbox, active: true },
@@ -39,6 +39,18 @@ function Metric({ icon: Icon, label, value, hint, tone = 'default' }: { icon: ty
   </div>
 }
 
+export function sourceHealthDisplay(health: ProductHealth | undefined) {
+  const sources = health?.sources ?? []
+  const degraded = sources.filter((source) => source.status === 'degraded')
+  return {
+    healthyCount: sources.filter((source) => source.status === 'healthy').length,
+    degraded,
+    detail: degraded.length
+      ? degraded.map((source) => `${source.source_id}: ${source.error_code ?? 'degraded'}`).join(' · ')
+      : sources.map((source) => source.source_id).join(' · ') || 'manual text only',
+  }
+}
+
 function App() {
   const [collapsed, setCollapsed] = useState(false)
   const [selected, setSelected] = useState<RunView | null>(null)
@@ -58,7 +70,10 @@ function App() {
     onSuccess: () => { setTextInput(''); setSubmitOpen(false); void queryClient.invalidateQueries({ queryKey: ['summary'] }) },
   })
   const summaryQuery = useQuery({ queryKey: ['summary'], queryFn: api.summary, refetchInterval: 5_000, retry: false })
+  const healthQuery = useQuery({ queryKey: ['product-health'], queryFn: api.health, refetchInterval: 10_000, retry: false })
   const summary = summaryQuery.data ?? fallbackSummary
+  const health = healthQuery.data
+  const sourceHealth = sourceHealthDisplay(health)
   const inspectorQuery = useQuery({
     queryKey: ['run-inspector', selected?.run_id],
     queryFn: () => api.runInspector(selected!.run_id),
@@ -82,7 +97,7 @@ function App() {
         <section className="metrics-grid"><Metric icon={Inbox} label="待处理事件" value={summary.inbox.pending_count} hint="需要人工确认" tone="amber" /><Metric icon={Activity} label="运行中" value={summary.inbox.running_count} hint="自动刷新 · 5s" tone="blue" /><Metric icon={Target} label="近 30 天预测" value={summary.forecast_count} hint={`${summary.evaluated_count} 已有结果`} tone="green" /><Metric icon={Database} label="当前策略" value="v1" hint={summary.active_pack} tone="purple" /></section>
         <section className="workspace-grid">
           <div className="panel inbox-panel"><div className="panel-header"><div><h2>Recent events</h2><p>按接收时间排序 · Point-in-time evidence</p></div><button className="text-button">查看全部 <ArrowUpRight size={14} /></button></div><div className="table-wrap"><table><thead><tr><th>事件</th><th>状态</th><th>策略</th><th>延迟</th><th>接收时间</th><th><span className="sr-only">操作</span></th></tr></thead><tbody>{summary.inbox.latest.map((run) => <tr key={run.run_id} onClick={() => setSelected(run)}><td><div className="event-cell"><span className="event-type"><BarChart3 size={15} /></span><div><strong>{run.headline ?? '分析运行中'}</strong><span>{run.event_id}</span></div></div></td><td><StatusPill status={run.gate_status} runStatus={run.status} errorCode={run.error_code} /></td><td><span className="mono">{run.strategy_version}</span></td><td><span className="mono">{run.latency_ms ? `${(run.latency_ms / 1000).toFixed(1)}s` : '—'}</span></td><td><span className="time">{formatRelative(run.updated_at)}</span></td><td><ChevronRight size={16} className="row-chevron" /></td></tr>)}</tbody></table></div></div>
-          <div className="side-column"><div className="panel health-panel"><div className="panel-header"><div><h2>System health</h2><p>来源、运行和资产状态</p></div><span className="health-badge"><span className="live-dot" />{summary.health_status}</span></div><div className="health-list"><HealthRow icon={Activity} label="Decision Core" value="Healthy" detail="last check 12s ago" tone="success" /><HealthRow icon={Network} label="Evidence sources" value="1 source" detail="manual text · no live feeds" tone="warning" /><HealthRow icon={BrainCircuit} label="Agent runtime" value="Ready" detail="langgraph-native.v1" tone="success" /><HealthRow icon={Database} label="Ledger" value="SQLite WAL" detail="backup 6h ago" tone="success" /></div><button className="panel-link">Open health inspector <ArrowUpRight size={14} /></button></div><div className="panel principle-panel"><div className="principle-icon"><ShieldCheck size={18} /></div><div><h3>发布由 Gate 决定</h3><p>Agent 只能提交候选。证据、反方、时间一致性和操作字段通过代码检查后，结果才会进入发布账本。</p></div></div></div>
+          <div className="side-column"><div className="panel health-panel"><div className="panel-header"><div><h2>System health</h2><p>来源、运行和资产状态</p></div><span className="health-badge"><span className="live-dot" />{health?.status ?? summary.health_status}</span></div><div className="health-list"><HealthRow icon={Activity} label="Decision Core" value={health?.status === 'degraded' ? 'Degraded' : 'Healthy'} detail={`${health?.running_runs ?? summary.inbox.running_count} running · ${health?.failed_runs ?? 0} failed`} tone={health?.status === 'degraded' ? 'warning' : 'success'} /><HealthRow icon={Network} label="Evidence sources" value={health ? `${sourceHealth.healthyCount}/${health.sources.length} healthy` : 'Loading'} detail={sourceHealth.detail} tone={sourceHealth.degraded.length || !health?.sources.length ? 'warning' : 'success'} /><HealthRow icon={BrainCircuit} label="Agent runtime" value="Ready" detail="langgraph-native.v1" tone="success" /><HealthRow icon={Database} label="Ledger" value="SQLite WAL" detail="cursor, runs and outbox durable" tone="success" /></div><button className="panel-link">Open health inspector <ArrowUpRight size={14} /></button></div><div className="panel principle-panel"><div className="principle-icon"><ShieldCheck size={18} /></div><div><h3>发布由 Gate 决定</h3><p>Agent 只能提交候选。证据、反方、时间一致性和操作字段通过代码检查后，结果才会进入发布账本。</p></div></div></div>
         </section>
         <section className="bottom-grid"><div className="panel signal-panel"><div className="panel-header"><div><h2>Forecast coverage</h2><p>输出窗口和结果闭环</p></div><button className="icon-button small" aria-label="More forecast options"><Menu size={16} /></button></div><div className="coverage-row"><div className="coverage-score"><span>{summary.evaluated_count}</span><small>/ {summary.forecast_count}</small><strong>已评估</strong></div><div className="coverage-bars"><CoverageBar label="已产生预测" value={summary.forecast_count ? 100 : 0} tone="blue" /><CoverageBar label="已获得结果" value={summary.forecast_count ? Math.round((summary.evaluated_count / summary.forecast_count) * 100) : 0} tone="green" /><CoverageBar label="待补标签" value={summary.forecast_count ? Math.max(0, Math.round(((summary.forecast_count - summary.evaluated_count) / summary.forecast_count) * 100)) : 0} tone="amber" /></div></div></div><div className="panel assets-panel"><div className="panel-header"><div><h2>Personal assets</h2><p>从结果中沉淀的方法，而不是 Prompt 集合</p></div><button className="text-button">打开资产库 <ArrowUpRight size={14} /></button></div><div className="asset-items"><div className="asset-empty"><Layers3 size={17} /><div><strong>{summary.evaluated_count ? '资产提炼待审核' : '暂无已验证资产'}</strong><span>{summary.evaluated_count ? `${summary.evaluated_count} 个结果可进入 Experience 提炼流程` : '完成 Forecast Outcome 后，经验才会进入资产候选。'}</span></div></div></div></div></section>
       </div>

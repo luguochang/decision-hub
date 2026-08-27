@@ -3,7 +3,7 @@
 版本：`ROADMAP-2026-08-26.v1`  
 用途：把 [产品架构基线](../DECISION_HUB_PRODUCT_ARCHITECTURE_V1.md) 中的 R0-R3 规划转换为 GitHub 可逐项追踪的执行清单。本文是里程碑状态入口；每个任务的实现边界、框架复用和 Codex 提示词见 [分阶段执行设计](EXECUTION_PLAN.md)，不替代架构基线、契约和 ADR。
 
-最近完成的总目标为 `R0-CORE-COMPLETE`，实现方案见 [R0 Core Completion](stages/R0_CORE_COMPLETION_PLAN.md)。R0-B、R0-C、R0-D 是该总目标内的工作包，均已通过；R1 实时来源和 R2 Workbench 仍需新的 Stage Charter。
+最近完成的总目标为 `R1-REALTIME-EVENT-ENGINE`，实现方案见 [R1 Stage Charter](stages/R1_REALTIME_EVENT_ENGINE.md)。R0-B、R0-C、R0-D 是已完成的核心工作包；R1 的离线退出门已通过，R2 尚未启动且需要新的 owner Stage Gate。
 
 ## 使用规则
 
@@ -16,7 +16,7 @@
 
 ## R0：Owner Production Core
 
-R0-A 文本核心纵向链已完成。R0-B、R0-C、R0-D 已通过 `R0-CORE-COMPLETE` 总体验收；R1 实时来源仍未开始，也没有被当前 R0 授权。
+R0-A 文本核心纵向链已完成。R0-B、R0-C、R0-D 已通过 `R0-CORE-COMPLETE` 总体验收；R1 的授权、契约和 adapter 边界已锁定并通过离线退出门。
 
 ### 已完成
 
@@ -40,18 +40,19 @@ R0-A 文本核心纵向链已完成。R0-B、R0-C、R0-D 已通过 `R0-CORE-COMP
 - [x] `R0-15` SQLite backup、restore、integrity、retention 工具和升级迁移；自动 watchdog 保留为后续调度能力。
 - [x] `R0-16` ReleaseManifest、failure injection、安装/升级/恢复 runbook 和离线 core acceptance。
 
-### 下一批 `next`
+### 当前阶段
 
-R0 核心闭环已完成；下一目标只能另立 R1，并先锁定实时来源授权、事件游标和行情执行基准契约。
+R0 核心闭环和 R1 实时事件离线闭环均已完成；不能因为 R1 完成而把 DSH/Pi、自动交易、实时 ASR 或第二领域倒灌进来。R2 必须重新获得 owner Stage Gate。
 
 ## R1：Realtime Event Engine
 
-- [ ] `R1-01` SourcePlugin registry、cursor、重连、去重、revision 和 source health。
-- [ ] `R1-02` 官方 Fed/BLS/BEA 日历、RSS/正文和授权范围内的事件来源。
-- [ ] `R1-03` Meeting Copilot/ASR adapter：只接收转写文本，保留 fragment/revision/PIT 语义。
-- [ ] `R1-04` OKX 公共行情和事件后执行基准；缺少授权的跨资产行情只能降级。
-- [ ] `R1-05` scheduler、Outcome 到期标记、漂移/失败聚合和 outbox 通知 adapter。
-- [ ] `R1-06` Email、桌面或 IM 推送；通知失败不能重新触发分析。
+- [x] `R1-01` SourcePlugin registry、cursor、重连、去重、revision 和 source health。
+- [x] `R1-02` 官方 Fed/BLS/BEA 日历、RSS/正文和授权范围内的事件来源；固定 parser/fixture 不触网。
+- [x] `R1-03` Meeting Copilot/ASR adapter 的文本 fragment/revision 边界；不含音频采集或 ASR 推理。
+- [x] `R1-04` OKX 公共行情和事件后执行基准；质量降级而非伪造执行结果。
+- [x] `R1-05` scheduler、Outcome 到期标记、失败聚合和 outbox 通知 adapter。
+- [x] `R1-06` local 通知 adapter 的有限重试；Email、桌面和 IM provider 仍是后续可替换 adapter。
+- [x] `R1-07` `/v1/sources`、`/v1/health`、Decision Desk 来源摘要及来源到 Outcome/outbox 离线 E2E。
 
 R1 开始真实直播监听或外部通知前，必须新增对应 ADR、Provider 授权说明、契约测试和回放样本。
 
@@ -84,6 +85,6 @@ R1 开始真实直播监听或外部通知前，必须新增对应 ADR、Provide
 |---|---|---|
 | `R0-Core` | 文本到 Forecast/Outcome/Evaluation、Gate、账本、回放边界、TDD/SDD | `done` |
 | `R0-Release` | Provider contract、backup/recovery、可观测 Run Inspector、ReleaseManifest | `done` |
-| `R1-Realtime` | 授权来源、事件调度、行情基准、Outcome 到期和通知 | `blocked/next` |
+| `R1-Realtime` | 授权来源、事件调度、行情基准、Outcome 到期和通知 | `done`（离线 fixture） |
 | `R2-Workbench` | DSH MCP、完整观测、实验、候选晋级和回滚 | `planned` |
 | `R3-Domains` | 第二领域真实复用和按需远程部署 | `planned` |
