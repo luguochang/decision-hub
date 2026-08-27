@@ -17,12 +17,31 @@ class OutcomeService:
         self.database = database
 
     def record(self, request: OutcomeCreate) -> EvaluationView:
-        evaluation_id = f"eval_{uuid.uuid4().hex}"
-        observed_at = utcnow()
         with self.database.session() as session:
             forecast = session.get(ForecastRecord, request.forecast_id)
             if not forecast:
                 raise KeyError(request.forecast_id)
+            existing_outcome = (
+                session.query(OutcomeRecord).filter_by(forecast_id=request.forecast_id).first()
+            )
+            if existing_outcome:
+                existing_evaluation = (
+                    session.query(EvaluationRecord)
+                    .filter_by(forecast_id=request.forecast_id)
+                    .first()
+                )
+                if existing_evaluation:
+                    return EvaluationView(
+                        evaluation_id=existing_evaluation.evaluation_id,
+                        forecast_id=existing_evaluation.forecast_id,
+                        brier_score=existing_evaluation.brier_score,
+                        net_return_pct=existing_evaluation.net_return_pct,
+                        direction_correct=existing_evaluation.direction_correct,
+                        label_status=existing_evaluation.label_status,
+                        evaluated_at=existing_evaluation.evaluated_at,
+                    )
+            evaluation_id = f"eval_{uuid.uuid4().hex}"
+            observed_at = utcnow()
             net_return = request.return_pct - request.fees - request.slippage
             brier = (forecast.probability - (1 if request.direction_correct else 0)) ** 2
             session.add(
