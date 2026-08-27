@@ -67,18 +67,14 @@ class ProviderConfig(BaseSettings):
     @model_validator(mode="after")
     def selected_mode_must_be_supported(self) -> ProviderConfig:
         if self.api_mode not in self.supported_api_modes:
-            raise ValueError(
-                f"api_mode {self.api_mode!r} is not declared in supported_api_modes"
-            )
+            raise ValueError(f"api_mode {self.api_mode!r} is not declared in supported_api_modes")
         pricing = (
             self.input_cost_per_million_tokens,
             self.output_cost_per_million_tokens,
             self.pricing_version,
         )
         if self.cost_budget is not None and any(item is None for item in pricing):
-            raise ValueError(
-                "cost_budget requires input/output token prices and pricing_version"
-            )
+            raise ValueError("cost_budget requires input/output token prices and pricing_version")
         return self
 
     @classmethod

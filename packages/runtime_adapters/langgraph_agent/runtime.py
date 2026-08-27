@@ -16,6 +16,7 @@ from packages.kernel.decision_hub_kernel.ports.runtime import (
     AgentResult,
     AgentUsage,
 )
+from packages.runtime_adapters.errors import map_runtime_error
 from packages.runtime_adapters.fake_runtime.runtime import FakeAgentRuntime
 from packages.runtime_adapters.langgraph_agent.provider_config import (
     ProviderConfig,
@@ -155,7 +156,11 @@ class LangGraphAgentRuntime:
                 model=self.provider_config.model,
             ) from exc
         except BaseException as exc:
-            raise self._map_provider_error(exc) from exc
+            raise map_runtime_error(
+                exc,
+                provider_id=self.provider_config.provider_id,
+                model=self.provider_config.model,
+            ) from exc
         structured = result.get("structured_response")
         try:
             payload = AgentPayload.model_validate(structured).model_dump()
@@ -178,32 +183,6 @@ class LangGraphAgentRuntime:
             provider_id=self.provider_config.provider_id,
             model=self.provider_config.model,
             api_mode=self.provider_config.api_mode,
-        )
-
-    def _map_provider_error(self, error: BaseException) -> AgentExecutionError:
-        text = str(error).lower()
-        status = getattr(error, "status_code", None)
-        if status == 429 or "rate limit" in text or "rate_limited" in text:
-            return AgentExecutionError(
-                "provider_rate_limited",
-                "provider rate limit reached",
-                retryable=True,
-                provider_id=self.provider_config.provider_id,
-                model=self.provider_config.model,
-            )
-        if isinstance(status, int) and status >= 500:
-            return AgentExecutionError(
-                "provider_unavailable",
-                "provider returned a server error",
-                retryable=True,
-                provider_id=self.provider_config.provider_id,
-                model=self.provider_config.model,
-            )
-        return AgentExecutionError(
-            "unknown_runtime_error",
-            "provider runtime failed",
-            provider_id=self.provider_config.provider_id,
-            model=self.provider_config.model,
         )
 
     def _extract_usage(self, result: dict[str, object]) -> AgentUsage:
@@ -236,10 +215,8 @@ class LangGraphAgentRuntime:
             and self.provider_config.output_cost_per_million_tokens is not None
         ):
             cost_usd = (
-                prompt_tokens
-                * self.provider_config.input_cost_per_million_tokens
-                + completion_tokens
-                * self.provider_config.output_cost_per_million_tokens
+                prompt_tokens * self.provider_config.input_cost_per_million_tokens
+                + completion_tokens * self.provider_config.output_cost_per_million_tokens
             ) / 1_000_000
             cost_status = "estimated"
         return AgentUsage(
@@ -249,8 +226,6 @@ class LangGraphAgentRuntime:
             cost_usd=cost_usd,
             cost_status=cost_status,
             pricing_version=(
-                self.provider_config.pricing_version
-                if cost_status == "estimated"
-                else None
+                self.provider_config.pricing_version if cost_status == "estimated" else None
             ),
         )
