@@ -7,7 +7,6 @@ from pathlib import Path
 import pytest
 
 from packages.contracts_py.decision_hub_contracts.models import ObservationCreate
-from packages.kernel.decision_hub_kernel.application.analyze import AnalyzeTextService
 from packages.kernel.decision_hub_kernel.application.outcome_due import DueOutcomeService
 from packages.kernel.decision_hub_kernel.persistence.db import (
     Database,
@@ -16,6 +15,7 @@ from packages.kernel.decision_hub_kernel.persistence.db import (
     OutcomeRecord,
 )
 from packages.kernel.decision_hub_kernel.ports.sources import MarketQuote, PriceWindow
+from packages.orchestration.langgraph import build_analyze_text_service
 from packages.runtime_adapters.fake_runtime.runtime import FakeAgentRuntime
 
 
@@ -66,7 +66,7 @@ class MissingWindowProvider:
 
 
 def _expired_forecast(database: Database, text: str) -> ForecastRecord:
-    service = AnalyzeTextService(database, FakeAgentRuntime())
+    service = build_analyze_text_service(database, FakeAgentRuntime())
     asyncio.run(service.submit_and_run(ObservationCreate(text=text)))
     with database.session() as session:
         forecast = session.query(ForecastRecord).order_by(ForecastRecord.horizon.asc()).first()

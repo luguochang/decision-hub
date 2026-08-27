@@ -14,12 +14,15 @@ from .sources import (
     SourcePollResult,
     SourceRegistryPort,
 )
+from .workflow import DecisionExecutionRequest, DecisionWorkflowExecutor
 
 __all__ = [
     "AgentExecutionError",
     "AgentRequest",
     "AgentResult",
     "AgentRuntime",
+    "DecisionExecutionRequest",
+    "DecisionWorkflowExecutor",
     "MarketDataPort",
     "MarketQuote",
     "MarketWindowPort",

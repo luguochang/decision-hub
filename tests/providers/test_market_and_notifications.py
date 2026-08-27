@@ -9,13 +9,13 @@ from pathlib import Path
 from pydantic import SecretStr
 
 from packages.contracts_py.decision_hub_contracts.models import ObservationCreate
-from packages.kernel.decision_hub_kernel.application.analyze import AnalyzeTextService
 from packages.kernel.decision_hub_kernel.application.outbox import NotificationDispatcher
 from packages.kernel.decision_hub_kernel.persistence.db import Database, OutboxRecord
 from packages.kernel.decision_hub_kernel.ports.sources import (
     NotificationMessage,
     NotificationResult,
 )
+from packages.orchestration.langgraph import build_analyze_text_service
 from packages.provider_adapters.notifications.local import LocalNotificationAdapter
 from packages.provider_adapters.notifications.smtp import SMTPConfig, SMTPNotificationAdapter
 from packages.runtime_adapters.fake_runtime.runtime import FakeAgentRuntime
@@ -26,7 +26,7 @@ def test_notification_dispatch_is_deduplicated_and_failure_does_not_change_artif
 ) -> None:
     database = Database(f"sqlite+pysqlite:///{tmp_path / 'notify.sqlite3'}")
     database.create_all()
-    service = AnalyzeTextService(database, FakeAgentRuntime())
+    service = build_analyze_text_service(database, FakeAgentRuntime())
     asyncio.run(service.submit_and_run(ObservationCreate(text="Powell says higher for longer.")))
     export = tmp_path / "notifications.jsonl"
     dispatcher = NotificationDispatcher(database, {"local": LocalNotificationAdapter(export)})
@@ -51,7 +51,7 @@ class RetryableNotificationAdapter:
 def test_notification_failure_is_observable_and_does_not_reanalyze(tmp_path: Path) -> None:
     database = Database(f"sqlite+pysqlite:///{tmp_path / 'notify-failure.sqlite3'}")
     database.create_all()
-    service = AnalyzeTextService(database, FakeAgentRuntime())
+    service = build_analyze_text_service(database, FakeAgentRuntime())
     asyncio.run(service.submit_and_run(ObservationCreate(text="Powell says higher for longer.")))
     dispatcher = NotificationDispatcher(database, {"local": RetryableNotificationAdapter()})
 
@@ -80,7 +80,7 @@ class PermanentNotificationAdapter:
 def test_notification_permanent_failure_is_terminal_and_not_due_again(tmp_path: Path) -> None:
     database = Database(f"sqlite+pysqlite:///{tmp_path / 'notify-terminal.sqlite3'}")
     database.create_all()
-    service = AnalyzeTextService(database, FakeAgentRuntime())
+    service = build_analyze_text_service(database, FakeAgentRuntime())
     asyncio.run(service.submit_and_run(ObservationCreate(text="Powell says higher for longer.")))
     now = datetime(2026, 8, 27, 1, 0, tzinfo=UTC)
     dispatcher = NotificationDispatcher(
@@ -104,7 +104,7 @@ def test_retryable_notification_waits_until_due_then_reaches_terminal_failure(
 ) -> None:
     database = Database(f"sqlite+pysqlite:///{tmp_path / 'notify-retry-limit.sqlite3'}")
     database.create_all()
-    service = AnalyzeTextService(database, FakeAgentRuntime())
+    service = build_analyze_text_service(database, FakeAgentRuntime())
     asyncio.run(service.submit_and_run(ObservationCreate(text="Powell says higher for longer.")))
     clock = [datetime(2026, 8, 27, 1, 0, tzinfo=UTC)]
     dispatcher = NotificationDispatcher(

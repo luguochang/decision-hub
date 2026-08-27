@@ -181,7 +181,7 @@ def test_inspector_preserves_provider_failure_code(tmp_path: Path) -> None:
         async def ainvoke(self, _state: dict[str, object], **_kwargs: object) -> None:
             raise AgentExecutionError("provider_timeout", "fixture timeout", retryable=True)
 
-    app.state.analyzer.graph = FailingGraph()
+    app.state.analyzer.executor.graph = FailingGraph()
     client = TestClient(app, raise_server_exceptions=False)
     response = client.post(
         "/v1/observations",

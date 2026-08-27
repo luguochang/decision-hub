@@ -15,13 +15,13 @@ from packages.contracts_py.decision_hub_contracts.models import (
     RunStatus,
 )
 from packages.kernel.decision_hub_kernel.application.admission import AdmissionService
-from packages.kernel.decision_hub_kernel.application.analyze import AnalyzeTextService
 from packages.kernel.decision_hub_kernel.application.health import HealthService
 from packages.kernel.decision_hub_kernel.application.outcome import OutcomeService
 from packages.kernel.decision_hub_kernel.application.source_ingest import SourceIngestionService
 from packages.kernel.decision_hub_kernel.persistence.db import Database
 from packages.kernel.decision_hub_kernel.ports.runtime import AgentExecutionError
 from packages.kernel.decision_hub_kernel.ports.sources import SourceConnector
+from packages.orchestration.langgraph import build_analyze_text_service
 from packages.pilot_runtime import build_readiness_service
 from packages.query_views.decision_desk.service import DecisionDeskQueryService
 from packages.runtime_adapters.langgraph_agent.runtime import LangGraphAgentRuntime
@@ -50,7 +50,9 @@ def create_app(
                 str(data_dir / "checkpoints" / "decision_graph.sqlite3"),
             )
         )
-    analyzer = AnalyzeTextService(db, runtime, checkpoint_path=checkpoint_path)
+    analyzer = build_analyze_text_service(
+        db, runtime, checkpoint_path=checkpoint_path
+    )
     desk = DecisionDeskQueryService(db)
     health = HealthService(db)
     outcomes = OutcomeService(db)

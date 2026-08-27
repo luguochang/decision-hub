@@ -14,9 +14,9 @@ from packages.contracts_py.decision_hub_contracts.models import (
     ObservationCreate,
     OutcomeCreate,
 )
-from packages.kernel.decision_hub_kernel.application.analyze import AnalyzeTextService
 from packages.kernel.decision_hub_kernel.application.outcome import OutcomeService
 from packages.kernel.decision_hub_kernel.persistence.db import Database
+from packages.orchestration.langgraph import build_analyze_text_service
 from packages.runtime_adapters.replay_runtime.runtime import ReplayAgentRuntime
 
 
@@ -101,7 +101,7 @@ async def run_fixture(
     data = ReplayFixture.model_validate_json(fixture.read_text())
     database = Database(f"sqlite+pysqlite:///{database_path}")
     database.create_all()
-    event_id, run_id, admitted = await AnalyzeTextService(
+    event_id, run_id, admitted = await build_analyze_text_service(
         database,
         ReplayAgentRuntime(),
         strategy_version=strategy_version,

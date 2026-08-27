@@ -10,8 +10,8 @@ import tempfile
 from pathlib import Path
 
 from packages.contracts_py.decision_hub_contracts.models import ObservationCreate
-from packages.kernel.decision_hub_kernel.application.analyze import AnalyzeTextService
 from packages.kernel.decision_hub_kernel.persistence.db import Database
+from packages.orchestration.langgraph import build_analyze_text_service
 from packages.runtime_adapters.langgraph_agent.runtime import LangGraphAgentRuntime
 
 DEFAULT_TEXT = (
@@ -75,7 +75,7 @@ async def run_canary(text: str) -> dict[str, object]:
     with tempfile.TemporaryDirectory(prefix="decision-hub-live-canary-") as temp_dir:
         database = Database(f"sqlite+pysqlite:///{Path(temp_dir) / 'canary.sqlite3'}")
         database.create_all()
-        service = AnalyzeTextService(database, LangGraphAgentRuntime())
+        service = build_analyze_text_service(database, LangGraphAgentRuntime())
         event_id, run_id, admitted = await service.submit_and_run(
             ObservationCreate(
                 text=text,

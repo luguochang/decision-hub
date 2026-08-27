@@ -6,7 +6,6 @@ from pathlib import Path
 import pytest
 
 from packages.contracts_py.decision_hub_contracts.models import ObservationCreate
-from packages.kernel.decision_hub_kernel.application.analyze import AnalyzeTextService
 from packages.kernel.decision_hub_kernel.persistence.db import (
     ArtifactRecord,
     Database,
@@ -19,6 +18,7 @@ from packages.kernel.decision_hub_kernel.ports.runtime import (
     AgentResult,
     AgentUsage,
 )
+from packages.orchestration.langgraph import build_analyze_text_service
 from packages.runtime_adapters.fake_runtime.runtime import FakeAgentRuntime
 
 
@@ -93,7 +93,7 @@ def test_provider_failures_are_visible_and_never_publish(
 ) -> None:
     database = Database(f"sqlite+pysqlite:///{tmp_path / f'{error_code}.sqlite3'}")
     database.create_all()
-    service = AnalyzeTextService(database, FailingRuntime(error_code))
+    service = build_analyze_text_service(database, FailingRuntime(error_code))
 
     with pytest.raises(AgentExecutionError) as captured:
         asyncio.run(
@@ -127,7 +127,7 @@ def test_langgraph_retry_preserves_step_and_call_attempts(tmp_path: Path) -> Non
     database.create_all()
 
     _, run_id, _ = asyncio.run(
-        AnalyzeTextService(database, RetryOnceRuntime()).submit_and_run(
+        build_analyze_text_service(database, RetryOnceRuntime()).submit_and_run(
             ObservationCreate(text="Powell says rates may stay higher for longer.")
         )
     )
@@ -154,7 +154,7 @@ def test_langgraph_retry_preserves_step_and_call_attempts(tmp_path: Path) -> Non
 def test_cost_budget_exhaustion_fails_closed(tmp_path: Path) -> None:
     database = Database(f"sqlite+pysqlite:///{tmp_path / 'budget.sqlite3'}")
     database.create_all()
-    service = AnalyzeTextService(database, PricedRuntime())
+    service = build_analyze_text_service(database, PricedRuntime())
 
     with pytest.raises(AgentExecutionError) as captured:
         asyncio.run(

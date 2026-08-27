@@ -9,7 +9,6 @@ from fastapi.testclient import TestClient
 
 from apps.hub_api.main import create_app
 from packages.contracts_py.decision_hub_contracts.models import SourceType, TextEnvelope
-from packages.kernel.decision_hub_kernel.application.analyze import AnalyzeTextService
 from packages.kernel.decision_hub_kernel.application.outbox import NotificationDispatcher
 from packages.kernel.decision_hub_kernel.application.outcome_due import DueOutcomeService
 from packages.kernel.decision_hub_kernel.application.scheduler import RealtimeScheduler
@@ -29,6 +28,7 @@ from packages.kernel.decision_hub_kernel.ports.sources import (
     SourceManifest,
     SourcePollResult,
 )
+from packages.orchestration.langgraph import build_analyze_text_service
 from packages.provider_adapters.notifications.local import LocalNotificationAdapter
 from packages.runtime_adapters.fake_runtime.runtime import FakeAgentRuntime
 from packages.source_adapters.registry import SourceRegistry
@@ -169,7 +169,7 @@ def test_scheduler_reuses_r0_chain_then_evaluates_due_forecast_and_notifies(
     registry.register(source)
     now = datetime(2026, 8, 27, 1, 0, 1, tzinfo=UTC)
     ingestion = SourceIngestionService(database, registry, clock=lambda: now)
-    analyzer = AnalyzeTextService(database, FakeAgentRuntime())
+    analyzer = build_analyze_text_service(database, FakeAgentRuntime())
     notifications = tmp_path / "notifications.jsonl"
 
     async def execute(target: RunTarget) -> None:

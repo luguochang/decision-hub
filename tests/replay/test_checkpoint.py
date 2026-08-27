@@ -8,12 +8,12 @@ from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 from langgraph.graph import END, START, StateGraph
 
 from packages.contracts_py.decision_hub_contracts.models import ObservationCreate
-from packages.kernel.decision_hub_kernel.application.analyze import AnalyzeTextService
 from packages.kernel.decision_hub_kernel.persistence.db import (
     ArtifactRecord,
     Database,
     OutboxRecord,
 )
+from packages.orchestration.langgraph import build_analyze_text_service
 from packages.orchestration.langgraph.checkpoint.recovery import CheckpointStore, RecoveryWatchdog
 from packages.orchestration.langgraph.graphs.decision_graph import build_decision_graph
 from packages.orchestration.langgraph.state.decision import DecisionState
@@ -52,7 +52,7 @@ def test_sqlite_checkpoint_survives_reopen(tmp_path: Path) -> None:
 def test_recovery_watchdog_reads_non_terminal_runs(tmp_path: Path) -> None:
     database = Database(f"sqlite+pysqlite:///{tmp_path / 'ledger.sqlite3'}")
     database.create_all()
-    service = AnalyzeTextService(database, FakeAgentRuntime())
+    service = build_analyze_text_service(database, FakeAgentRuntime())
     event_id, _, admitted = service.admission.admit(ObservationCreate(text="running fixture"))
     assert admitted is True
     run_id, _ = service.runs.create(event_id)
@@ -64,7 +64,7 @@ def test_business_run_recovers_from_checkpoint_without_duplicate_commit(tmp_path
         database = Database(f"sqlite+pysqlite:///{tmp_path / 'ledger.sqlite3'}")
         database.create_all()
         checkpoint_path = tmp_path / "checkpoints.sqlite3"
-        service = AnalyzeTextService(
+        service = build_analyze_text_service(
             database, FakeAgentRuntime(), checkpoint_path=checkpoint_path
         )
         event_id, _envelope, admitted = service.admission.admit(

@@ -8,13 +8,13 @@ import time
 from pathlib import Path
 
 from packages.kernel.decision_hub_kernel.application.admission import AdmissionService
-from packages.kernel.decision_hub_kernel.application.analyze import AnalyzeTextService
 from packages.kernel.decision_hub_kernel.application.scheduler import RealtimeScheduler
 from packages.kernel.decision_hub_kernel.application.source_ingest import (
     RunTarget,
     SourceIngestionService,
 )
 from packages.kernel.decision_hub_kernel.persistence.db import Database
+from packages.orchestration.langgraph import build_analyze_text_service
 from packages.pilot_runtime import (
     PilotSettings,
     build_notification_adapters,
@@ -75,7 +75,7 @@ def run() -> int:
         if args.preflight or report.status != "ready":
             return 0 if report.status == "ready" else 1
     ingestion = SourceIngestionService(database, registry, admission=AdmissionService(database))
-    analyzer = AnalyzeTextService(database, LangGraphAgentRuntime())
+    analyzer = build_analyze_text_service(database, LangGraphAgentRuntime())
 
     async def execute_target(target: RunTarget) -> None:
         await analyzer.run_admitted(target.event_id, target.run_id)
