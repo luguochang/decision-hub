@@ -61,6 +61,40 @@ DECISION_HUB_SOURCES_ENABLED=1 DECISION_HUB_MARKET_ENABLED=1 \
 
 本地通知输出到 `data/decision-hub/exports/notifications.jsonl`。来源/行情/通知失败只更新健康或 outbox 重试状态，不能重新触发分析或改变已提交 Artifact/Forecast。真实 endpoint、邮件和市场执行质量必须分别以 opt-in canary 验证。
 
+## R1-L 单 owner 试运行预检
+
+进入长期 worker 前先执行只读预检。它不会访问外部 Provider、来源、行情或 SMTP：
+
+```bash
+./.venv/bin/python -m apps.hub_worker.main --preflight
+```
+
+只有明确设置 `DECISION_HUB_PILOT_MODE=1` 并增加 `--pilot`，worker 才会把相同报告作为启动门；失败时不会创建 scheduler、轮询来源或消费 outbox。local 通知默认写入 `data/decision-hub/exports/notifications.jsonl`，Email 必须显式设置 SMTP host/sender/recipient，密码只从当前进程环境注入。
+
+运行不触网的 R1-L acceptance（含 worker fail-closed、入口测试、outbox/recovery、PIT replay 和 backup/restore）：
+
+```bash
+./.venv/bin/python tools/pilot_acceptance.py
+```
+
+readiness 通过只表示本地配置和数据边界满足要求；真实来源授权、Provider/SMTP 连通性、长期运行和业务效果仍需 owner 单独授权的 Live Pilot Gate。
+
+### 单 owner 启停与故障处理
+
+启动长期 worker 前使用 `--preflight`，确认报告为 `ready` 后再使用 `--pilot`：
+
+```bash
+DECISION_HUB_PILOT_MODE=1 \
+DECISION_HUB_LLM_ENABLED=1 \
+DECISION_HUB_SOURCES_ENABLED=1 \
+DECISION_HUB_MARKET_ENABLED=1 \
+./.venv/bin/python -m apps.hub_worker.main --pilot
+```
+
+停止时向前台进程发送 `Ctrl-C`（SIGINT），或由进程管理器发送 SIGTERM；不要删除数据库文件。worker 只在 tick 边界停止，已提交的 Event/Run/Artifact/Outbox 会保留，下一次启动会由 durable source state、Run 和 checkpoint 恢复。来源、行情、Provider 或通知失败只进入 health/error/outbox retry 状态，不重新执行已经提交的决策。
+
+Provider 的总超时、重试次数、token budget 和可选 cost budget 只在 `ProviderConfig` 配置；成本未知时记录 `unknown`，预算不足时 fail-closed。不要在 worker、Graph 或通知 adapter 内另写重试/计费逻辑。日志和 readiness 输出只允许固定错误码、版本、状态和 hash，禁止记录 API key、SMTP password、Authorization 或原始 Provider JSON。
+
 ## Core durability and replay
 
 SQLite backup and integrity checks use the checked-in operations tool:

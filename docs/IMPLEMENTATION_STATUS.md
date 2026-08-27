@@ -1,7 +1,7 @@
 # 实施状态
 
 日期：2026-08-27（Asia/Shanghai）
-状态：`R0-CORE-COMPLETE` 已完成并提交为 `2ee2f8d`；`R1-REALTIME-EVENT-ENGINE` 已完成离线验收并提交。下一阶段 `R2` 尚未获 owner Stage Gate。
+状态：`R0-CORE-COMPLETE` 已完成并提交为 `2ee2f8d`；`R1-REALTIME-EVENT-ENGINE` 已完成离线验收并提交；进入 R2 前的 `R1-L-SINGLE-OWNER-PILOT-READINESS` 离线代码门已通过并形成独立提交，尚未推送，Live Pilot Gate 和 `R2` 均未获 owner 授权。
 
 最后复核：2026-08-27。R1 的固定 fixture、契约、迁移和端到端退出门已通过；这是可重复的离线工程证据，不是生产稳定性证明。真实网络、来源授权、预测准确率和盈利能力仍需独立验证。
 
@@ -12,6 +12,7 @@
 - 最近完成 Stage Charter：`R1 Realtime Event Engine`，`done`，见 `docs/stages/R1_REALTIME_EVENT_ENGINE.md`；可插拔边界见 `docs/decisions/ADR-0003-r1-realtime-plugin-boundary.md`。
 - `R0-B1 ProviderConfig + capability manifest`：`done`；R0-B Provider Reliability Boundary 整体已完成。
 - `R0-CORE-COMPLETE`：`done`；证据入口为 `tools/core_acceptance.py` 和 `docs/RELEASE_MANIFEST.json`。
+- `R1-L-SINGLE-OWNER-PILOT-READINESS`：`done (offline)`；Stage Charter 见 `docs/stages/R1_L_SINGLE_OWNER_PILOT_READINESS.md`。readiness 契约、控制层、API 只读入口、worker 预检/启动门、通知组合根、离线 acceptance 与文档收口均已通过；本次变更已形成独立提交但尚未推送，真实 Live Pilot Gate 仍未授权。
 - Run/Step/Attempt/Call normalized projection + Run Inspector API：`done`，新 Run 可查询四个 Step、三角色 Call、错误/成本/重试和 `/v1/runs/{run_id}/inspector`。
 - SQLite backup/integrity 和固定 PIT Replay：`done`，已验证固定 clock、future-information reject、baseline/candidate、Outcome/Brier/net return、restore replay smoke。
 
@@ -46,6 +47,17 @@ R1 退出门已完成：`R1-01` 至 `R1-07` 均有可回滚提交、固定 fixtu
 | Graph checkpoint | `langgraph-checkpoint-sqlite` 独立 checkpoint store + RecoveryWatchdog 恢复边界 | `tests/replay/test_checkpoint.py`, `tests/e2e/test_runtime_safety.py` |
 | 发布 outbox | Artifact 与 `OutboxRecord` 同一事务提交；`hub-worker --once` 写本地 JSONL 并按 dedupe key 标记完成 | `test_outbox_worker.py` + fresh migration smoke |
 
+## R1-L 进入 R2 前收口
+
+| 能力 | 当前实现 | 证据与边界 |
+|---|---|---|
+| readiness | `packages/pilot_runtime` 聚合数据库、迁移、Provider、来源、市场、通知和自动交易禁用检查，输出 `pilot-readiness.v1` 脱敏报告 | `tests/pilot/test_readiness.py`；不触网、不调用 LLM/SMTP |
+| worker 启动门 | `hub-worker --preflight` 输出报告并以非零退出表示未就绪；`--pilot` 在 scheduler 前 fail-closed | `apps/hub_worker/README.md`、`tools/pilot_acceptance.py`；`--once` fixture 兼容保留 |
+| 通知组合根 | local JSONL 或显式 email SMTP adapter，均消费 committed outbox；复用现有 bounded retry/dedupe | `packages/pilot_runtime/bootstrap.py`、`tests/providers`；不重新分析、不改账本 |
+| API readiness | 只读 `/v1/pilot/readiness`，仅返回 canonical Pydantic DTO，不返回密钥、密码、原始 provider JSON | `tests/pilot/test_entrypoints.py` |
+
+以上条目是离线实现证据，不等于真实来源、真实 SMTP、长期运行、预测准确率或盈利验证；这些需要单独的 Live Pilot Gate。本次代码已提交但尚未推送。
+
 ## 尚未声称完成
 
 - 外部 LLM live canary 已能通过 `gpt-5.5` Responses 路径完成三角色调用、结构化解析和 Artifact/Forecast 持久化；这只是 Provider 兼容性证据，不代表预测准确率或盈利能力。默认 CI 继续使用 fake/replay 保持确定性。
@@ -67,10 +79,10 @@ Inspector 证据归一化已由研究图汇合边界保证：Facts/Citations 取
 
 长期规范见 [`docs/engineering/TDD_SDD_SELF_TEST_STANDARD.md`](engineering/TDD_SDD_SELF_TEST_STANDARD.md)。当前测试已覆盖从文本输入到 Evaluation 的可执行链：文本哈希、Event/Observation/Snapshot、LangGraph research、Gate、Artifact、30m/24h/72h Forecast、Outcome、Brier/net return、Query View、Timeline、Step/Attempt/Call、Provider failure safety、checkpoint recovery、backup/restore 和 Outbox。
 
-2026-08-27 R1 离线验收结果：
+2026-08-27 R1/R1-L 离线验收结果：
 
 ```text
-Python pytest: 80 passed, 1 warning
+Python pytest: 87 passed, 1 warning
 Ruff: passed
 Pyright: 0 errors, 0 warnings
 Canonical schema check: passed
@@ -78,6 +90,7 @@ Module documentation check: passed
 Frontend Vitest: 1 passed
 Frontend Vite build: passed
 Core acceptance: passed（含 fresh Alembic `0001 -> 0010`、PIT compare、backup/restore/integrity、secret scan、前端 Vitest/Vite）
+Pilot acceptance: passed（readiness、worker preflight fail-closed、notification composition、入口 API、PIT/recovery/backup 复用检查）
 ```
 
 外部模型 canary 使用 `tools/canary/run_live_text_canary.py`，只读当前进程环境变量，使用临时 SQLite，输出脱敏 ID/状态/hash，不把密钥写入仓库或数据目录。本次使用 `https://codexai.club/v1` 与 `gpt-5.5` 做了分层探测：

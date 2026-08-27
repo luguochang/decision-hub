@@ -11,6 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from packages.contracts_py.decision_hub_contracts.models import (
     ObservationCreate,
     OutcomeCreate,
+    PilotReadinessReport,
     RunStatus,
 )
 from packages.kernel.decision_hub_kernel.application.admission import AdmissionService
@@ -21,6 +22,7 @@ from packages.kernel.decision_hub_kernel.application.source_ingest import Source
 from packages.kernel.decision_hub_kernel.persistence.db import Database
 from packages.kernel.decision_hub_kernel.ports.runtime import AgentExecutionError
 from packages.kernel.decision_hub_kernel.ports.sources import SourceConnector
+from packages.pilot_runtime import build_readiness_service
 from packages.query_views.decision_desk.service import DecisionDeskQueryService
 from packages.runtime_adapters.langgraph_agent.runtime import LangGraphAgentRuntime
 from packages.source_adapters.official_feeds import official_source_presets
@@ -68,6 +70,10 @@ def create_app(
         if sources_enabled is not None
         else os.getenv("DECISION_HUB_SOURCES_ENABLED", "0") == "1"
     )
+    app.state.readiness_service = build_readiness_service(
+        db,
+        source_registry.manifests(),
+    )
 
     async def execute(event_id: str, run_id: str) -> None:
         try:
@@ -94,6 +100,11 @@ def create_app(
     @app.get("/v1/health")
     async def product_health():
         return health.status()
+
+    @app.get("/v1/pilot/readiness", response_model=PilotReadinessReport)
+    async def pilot_readiness() -> PilotReadinessReport:
+        # Recompute database state on every request while keeping checks in pilot_runtime.
+        return app.state.readiness_service.report()
 
     @app.get("/v1/sources")
     async def sources() -> list[dict[str, object]]:

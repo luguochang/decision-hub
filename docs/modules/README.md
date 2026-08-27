@@ -7,6 +7,7 @@
 | `packages/runtime_adapters` | AgentRuntime 实现 | `AgentRuntime` | Graph -> adapter | `v1` | `tests/contracts` |
 | `packages/source_adapters` | 文本来源统一适配 | `SourcePlugin` | API/未来监听 -> Kernel | `v1` | `tests/contracts` |
 | `packages/provider_adapters` | 市场、通知等第三方适配 | `MarketDataPort`、`NotificationPort` | Worker -> Kernel ports | `v1` | `tests/providers` |
+| `packages/pilot_runtime` | 单 owner 试运行配置、预检与组合控制 | `PilotSettings`、`PilotReadinessService` | API/Worker -> Kernel/adapters | `pilot-readiness.v1` | `tests/pilot` |
 | `packages/query_views` | 前端只读 View DTO | Query services | API -> repository | `v1` | `tests/e2e` |
 | `packages/contracts_ts` | TypeScript/Zod 公开契约镜像 | `@decision-hub/contracts-ts` | canonical schema -> Web/DSH adapters | `v1` | `pnpm build/test` |
 | `apps/hub_api` | REST API 和静态前端 | `/v1` | Browser/CLI -> Kernel | `v1` | `tests/e2e` |

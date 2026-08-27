@@ -13,6 +13,10 @@
 
 - R2 Decision Workbench 与自主进化：在 R1 真实数据和 R0 replay 证据稳定后，再接入 DSH/Pi ResearchMemo、实验、shadow 和人工晋级。
 
+### R1-L offline complete (2026-08-27)
+
+- R1-L 单 owner 试运行就绪的代码、离线 acceptance 和文档已完成，包含脱敏 readiness 契约与 API、worker `--preflight`/`--pilot` 启动门，以及 local/email outbox 组合根。本次变更已形成独立提交但尚未推送；真实来源、SMTP、长期运行和业务效果仍需 Live Pilot Gate。
+
 ### Delivered (2026-08-27)
 
 - R1 Realtime Event Engine：来源 registry、官方 feed/calendar、文本转写边界、行情基准、scheduler、到期 Outcome、local notification、健康 API 和 Decision Desk 摘要已完成离线验收。固定 fixture 覆盖 cursor/PIT、重复与修订、失败恢复、到期幂等、通知重试、迁移升级和来源到 Outcome/outbox 的端到端链路。

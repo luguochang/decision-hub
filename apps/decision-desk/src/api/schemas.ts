@@ -11,6 +11,7 @@ export {
   stepViewSchema,
   runInspectorSchema,
   productHealthSchema,
+  pilotReadinessReportSchema,
 } from '@decision-hub/contracts-ts'
 export type {
   ArtifactView,
@@ -22,4 +23,5 @@ export type {
   StepView,
   RunInspector,
   ProductHealth,
+  PilotReadinessReport,
 } from '@decision-hub/contracts-ts'

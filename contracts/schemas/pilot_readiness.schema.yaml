@@ -1,0 +1,35 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/pilot-readiness.schema.json
+title: PilotReadinessReport
+type: object
+additionalProperties: false
+required:
+  - schema_version
+  - status
+  - checked_at
+  - pilot_mode
+  - notification_channel
+  - source_ids
+  - checks
+  - live_canaries_required
+properties:
+  schema_version: {type: string, const: pilot-readiness.v1}
+  status: {type: string, enum: [ready, not_ready]}
+  checked_at: {type: string, format: date-time}
+  pilot_mode: {type: boolean}
+  notification_channel: {type: string, enum: [local, email]}
+  source_ids: {type: array, items: {type: string}}
+  checks:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: [check_id, status, detail]
+      properties:
+        check_id: {type: string, minLength: 1}
+        status: {type: string, enum: [pass, fail, warning]}
+        detail: {type: string, minLength: 1}
+        error_code: {type: [string, 'null']}
+  live_canaries_required:
+    type: array
+    items: {type: string}

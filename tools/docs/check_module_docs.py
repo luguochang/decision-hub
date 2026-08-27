@@ -9,6 +9,7 @@ REQUIRED = [
     ROOT / "packages/runtime_adapters/README.md",
     ROOT / "packages/source_adapters/README.md",
     ROOT / "packages/query_views/README.md",
+    ROOT / "packages/pilot_runtime/README.md",
     ROOT / "packages/contracts_ts/README.md",
     ROOT / "apps/hub_api/README.md",
     ROOT / "apps/hub_worker/README.md",

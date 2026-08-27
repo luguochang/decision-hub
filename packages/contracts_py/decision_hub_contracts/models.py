@@ -105,6 +105,28 @@ class ProductHealth(BaseModel):
     sources: list[SourceHealth] = Field(default_factory=list)
 
 
+class PilotReadinessCheck(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    check_id: str = Field(min_length=1)
+    status: str = Field(pattern=r"^(pass|fail|warning)$")
+    detail: str = Field(min_length=1)
+    error_code: str | None = None
+
+
+class PilotReadinessReport(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    schema_version: str = "pilot-readiness.v1"
+    status: str = Field(pattern=r"^(ready|not_ready)$")
+    checked_at: datetime
+    pilot_mode: bool
+    notification_channel: str = Field(pattern=r"^(local|email)$")
+    source_ids: tuple[str, ...] = ()
+    checks: tuple[PilotReadinessCheck, ...]
+    live_canaries_required: tuple[str, ...] = ()
+
+
 class MarketQuote(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 

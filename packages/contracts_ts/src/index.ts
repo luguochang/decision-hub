@@ -30,6 +30,16 @@ export const productHealthSchema = z.object({
   status: z.enum(['ok', 'degraded']), running_runs: z.number().int().nonnegative(),
   failed_runs: z.number().int().nonnegative(), sources: z.array(sourceHealthSchema),
 })
+export const pilotReadinessCheckSchema = z.object({
+  check_id: z.string().min(1), status: z.enum(['pass', 'fail', 'warning']),
+  detail: z.string().min(1), error_code: z.string().nullable(),
+})
+export const pilotReadinessReportSchema = z.object({
+  schema_version: z.literal('pilot-readiness.v1'), status: z.enum(['ready', 'not_ready']),
+  checked_at: z.string(), pilot_mode: z.boolean(),
+  notification_channel: z.enum(['local', 'email']), source_ids: z.array(z.string()),
+  checks: z.array(pilotReadinessCheckSchema), live_canaries_required: z.array(z.string()),
+})
 
 export const forecastSchema = z.object({
   forecast_id: z.string(), artifact_id: z.string(), instrument: z.string(), horizon: z.string(),
@@ -104,3 +114,5 @@ export type SourceHealth = z.infer<typeof sourceHealthSchema>
 export type MarketQuote = z.infer<typeof marketQuoteSchema>
 export type NotificationMessage = z.infer<typeof notificationMessageSchema>
 export type ProductHealth = z.infer<typeof productHealthSchema>
+export type PilotReadinessCheck = z.infer<typeof pilotReadinessCheckSchema>
+export type PilotReadinessReport = z.infer<typeof pilotReadinessReportSchema>

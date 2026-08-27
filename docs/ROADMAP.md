@@ -42,7 +42,17 @@ R0-A 文本核心纵向链已完成。R0-B、R0-C、R0-D 已通过 `R0-CORE-COMP
 
 ### 当前阶段
 
-R0 核心闭环和 R1 实时事件离线闭环均已完成；不能因为 R1 完成而把 DSH/Pi、自动交易、实时 ASR 或第二领域倒灌进来。R2 必须重新获得 owner Stage Gate。
+R0 核心闭环和 R1 实时事件离线闭环均已完成；当前阶段是进入 R2 前的 `R1-L` 单 owner 试运行就绪收口。不能因为 R1 完成而把 DSH/Pi、自动交易、实时 ASR 或第二领域倒灌进来。R2 必须重新获得 owner Stage Gate。
+
+### R1-L：Single-Owner Pilot Readiness（离线代码门已通过，等待 Live Pilot Gate）
+
+详见 [R1-L Stage Charter](stages/R1_L_SINGLE_OWNER_PILOT_READINESS.md)。本阶段只收口本机人工决策辅助的启动、配置、安全、通知、恢复和验收边界：
+
+- [x] `R1-L-01` readiness canonical DTO、Pydantic 服务和脱敏检查。
+- [x] `R1-L-02` worker `--preflight` 与 `--pilot` 启动门，保留 `--once` 离线兼容。
+- [x] `R1-L-03` local/email 通知组合根，复用事务 outbox 和有限重试。
+- [x] `R1-L-04` 只读 `/v1/pilot/readiness` API、模块 README 和运维入口。
+- [x] `R1-L-05` 离线 pilot acceptance、状态/路线图/CHANGELOG 收口；代码退出门已通过并形成独立提交但尚未推送，真实 Live Pilot Gate 仍需 owner 单独授权。
 
 ## R1：Realtime Event Engine
 

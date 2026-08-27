@@ -273,7 +273,44 @@ R1 已完成离线退出门。它只把来源、市场和通知 adapter 接入 R
 
 R1 不包含：音频采集、ASR 推理、OCR、未授权网页抓取、搜索摘要 canonical source、自动交易、DSH/Pi 自动热路径、Redis/Kafka/Temporal/DBOS/微服务。真实来源、行情、邮件和 ASR 的授权、网络稳定性、低延迟、预测准确率与盈利能力必须在后续 Stage Charter 中单独定义可验证目标，不能由 R1 fixture 代替。
 
-## 10. R2：Decision Workbench 与自主进化
+## 10. R1-L：Single-Owner Pilot Readiness（进入 R2 前）
+
+R1-L 的完整规格、BDD 场景、TDD 故障矩阵和退出门见 [R1-L Stage Charter](stages/R1_L_SINGLE_OWNER_PILOT_READINESS.md)。它是 R1 和 R2 之间的运行边界，不增加研究能力，不接入 DSH/Pi，不改变 R0/R1 正式链。
+
+### 10.1 价值目标
+
+在单机、单 owner、人工决策辅助的前提下，能够在启动前判断配置/数据库/来源/行情/通知是否安全，失败时不启动长期 worker，成功后通过既有 LangGraph、Gate、账本和 outbox 运行，并留下可脱敏、可恢复、可回放的证据。它不能证明真实网络稳定、预测准确或盈利。
+
+### 10.2 已实现的薄层
+
+| Task ID | 实现边界 | 固定验收 |
+|---|---|---|
+| `R1-L-01` | `pilot-readiness.v1` canonical DTO、`PilotReadinessService`、共享 bootstrap | `tests/pilot/test_readiness.py` |
+| `R1-L-02` | worker `--preflight`/`--pilot`，预检失败不进入 scheduler；保留 `--once` | `tools/pilot_acceptance.py` worker smoke |
+| `R1-L-03` | local JSONL 或 SMTP adapter 组合根，复用 committed outbox/bounded retry | `tests/pilot`、`tests/providers` |
+| `R1-L-04` | `/v1/pilot/readiness` 只读 API 与模块/runbook 文档 | `tests/pilot/test_entrypoints.py` |
+| `R1-L-05` | 离线 acceptance、文档/状态收口；真实 Live Pilot Gate 另行授权 | `tools/pilot_acceptance.py`、`core_acceptance.py` |
+
+### 10.3 强制约束
+
+- readiness 不调用外部 LLM、来源、行情或 SMTP；实时连通性只能由显式 canary 证明。
+- worker/API 不复制 readiness、Provider、重试或账本逻辑；统一调用 `packages/pilot_runtime` 和现有 Kernel/adapter。
+- `--pilot` 要求 `DECISION_HUB_PILOT_MODE=1`，自动交易和已知私钥变量一律 fail-closed。
+- 不引入新队列、数据库、workflow engine、DSH/Pi runtime 或领域对象；R2 仍需新的 Stage Charter 和 owner Stage Gate。
+
+### 10.4 固定执行顺序
+
+```text
+R1-L-01 readiness contract/service
+  -> R1-L-02 worker gate
+  -> R1-L-03 notification composition
+  -> R1-L-04 API/runbook
+  -> R1-L-05 offline acceptance + status closeout
+  -> owner Live Pilot Gate
+  -> new R2 Stage Charter (not automatic)
+```
+
+## 11. R2：Decision Workbench 与自主进化
 
 R2 的目标不是“让 Agent 自己改代码”，而是把失败样本、反馈和候选版本沉淀成可比较的个人资产。
 
@@ -311,7 +348,7 @@ R2 的目标不是“让 Agent 自己改代码”，而是把失败样本、反�
 
 验收：自主进化只能产生候选；所有晋级可解释、可回滚、可重放；Gate 规则不能由 Agent 修改。
 
-## 11. R3：多领域与部署扩展
+## 12. R3：多领域与部署扩展
 
 ### R3-A：A 股、美股和宏观
 
@@ -340,7 +377,7 @@ R2 的目标不是“让 Agent 自己改代码”，而是把失败样本、反�
 
 只有出现跨机器高可用、多 worker 高并发写入、远程只读服务或大规模 tick 数据时，才评估 PostgreSQL；迁移存储驱动，不迁移 Event/Evidence/Snapshot/Forecast/Outcome 契约。
 
-## 12. Codex 任务卡：每次只交付一个小目标
+## 13. Codex 任务卡：每次只交付一个小目标
 
 ### 12.1 任务卡固定格式
 
@@ -419,7 +456,7 @@ feat: expose run inspector timeline view
 chore: publish R0 release manifest
 ```
 
-## 13. 任务完成检查表
+## 14. 任务完成检查表
 
 ```text
 [ ] 任务只解决一个目标，没有顺手增加未来基础设施
@@ -435,7 +472,7 @@ chore: publish R0 release manifest
 [ ] commit 独立、可回滚，没有自动 push
 ```
 
-## 14. Owner 确认记录
+## 15. Owner 确认记录
 
 Owner 已确认以下执行纪律，不重新讨论已冻结的产品架构：
 

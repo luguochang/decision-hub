@@ -12,6 +12,8 @@ Decision Hub 是一个可插拔、可审计的事件驱动决策智能平台。
 
 `R1 Realtime Event Engine` 已完成离线验收并提交：来源、市场和通知以可替换 adapter 接入既有 Kernel，固定 fixture 覆盖来源到 Outcome/outbox 的完整链路、游标/PIT、失败恢复和升级路径。真实来源、行情、邮件和 ASR 的网络稳定性、授权范围、预测准确率及盈利能力均未声称完成；`R2` 必须获得新的 owner Stage Gate。
 
+进入 R2 前的 `R1-L Single-Owner Pilot Readiness` 离线代码门也已完成：readiness、worker 预检/启动门、local/email outbox 组合根和只读 readiness API 已实现并通过 `tools/pilot_acceptance.py`。本次变更已形成独立提交但尚未推送；真实连续运行仍需 owner 单独授权的 Live Pilot Gate。
+
 ## 文档入口
 
 - [工程索引](INDEX.md)
