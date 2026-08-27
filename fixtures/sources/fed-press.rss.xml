@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Federal Reserve fixture</title>
+    <item>
+      <guid>fed-2026-08-27-1</guid>
+      <title>Federal Reserve issues FOMC statement</title>
+      <description>The Committee will carefully assess incoming data.</description>
+      <link>https://www.federalreserve.gov/newsevents/pressreleases/monetary20260827a.htm</link>
+      <pubDate>Thu, 27 Aug 2026 18:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>
