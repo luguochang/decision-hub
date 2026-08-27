@@ -1,7 +1,7 @@
 # 实施状态
 
 日期：2026-08-27（Asia/Shanghai）
-状态：`R0-CORE-COMPLETE` 已完成并提交为 `2ee2f8d`；`R1-REALTIME-EVENT-ENGINE` 已完成离线验收并提交；进入 R2 前的 `R1-L-SINGLE-OWNER-PILOT-READINESS` 离线代码门已通过并形成独立提交，尚未推送，Live Pilot Gate 和 `R2` 均未获 owner 授权。
+状态：`R0-CORE-COMPLETE` 和 `R1-REALTIME-EVENT-ENGINE` 已完成离线验收并提交；`R1-L-SINGLE-OWNER-PILOT-READINESS` 离线代码门已通过，Live Pilot Gate 尚未授权。R2 Stage Charter 已由 owner 接受，`R2-00` Kernel/Orchestration 边界对齐已实现并通过相关回归，下一张任务为 `R2-01`。
 
 最后复核：2026-08-27。R1 的固定 fixture、契约、迁移和端到端退出门已通过；这是可重复的离线工程证据，不是生产稳定性证明。真实网络、来源授权、预测准确率和盈利能力仍需独立验证。
 
@@ -15,6 +15,15 @@
 - `R1-L-SINGLE-OWNER-PILOT-READINESS`：`done (offline)`；Stage Charter 见 `docs/stages/R1_L_SINGLE_OWNER_PILOT_READINESS.md`。readiness 契约、控制层、API 只读入口、worker 预检/启动门、通知组合根、离线 acceptance 与文档收口均已通过；本次变更已形成独立提交但尚未推送，真实 Live Pilot Gate 仍未授权。
 - Run/Step/Attempt/Call normalized projection + Run Inspector API：`done`，新 Run 可查询四个 Step、三角色 Call、错误/成本/重试和 `/v1/runs/{run_id}/inspector`。
 - SQLite backup/integrity 和固定 PIT Replay：`done`，已验证固定 clock、future-information reject、baseline/candidate、Outcome/Brier/net return、restore replay smoke。
+
+## R2 实施状态
+
+- Stage Charter：[R2 Decision Workbench 与自主进化](stages/R2_DECISION_WORKBENCH_EVOLUTION.md)，状态 `accepted / in_progress`；U2 完成后停止扩张并进入观察期。
+- [ADR-0005 DSH Harness 与插件生态桥接边界](decisions/ADR-0005-dsh-harness-plugin-bridge.md) 和 [ADR-0006 Kernel/Orchestration 边界对齐](decisions/ADR-0006-kernel-orchestration-boundary-alignment.md) 已接受；尚未接入任意 DSH 社区插件。
+- 已明确的提案范围：Core MCP/DSH ResearchMemo、统一 Query/View、Evaluation Dataset/FailurePattern/Experience、baseline/candidate replay/holdout/shadow、Pi candidate adapter、Version Registry、owner Promotion/Rollback 和资产目录。
+- `R2-00 done`：新增 `DecisionWorkflowExecutor` Port 和 `LangGraphDecisionExecutor`/composition root；Kernel 不再直接导入 LangGraph/LangChain，PIT、Gate、账本、checkpoint/recovery 和 API 行为保持不变。
+- 未开始：R2 canonical schema、数据库迁移、MCP server、DSH/Pi adapter、evolution graph、Promotion/Rollback API、R2 前端页面和任何 active pointer 变更。
+- 当前下一张任务：`R2-01 Core MCP Query + ResearchMemo/Feedback canonical contract`。
 
 ## R1 已交付与退出门
 

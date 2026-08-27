@@ -9,9 +9,9 @@ Decision Hub 持续把有时间边界的文本和事件证据，转换为可证�
 
 ## 当前大阶段
 
-**R1-L-SINGLE-OWNER-PILOT-READINESS（进行中）**
+**R2-DECISION-WORKBENCH-V1（已授权；R2-00 done，R2-01 next）**
 
-R0 核心已完成，执行约束和历史验收证据见 [R0 Core Completion](../stages/R0_CORE_COMPLETION_PLAN.md)；Provider 子阶段记录见 [R0-B Stage Charter](../stages/R0-B_PROVIDER_RELIABILITY_BOUNDARY.md)。R1 已通过离线退出门，输入、输出、失败语义和退出门见 [R1 Realtime Event Engine](../stages/R1_REALTIME_EVENT_ENGINE.md)，可插拔边界见 [ADR-0003](../decisions/ADR-0003-r1-realtime-plugin-boundary.md)。当前只做进入 R2 前的 [R1-L 单 owner 试运行就绪](../stages/R1_L_SINGLE_OWNER_PILOT_READINESS.md)：readiness、worker 启动门、通知组合根和 API 只读报告。R2 仍须新建 Stage Charter 并取得 owner 授权。本页只保留稳定的产品目的、不变量和非目标。
+R0/R1/R1-L 离线代码门已完成，Live Pilot Gate 仍独立待授权。当前只按已接受的 [R2 Decision Workbench 与自主进化 Stage Charter](../stages/R2_DECISION_WORKBENCH_EVOLUTION.md) 完成 R2-00 至 R2-05：研究、实验、资产、插件桥接、候选比较和人工 Promotion/Rollback；R2 结束后进入观察期，不自动开始 R3。本页只保留稳定的产品目的、不变量和当前阶段锚点。
 
 最近完成的总目标是 [R1 Realtime Event Engine](../stages/R1_REALTIME_EVENT_ENGINE.md)：来源文本、市场事实和已提交 outbox 已复用 R0 主链，并未创建第二个 Agent runtime、账本或 Gate。它证明离线工程闭环，不证明真实网络稳定性、预测准确率或盈利能力。
 

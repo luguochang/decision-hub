@@ -77,7 +77,7 @@ TextEnvelope
 | R0-C | 观测、恢复和可回放评测 | LangGraph checkpoint、SQLite、pytest | `done` | Run Inspector、backup/recovery、PIT replay 通过 |
 | R0-D | R0 发布基线 | ReleaseManifest、runbook、CI | `done` | R0 Definition of Done 全部满足 |
 | R1 | 真实事件来源和按需触发 | SourcePlugin、scheduler、outbox | `done`（离线 fixture） | 授权来源、事件游标、行情基准和通知测试通过 |
-| R2 | Workbench 与自主进化 | DSH MCP、replay/shadow、Promotion | `planned` | 候选可比较、人工晋级、可回滚 |
+| R2 | Workbench 与自主进化 | DSH MCP、replay/shadow、Promotion | `in_progress` | 候选可比较、人工晋级、可回滚 |
 | R3 | 第二领域和按需部署扩展 | Domain Extension、PostgreSQL 迁移出口 | `planned` | 第二领域复用 Kernel，不复制主链 |
 
 ### 阶段门的固定顺序
@@ -312,11 +312,19 @@ R1-L-01 readiness contract/service
 
 ## 11. R2：Decision Workbench 与自主进化
 
-R2 的目标不是“让 Agent 自己改代码”，而是把失败样本、反馈和候选版本沉淀成可比较的个人资产。
+R2 的目标不是“让 Agent 自己改代码”，而是把失败样本、反馈和候选版本沉淀成可比较的个人资产。完整边界见 [R2 Stage Charter](stages/R2_DECISION_WORKBENCH_EVOLUTION.md)。该 Charter 已接受；R2-00 已完成且未改变 R0/R1 行为，当前按顺序执行 R2-01。
+
+### R2-00：Kernel/Orchestration Boundary Alignment
+
+复用：现有 `AgentRuntime`、LangGraph graph、checkpoint 和 R0/R1 测试；新增最小 workflow executor Port，把 LangGraph 类型和 graph factory 的组装移到 orchestration/composition root。
+
+不实现：新的业务对象、canonical schema、迁移、MCP、DSH/Pi adapter 或第二个 workflow engine。
+
+验收：Kernel application 不再直接导入 LangGraph/LangChain 编排类型；LangGraph contract、PIT、Gate、账本、checkpoint/recovery、API E2E 和全量测试与基线一致；模块 README、状态和 ADR-0006 同步。
 
 ### R2-A：DSH MCP / ResearchMemo
 
-复用：DSH 的 MCP、Skill、会话和研究能力；Decision Hub 提供只读 Snapshot/Run/Artifact query 和受限 ResearchMemo command。
+复用：DSH 的 MCP、Skill、会话和研究能力；Decision Hub 提供只读 Snapshot/Run/Artifact query 和受限 ResearchMemo command。ResearchMemo、Experiment、Candidate、Promotion 和 Rollback 的拟议语义以 R2 Stage Charter 为准，不能在本节或任务实现中自行扩展。R2-01 只能在 R2-00 通过后开始。
 
 边界：DSH 不能写业务账本、修改 Gate、设置默认策略或触发自动交易；研究结果必须通过 schema、来源和 owner review。
 

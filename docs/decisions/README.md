@@ -8,6 +8,8 @@
 - [ADR-0002 R0 核心观测、回放与成本语义](ADR-0002-r0-core-observability-replay.md)
 - [ADR-0003 R1 实时来源与可插拔适配器边界](ADR-0003-r1-realtime-plugin-boundary.md)
 - [ADR-0004 冻结历史 Alembic schema snapshot](ADR-0004-freeze-alembic-schema-snapshots.md)
+- [ADR-0005 DSH Harness 与插件生态桥接边界（accepted）](ADR-0005-dsh-harness-plugin-bridge.md)
+- [ADR-0006 Kernel 与 Orchestration 边界对齐（accepted）](ADR-0006-kernel-orchestration-boundary-alignment.md)
 
 ## 模板
 

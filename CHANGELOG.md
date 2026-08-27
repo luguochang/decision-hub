@@ -11,7 +11,13 @@
 
 ### Next
 
-- R2 Decision Workbench 与自主进化：在 R1 真实数据和 R0 replay 证据稳定后，再接入 DSH/Pi ResearchMemo、实验、shadow 和人工晋级。
+- R2 Decision Workbench 与自主进化：Stage Charter 已接受并开始按 R2-00 至 R2-05 实施；当前 R2-00 done，R2-01 next。
+- DSH 插件生态核对：官方 Harness 采用 “everything is a plugin” 且仍处于 developer preview；社区目录本次公开 count 为约 `2322`。新增 [ADR-0005](docs/decisions/ADR-0005-dsh-harness-plugin-bridge.md) 提案，推荐通过 `ResearchWorkbenchPort`、`CapabilityManifest` 和 `DshCapabilityAdapter` 复用插件，不把 DSH 作为 Product Kernel。
+
+### R2 in progress (2026-08-27)
+
+- R2 Stage Gate 已接受，锁定 U2 Decision Workbench v1、R2-00 至 R2-05 和完成后观察期；ADR-0005/0006 已接受。
+- R2-00 将 LangGraph graph、checkpoint 和配置组装移出 Kernel application，新增最小 `DecisionWorkflowExecutor` Port、LangGraph executor/composition root 和架构 import 回归门；R0/R1 行为不变。
 
 ### R1-L offline complete (2026-08-27)
 

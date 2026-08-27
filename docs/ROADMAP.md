@@ -3,7 +3,7 @@
 版本：`ROADMAP-2026-08-26.v1`  
 用途：把 [产品架构基线](../DECISION_HUB_PRODUCT_ARCHITECTURE_V1.md) 中的 R0-R3 规划转换为 GitHub 可逐项追踪的执行清单。本文是里程碑状态入口；每个任务的实现边界、框架复用和 Codex 提示词见 [分阶段执行设计](EXECUTION_PLAN.md)，不替代架构基线、契约和 ADR。
 
-最近完成的总目标为 `R1-REALTIME-EVENT-ENGINE`，实现方案见 [R1 Stage Charter](stages/R1_REALTIME_EVENT_ENGINE.md)。R0-B、R0-C、R0-D 是已完成的核心工作包；R1 的离线退出门已通过，R2 尚未启动且需要新的 owner Stage Gate。
+R0/R1/R1-L 离线代码门已完成。R2 的 [Stage Charter](stages/R2_DECISION_WORKBENCH_EVOLUTION.md) 已接受并进入实现；R2-00 已完成，R2-01 是下一张任务卡。
 
 ## 使用规则
 
@@ -68,6 +68,9 @@ R1 开始真实直播监听或外部通知前，必须新增对应 ADR、Provide
 
 ## R2：Decision Workbench 与自主进化
 
+详细边界、拟议契约、DSH 插件生态核对、桥接方案、任务依赖、BDD/TDD 验收门、允许/禁止路径和 owner 决策项见 [R2 Stage Charter](stages/R2_DECISION_WORKBENCH_EVOLUTION.md) 及 [ADR-0005](decisions/ADR-0005-dsh-harness-plugin-bridge.md)。当前状态：`accepted / in_progress`；只授权 R2-00 至 R2-05，R2 完成后进入观察期。
+
+- [x] `R2-00` Kernel/Orchestration 边界对齐：移除 Kernel application 对 LangGraph/LangChain 编排细节的直接依赖，保持 R0/R1 行为不变（见 [ADR-0006](decisions/ADR-0006-kernel-orchestration-boundary-alignment.md)）。
 - [ ] `R2-01` Core MCP 和 DSH ResearchMemo adapter；DSH 只能提交研究候选，不能写业务账本或默认发布版本。
 - [ ] `R2-02` 完整 Run Inspector：证据血缘、步骤、调用、成本、Gate、版本和回放对比。
 - [ ] `R2-03` Evaluation 数据集、失败样本、反馈和策略实验登记。
@@ -80,6 +83,19 @@ R1 开始真实直播监听或外部通知前，必须新增对应 ADR、Provide
 - [ ] `R3-02` 美股/宏观 Domain Pack，单独定义市场时段、执行基准和来源契约。
 - [ ] `R3-03` PPT 等非市场产品使用独立 Domain Extension，验证 Kernel 的跨产品复用。
 - [ ] `R3-04` 只有出现跨机器高可用、并发写入、远程只读或长期大规模 tick 数据需求时，才评估 PostgreSQL/远程部署。
+
+## 产品可用阶段
+
+路线图的 `done` 不等于“模型已经赚钱”。当前产品形态按以下门槛解释：
+
+| 状态 | 可交付产品 | 进入条件 | 结论边界 |
+|---|---|---|---|
+| `U0` | R0 本地文本决策核心 | 已通过 R0 离线验收 | 可用于人工提交文本和复盘，不代表实时来源或收益 |
+| `U1` | R1/R1-L 单 owner 试运行 | R1-L 离线门已通过，且 owner 另行通过 Live Pilot Gate | 可有限运行真实来源/通知，仍需观察稳定性和效果 |
+| `U2` | R2 Decision Workbench v1 | R2-00 至 R2-05 退出门全部通过，owner Promotion/Rollback 可审计 | 这是首个成熟个人产品闭环；不自动宣称预测优势 |
+| `U3` | 多领域和远程部署 | R2 观察期证明新领域或规模需求，并另立 Charter/ADR | 仅按真实需求扩展，不预建泛化基础设施 |
+
+R2 通过后进入观察期，不自动开启 R3。新领域、公共插件市场、多用户或远程高可用都必须有独立价值证据和新的 Stage Gate。
 
 ## 明确暂不做
 
@@ -96,5 +112,5 @@ R1 开始真实直播监听或外部通知前，必须新增对应 ADR、Provide
 | `R0-Core` | 文本到 Forecast/Outcome/Evaluation、Gate、账本、回放边界、TDD/SDD | `done` |
 | `R0-Release` | Provider contract、backup/recovery、可观测 Run Inspector、ReleaseManifest | `done` |
 | `R1-Realtime` | 授权来源、事件调度、行情基准、Outcome 到期和通知 | `done`（离线 fixture） |
-| `R2-Workbench` | DSH MCP、完整观测、实验、候选晋级和回滚 | `planned` |
+| `R2-Workbench` | DSH MCP、完整观测、实验、候选晋级和回滚 | `in_progress`（R2-00 done；R2-01 next） |
 | `R3-Domains` | 第二领域真实复用和按需远程部署 | `planned` |
