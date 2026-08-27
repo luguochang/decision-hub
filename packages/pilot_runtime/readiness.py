@@ -18,7 +18,6 @@ from packages.runtime_adapters.langgraph_agent.provider_config import ProviderCo
 
 from .config import PilotSettings
 
-EXPECTED_MIGRATION_HEAD = "0010_source_poll_schedule"
 PRIVATE_EXECUTION_ENV_VARS = (
     "OKX_API_KEY",
     "OKX_SECRET_KEY",
@@ -105,14 +104,17 @@ class PilotReadinessService:
                 ),
             )
         try:
+            expected_heads = self.database.expected_migration_heads()
             with self.database.session() as session:
-                revision = session.execute(
+                revisions = tuple(
+                    session.execute(
                     text("SELECT version_num FROM alembic_version")
-                ).scalar_one()
+                    ).scalars()
+                )
             migration = _check(
                 "database_migration",
-                revision == EXPECTED_MIGRATION_HEAD,
-                f"migration head is {EXPECTED_MIGRATION_HEAD}",
+                set(revisions) == set(expected_heads),
+                f"migration head is {', '.join(expected_heads)}",
                 "database migration head is not current",
                 "database_migration_outdated",
             )

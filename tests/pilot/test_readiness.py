@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from pydantic import SecretStr
+from sqlalchemy import text
 
 from packages.kernel.decision_hub_kernel.persistence.db import Database
 from packages.pilot_runtime.bootstrap import build_notification_adapters
@@ -118,6 +119,31 @@ def test_database_without_alembic_head_is_not_ready(tmp_path: Path) -> None:
     assert report.status == "not_ready"
     migration = next(item for item in report.checks if item.check_id == "database_migration")
     assert migration.error_code == "database_migration_missing"
+
+
+def test_database_at_historical_head_is_not_ready(tmp_path: Path) -> None:
+    database = _database(tmp_path)
+    with database.session() as session:
+        session.execute(
+            text("UPDATE alembic_version SET version_num = '0010_source_poll_schedule'")
+        )
+    service = PilotReadinessService(
+        database,
+        [source.manifest for source in official_source_presets()],
+        PilotSettings(pilot_mode=True, sources_enabled=True, market_enabled=True),
+        provider_config=ProviderConfig(
+            provider_id="fixture-provider",
+            model="fixture-model",
+            api_mode="responses",
+        ),
+        environment={"DECISION_HUB_LLM_ENABLED": "1", "OPENAI_API_KEY": "test-secret"},
+    )
+
+    report = service.report()
+
+    assert report.status == "not_ready"
+    migration = next(item for item in report.checks if item.check_id == "database_migration")
+    assert migration.error_code == "database_migration_outdated"
 
 
 def test_email_adapter_receives_secret_without_exposing_it(tmp_path: Path) -> None:

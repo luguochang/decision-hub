@@ -22,4 +22,4 @@ Kernel 拥有 SQLite 业务账本，包括 Event/Observation/Snapshot/Run/Artifa
 `tests/kernel`、`tests/contracts`、`tests/replay`。`tests/contracts/test_architecture_boundaries.py` 会拒绝 Kernel 对 orchestration、LangGraph 或 LangChain 的反向依赖。
 
 ## 最近验证
-`tests/kernel`、`tests/e2e`、`tests/replay`、`tests/sources`、`tests/scheduler` 和 `tests/migrations` 覆盖账本、PIT、Gate、幂等、Outcome/Evaluation、source cursor/health、到期扫描、Step/Call 投影、恢复和升级路径；数据库结构由冻结 schema 的 Alembic `0001` 至 `0010` 管理。
+`tests/kernel`、`tests/e2e`、`tests/replay`、`tests/sources`、`tests/scheduler`、`tests/migrations`、`tests/workbench` 和 `tests/evolution` 覆盖账本、PIT、Gate、幂等、Outcome/Evaluation、source cursor/health、到期扫描、Step/Call 投影、恢复、Promotion/Rollback 原子性和升级路径；数据库结构由冻结 schema 的 Alembic `0001` 至 `0015` 管理。R2 离线 U2 工程退出门已完成，真实生产 shadow 和效果仍未证明。

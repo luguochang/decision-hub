@@ -67,7 +67,8 @@ def _durability_and_replay_smoke() -> None:
             revision = session.execute(
                 __import__("sqlalchemy").text("SELECT version_num FROM alembic_version")
             ).scalar_one()
-        if revision != "0010_source_poll_schedule":
+        expected_head = migrated.expected_migration_heads()
+        if revision not in expected_head:
             raise SystemExit(f"unexpected migration head: {revision}")
 
         live_path = temp / "live.sqlite3"

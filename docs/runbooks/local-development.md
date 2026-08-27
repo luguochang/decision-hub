@@ -47,7 +47,7 @@ curl -X POST http://127.0.0.1:8000/v1/observations \
 
 SQLite backup、restore、integrity check 和 retention command 在 R0 运维补齐前，不得把手工删除数据库文件当清理方式。
 
-升级已有本地数据库时始终先执行 `./.venv/bin/alembic upgrade head`。`0007_run_cost_nullable` 会把旧版 `runs.cost_usd` 的 `NOT NULL` 约束迁移为可空，`0008` 至 `0010` 增加 durable source cursor/health、通知重试状态和 `next_poll_at`；迁移前应按下方命令做一次 backup。`0001_initial` 是冻结的 R0 schema snapshot，不能再导入当前 ORM metadata。
+升级已有本地数据库时始终先执行 `./.venv/bin/alembic upgrade head`。`0007_run_cost_nullable` 会把旧版 `runs.cost_usd` 的 `NOT NULL` 约束迁移为可空，`0008` 至 `0010` 增加 durable source cursor/health、通知重试状态和 `next_poll_at`，`0011` 至 `0015` 增加 Workbench/Evolution 资产、metadata 和 PIT provenance；迁移前应按下方命令做一次 backup。`0001_initial` 是冻结的 R0 schema snapshot，不能再导入当前 ORM metadata。
 
 ## R1 来源、调度与通知
 

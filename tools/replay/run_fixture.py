@@ -16,6 +16,7 @@ from packages.contracts_py.decision_hub_contracts.models import (
 )
 from packages.kernel.decision_hub_kernel.application.outcome import OutcomeService
 from packages.kernel.decision_hub_kernel.persistence.db import Database
+from packages.kernel.decision_hub_kernel.ports.runtime import AgentRuntime
 from packages.orchestration.langgraph import build_analyze_text_service
 from packages.runtime_adapters.replay_runtime.runtime import ReplayAgentRuntime
 
@@ -26,6 +27,7 @@ class ReplayOutcome(BaseModel):
     horizon: str
     return_pct: float
     direction_correct: bool
+    available_at: datetime
     fees: float = 0
     slippage: float = 0
     quality_status: str = "fixture"
@@ -56,6 +58,7 @@ class ReplayReport(BaseModel):
     status: str
     gate_status: str | None
     latency_ms: int | None
+    cost_usd: float | None = None
     cost_status: str
     call_count: int
     evaluation_count: int
@@ -64,6 +67,11 @@ class ReplayReport(BaseModel):
     forecast_horizons: list[str]
     error_codes: list[str]
     artifact_fingerprint: str | None
+    stage: str = "replay"
+    event_family: str = "unknown"
+    evidence_coverage: float | None = None
+    directional_accuracy: float | None = None
+    failure_counts: dict[str, int] = Field(default_factory=dict)
 
 
 def _artifact_fingerprint(artifact: Any) -> str | None:
@@ -96,14 +104,19 @@ def _artifact_fingerprint(artifact: Any) -> str | None:
 
 
 async def run_fixture(
-    fixture: Path, database_path: Path, *, strategy_version: str = "baseline.v1"
+    fixture: Path,
+    database_path: Path,
+    *,
+    strategy_version: str = "baseline.v1",
+    runtime: AgentRuntime | None = None,
 ) -> dict[str, object]:
     data = ReplayFixture.model_validate_json(fixture.read_text())
     database = Database(f"sqlite+pysqlite:///{database_path}")
     database.create_all()
+    selected_runtime = runtime or ReplayAgentRuntime()
     event_id, run_id, admitted = await build_analyze_text_service(
         database,
-        ReplayAgentRuntime(),
+        selected_runtime,
         strategy_version=strategy_version,
         admission_clock=lambda: data.received_at,
     ).submit_and_run(data.observation)
@@ -153,13 +166,18 @@ async def run_fixture(
         ),
         snapshot_hash=inspector.snapshot_hash,
         strategy_version=strategy_version,
-        runtime_id="replay",
-        runtime_version="replay.v1",
+        runtime_id=getattr(selected_runtime, "runtime_id", "unknown"),
+        runtime_version=getattr(selected_runtime, "runtime_version", "unknown"),
         pack_version="crypto_macro.v1",
         status=run.status.value,
         gate_status=run.gate_status.value if run.gate_status else None,
         latency_ms=run.latency_ms,
-        cost_status="unknown",
+        cost_usd=run.cost_usd,
+        cost_status=(
+            "estimated"
+            if run.cost_usd is not None
+            else "unknown"
+        ),
         call_count=len(inspector.calls),
         evaluation_count=inspector.evaluation_count,
         mean_brier_score=mean_brier_score,
@@ -175,6 +193,29 @@ async def run_fixture(
             }
         ),
         artifact_fingerprint=_artifact_fingerprint(inspector.artifact),
+        stage=data.split if data.split in {"replay", "holdout", "shadow"} else "replay",
+        event_family=data.observation.event_hint or "unknown",
+        evidence_coverage=(
+            min(
+                1.0,
+                len(inspector.artifact.citations)
+                / max(1, len(inspector.artifact.facts)),
+            )
+            if inspector.artifact
+            else None
+        ),
+        directional_accuracy=(
+            sum(1 for item in inspector.evaluations if item.direction_correct)
+            / len(inspector.evaluations)
+            if inspector.evaluations
+            else None
+        ),
+        failure_counts={
+            code: sum(1 for item in inspector.calls if item.error_code == code)
+            for code in sorted(
+                {item.error_code for item in inspector.calls if item.error_code is not None}
+            )
+        },
     )
     return {
         "fixture_id": data.fixture_id,
@@ -183,10 +224,11 @@ async def run_fixture(
         "admitted": admitted,
         "status": run.status.value,
         "gate_status": run.gate_status.value if run.gate_status else None,
-        "runtime_id": "replay",
-        "runtime_version": "replay.v1",
+        "runtime_id": report.runtime_id,
+        "runtime_version": report.runtime_version,
         "latency_ms": run.latency_ms,
         "cost_status": "unknown",
+        "cost_usd": report.cost_usd,
         "call_count": len(inspector.calls),
         "strategy_version": strategy_version,
         "snapshot_cutoff_at": report.snapshot_cutoff_at,
@@ -196,6 +238,11 @@ async def run_fixture(
         "mean_brier_score": report.mean_brier_score,
         "net_return_pct": report.net_return_pct,
         "artifact_fingerprint": report.artifact_fingerprint,
+        "stage": report.stage,
+        "event_family": report.event_family,
+        "evidence_coverage": report.evidence_coverage,
+        "directional_accuracy": report.directional_accuracy,
+        "failure_counts": report.failure_counts,
         "report": report.model_dump(mode="json"),
     }
 

@@ -71,7 +71,7 @@ DECISION_HUB_NOTIFICATION_CHANNEL=local | email
 以下任一条件使 readiness `fail`，worker 不得以 pilot 模式启动：
 
 - Provider key 缺失、API mode 未声明、结构化输出不支持、timeout/retry/budget 非法。
-- 数据库无法连接、Alembic head 不是 `0010_source_poll_schedule`、数据目录不可写。
+- 数据库无法连接、Alembic revision 不是仓库当前唯一 head、数据目录不可写。readiness 从 Alembic `ScriptDirectory` 读取 head，禁止在运行层重复维护 revision 常量。
 - 没有启用且具备 authority/domain 的来源 manifest，或市场能力未显式启用。
 - email channel 缺 SMTP host/sender/recipient，或配置含明文密码而未通过 SecretStr 环境注入。
 - `DECISION_HUB_AUTO_TRADE` 为真，或检测到已知交易私钥环境变量。
@@ -90,7 +90,7 @@ DECISION_HUB_NOTIFICATION_CHANNEL=local | email
 | `R1-L-04` | API readiness 与运维 runbook | `apps/hub_api/main.py`、runbook、模块 README | 只读 API DTO、迁移/备份/恢复步骤可执行 |
 | `R1-L-05` | 离线 pilot acceptance 与文档收口 | `tests/e2e`、状态/路线图/CHANGELOG | 全量质量门、真实 Live Pilot Gate 清单、阶段审计 |
 
-当前实现状态：`R1-L-01` 至 `R1-L-05` 的离线代码、测试和文档证据已完成；本次变更形成独立提交但尚未推送，也未授权真实 Live Pilot Gate。只有 owner 明确授权来源、Provider 和通知通道后，才能进行真实连续运行验收。
+当前实现状态：`R1-L-01` 至 `R1-L-05` 的离线代码、测试和文档证据已完成；真实 Live Pilot Gate 仍未授权。只有 owner 明确授权来源、Provider 和通知通道后，才能进行真实连续运行验收。
 
 ## 6. BDD 验收场景
 
