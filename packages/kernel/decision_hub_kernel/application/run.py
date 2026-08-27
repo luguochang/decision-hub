@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import uuid
+from typing import Any, cast
+
+from sqlalchemy import update
 
 from packages.kernel.decision_hub_kernel.persistence.db import (
     Database,
@@ -52,6 +55,32 @@ class RunService:
                 .first()
             )
             return existing.run_id if existing else None
+
+    def claim_for_execution(self, run_id: str) -> bool:
+        """Atomically claim an admitted Run before a scheduler/API executes its graph."""
+        now = utcnow()
+        with self.database.session() as session:
+            result = session.execute(
+                update(RunRecord)
+                .where(
+                    RunRecord.run_id == run_id,
+                    RunRecord.status == RunStatus.admitted.value,
+                )
+                .values(status=RunStatus.running.value, updated_at=now)
+            )
+            claimed = cast(Any, result).rowcount
+        return claimed == 1
+
+    def admitted_targets(self) -> list[tuple[str, str]]:
+        """Return durable event/run pairs that still need their first execution."""
+        with self.database.session() as session:
+            rows = (
+                session.query(RunRecord)
+                .filter(RunRecord.status == RunStatus.admitted.value)
+                .order_by(RunRecord.created_at.asc())
+                .all()
+            )
+            return [(row.event_id, row.run_id) for row in rows]
 
     def set_status(self, run_id: str, status: RunStatus, *, error_code: str | None = None) -> None:
         with self.database.session() as session:

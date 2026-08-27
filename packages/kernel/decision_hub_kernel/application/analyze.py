@@ -61,7 +61,9 @@ class AnalyzeTextService:
 
     async def run_admitted(
         self, event_id: str, run_id: str, _envelope: TextEnvelope | None = None
-    ) -> None:
+    ) -> bool:
+        if not self.runs.claim_for_execution(run_id):
+            return False
         deadline = datetime.now(UTC) + timedelta(seconds=self.run_timeout_seconds)
         state: DecisionState = {
             "run_id": run_id,
@@ -72,9 +74,7 @@ class AnalyzeTextService:
             async with asyncio.timeout(self.run_timeout_seconds):
                 await self._invoke(state, run_id)
         except TimeoutError as exc:
-            self.runs.set_status(
-                run_id, RunStatus.failed, error_code="run_deadline_exceeded"
-            )
+            self.runs.set_status(run_id, RunStatus.failed, error_code="run_deadline_exceeded")
             raise AgentExecutionError(
                 "run_deadline_exceeded", "decision run exceeded its deadline"
             ) from exc
@@ -83,26 +83,17 @@ class AnalyzeTextService:
             raise
         except ValueError as exc:
             if str(exc) != "pit_future_information":
-                self.runs.set_status(
-                    run_id, RunStatus.failed, error_code="run_execution_failed"
-                )
-                raise AgentExecutionError(
-                    "run_execution_failed", "decision run failed"
-                ) from exc
-            self.runs.set_status(
-                run_id, RunStatus.failed, error_code="pit_future_information"
-            )
+                self.runs.set_status(run_id, RunStatus.failed, error_code="run_execution_failed")
+                raise AgentExecutionError("run_execution_failed", "decision run failed") from exc
+            self.runs.set_status(run_id, RunStatus.failed, error_code="pit_future_information")
             raise AgentExecutionError(
                 "pit_future_information",
                 "observation contains information newer than its received timestamp",
             ) from exc
         except Exception as exc:
-            self.runs.set_status(
-                run_id, RunStatus.failed, error_code="run_execution_failed"
-            )
-            raise AgentExecutionError(
-                "run_execution_failed", "decision run failed"
-            ) from exc
+            self.runs.set_status(run_id, RunStatus.failed, error_code="run_execution_failed")
+            raise AgentExecutionError("run_execution_failed", "decision run failed") from exc
+        return True
 
     async def resume(self, run_id: str) -> None:
         if self.checkpoint_path is None:
@@ -112,12 +103,8 @@ class AnalyzeTextService:
             raise KeyError(run_id)
         async with asyncio.timeout(self.run_timeout_seconds):
             async with CheckpointStore(self.checkpoint_path).open() as saver:
-                graph = build_decision_graph(
-                    self.database, self.runtime, checkpointer=saver
-                )
-                await graph.ainvoke(
-                    None, config={"configurable": {"thread_id": run_id}}
-                )
+                graph = build_decision_graph(self.database, self.runtime, checkpointer=saver)
+                await graph.ainvoke(None, config={"configurable": {"thread_id": run_id}})
 
     async def _invoke(self, state: DecisionState, run_id: str) -> None:
         config: RunnableConfig = {"configurable": {"thread_id": run_id}}
