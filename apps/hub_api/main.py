@@ -16,6 +16,7 @@ from packages.kernel.decision_hub_kernel.application.analyze import AnalyzeTextS
 from packages.kernel.decision_hub_kernel.application.health import HealthService
 from packages.kernel.decision_hub_kernel.application.outcome import OutcomeService
 from packages.kernel.decision_hub_kernel.persistence.db import Database
+from packages.kernel.decision_hub_kernel.ports.runtime import AgentExecutionError
 from packages.query_views.decision_desk.service import DecisionDeskQueryService
 from packages.runtime_adapters.langgraph_agent.runtime import LangGraphAgentRuntime
 
@@ -27,7 +28,16 @@ def create_app(database: Database | None = None) -> FastAPI:
     else:
         db.create_all()
     runtime = LangGraphAgentRuntime()
-    analyzer = AnalyzeTextService(db, runtime)
+    checkpoint_path = None
+    if database is None:
+        data_dir = Path(os.getenv("DECISION_HUB_DATA_DIR", "data/decision-hub"))
+        checkpoint_path = Path(
+            os.getenv(
+                "DECISION_HUB_CHECKPOINT_PATH",
+                str(data_dir / "checkpoints" / "decision_graph.sqlite3"),
+            )
+        )
+    analyzer = AnalyzeTextService(db, runtime, checkpoint_path=checkpoint_path)
     desk = DecisionDeskQueryService(db)
     health = HealthService(db)
     outcomes = OutcomeService(db)
@@ -35,10 +45,12 @@ def create_app(database: Database | None = None) -> FastAPI:
     app.state.database = db
     app.state.analyzer = analyzer
 
-    async def execute(event_id: str, run_id: str, request: ObservationCreate) -> None:
-        _, envelope, _ = analyzer.admission.admit(request)
+    async def execute(event_id: str, run_id: str) -> None:
         try:
-            await analyzer.run_admitted(event_id, run_id, envelope)
+            await analyzer.run_admitted(event_id, run_id)
+        except AgentExecutionError as exc:
+            analyzer.runs.set_status(run_id, RunStatus.failed, error_code=exc.error_code)
+            raise
         except Exception:
             analyzer.runs.set_status(run_id, RunStatus.failed, error_code="run_execution_failed")
             raise
@@ -78,7 +90,7 @@ def create_app(database: Database | None = None) -> FastAPI:
                 }
         run_id, run_created = analyzer.runs.create(event_id, idempotency_key)
         if admitted and run_created:
-            background_tasks.add_task(execute, event_id, run_id, payload)
+            background_tasks.add_task(execute, event_id, run_id)
         elif not run_created:
             return {
                 "event_id": event_id,
@@ -109,6 +121,13 @@ def create_app(database: Database | None = None) -> FastAPI:
         if not db.get_run_view(run_id):
             raise HTTPException(status_code=404, detail="run_not_found")
         return {"run_id": run_id, "items": db.get_timeline(run_id)}
+
+    @app.get("/v1/runs/{run_id}/inspector")
+    async def run_inspector(run_id: str):
+        view = db.get_run_inspector(run_id)
+        if not view:
+            raise HTTPException(status_code=404, detail="run_not_found")
+        return view
 
     @app.get("/v1/artifacts/{artifact_id}")
     async def artifact_view(artifact_id: str):

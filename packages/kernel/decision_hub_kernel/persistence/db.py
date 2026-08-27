@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 from collections.abc import Generator
@@ -8,18 +9,31 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import DateTime, Float, Integer, String, Text, create_engine, event, select
+from sqlalchemy import (
+    DateTime,
+    Float,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    create_engine,
+    event,
+    select,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 from packages.contracts_py.decision_hub_contracts.models import (
     ArtifactView,
+    CallView,
     Direction,
     EvaluationView,
     Forecast,
     GateDecision,
     GateStatus,
+    RunInspectorView,
     RunStatus,
     RunView,
+    StepView,
 )
 
 
@@ -81,7 +95,7 @@ class RunRecord(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     latency_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    cost_usd: Mapped[float] = mapped_column(Float, default=0)
+    cost_usd: Mapped[float | None] = mapped_column(Float, nullable=True, default=None)
     error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
     artifact_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
 
@@ -94,6 +108,59 @@ class RunEventRecord(Base):
     event_type: Mapped[str] = mapped_column(String(128))
     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     payload_json: Mapped[str] = mapped_column(Text, default="{}")
+
+
+class RunCallRecord(Base):
+    __tablename__ = "run_calls"
+    call_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    run_id: Mapped[str] = mapped_column(String(128), index=True)
+    role: Mapped[str] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(32), default="running")
+    attempt: Mapped[int] = mapped_column(Integer, default=1)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    latency_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    runtime_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    runtime_version: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    provider_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    model: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    api_mode: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    schema_version: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    prompt_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    completion_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    total_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    cost_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
+    cost_status: Mapped[str] = mapped_column(String(32), default="unknown")
+    pricing_version: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    retryable: Mapped[bool] = mapped_column(default=False)
+
+
+class RunStepRecord(Base):
+    __tablename__ = "run_steps"
+    step_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    run_id: Mapped[str] = mapped_column(String(128), index=True)
+    step_name: Mapped[str] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(32), default="running")
+    attempt: Mapped[int] = mapped_column(Integer, default=1)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    finished_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    latency_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
+
+class RunRoleOutputRecord(Base):
+    __tablename__ = "run_role_outputs"
+    __table_args__ = (UniqueConstraint("run_id", "role", name="uq_run_role_output"),)
+    output_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    run_id: Mapped[str] = mapped_column(String(128), index=True)
+    role: Mapped[str] = mapped_column(String(64))
+    payload_json: Mapped[str] = mapped_column(Text)
+    payload_hash: Mapped[str] = mapped_column(String(64))
+    schema_version: Mapped[str] = mapped_column(String(64), default="agent-payload.v1")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 class ArtifactRecord(Base):
@@ -228,6 +295,114 @@ class Database:
                 gate_status=GateStatus(artifact.gate_status) if artifact else None,
             )
 
+    def get_run_record(self, run_id: str) -> RunRecord | None:
+        with self.session() as session:
+            return session.get(RunRecord, run_id)
+
+    @property
+    def sqlite_path(self) -> Path | None:
+        database = self.engine.url.database
+        if self.engine.dialect.name != "sqlite" or not database or database == ":memory:":
+            return None
+        return Path(database)
+
+    def get_snapshot_evidence(self, snapshot_id: str) -> list[dict[str, object]]:
+        with self.session() as session:
+            snapshot = session.get(SnapshotRecord, snapshot_id)
+            if not snapshot:
+                raise KeyError(snapshot_id)
+            payload = json.loads(snapshot.evidence_json)
+        if not isinstance(payload, list) or not all(isinstance(item, dict) for item in payload):
+            raise ValueError("snapshot evidence is invalid")
+        return payload
+
+    def save_role_output(
+        self, run_id: str, role: str, payload: dict[str, object], schema_version: str
+    ) -> str:
+        serialized = json.dumps(payload, ensure_ascii=False, sort_keys=True)
+        payload_hash = hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+        with self.session() as session:
+            existing = (
+                session.query(RunRoleOutputRecord)
+                .filter_by(run_id=run_id, role=role)
+                .first()
+            )
+            if existing:
+                return existing.output_id
+            output_id = f"out_{__import__('uuid').uuid4().hex}"
+            session.add(
+                RunRoleOutputRecord(
+                    output_id=output_id,
+                    run_id=run_id,
+                    role=role,
+                    payload_json=serialized,
+                    payload_hash=payload_hash,
+                    schema_version=schema_version,
+                    created_at=utcnow(),
+                )
+            )
+            return output_id
+
+    def get_role_output(self, output_id: str) -> dict[str, object]:
+        with self.session() as session:
+            output = session.get(RunRoleOutputRecord, output_id)
+            if not output:
+                raise KeyError(output_id)
+            payload = json.loads(output.payload_json)
+        if not isinstance(payload, dict):
+            raise ValueError("role output is invalid")
+        return payload
+
+    def find_role_output(
+        self, run_id: str, role: str
+    ) -> tuple[str, dict[str, object]] | None:
+        with self.session() as session:
+            output = (
+                session.query(RunRoleOutputRecord)
+                .filter_by(run_id=run_id, role=role)
+                .first()
+            )
+            if not output:
+                return None
+            payload = json.loads(output.payload_json)
+        if not isinstance(payload, dict):
+            raise ValueError("role output is invalid")
+        return output.output_id, payload
+
+    def record_run_event(
+        self,
+        run_id: str,
+        sequence_no: int,
+        event_type: str,
+        payload: dict[str, object] | None = None,
+    ) -> None:
+        with self.session() as session:
+            existing = (
+                session.query(RunEventRecord)
+                .filter_by(run_id=run_id, event_type=event_type)
+                .first()
+            )
+            if existing:
+                return
+            session.add(
+                RunEventRecord(
+                    run_id=run_id,
+                    sequence_no=sequence_no,
+                    event_type=event_type,
+                    occurred_at=utcnow(),
+                    payload_json=json.dumps(payload or {}, ensure_ascii=False),
+                )
+            )
+
+    def recovery_candidates(self) -> list[str]:
+        with self.session() as session:
+            rows = session.scalars(
+                select(RunRecord)
+                .where(RunRecord.status.in_([RunStatus.admitted.value, RunStatus.running.value]))
+                .order_by(RunRecord.created_at.asc())
+            ).all()
+            return [row.run_id for row in rows]
+
     def get_artifact_view(self, artifact_id: str) -> ArtifactView | None:
         with self.session() as session:
             artifact = session.get(ArtifactRecord, artifact_id)
@@ -345,6 +520,101 @@ class Database:
                 }
                 for row in rows
             ]
+
+    def get_run_calls(self, run_id: str) -> list[CallView]:
+        with self.session() as session:
+            rows = session.scalars(
+                select(RunCallRecord)
+                .where(RunCallRecord.run_id == run_id)
+                .order_by(RunCallRecord.started_at.asc())
+            ).all()
+            return [
+                CallView(
+                    call_id=row.call_id,
+                    run_id=row.run_id,
+                    role=row.role,
+                    status=row.status,
+                    attempt=row.attempt,
+                    started_at=row.started_at,
+                    finished_at=row.finished_at,
+                    latency_ms=row.latency_ms,
+                    runtime_id=row.runtime_id,
+                    runtime_version=row.runtime_version,
+                    provider_id=row.provider_id,
+                    model=row.model,
+                    api_mode=row.api_mode,
+                    schema_version=row.schema_version,
+                    prompt_tokens=row.prompt_tokens,
+                    completion_tokens=row.completion_tokens,
+                    total_tokens=row.total_tokens,
+                    cost_usd=row.cost_usd,
+                    cost_status=row.cost_status,
+                    pricing_version=row.pricing_version,
+                    error_code=row.error_code,
+                    retryable=row.retryable,
+                )
+                for row in rows
+            ]
+
+    def get_run_steps(self, run_id: str) -> list[StepView]:
+        with self.session() as session:
+            rows = session.scalars(
+                select(RunStepRecord)
+                .where(RunStepRecord.run_id == run_id)
+                .order_by(RunStepRecord.started_at.asc(), RunStepRecord.attempt.asc())
+            ).all()
+            return [
+                StepView(
+                    step_id=row.step_id,
+                    run_id=row.run_id,
+                    step_name=row.step_name,
+                    status=row.status,
+                    attempt=row.attempt,
+                    started_at=row.started_at,
+                    finished_at=row.finished_at,
+                    latency_ms=row.latency_ms,
+                    error_code=row.error_code,
+                )
+                for row in rows
+            ]
+
+    def get_run_inspector(self, run_id: str) -> RunInspectorView | None:
+        run = self.get_run_view(run_id)
+        if not run:
+            return None
+        artifact = self.get_artifact_view(run.artifact_id) if run.artifact_id else None
+        with self.session() as session:
+            evaluations = session.scalars(
+                select(EvaluationRecord)
+                .join(ForecastRecord, EvaluationRecord.forecast_id == ForecastRecord.forecast_id)
+                .join(ArtifactRecord, ForecastRecord.artifact_id == ArtifactRecord.artifact_id)
+                .where(ArtifactRecord.run_id == run_id)
+                .order_by(EvaluationRecord.evaluated_at.asc())
+            ).all()
+            snapshot = session.get(SnapshotRecord, run.snapshot_id) if run.snapshot_id else None
+        evaluation_views = [
+            EvaluationView(
+                evaluation_id=item.evaluation_id,
+                forecast_id=item.forecast_id,
+                brier_score=item.brier_score,
+                net_return_pct=item.net_return_pct,
+                direction_correct=item.direction_correct,
+                label_status=item.label_status,
+                evaluated_at=item.evaluated_at,
+            )
+            for item in evaluations
+        ]
+        return RunInspectorView(
+            run=run,
+            timeline=self.get_timeline(run_id),
+            steps=self.get_run_steps(run_id),
+            calls=self.get_run_calls(run_id),
+            artifact=artifact,
+            evaluation_count=len(evaluation_views),
+            evaluations=evaluation_views,
+            snapshot_cutoff_at=snapshot.cutoff_at if snapshot else None,
+            snapshot_hash=snapshot.snapshot_hash if snapshot else None,
+        )
 
 
 def _configure_sqlite(dbapi_connection: Any, _connection_record: Any) -> None:

@@ -1,9 +1,9 @@
 # Decision Hub 产品架构基线 V1
 
-> **状态：R0 实施中；owner 已确认 OD-01～OD-16 推荐默认。本文件仍是架构、契约和边界的唯一基线。**  
+> **状态：R0 核心已完成；owner 已确认 OD-01～OD-16 推荐默认。本文件仍是架构、契约和边界的唯一基线。**
 > **日期：2026-08-26（Asia/Shanghai）**  
 > **适用对象：单 owner 的事件驱动市场决策产品；首个场景为宏观事件对 BTC 与国际黄金的影响。**  
-> **实施规则：所有 R0-R4 都在同一架构、同一领域账本和同一公开契约上增加永久能力，不做“先做一套、后搬家”的阶段迁移。当前先跑通文本核心；ASR/音频只实现来源适配边界。**
+> **实施规则：所有 R0-R3 都在同一架构、同一领域账本和同一公开契约上增加永久能力，不做“先做一套、后搬家”的阶段迁移。R0 文本核心已通过离线验收；ASR/音频只通过来源适配边界接入。**
 
 ## 1. 先定义产品，而不是先定义 Workflow 或 Agent
 
@@ -628,8 +628,8 @@ decision-hub/
 │   ├── policies/                          # Gate 等声明式 policy 参数 schema/config
 │   └── versions.yaml                      # 契约版本与兼容性登记
 ├── apps/
-│   ├── hub-api/                           # FastAPI 进程入口；不放领域规则
-│   ├── hub-worker/                        # LangGraph run worker / scheduler
+│   ├── hub_api/                           # FastAPI 进程入口；不放领域规则（R0 已落地）
+│   ├── hub_worker/                        # R0 outbox worker；scheduler/recovery loop 后续加入
 │   ├── pi-shadow-worker/                  # 可选 Node Pi adapter；默认不部署
 │   └── decision-desk/                     # 正式本地 Web 前端；不承载业务规则
 ├── packages/
@@ -729,37 +729,38 @@ decision-hub/
 └── INDEX.md                                # 仓库入口和局部架构地图
 ```
 
-这不是要求先创建空目录凑架构，而是**代码所有权边界**。首个可运行纵向闭环直接创建 `kernel`、`orchestration/langgraph`、`langgraph_agent`、`replay_runtime`、`fake_runtime`、`evals`、`manual_text`、`local_sql`、`structured_log` 和 `crypto_macro` 中实际被使用的文件；禁止生成没有调用方的空骨架。Pi adapter 只有在开始正式对照实验时才创建，feed/source 和 DSH adapter 在接入真实能力时增加。未来增量在这些既有边界中添加实现，不迁走 R0 业务代码。`kernel/decision` 是当前 Decision Hub 的领域扩展，不代表未来所有产品都继承市场对象；`kernel/observability` 与 `kernel/evolution` 只保存跨产品协议和生命周期，不包含 BTC 评分规则。
+这不是要求现在创建所有目录凑架构，而是**代码所有权边界和未来落点地图**。当前实际交付以 `INDEX.md`、`docs/IMPLEMENTATION_STATUS.md` 和各模块 README 为准；未落地的目录只在对应 Stage Charter 获批后创建。R0 已创建并使用 `kernel`、`orchestration/langgraph`、`langgraph_agent`、`replay_runtime`、`fake_runtime`、`manual_text`、SQLite read model 和固定 replay fixture；Pi、feed/source、DSH、evolution、通用 evals 和第二领域目录在真正有调用方时增加。未来增量在这些边界中添加实现，不迁走 R0 业务代码。`kernel/decision` 是当前 Decision Hub 的领域扩展，不代表未来所有产品都继承市场对象；跨产品 observability/evolution 只保存协议和生命周期，不包含 BTC 评分规则。
 
-首批真实文件和主类型按下表锁定；可以在实现时拆小，但不得把职责反向合并进 Graph node 或 API route：
+按阶段落地的文件所有权和主类型如下；`R0` 行是当前真实入口，`R1/R2` 行是获批后才创建的目标位置。可以在实现时拆小，但不得把职责反向合并进 Graph node 或 API route：
 
 | 文件 | 主类型/函数 | 唯一职责 |
 |---|---|---|
-| `kernel/application/admission.py` | `AdmissionService` | 输入幂等、Observation/Event admission |
-| `kernel/application/snapshot.py` | `SnapshotService` | Evidence 校验、PIT freeze、generation |
-| `kernel/application/run.py` | `RunService` | Run 状态机、版本 manifest、CAS |
-| `kernel/application/gate.py` | `GateService` | 执行命名 GatePolicy，返回逐条 rule 决定 |
-| `kernel/application/commit.py` | `CommitDecisionService` | Artifact/Forecast/RunEvent/outbox 单事务提交 |
-| `kernel/application/outcome.py` | `OutcomeService` | 到期标签、执行基准和数据质量 |
-| `kernel/application/promotion.py` | `PromotionService` | 校验 PromotionDecision，原子切换/回滚版本 |
-| `orchestration/langgraph/state/*.py` | `DecisionState/ResearchState/EvolutionState` | 窄 checkpoint state 与 reducer；不含 ORM/原文 |
-| `orchestration/langgraph/graphs/decision_graph.py` | `build_decision_graph()` | 在线生命周期拓扑和 conditional edges |
-| `orchestration/langgraph/graphs/research_graph.py` | `build_research_graph()` | Supervisor、dynamic `Send`、join/replan/Lead |
-| `orchestration/langgraph/graphs/evolution_graph.py` | `build_evolution_graph()` | 经验、候选、replay、shadow、owner interrupt |
-| `orchestration/langgraph/nodes/*.py` | 薄 node functions | 从 state 取 ref，调用 application/port，返回 state delta |
-| `orchestration/langgraph/routing/conditions.py` | typed route functions | failure/degrade/replan/finish 分支；不做领域推理 |
-| `orchestration/langgraph/routing/sends.py` | `build_specialist_sends()` | 校验后动态 fan-out ready tasks |
-| `orchestration/langgraph/checkpoint/recovery.py` | `RecoveryWatchdog` | 对照 Run 状态/checkpoint 恢复或确定性收尾 |
-| `runtime_adapters/langgraph_agent/factory.py` | `SpecialistAgentFactory` | 从已晋级 Profile 装配 `create_agent` |
-| `runtime_adapters/langgraph_agent/tool_gate.py` | `ToolGate` | 工具 allowlist、参数、数据范围、预算和幂等 |
-| `query_views/run_inspector/service.py` | `RunInspectorQueryService` | 从 read model 组装 Overview/Timeline/Evidence/Gate/Cost/Outcome View |
-| `query_views/decision_desk/service.py` | `DecisionDeskQueryService` | Inbox、summary、Health、Forecast 和 Asset 列表 View |
-| `query_views/evolution/service.py` | `EvolutionQueryService` | Candidate/Experiment/Promotion/Rollback 对比 View |
-| `apps/hub-api/view_routes.py` | Query routes | 只返回生成/校验的 View DTO，不做查询规则和业务决策 |
+| `packages/kernel/decision_hub_kernel/application/admission.py`（R0） | `AdmissionService` | 输入幂等、Observation/Event admission |
+| `packages/kernel/decision_hub_kernel/application/snapshot.py`（R0） | `SnapshotService` | Evidence 校验、PIT freeze、generation |
+| `packages/kernel/decision_hub_kernel/application/run.py`（R0） | `RunService` | Run 状态机、版本 manifest、CAS |
+| `packages/kernel/decision_hub_kernel/decision/gate.py`（R0） | `evaluate_gate()` | 执行命名 GatePolicy，返回逐条 rule 决定 |
+| `packages/kernel/decision_hub_kernel/application/commit.py`（R0） | `CommitDecisionService` | Artifact/Forecast/RunEvent/outbox 单事务提交 |
+| `packages/kernel/decision_hub_kernel/application/outcome.py`（R0） | `OutcomeService` | 到期标签、执行基准和数据质量 |
+| `packages/kernel/decision_hub_kernel/application/promotion.py`（R2） | `PromotionService` | 校验 PromotionDecision，原子切换/回滚版本 |
+| `packages/orchestration/langgraph/state/decision.py`（R0） | `DecisionState` | 窄 checkpoint state；不含 ORM/原文 |
+| `packages/orchestration/langgraph/graphs/decision_graph.py`（R0） | `build_decision_graph()` | 在线生命周期拓扑和边界恢复 |
+| `packages/orchestration/langgraph/graphs/research_graph.py`（R0） | `build_research_graph()` | policy/counter/synthesis structured roles 和结果汇合；Supervisor/dynamic Send 属于 R2 |
+| `packages/orchestration/langgraph/graphs/evolution_graph.py`（R2） | `build_evolution_graph()` | 经验、候选、replay、shadow、owner interrupt |
+| `packages/orchestration/langgraph/nodes/*.py`（R2） | 薄 node functions | 从 state 取 ref，调用 application/port，返回 state delta |
+| `packages/orchestration/langgraph/routing/conditions.py`（R2） | typed route functions | failure/degrade/replan/finish 分支；不做领域推理 |
+| `packages/orchestration/langgraph/routing/sends.py`（R2） | `build_specialist_sends()` | 校验后动态 fan-out ready tasks |
+| `packages/orchestration/langgraph/checkpoint/recovery.py`（R0） | `RecoveryWatchdog` | 对照 Run 状态/checkpoint 恢复或确定性收尾 |
+| `packages/runtime_adapters/langgraph_agent/runtime.py`、`provider_config.py`（R0） | `LangGraphAgentRuntime`、`ProviderConfig` | 配置 Provider、装配 LangChain `create_agent`、返回统一 AgentResult |
+| `packages/runtime_adapters/langgraph_agent/factory.py`（R2） | `SpecialistAgentFactory` | 从已晋级 Profile 装配 `create_agent` |
+| `packages/runtime_adapters/langgraph_agent/tool_gate.py`（R2） | `ToolGate` | 工具 allowlist、参数、数据范围、预算和幂等 |
+| `packages/kernel/decision_hub_kernel/persistence/db.py` + `packages/query_views/decision_desk/service.py`（R0） | Run Inspector read model/query | 从业务 read model 组装 Overview/Timeline/Evidence/Gate/Cost/Outcome View |
+| `packages/query_views/decision_desk/service.py`（R0） | `DecisionDeskQueryService` | Inbox、summary、Health、Forecast 和 Asset 列表 View |
+| `packages/query_views/evolution/service.py`（R2） | `EvolutionQueryService` | Candidate/Experiment/Promotion/Rollback 对比 View |
+| `apps/hub_api/main.py`（R0） | Query routes | 只返回生成/校验的 View DTO，不做查询规则和业务决策 |
 | `apps/decision-desk/src/features/*` | React feature modules | 视图状态、交互和格式化；不实现 Gate、Outcome 或资产晋级规则 |
-| `evals/runners/evaluation_runner.py` | `EvaluationRunner` | 固定 manifest 执行、先存 raw artifacts 后评分 |
-| `evals/graders/*` | `Deterministic/Trajectory/LLM Grader` | 各自独立评分，不修改运行产物 |
-| `evals/compare/promotion_gate.py` | `PromotionGate` | baseline/candidate 硬不变量和切片非劣比较 |
+| `packages/evals/runners/evaluation_runner.py`（R2） | `EvaluationRunner` | 固定 manifest 执行、先存 raw artifacts 后评分 |
+| `packages/evals/graders/*`（R2） | `Deterministic/Trajectory/LLM Grader` | 各自独立评分，不修改运行产物 |
+| `packages/evals/compare/promotion_gate.py`（R2） | `PromotionGate` | baseline/candidate 硬不变量和切片非劣比较 |
 
 API route、Graph node、Adapter 都不得重新实现表中 use case；静态依赖检查和单元/契约测试会对这些边界做验证。这样修复 Provider、换模型、换 Pi 或增加 A 股 Pack 时，不会在三处复制 admission、Gate、commit 和评测逻辑。
 
@@ -1364,34 +1365,37 @@ observability/   # RunEvent/Trace/Lineage/成本/失败 read model
 evolution/       # Experience/Candidate/Experiment/Promotion 历史
 ```
 
-### 9.7 R0 的真实交付物与验收门槛
+### 9.7 R0-CORE-COMPLETE 交付物与长期扩展边界
 
-在开始写 R0 代码前，先把以下文件和样本作为实施清单；没有这些东西，不能宣称“已经有底座”：
+以下表保留完整架构能力地图，但必须按阶段解释：标为 R0 的内容是当前
+`R0-CORE-COMPLETE` 的实际交付物；标为 R1/R2/R3 的内容是长期扩展，不能写入
+R0 的完成声明。R0 的精确 Definition of Done、验证命令和 ReleaseManifest 以
+`docs/stages/R0_CORE_COMPLETION_PLAN.md` 为准。
 
 | 交付物 | 具体文件/结果 | 验收标准 |
 |---|---|---|
 | 稳定契约与 codegen | `contracts/**/*.yaml`、`tools/contract_codegen/`、生成的 `contracts_py/contracts_ts` | YAML 为唯一源；Pydantic/Zod 可生成且可校验；clean generation 无漂移；无 Pi/DSH import |
-| 账本与迁移 | `packages/kernel/persistence/`、`migrations/001_initial.py` | 新建 Event -> Snapshot -> Run -> Artifact -> Forecast 可事务提交；CAS 生效 |
-| 三张运行图 | `packages/orchestration/langgraph/{state,graphs,nodes,routing,checkpoint}` | decision/research/evolution 图可恢复；动态 fan-out、replan、失败降级和离线晋级路径均有测试 |
-| 正式/测试 runtime | `langgraph_agent` + `single_call_runtime` + `replay_runtime` + `fake_runtime` | `create_agent` 不手写 tool loop；同一协议；记录 trajectory/cost/latency/version；失败码统一 |
-| Agentic Strategy | `packs/crypto_macro/strategies/agentic_research.py` + 已晋级 Profiles | Supervisor 输出结构化 plan；Specialist 受工具/预算限制；Lead 只提 Candidate；Gate 唯一发布 |
-| 非黑盒运行记录 | `kernel/observability` + `local_sql` + `structured_log` | Artifact 可追溯到 Gate/Step/Call/Snapshot/Evidence；重试/降级/成本可查询；secret/CoT 不落日志 |
-| Run Inspector | `/v1/runs/{id}/timeline|lineage|gate` + CLI | 不依赖 Pi/DSH session 或 Grafana即可解释完整 Run |
-| 版本与进化骨架 | `kernel/evolution` + VersionRegistry/Evolution tables | 候选不能改生产默认；实验、晋级、拒绝和回滚可审计；PIT 污染测试失败 |
+| 账本与迁移（R0） | `packages/kernel/decision_hub_kernel/persistence/`、`migrations/versions/0001_initial.py` 至 `0007_run_cost_nullable.py` | 新建 Event -> Snapshot -> Run -> Artifact -> Forecast 可事务提交；CAS 生效；业务账本与 checkpoint 分离 |
+| 运行图（R0；evolution 为 R2） | `packages/orchestration/langgraph/{state,graphs,checkpoint}` | R0 的 decision/research 图可恢复，研究 reviewer 并行、失败降级和幂等提交有测试；动态 fan-out、replan、evolution graph 属于 R2，不写入 R0 完成声明 |
+| 正式/测试 runtime（R0） | `packages/runtime_adapters/langgraph_agent/` + `replay_runtime/` + `fake_runtime/` | `create_agent` 不手写 tool loop；三种 runtime 使用同一 `AgentRequest -> AgentResult` 契约；记录 latency/cost/version；失败码统一 |
+| Agentic Strategy（R0 边界） | `packages/orchestration/langgraph/graphs/research_graph.py`、`packages/runtime_adapters/langgraph_agent/runtime.py` | R0 使用固定的 policy/counter/synthesis structured roles；Agent 只提 Candidate，Gate 唯一发布。受限 Supervisor、动态 Profile 和工具 fan-out 属于 R2 |
+| 非黑盒运行记录（R0） | `packages/kernel/decision_hub_kernel/application/{steps,calls}.py`、`packages/query_views/`、SQLite read model | Artifact 可追溯到 Gate/Step/Call/Snapshot/Evidence；重试/降级/成本可查询；secret、CoT 和原始 provider JSON 不落前端 |
+| Run Inspector（R0） | `/v1/runs/{id}/inspector`、`/v1/runs/{id}/timeline`、`apps/decision-desk/` | 不依赖 Pi/DSH session 或 Grafana 即可解释完整 Run；Query/View DTO 不透传 SQL 或 LangGraph state |
+| 版本与进化骨架（R2） | R0 的 Run strategy/runtime/provider/schema 版本字段；R2 再引入 VersionRegistry、Evolution tables 和 Promotion API | R0 只记录版本血缘并支持 baseline/candidate replay；候选实验、晋级、拒绝和回滚属于 R2，不能宣称已完成 |
 | 恢复与幂等 | checkpoint、startup recovery、idempotency/CAS、transactional outbox | 任意已提交状态强杀后可恢复或确定性结束；不重复 Artifact/通知 |
-| 安全与供应链 | SecretProvider、工具 risk manifest、依赖锁、secret/vulnerability/license scan、SBOM | 未声明工具默认拒绝；secret canary 不出现在数据库/日志/Trace |
-| 运维交付 | Docker/Windows 启动、health、backup/restore/integrity、retention、rollback runbook | 干净环境可启动；备份恢复后 fixture/账本完整性校验通过 |
-| Release Gate | CI pipeline + `ReleaseManifest` | codegen、migration、recovery、replay、安全、安装 smoke 全部通过并记录版本/回滚点 |
-| 文本入口 | `source_adapters/manual_text/` | 手工文本形成 Observation；去重、revision、source span 可回放 |
-| BTC Pack | `packs/crypto_macro/` | manifest、profiles、Gate、Forecast 和至少一组 PIT fixture 全部通过 contract tests |
-| 业务用例 API | `apps/hub-api/routes.py` | 只能调用产品用例；不暴露任意 chat/session 写入口 |
-| Query/View API | `packages/query_views/` + `apps/hub-api/view_routes.py` | 只输出 Overview/Timeline/Evidence/Gate/Cost/Outcome/Asset DTO；不透传 SQL、Harness state 或原始 JSON |
+| 安全与供应链（R0 基线） | 依赖 lockfile、`tools/core_acceptance.py` secret scan、canary 脱敏规则；工具 risk manifest、漏洞/许可证扫描和 SBOM 留作后续 | R0 不把 secret 写入代码/数据库/日志；完整工具风险目录和 SBOM 属于 R1/R2，不能冒充已完成 |
+| 运维交付（R0 基线） | `docs/runbooks/local-development.md`、`tools/ops/database.py`、health、backup/restore/integrity/retention | 本机原生启动、备份恢复和 fixture 完整性校验通过；Docker/Windows 安装和 rollback 自动化留作后续 |
+| Release Gate（R0） | `tools/core_acceptance.py` + `docs/RELEASE_MANIFEST.json` | codegen、migration、recovery、replay、安全、前端构建 smoke 全部通过并记录版本；CI pipeline 化属于后续 |
+| 文本入口（R0） | `packages/source_adapters/manual_text/` | 手工文本形成 Observation；content hash 去重和 PIT 时间戳可回放 |
+| BTC 领域基线（R0） | `contracts/policies/gate_policy.schema.yaml`、`fixtures/replay/`、`pack_version=crypto_macro.v1` | Gate、Forecast、Outcome/Evaluation 和 PIT fixture 通过契约/回放测试；独立 `packs/crypto_macro` Pack 目录与 Profiles 属于后续扩展 |
+| 业务用例 API（R0） | `apps/hub_api/main.py` | 只能调用产品用例；不暴露任意 chat/session 写入口 |
+| Query/View API（R0） | `packages/query_views/` + `apps/hub_api/main.py` | 只输出 Overview/Timeline/Evidence/Gate/Cost/Outcome DTO；不透传 SQL、Harness state 或原始 JSON |
 | Decision Desk | `apps/decision-desk/` | 最小页面能查看 Inbox、Decision、Forecast、Run、Health、Assets；刷新后从 Query API 恢复，不拥有业务真相 |
-| 评估器 | `packages/evals/` + `packs/crypto_macro/evaluation/` | 固定 dataset manifest；原始 trajectory 先落盘；六层 grader、时间切分、baseline/candidate 报告和 Promotion Gate 可运行 |
+| 评估器（R0；六层 grader/Promotion 为 R2） | `tools/replay/`、`fixtures/replay/`、`tests/replay/` | R0 固定 PIT replay/holdout、baseline/candidate 独立报告、Brier/net return 和未来信息拒绝可运行；六层 grader、shadow 和 Promotion Gate 属于 R2 |
 | 模块文档 | `docs/modules/` + 每个模块/应用/Pack 下的 `README.md` | README 含边界、契约、错误、权限、测试、资产沉淀和最近验证 commit；代码变更触发文档同步检查 |
-| 失败测试 | `tests/failure_modes/` | stale/missing/conflict/timeout/duplicate generation/telemetry exporter failure 均有确定性结果；Exporter 失败不改变业务 Run |
+| 失败测试（R0 已覆盖范围） | `tests/e2e/test_runtime_safety.py`、`tests/runtime/`、`tests/replay/`、`tests/tools/` | timeout/429/5xx/structured output/configuration、重复提交、PIT future-information、checkpoint/backup failure 有确定性结果；source/exporter failure 属于 R1/R2 |
 
-R0 的 GO 条件不是“报告看起来像专家”，而是：同一 fixture 能跑通固定、Legacy 和 LangGraph Agentic 三种同契约策略；历史状态不被覆盖；Agent trajectory/Gate 可解释；失败会降级；Forecast 能在到期后补 Outcome；baseline/candidate 可公平比较。Pi adapter、DSH Workbench 和实时来源后加时只能实现已有 ports 和 contract tests，不能另建生产链。
+R0 的 GO 条件不是“报告看起来像专家”，而是：同一 fixture 能在 Fake、Replay 和配置好的 LangGraph-native runtime 上遵守同一契约；历史状态不被覆盖；三角色调用、Step/Call、Gate 和版本血缘可解释；失败会降级；Forecast 能补 Outcome；baseline/candidate 可公平比较。Pi adapter、DSH Workbench、动态 Supervisor、evolution graph 和实时来源后加时只能实现已有 ports 和 contract tests，不能另建生产链。
 
 ## 10. 实时来源、日历和语音的正确位置
 
@@ -1797,7 +1801,7 @@ Task -> Run -> Step -> Tool/Model -> Artifact -> Review -> Evaluation
 
 | 版本 | 永久能力 | 不做什么 |
 |---|---|---|
-| **R0 Owner Production Core** | Python Kernel、公开契约、SQLite WAL、三张 LangGraph、`ManualTextSource`、按需市场快照、`FixedEvidenceStrategy`、`LegacyAlertStrategy`、LangGraph-native `AgenticResearchStrategy`、Artifact/Forecast/Outcome；六层评测、时间切分 replay/shadow、Run/Step/Call/Lineage/Gate、Version Registry/Evolution candidate；migration、checkpoint recovery、幂等/CAS、事务 outbox、health、backup/restore、ReleaseManifest、Query/View DTO 和 Decision Desk 最小可用页面 | 不把 Agentic 推迟到另一套架构；不把真实链路放入 DSH；不做多用户 UI、ASR daemon、自动交易；不让候选自动晋级；不以省略恢复/评测换取“更快 PoC” |
+| **R0 Owner Production Core** | Python Kernel、公开契约、SQLite WAL、decision/research LangGraph、`ManualTextSource`、LangGraph-native structured roles、Artifact/Forecast/Outcome；Run/Step/Attempt/Call Inspector、PIT replay/holdout、baseline/candidate 比较、checkpoint recovery、幂等/CAS、事务 outbox、health、backup/restore、ReleaseManifest、Query/View DTO 和 Decision Desk 最小可用页面 | 不把实时来源、ASR daemon、通知、DSH/Pi、六层 grader、Version Registry、Evolution candidate、动态 Supervisor 或自动交易写成 R0 已完成；不让候选自动晋级 |
 | **R1 Realtime Event Engine** | Source plugins、scheduler、inbox/outbox、source cursor、官方日历/Feed/市场 streams、Meeting Copilot 转写 adapter；Outcome 到期调度、漂移/失败聚合和 E2 候选自动实验 | 不依赖未授权网页抓取作为关键来源；不自动晋级 Doctrine/Gate；不改变文本之后的决策链 |
 | **R2 Decision Workbench** | Core MCP、DSH ResearchMemo、Decision Desk 完整 Run Inspector、血缘/Gate/成本/回放/实验对比和 owner promotion review；可选 DSH 嵌入入口 | 不将 DSH 会话作为正式决策记录或调度器；不允许 DSH 直写默认版本 |
 | **R3 Domain / Deployment Expansion** | A 股、美股、供应链、地缘 Pack；PPT 等新产品用独立 Domain Extension 验证 Kernel；实际需要时 PostgreSQL、跨机部署与可靠性升级 | 不复制 Core，不让 BTC schema 污染其他产品，不先建设通用聊天/代码 Agent 平台 |
@@ -1952,24 +1956,22 @@ packs/<pack>/README.md
 
 CI 必须检查：模块 README 存在、README 中声明的公开入口真实存在、`contract_version`/`last_verified_commit` 不为空；代码路径发生变化而对应 README 未更新时，CI 进入文档同步失败。README 不是靠人工记忆维护，使用 `tools/docs/check_module_docs` 做路径和版本校验。
 
-R0 首批必须存在的模块文档不是一套空模板，而是以下真实边界的维护入口：
+R0 当前必须存在的模块文档是以下真实边界的维护入口；标为“后续”的路径只在对应 Stage Charter 获批后创建：
 
 ```text
 docs/modules/README.md
 packages/kernel/README.md
-packages/kernel/application/README.md
-packages/kernel/persistence/README.md
-packages/kernel/observability/README.md
-packages/kernel/evolution/README.md
 packages/orchestration/langgraph/README.md
-packages/runtime_adapters/langgraph_agent/README.md
-packages/runtime_adapters/replay_runtime/README.md
+packages/runtime_adapters/README.md
+packages/source_adapters/README.md
 packages/query_views/README.md
-apps/hub-api/README.md
-apps/hub-worker/README.md
+packages/contracts_ts/README.md
+apps/hub_api/README.md
+apps/hub_worker/README.md
 apps/decision-desk/README.md
-packs/crypto_macro/README.md
-packages/evals/README.md
+# 后续 R1/R2：packages/kernel/{observability,evolution}/README.md、
+# packages/runtime_adapters/{langgraph_agent,replay_runtime}/README.md、
+# packages/evals/README.md、packs/crypto_macro/README.md、DSH/Pi adapter README
 ```
 
 其中 `docs/modules/README.md` 是模块地图，不重复实现细节；它必须列出每个模块的 owner、公开入口、上游/下游、契约版本、测试入口和最近验证提交。以后新增 `source_adapters/official_feeds`、`workbench_adapters/dsh_mcp`、`packs/ppt` 或 `pi_runtime` 时，先新增对应 README 和契约测试，再新增实现文件。
@@ -2219,17 +2221,17 @@ R0 同时交付：
 
 #### 13.7.9 R0 前后端部署约定
 
-R0 的本机 Docker Compose 只有两个必需运行单元：
+R0 当前以本机原生进程验证（`uvicorn` + Vite/静态构建）；Docker Compose 只保留为不改变边界的后续部署形态，尚未作为 R0 发布产物。无论原生还是容器，必需职责只有以下两个运行单元：
 
 ```text
-hub-api
+hub_api
   FastAPI + Query/Command API + 已构建的 decision-desk 静态文件
 
-hub-worker
-  LangGraph decision/research/evolution + scheduler + recovery watchdog
+hub_worker
+  R0 本地 outbox worker；分析由 API background task 复用正式 LangGraph，scheduler/recovery loop 属于 R1
 ```
 
-`decision-desk` 在开发环境由 Vite dev server 启动，并代理 `/v1` 到 `hub-api`；生产环境由 Vite 构建静态资源，打包进 `hub-api` image/volume，由同源 API 服务。R0 不单独引入 Nginx、Caddy、BFF 或前端 Node server。Pi shadow、DSH adapter、Source worker 只有在实际启用时才以 Compose profile 加入。
+`decision-desk` 在开发环境由 Vite dev server 启动，并代理 `/v1` 到 `hub_api`；生产环境由 Vite 构建静态资源，打包进 API 进程的发布目录，由同源 API 服务。R0 不单独引入 Nginx、Caddy、BFF 或前端 Node server。Pi shadow、DSH adapter、Source worker 只有在实际启用时才以 Compose profile 加入。
 
 Local API 默认监听 `127.0.0.1`，浏览器通过同源访问，避免首版 CORS、登录和跨域状态问题。需要从局域网/公网访问时，优先通过 VPN/SSH tunnel；若要直接暴露，必须新增认证、TLS、Origin、审计和 ADR，不临时在前端加一个密码框。
 
@@ -2366,7 +2368,7 @@ OD-01 至 OD-16 已完成首轮冻结；后续只有实现确实需要改变已�
 | [DECISION_HUB_FINAL_ARCHITECTURE.md](./DECISION_HUB_FINAL_ARCHITECTURE.md) | 保留 Text-Core、Evidence、Gate、Artifact 等可复用思想；其中手写 `asyncio Coordinator + 固定 Pi 角色链` 已被退回，不可实施 |
 | [FINAL_PLAN.md](/Users/chase/Downloads/FINAL_PLAN.md) | 外部评审候选方案；其领域资产、PIT、证据/Gate 与评测思想可保留，但“DSH 先做真实链路、未来抽 Core”的阶段设计不采用 |
 | [COGNIDA_ARCHITECTURE_RESEARCH_2026-08-25.md](./research/COGNIDA_ARCHITECTURE_RESEARCH_2026-08-25.md) | Cognida 生命周期、可观测和经验进化的源码调查；其思想已提炼到第 11.2-11.12 节，但该研究文档本身不是决策源，也不表示引入 Cognida |
-| **本文** | R0 实施中的产品架构基线；OD-01 至 OD-16 已由 owner 确认，本文是后续契约设计和实现的唯一架构依据 |
+| **本文** | R0 核心已完成的产品架构基线；OD-01 至 OD-16 已由 owner 确认，本文是后续契约设计和实现的唯一架构依据 |
 
 ---
 

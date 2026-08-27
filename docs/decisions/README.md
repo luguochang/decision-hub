@@ -5,6 +5,7 @@
 ## 当前 ADR
 
 - [ADR-0001 R0 实现基线](ADR-0001-r0-implementation-baseline.md)
+- [ADR-0002 R0 核心观测、回放与成本语义](ADR-0002-r0-core-observability-replay.md)
 
 ## 模板
 

@@ -18,4 +18,4 @@
 LangGraph checkpoint 使用 `langgraph-checkpoint-sqlite` 写入独立 checkpoint SQLite；它只保存 graph 恢复状态，不替代 Kernel 账本。`RecoveryWatchdog` 依据 Kernel 中非终态 Run 选择恢复候选。
 
 ## 最近验证
-R0 scaffold。
+Decision Graph 已使用 LangGraph `RetryPolicy`、SQLite checkpoint 和四个 Step 边界；研究节点的 policy/counter reviewer 并行，失败和重试 attempt 投影到 Kernel Inspector。`tests/replay/test_checkpoint.py` 与 `tests/e2e/test_runtime_safety.py` 覆盖恢复、幂等和失败安全。

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Protocol
 
@@ -17,18 +17,55 @@ class AgentRequest:
 
 
 @dataclass(frozen=True)
+class AgentUsage:
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    total_tokens: int | None = None
+    cost_usd: float | None = None
+    cost_status: str = "unknown"
+    pricing_version: str | None = None
+
+
+class AgentExecutionError(RuntimeError):
+    def __init__(
+        self,
+        error_code: str,
+        message: str,
+        *,
+        retryable: bool = False,
+        attempt: int = 1,
+        provider_id: str | None = None,
+        model: str | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.error_code = error_code
+        self.retryable = retryable
+        self.attempt = attempt
+        self.provider_id = provider_id
+        self.model = model
+
+
+@dataclass(frozen=True)
 class AgentResult:
     role: str
     payload: dict[str, object]
     runtime_id: str
     runtime_version: str
     latency_ms: int
-    cost_usd: float
+    cost_usd: float | None = None
+    usage: AgentUsage = field(default_factory=AgentUsage)
+    provider_id: str | None = None
+    model: str | None = None
+    api_mode: str | None = None
+    schema_version: str = "agent-payload.v1"
 
 
 class AgentRuntime(Protocol):
     runtime_id: str
     runtime_version: str
+    max_attempts: int
+    @property
+    def cost_budget(self) -> float | None: ...
 
     async def execute(self, request: AgentRequest) -> AgentResult: ...
 

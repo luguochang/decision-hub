@@ -1,14 +1,26 @@
 # R0 实施状态
 
 日期：2026-08-26（Asia/Shanghai）
-状态：核心文本纵向链已可运行，继续补齐生产级恢复、评测和来源扩展。
+状态：R0-A 文本核心纵向链已完成；`R0-CORE-COMPLETE` 已通过离线总体验收。R0-B/R0-C/R0-D 已完成；R1 实时来源、ASR、通知和第二领域仍未开始。
+
+最后复核：2026-08-27。产品架构总表已与当前实际路径、ReleaseManifest 和 R0/R1/R2 范围重新对齐；本次仅为文档治理修正，无运行时行为变化。
+
+## 治理状态
+
+- 项目宪章：`accepted`，见 `docs/engineering/PROJECT_CHARTER.md`。
+- 全局开发治理：`accepted`，见 `docs/engineering/DEVELOPMENT_GOVERNANCE.md`。
+- 最近完成 Stage Charter：`R0-B Provider Reliability Boundary`，`accepted`，见 `docs/stages/R0-B_PROVIDER_RELIABILITY_BOUNDARY.md`；当前没有执行中的 Stage Charter。
+- `R0-B1 ProviderConfig + capability manifest`：`done`；R0-B Provider Reliability Boundary 整体已完成。
+- `R0-CORE-COMPLETE`：`done`；证据入口为 `tools/core_acceptance.py` 和 `docs/RELEASE_MANIFEST.json`。
+- Run/Step/Attempt/Call normalized projection + Run Inspector API：`done`，新 Run 可查询四个 Step、三角色 Call、错误/成本/重试和 `/v1/runs/{run_id}/inspector`。
+- SQLite backup/integrity 和固定 PIT Replay：`done`，已验证固定 clock、future-information reject、baseline/candidate、Outcome/Brier/net return、restore replay smoke。
 
 ## 已完成并自测
 
 | 能力 | 当前实现 | 证据 |
 |---|---|---|
 | 文本入口 | `ObservationCreate -> TextEnvelope`，content hash 去重 | `tests/contracts`, `tests/e2e` |
-| 账本 | SQLite WAL + Alembic `0001_initial`/`0002_outbox`，Event/Observation/Run/Snapshot/Artifact/Forecast/Outcome/Evaluation/Outbox；业务状态与 checkpoint 分离 | `tests/kernel`, API smoke, SQLite PRAGMA |
+| 账本 | SQLite WAL + Alembic `0001` 至 `0007`，Event/Observation/Run/Snapshot/Artifact/Forecast/Outcome/Evaluation/Outbox/Step/Call；业务状态与 checkpoint 分离 | `tests/kernel`, `tests/e2e`, fresh migration/SQLite PRAGMA |
 | PIT | `SnapshotService.freeze()` 保存 cutoff、证据 hash 和不可变 snapshot | `tests/kernel/test_core_flow.py` |
 | Agent 编排 | LangGraph decision/research graph；研究层 policy/counter 并行；Fake/Replay 和 LangGraph-native `create_agent` seam | graph integration in core flow |
 | Gate | facts/citations/counter-thesis/action fields/probability cap 的确定性检查 | `test_gate_fails_closed_without_evidence` |
@@ -18,42 +30,41 @@
 | 前端契约 | `@decision-hub/contracts-ts` workspace 包提供 Zod 运行时校验，Decision Desk 只 re-export | TypeScript build + client fixture test |
 | 契约同步 | canonical schema hash manifest 检查；schema 改动会使 codegen check 失败 | `tools.contract_codegen generate/check` |
 | ASR 位置 | `TranscriptSourcePlugin` 和 Meeting Copilot adapter，只接收 TextEnvelope | `test_transcript_adapter_is_text_only` |
-| Graph checkpoint | `langgraph-checkpoint-sqlite` 独立 checkpoint store + RecoveryWatchdog 边界 | `tests/replay/test_checkpoint.py` |
+| Graph checkpoint | `langgraph-checkpoint-sqlite` 独立 checkpoint store + RecoveryWatchdog 恢复边界 | `tests/replay/test_checkpoint.py`, `tests/e2e/test_runtime_safety.py` |
 | 发布 outbox | Artifact 与 `OutboxRecord` 同一事务提交；`hub-worker --once` 写本地 JSONL 并按 dedupe key 标记完成 | `test_outbox_worker.py` + fresh migration smoke |
 
 ## 尚未声称完成
 
-- 外部 LLM live canary 已能通过 `gpt-5.5` Responses 路径完成三角色调用、结构化解析和 Artifact/Forecast 持久化；成本表、provider contract 和业务准确率仍未完成。默认 CI 继续使用 fake/replay 保持确定性。
-- Email/IM 外部通知 adapter、scheduler/recovery watchdog 自动循环和真实 Provider 仍未接入；本地 outbox worker 已可运行且不触发新分析。
+- 外部 LLM live canary 已能通过 `gpt-5.5` Responses 路径完成三角色调用、结构化解析和 Artifact/Forecast 持久化；这只是 Provider 兼容性证据，不代表预测准确率或盈利能力。默认 CI 继续使用 fake/replay 保持确定性。
+- Email/IM 外部通知 adapter、scheduler/recovery watchdog 自动循环和默认真实 Provider 运行仍未接入；本地 outbox worker 已可运行且不触发新分析。
 - Outbox/通知 adapter、官方日历/新闻源、实时市场 Provider、直播音频 capture。
-- 完整六层评测、时间切分 replay/holdout/shadow 和 Asset Promotion。
-- Playwright 浏览器交互和 375/768/1024/1440 视觉回归。
-这些是后续 R0/R1 工作项，不改变文本核心和 ASR 适配器边界；在相应能力未通过测试前，不标记为生产完成。
+- 完整六层评测、长期样本量和 Asset Promotion。
+- 完整 Playwright 375/768/1024/1440 视觉回归仍未建立；当前已完成浏览器 DOM、提交文本、桌面截图和 375px Inspector 无横向溢出 smoke。
+这些是后续 R1/R2 工作项，不改变 R0 文本核心和 ASR 适配器边界；R0 的工程闭环已完成，但不能把有限 fixture 结果宣传为市场收益。
 
 ## 本地验证命令
 
 ```bash
-./.venv/bin/ruff check packages apps migrations tests tools
-./.venv/bin/pytest -q
-pnpm --dir apps/decision-desk build
-pnpm --dir apps/decision-desk test
-./.venv/bin/python -m tools.contract_codegen check
+./.venv/bin/python tools/core_acceptance.py
 ```
+
+Inspector 证据归一化已由研究图汇合边界保证：Facts/Citations 取自 policy reviewer 的结构化输出，synthesis 上下文不会作为原始 JSON 写入 Artifact；`tests/e2e/test_api_flow.py` 对此有回归断言。
 
 ## TDD/SDD 与本次自测记录
 
-长期规范见 [`docs/engineering/TDD_SDD_SELF_TEST_STANDARD.md`](engineering/TDD_SDD_SELF_TEST_STANDARD.md)。当前测试已覆盖从文本输入到 Evaluation 的可执行链：文本哈希、Event/Observation/Snapshot、LangGraph research、Gate、Artifact、30m/24h/72h Forecast、Outcome、Brier/net return、Query View、Timeline 和 Outbox。
+长期规范见 [`docs/engineering/TDD_SDD_SELF_TEST_STANDARD.md`](engineering/TDD_SDD_SELF_TEST_STANDARD.md)。当前测试已覆盖从文本输入到 Evaluation 的可执行链：文本哈希、Event/Observation/Snapshot、LangGraph research、Gate、Artifact、30m/24h/72h Forecast、Outcome、Brier/net return、Query View、Timeline、Step/Attempt/Call、Provider failure safety、checkpoint recovery、backup/restore 和 Outbox。
 
 2026-08-26 本地结果：
 
 ```text
-Python pytest: 16 passed, 1 warning
+Python pytest: 44 passed, 1 warning
 Ruff: passed
 Pyright: 0 errors, 0 warnings
 Canonical schema check: passed
 Module documentation check: passed
 Frontend Vitest: 1 passed
 Frontend Vite build: passed
+Core acceptance: passed（fresh Alembic `0007_run_cost_nullable`、PIT compare、backup/restore/integrity、secret scan）
 ```
 
 外部模型 canary 使用 `tools/canary/run_live_text_canary.py`，只读当前进程环境变量，使用临时 SQLite，输出脱敏 ID/状态/hash，不把密钥写入仓库或数据目录。本次使用 `https://codexai.club/v1` 与 `gpt-5.5` 做了分层探测：

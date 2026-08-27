@@ -8,7 +8,7 @@ Decision Hub 是一个可插拔、可审计的事件驱动决策智能平台。
 
 ## 当前状态
 
-当前处于 `R0 Owner Production`：文本输入到决策、预测、结果评估的纵向链已能在本地运行；外部 GPT-5.5 Responses 兼容性 canary 已通过，业务 Gate 仍保持独立裁决。ASR、实时新闻/日历、实时行情、通知和完整时间切分评测尚未标记为生产完成。
+`R0 Owner Production Core` 已完成：文本输入到决策、预测、结果评估、观测、恢复、回放和备份自测的纵向链已能在本地运行；外部 GPT-5.5 Responses 兼容性 canary 已通过，业务 Gate 仍保持独立裁决。ASR、实时新闻/日历、实时行情、通知和长期样本评测尚未标记为生产完成。
 
 ## 文档入口
 
@@ -17,6 +17,10 @@ Decision Hub 是一个可插拔、可审计的事件驱动决策智能平台。
 - [执行路线图](docs/ROADMAP.md)
 - [分阶段执行设计](docs/EXECUTION_PLAN.md)
 - [实现状态](docs/IMPLEMENTATION_STATUS.md)
+- [项目宪章](docs/engineering/PROJECT_CHARTER.md)
+- [全局开发治理规范](docs/engineering/DEVELOPMENT_GOVERNANCE.md)
+- [R0-B Stage Charter](docs/stages/R0-B_PROVIDER_RELIABILITY_BOUNDARY.md)
+- [R0 Core Completion 实现方案](docs/stages/R0_CORE_COMPLETION_PLAN.md)
 - [TDD/SDD 与自测规范](docs/engineering/TDD_SDD_SELF_TEST_STANDARD.md)
 - [ADR 目录](docs/decisions/README.md)
 - [模块地图](docs/modules/README.md)

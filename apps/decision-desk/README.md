@@ -10,4 +10,4 @@ React + TypeScript + Vite + TanStack Query + Lucide。页面只消费 API View D
 采用 data-dense operations dashboard：中性浅色画布、专业深蓝导航、状态色、紧凑表格、可见 focus、响应式 375/768/1024/1440；不使用紫粉渐变、HUD 装饰或 JSON dump。
 
 ## 最近验证
-R0 scaffold；使用 `pnpm build` 和 Playwright 视觉 smoke 验证。
+Decision Desk 已消费真实 `/v1/runs/{run_id}/inspector` Query/View，显示 Run/Step/Attempt/Call、证据、Gate、Forecast 和 Evaluation；使用 `pnpm test` 与 `pnpm build` 验证，视觉验收仍需 Playwright 浏览器任务。

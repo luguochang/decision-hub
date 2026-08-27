@@ -122,10 +122,65 @@ class RunView(BaseModel):
     updated_at: datetime
     finished_at: datetime | None = None
     latency_ms: int | None = None
-    cost_usd: float = 0
+    cost_usd: float | None = None
     error_code: str | None = None
     headline: str | None = None
     gate_status: GateStatus | None = None
+
+
+class CallView(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    call_id: str
+    run_id: str
+    role: str
+    status: str
+    attempt: int
+    started_at: datetime
+    finished_at: datetime | None = None
+    latency_ms: int | None = None
+    runtime_id: str | None = None
+    runtime_version: str | None = None
+    provider_id: str | None = None
+    model: str | None = None
+    api_mode: str | None = None
+    schema_version: str | None = None
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    total_tokens: int | None = None
+    cost_usd: float | None = None
+    cost_status: str = "unknown"
+    pricing_version: str | None = None
+    error_code: str | None = None
+    retryable: bool = False
+
+
+class StepView(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    step_id: str
+    run_id: str
+    step_name: str
+    status: str
+    attempt: int
+    started_at: datetime
+    finished_at: datetime | None = None
+    latency_ms: int | None = None
+    error_code: str | None = None
+
+
+class RunInspectorView(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    run: RunView
+    timeline: list[dict[str, object]]
+    steps: list[StepView]
+    calls: list[CallView]
+    artifact: ArtifactView | None = None
+    evaluation_count: int = 0
+    evaluations: list[EvaluationView] = Field(default_factory=list)
+    snapshot_cutoff_at: datetime | None = None
+    snapshot_hash: str | None = None
 
 
 class InboxView(BaseModel):

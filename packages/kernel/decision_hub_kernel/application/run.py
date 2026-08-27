@@ -14,7 +14,13 @@ class RunService:
     def __init__(self, database: Database) -> None:
         self.database = database
 
-    def create(self, event_id: str, idempotency_key: str | None = None) -> tuple[str, bool]:
+    def create(
+        self,
+        event_id: str,
+        idempotency_key: str | None = None,
+        *,
+        strategy_version: str = "baseline.v1",
+    ) -> tuple[str, bool]:
         if idempotency_key:
             with self.database.session() as session:
                 existing = (
@@ -30,6 +36,7 @@ class RunService:
                     run_id=run_id,
                     event_id=event_id,
                     idempotency_key=idempotency_key,
+                    strategy_version=strategy_version,
                     created_at=now,
                     updated_at=now,
                 )

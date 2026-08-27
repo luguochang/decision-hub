@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import time
 
-from packages.kernel.decision_hub_kernel.ports.runtime import AgentRequest, AgentResult
+from packages.kernel.decision_hub_kernel.ports.runtime import AgentRequest, AgentResult, AgentUsage
 
 
 class FakeAgentRuntime:
     runtime_id = "fake"
     runtime_version = "fake.v1"
+    max_attempts = 1
+    cost_budget: float | None = None
 
     async def execute(self, request: AgentRequest) -> AgentResult:
         started = time.perf_counter()
@@ -56,5 +58,9 @@ class FakeAgentRuntime:
             runtime_id=self.runtime_id,
             runtime_version=self.runtime_version,
             latency_ms=round((time.perf_counter() - started) * 1000),
-            cost_usd=0,
+            cost_usd=None,
+            usage=AgentUsage(cost_status="unknown"),
+            provider_id="fake",
+            model="deterministic-fixture",
+            api_mode="offline",
         )

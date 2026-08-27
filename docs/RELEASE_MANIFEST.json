@@ -1,0 +1,36 @@
+{
+  "manifest_version": "release-manifest.v1",
+  "generated_at": "2026-08-26T16:23:18.630700+00:00",
+  "git_revision": "9d4a7b2f44370b21e586d7d2d4a743db0cbb9055",
+  "worktree_dirty": true,
+  "schema_manifest_sha256": "b356fd34b56e7acba8606cdadbc592376bb743aaed98f5dc22318eadc60ab8f1",
+  "strategy_version": "baseline.v1",
+  "pack_version": "crypto_macro.v1",
+  "runtime_versions": [
+    "fake.v1",
+    "replay.v1",
+    "langgraph-native.v1"
+  ],
+  "migrations_head": "0007_run_cost_nullable",
+  "verified": [
+    "text admission and PIT snapshot",
+    "LangGraph research and deterministic Gate",
+    "Artifact/Forecast/Outcome/Evaluation",
+    "provider failure taxonomy and bounded retry",
+    "Run/Step/Attempt/Call normalized inspector",
+    "checkpoint recovery and idempotent commit",
+    "SQLite backup/restore/integrity/retention smoke",
+    "offline PIT replay and baseline/candidate comparison"
+  ],
+  "opt_in_only": [
+    "external Provider live canary"
+  ],
+  "not_claimed": [
+    "forecast accuracy",
+    "profitability",
+    "real-time news/calendar/market feeds",
+    "ASR/live meeting monitoring",
+    "notifications",
+    "DSH/Pi production integration"
+  ]
+}

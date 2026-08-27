@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-Decision Hub 正在实现 R0 Owner Production。当前首要目标是把已经存在的文本可靠地转换为可回放、可审计、可评估的市场决策支持结果。ASR、直播监听、新闻日历和通知只通过适配器接入，不改变文本之后的核心链路。
+Decision Hub 已完成 R0 Owner Production Core：文本已经可以可靠地转换为可回放、可审计、可评估的市场决策支持结果。当前没有正在执行的 R0 代码任务；ASR、直播监听、新闻日历和通知必须作为后续阶段的适配器接入，不改变文本之后的核心链路。
 
 ## 唯一有效事实源
 
@@ -13,9 +13,13 @@ Decision Hub 正在实现 R0 Owner Production。当前首要目标是把已经�
 3. [分阶段执行设计](docs/EXECUTION_PLAN.md)
 4. [ADR 目录](docs/decisions/README.md)
 5. [模块地图](docs/modules/README.md)
-6. [TDD/SDD 与自测规范](docs/engineering/TDD_SDD_SELF_TEST_STANDARD.md)
-7. `contracts/schemas/` 中的 canonical schema
-8. 受影响模块的 `README.md`、测试和 ReleaseManifest
+6. [项目宪章](docs/engineering/PROJECT_CHARTER.md)
+7. [全局开发治理规范](docs/engineering/DEVELOPMENT_GOVERNANCE.md)
+8. [R0-B Stage Charter](docs/stages/R0-B_PROVIDER_RELIABILITY_BOUNDARY.md)
+9. [R0 Core Completion 实现方案](docs/stages/R0_CORE_COMPLETION_PLAN.md)
+10. [TDD/SDD 与自测规范](docs/engineering/TDD_SDD_SELF_TEST_STANDARD.md)
+11. `contracts/schemas/` 中的 canonical schema
+12. 受影响模块的 `README.md`、测试和 ReleaseManifest
 
 `DECISION_HUB_FINAL_ARCHITECTURE.md` 和 `DSH_RESEARCH_DECISION_LOG.md` 是历史研究/审查材料；若与 V1 基线冲突，以 V1、ADR、canonical schema 和受影响模块文档为准。
 

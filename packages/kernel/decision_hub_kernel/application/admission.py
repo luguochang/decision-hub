@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import hashlib
 import uuid
+from collections.abc import Callable
+from datetime import datetime
 
 from packages.contracts_py.decision_hub_contracts.models import (
     ObservationCreate,
@@ -20,11 +22,14 @@ def _hash_text(text: str) -> str:
 
 
 class AdmissionService:
-    def __init__(self, database: Database) -> None:
+    def __init__(
+        self, database: Database, *, clock: Callable[[], datetime] = utcnow
+    ) -> None:
         self.database = database
+        self.clock = clock
 
     def admit(self, request: ObservationCreate) -> tuple[str, TextEnvelope, bool]:
-        now = utcnow()
+        now = self.clock()
         observed_at = request.observed_at or now
         content_hash = _hash_text(request.text)
         envelope = TextEnvelope(

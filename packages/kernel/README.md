@@ -22,4 +22,4 @@ Kernel 拥有 SQLite 业务账本；Query service 只读规范化表并生成 Vi
 `tests/kernel`、`tests/contracts`、`tests/replay`。
 
 ## 最近验证
-R0 scaffold，等待首次 `uv run pytest`。
+`tests/kernel`、`tests/e2e`、`tests/replay` 已覆盖账本、PIT、Gate、幂等、Outcome/Evaluation、Step/Call 投影和恢复；数据库结构由 Alembic `0001` 至 `0007` 管理。

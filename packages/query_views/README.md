@@ -10,4 +10,4 @@
 `DecisionDeskQueryService.summary()`。
 
 ## 最近验证
-R0 scaffold。
+`DecisionDeskQueryService.summary()` 与 Kernel Inspector DTO 已通过 API/E2E 测试；Query View 不读取 Graph state、Provider response 或前端私有 DTO。

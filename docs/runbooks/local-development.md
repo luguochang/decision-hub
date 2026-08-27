@@ -46,3 +46,26 @@ curl -X POST http://127.0.0.1:8000/v1/observations \
 ```
 
 SQLite backup、restore、integrity check 和 retention command 在 R0 运维补齐前，不得把手工删除数据库文件当清理方式。
+
+升级已有本地数据库时始终先执行 `./.venv/bin/alembic upgrade head`。`0007_run_cost_nullable` 会把旧版 `runs.cost_usd` 的 `NOT NULL` 约束迁移为可空，以准确表示 Provider 未返回 usage 的 unknown 成本；迁移前应按下方命令做一次 backup。
+
+## Core durability and replay
+
+SQLite backup and integrity checks use the checked-in operations tool:
+
+```bash
+./.venv/bin/python -m tools.ops.database backup \
+  data/decision-hub/db/decision_hub.sqlite3 \
+  tmp/backups/decision-hub.sqlite3
+./.venv/bin/python -m tools.ops.database integrity tmp/backups/decision-hub.sqlite3
+```
+
+Run the fixed PIT fixture without a live Provider:
+
+```bash
+./.venv/bin/python -m tools.replay.run_fixture \
+  fixtures/replay/powell-higher-for-longer.json \
+  --database tmp/replay.sqlite3
+```
+
+The replay output is compatibility and reproducibility evidence. It is not a claim of forecast accuracy or profitability.

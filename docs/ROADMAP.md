@@ -3,6 +3,8 @@
 版本：`ROADMAP-2026-08-26.v1`  
 用途：把 [产品架构基线](../DECISION_HUB_PRODUCT_ARCHITECTURE_V1.md) 中的 R0-R3 规划转换为 GitHub 可逐项追踪的执行清单。本文是里程碑状态入口；每个任务的实现边界、框架复用和 Codex 提示词见 [分阶段执行设计](EXECUTION_PLAN.md)，不替代架构基线、契约和 ADR。
 
+最近完成的总目标为 `R0-CORE-COMPLETE`，实现方案见 [R0 Core Completion](stages/R0_CORE_COMPLETION_PLAN.md)。R0-B、R0-C、R0-D 是该总目标内的工作包，均已通过；R1 实时来源和 R2 Workbench 仍需新的 Stage Charter。
+
 ## 使用规则
 
 - 每个任务先锁契约、失败边界和验收测试，再实现。
@@ -13,6 +15,8 @@
 状态标记：`done` 已验证；`partial` 已有边界或 scaffold，但未达生产验收；`next` 下一批执行；`blocked` 需要外部授权或真实数据。
 
 ## R0：Owner Production Core
+
+R0-A 文本核心纵向链已完成。R0-B、R0-C、R0-D 已通过 `R0-CORE-COMPLETE` 总体验收；R1 实时来源仍未开始，也没有被当前 R0 授权。
 
 ### 已完成
 
@@ -28,21 +32,17 @@
 - [x] `R0-10` Decision Desk 最小页面和文本提交入口。
 - [x] `R0-11` 本地 TDD/E2E、Runtime adapter、契约、文档和前端构建检查。
 
-### 当前 `partial`
+### R0 核心已完成
 
-- [ ] `R0-12` Provider contract：记录模型、协议、超时、成本、重试和结构化输出能力；不能只依赖一次 canary。
-- [ ] `R0-13` Run/Step/Attempt/Lineage/Gate 的完整可观测 read model 和前端 Run Inspector。
-- [ ] `R0-14` PIT fixture 集、时间切分 replay/holdout/shadow 和 baseline/candidate 对比。
-- [ ] `R0-15` SQLite backup、restore、integrity check、retention 和 startup recovery watchdog 自动循环。
-- [ ] `R0-16` R0 ReleaseManifest、完整 failure injection、安装/升级/回滚 runbook。
+- [x] `R0-12` Provider contract：配置、timeout、bounded retry、错误分类、usage/cost unknown/estimated 和预算 fail-closed。
+- [x] `R0-13` Run/Step/Attempt/Lineage/Gate 的规范化 read model 和前端 Run Inspector。
+- [x] `R0-14` 固定 PIT fixture、holdout replay、baseline/candidate 独立比较、Brier/net return。
+- [x] `R0-15` SQLite backup、restore、integrity、retention 工具和升级迁移；自动 watchdog 保留为后续调度能力。
+- [x] `R0-16` ReleaseManifest、failure injection、安装/升级/恢复 runbook 和离线 core acceptance。
 
 ### 下一批 `next`
 
-1. 补齐 `R0-12` Provider contract 和统一 timeout/retry/error 分类。
-2. 形成第一批固定 PIT fixtures，并建立 Fake/Replay 与 GPT-5.5 结果的同契约对照。
-3. 完善 Run Inspector 的阶段、耗时、模型调用、Gate 命中和降级原因展示，禁止直接显示无用原始 JSON。
-4. 增加 SQLite 备份恢复 smoke 和进程中断恢复测试。
-5. 生成 R0 ReleaseManifest，明确已验证、未验证和不能宣称的能力。
+R0 核心闭环已完成；下一目标只能另立 R1，并先锁定实时来源授权、事件游标和行情执行基准契约。
 
 ## R1：Realtime Event Engine
 
@@ -82,8 +82,8 @@ R1 开始真实直播监听或外部通知前，必须新增对应 ADR、Provide
 
 | 里程碑 | 必须具备 | 当前 |
 |---|---|---|
-| `R0-Core` | 文本到 Forecast/Outcome/Evaluation、Gate、账本、回放边界、TDD/SDD | `partial` |
-| `R0-Release` | Provider contract、backup/recovery、可观测 Run Inspector、ReleaseManifest | `next` |
+| `R0-Core` | 文本到 Forecast/Outcome/Evaluation、Gate、账本、回放边界、TDD/SDD | `done` |
+| `R0-Release` | Provider contract、backup/recovery、可观测 Run Inspector、ReleaseManifest | `done` |
 | `R1-Realtime` | 授权来源、事件调度、行情基准、Outcome 到期和通知 | `blocked/next` |
 | `R2-Workbench` | DSH MCP、完整观测、实验、候选晋级和回滚 | `planned` |
 | `R3-Domains` | 第二领域真实复用和按需远程部署 | `planned` |

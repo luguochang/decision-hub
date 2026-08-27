@@ -10,4 +10,4 @@
 `uv run uvicorn apps.hub_api.main:app --host 127.0.0.1 --port 8000`。
 
 ## 最近验证
-R0 scaffold。
+`tests/e2e` 覆盖文本 admission、PIT、Graph、Gate、Artifact、Outcome/Evaluation、Inspector 和 Provider 失败安全；生产启动使用 Alembic `upgrade head`，测试注入的 Database 才使用 `create_all`。

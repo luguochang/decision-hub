@@ -9,6 +9,7 @@ from .models import (
     OutcomeCreate,
     RunStatus,
     RunView,
+    StepView,
     TextEnvelope,
 )
 
@@ -21,5 +22,6 @@ __all__ = [
     "OutcomeCreate",
     "RunStatus",
     "RunView",
+    "StepView",
     "TextEnvelope",
 ]

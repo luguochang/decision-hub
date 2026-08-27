@@ -13,6 +13,7 @@ from packages.kernel.decision_hub_kernel.persistence.db import (
     ObservationRecord,
     SnapshotRecord,
 )
+from packages.kernel.decision_hub_kernel.ports.runtime import AgentExecutionError
 
 
 def test_api_observation_run_and_outcome(tmp_path: Path) -> None:
@@ -35,6 +36,23 @@ def test_api_observation_run_and_outcome(tmp_path: Path) -> None:
     run_view = run.json()
     assert run_view["artifact_id"]
     detail = client.get(f"/v1/runs/{body['run_id']}/view").json()
+    inspector = client.get(f"/v1/runs/{body['run_id']}/inspector")
+    assert inspector.status_code == 200
+    assert len(inspector.json()["calls"]) == 3
+    assert [step["step_name"] for step in inspector.json()["steps"]] == [
+        "mark_running",
+        "freeze_snapshot",
+        "research",
+        "gate_and_commit",
+    ]
+    assert all(step["status"] == "succeeded" for step in inspector.json()["steps"])
+    assert {call["role"] for call in inspector.json()["calls"]} == {
+        "policy_delta",
+        "counter_thesis",
+        "decision_synthesis",
+    }
+    assert all(call["status"] == "succeeded" for call in inspector.json()["calls"])
+    assert all(call["cost_status"] == "unknown" for call in inspector.json()["calls"])
     timeline = client.get(f"/v1/runs/{body['run_id']}/timeline")
     assert timeline.status_code == 200
     assert [item["event_type"] for item in timeline.json()["items"]] == [
@@ -109,6 +127,8 @@ def test_text_input_to_evaluation_output_contract(tmp_path: Path) -> None:
     assert run["artifact_id"] == artifact["artifact_id"]
     assert artifact["gate_status"] == "publish"
     assert artifact["facts"]
+    assert artifact["facts"] == [text]
+    assert all("Policy analysis:" not in fact for fact in artifact["facts"])
     assert artifact["citations"]
     assert artifact["counter_thesis"]
     assert {forecast["horizon"] for forecast in artifact["forecasts"]} == {
@@ -152,3 +172,23 @@ def test_text_input_to_evaluation_output_contract(tmp_path: Path) -> None:
     assert evaluation_body["brier_score"] == pytest.approx(
         (artifact["forecasts"][0]["probability"] - 1) ** 2
     )
+
+
+def test_inspector_preserves_provider_failure_code(tmp_path: Path) -> None:
+    database = Database(f"sqlite+pysqlite:///{tmp_path / 'failure.sqlite3'}")
+    app = create_app(database)
+    class FailingGraph:
+        async def ainvoke(self, _state: dict[str, object], **_kwargs: object) -> None:
+            raise AgentExecutionError("provider_timeout", "fixture timeout", retryable=True)
+
+    app.state.analyzer.graph = FailingGraph()
+    client = TestClient(app, raise_server_exceptions=False)
+    response = client.post(
+        "/v1/observations",
+        headers={"Idempotency-Key": "provider-timeout"},
+        json={"text": "fixture provider timeout", "source_id": "failure-fixture"},
+    )
+    assert response.status_code == 202
+    run = client.get(response.json()["status_url"]).json()
+    assert run["status"] == "failed"
+    assert run["error_code"] == "provider_timeout"

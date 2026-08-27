@@ -1,12 +1,14 @@
 # Decision Hub 分阶段执行设计
 
 版本：`EXECUTION-2026-08-26.v1`
-状态：`proposed`，等待 owner 确认后才启动下一阶段实现。
+状态：`accepted`（owner 已确认）；按本文件和当前 Stage Charter 串行执行任务。
 适用范围：R0 文本核心、R1 实时事件、R2 Workbench/自主进化、R3 多领域与部署扩展。
 
 ## 1. 这份文档解决什么问题
 
 `DECISION_HUB_PRODUCT_ARCHITECTURE_V1.md` 是架构、契约和边界的唯一基线；`docs/ROADMAP.md` 是里程碑清单。本文件是两者之间的执行层，解决每次交给 Codex 一个小目标时容易出现的四类问题：
+
+本文件必须与 [项目宪章](engineering/PROJECT_CHARTER.md)、[R0-B Stage Charter](stages/R0-B_PROVIDER_RELIABILITY_BOUNDARY.md)（已完成的历史阶段记录）、[R0 Core Completion 实现方案](stages/R0_CORE_COMPLETION_PLAN.md) 和 [全局开发治理规范](engineering/DEVELOPMENT_GOVERNANCE.md) 一起使用：宪章负责保持产品目的短而稳定，Stage Charter 负责工作包边界和验收门，Core Completion 方案负责总目标及完整闭环，治理规范负责 SDD/BDD/TDD、上下文压缩和变更留痕，本文件负责任务拆分。
 
 1. 没有先定义任务边界，开发过程中不断添加无调用方的抽象。
 2. 把 LangChain、LangGraph、Pydantic、OpenTelemetry 等已有能力重新实现一遍。
@@ -71,9 +73,9 @@ TextEnvelope
 |---|---|---|---|---|
 | P0 | 仓库、契约、文档和测试纪律 | Git、Pydantic、codegen、pytest | `done` | 可追溯提交、无 secret、规则可执行 |
 | R0-A | 文本输入到可审计决策纵向链 | FastAPI、SQLAlchemy、Alembic、LangGraph | `done` | Fake/Replay E2E 通过 |
-| R0-B | Provider 兼容和失败语义 | LangChain OpenAI、LangGraph RetryPolicy、OpenTelemetry | `partial` | Chat/Responses canary、错误和预算测试通过 |
-| R0-C | 观测、恢复和可回放评测 | LangGraph checkpoint、SQLite、pytest | `partial` | Run Inspector、backup/recovery、PIT replay 通过 |
-| R0-D | R0 发布基线 | ReleaseManifest、runbook、CI | `next` | R0 Definition of Done 全部满足 |
+| R0-B | Provider 兼容和失败语义 | LangChain OpenAI、LangGraph RetryPolicy、OpenTelemetry | `done` | Chat/Responses canary、错误和预算测试通过 |
+| R0-C | 观测、恢复和可回放评测 | LangGraph checkpoint、SQLite、pytest | `done` | Run Inspector、backup/recovery、PIT replay 通过 |
+| R0-D | R0 发布基线 | ReleaseManifest、runbook、CI | `done` | R0 Definition of Done 全部满足 |
 | R1 | 真实事件来源和按需触发 | SourcePlugin、scheduler、outbox | `planned` | 授权来源、事件游标、行情基准和通知测试通过 |
 | R2 | Workbench 与自主进化 | DSH MCP、replay/shadow、Promotion | `planned` | 候选可比较、人工晋级、可回滚 |
 | R3 | 第二领域和按需部署扩展 | Domain Extension、PostgreSQL 迁移出口 | `planned` | 第二领域复用 Kernel，不复制主链 |
@@ -247,11 +249,11 @@ TextEnvelope
 
 任务：
 
-- [ ] 生成 `ReleaseManifest`：代码、schema、pack、strategy、runtime、provider policy、migration、测试摘要。
-- [ ] 完成本地 Docker/原生运行手册，明确数据目录、备份、API、前端和 canary 配置。
-- [ ] 运行 Python、契约、类型、前端、E2E、replay、文档和安全扫描。
-- [ ] 记录已完成、partial、blocked 和明确不能宣称的能力。
-- [ ] owner 通过 R0 gate 后，冻结 R1 的契约范围。
+- [x] 生成 `ReleaseManifest`：代码、schema、pack、strategy、runtime、provider policy、migration、测试摘要。
+- [x] 完成本地 Docker/原生运行手册，明确数据目录、备份、API、前端和 canary 配置。
+- [x] 运行 Python、契约、类型、前端、E2E、replay、文档和安全扫描。
+- [x] 记录已完成、partial、blocked 和明确不能宣称的能力。
+- [x] R0 gate 通过后，冻结 R1 的契约范围。
 
 R0 退出条件：文本输入到 Outcome/Evaluation 可回放；Provider 失败可降级；账本和 checkpoint 可恢复；Run Inspector 能解释；没有 secret；没有未记录的临时架构。
 
@@ -443,19 +445,21 @@ docs/ROADMAP.md 或 ADR（按需）。
 不要 push，不要写入任何 secret。
 ```
 
-### 12.3 第一批推荐任务卡
+### 12.3 R0 已完成任务卡顺序（历史记录）
 
-在 owner 确认本文件后，按以下顺序逐个开 Codex 任务，不要并行扩大范围：
+以下记录 R0 的实际执行顺序，全部已完成，不是当前待办；后续任务必须先建立并确认新的 Stage Charter：
 
-1. `R0-B1` ProviderConfig 和 capability manifest。
-2. `R0-B4` timeout/retry/error taxonomy，先以 mock transport 验证。
-3. `R0-B5` token usage/cost metadata 投影。
-4. `R0-C4` 第一批 PIT fixture 和 replay/holdout 骨架。
-5. `R0-C1` Run/Step/Attempt/Call Query View。
-6. `R0-C2` checkpoint 中断恢复和幂等提交。
-7. `R0-C3` backup/restore/integrity runbook 与 smoke。
-8. `R0-C5` Run Inspector 前端。
-9. `R0-D` ReleaseManifest 和 R0 release gate。
+1. `R0-B1` ProviderConfig 和 capability manifest（`done`）。
+2. `R0-B4` timeout/retry/error taxonomy（`done`）。
+3. `R0-B5` token usage/cost metadata 投影（`done`）。
+4. `R0-C4` PIT fixture 和 replay/holdout（`done`）。
+5. `R0-C1` Run/Step/Attempt/Call Query View（`done`）。
+6. `R0-C2` checkpoint 中断恢复和幂等提交（`done`）。
+7. `R0-C3` backup/restore/integrity runbook 与 smoke（`done`）。
+8. `R0-C5` Run Inspector 前端（`done`）。
+9. `R0-D` ReleaseManifest 和 R0 release gate（`done`）。
+
+下一目标：先由 owner 确认 R1 实时来源 Stage Charter；在确认前不创建 R1 代码任务。
 
 每个任务结束时必须形成一个独立 commit；commit message 使用 `<type>: <single outcome>`，例如：
 
@@ -484,9 +488,9 @@ chore: publish R0 release manifest
 [ ] commit 独立、可回滚，没有自动 push
 ```
 
-## 14. Owner 确认项
+## 14. Owner 确认记录
 
-本文件进入 `accepted` 前只需要确认执行纪律，不需要重新讨论已冻结的产品架构：
+Owner 已确认以下执行纪律，不重新讨论已冻结的产品架构：
 
 - 是否接受“架构基线不变，执行设计作为任务拆分层”的方式。
 - 是否接受 R0-B -> R0-C -> R0-D 的顺序，不先做 R1 实时来源或 R2 DSH 集成。
@@ -494,4 +498,4 @@ chore: publish R0 release manifest
 - 是否接受所有超时/重试/结构化输出优先使用 LangChain/LangGraph 能力，本项目只做策略配置、错误映射和产品状态投影。
 - 是否接受每次 Codex 只执行一个 Task ID，并以独立 commit、测试和文档作为完成单位。
 
-Owner 确认后，将本文件状态改为 `accepted`，再启动第一张 `R0-B1` 任务卡；在此之前不开始下一阶段代码。
+本文件和 R0-B Stage Charter 已进入 `accepted`；`R0-CORE-COMPLETE` 已完成。下一目标必须重新生成 Task Context Manifest，并先由 owner 确认 R1 的实时来源契约和授权边界，不能把 R0 的授权扩展到后续任务。

@@ -7,6 +7,9 @@ export {
   gateStatusSchema,
   runStatusSchema,
   runViewSchema,
+  callViewSchema,
+  stepViewSchema,
+  runInspectorSchema,
 } from '@decision-hub/contracts-ts'
 export type {
   ArtifactView,
@@ -14,4 +17,7 @@ export type {
   Forecast,
   GateStatus,
   RunView,
+  CallView,
+  StepView,
+  RunInspector,
 } from '@decision-hub/contracts-ts'

@@ -1,15 +1,26 @@
 from __future__ import annotations
 
+import asyncio
 import os
 import time
+from datetime import UTC, datetime
 from typing import Any
 
 from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, ConfigDict, Field, SecretStr
 
-from packages.kernel.decision_hub_kernel.ports.runtime import AgentRequest, AgentResult
+from packages.kernel.decision_hub_kernel.ports.runtime import (
+    AgentExecutionError,
+    AgentRequest,
+    AgentResult,
+    AgentUsage,
+)
 from packages.runtime_adapters.fake_runtime.runtime import FakeAgentRuntime
+from packages.runtime_adapters.langgraph_agent.provider_config import (
+    ProviderConfig,
+    validate_api_mode,
+)
 
 
 class AgentPayload(BaseModel):
@@ -42,22 +53,26 @@ class LangGraphAgentRuntime:
     runtime_id = "langgraph-native"
     runtime_version = "langgraph-native.v1"
 
-    def __init__(self) -> None:
+    def __init__(self, provider_config: ProviderConfig | None = None) -> None:
         self._fallback = FakeAgentRuntime()
         self.enabled = os.getenv("DECISION_HUB_LLM_ENABLED", "0") == "1"
-        self.api_mode = self.resolve_api_mode()
+        self.provider_config = provider_config or ProviderConfig.from_env()
+        self.capability_manifest = self.provider_config.capability_manifest()
+        self.api_mode = self.provider_config.api_mode
+        self.max_attempts = self.provider_config.max_retries + 1
+        self.cost_budget = self.provider_config.cost_budget
         self._agent: Any = None
         if self.enabled:
             self._agent = self._build_agent()
 
     @staticmethod
     def resolve_api_mode() -> str:
-        mode = os.getenv("DECISION_HUB_LLM_API_MODE", "responses").strip().lower()
-        if mode not in {"responses", "chat"}:
+        try:
+            return validate_api_mode(os.getenv("DECISION_HUB_LLM_API_MODE", "responses"))
+        except ValueError as exc:
             raise RuntimeError(
                 "DECISION_HUB_LLM_API_MODE must be either 'responses' or 'chat'"
-            )
-        return mode
+            ) from exc
 
     def _build_agent(self) -> Any:
         raw_key = (
@@ -66,19 +81,35 @@ class LangGraphAgentRuntime:
             or os.getenv("SUB2API_API_KEY")
         )
         if not raw_key:
-            raise RuntimeError(
+            raise AgentExecutionError(
+                "configuration_invalid",
                 "DECISION_HUB_LLM_ENABLED=1 requires an OpenAI-compatible API key "
-                "in OPENAI_API_KEY, DEEPSEEK_API_KEY, or SUB2API_API_KEY"
+                "in OPENAI_API_KEY, DEEPSEEK_API_KEY, or SUB2API_API_KEY",
+            )
+        if not self.capability_manifest.supports_structured_output:
+            raise AgentExecutionError(
+                "configuration_invalid",
+                "configured Provider does not support structured output",
+                provider_id=self.provider_config.provider_id,
+                model=self.provider_config.model,
             )
         model = ChatOpenAI(
-            model=os.getenv("DECISION_HUB_MODEL", "deepseek-chat"),
+            model=self.provider_config.model,
             api_key=SecretStr(raw_key),
-            base_url=os.getenv("OPENAI_BASE_URL") or os.getenv("SUB2API_BASE_URL"),
+            base_url=(
+                str(self.provider_config.base_url)
+                if self.provider_config.base_url is not None
+                else None
+            ),
             temperature=0,
+            timeout=self.provider_config.timeout_seconds,
+            # Workflow retries are owned by LangGraph so each attempt is visible in RunCall.
+            max_retries=0,
+            max_completion_tokens=self.provider_config.token_budget,
             # OpenAI-compatible relays may expose Chat Completions without Responses API.
             # Responses is the default for GPT-5-compatible relays; Chat is an explicit
             # fallback for providers that expose only /chat/completions.
-            use_responses_api=self.api_mode == "responses",
+            use_responses_api=self.provider_config.api_mode == "responses",
         )
         return create_agent(
             model,
@@ -104,19 +135,122 @@ class LangGraphAgentRuntime:
             "Use the evidence IDs as citations when directly supported. Fill every schema field; "
             "use an empty string or empty list for fields outside this role."
         )
-        result = await self._agent.ainvoke({"messages": [{"role": "user", "content": prompt}]})
+        if self._agent is None:
+            raise AgentExecutionError("configuration_invalid", "agent is not configured")
+        timeout_seconds = max(
+            0.001,
+            (request.deadline_at - datetime.now(UTC)).total_seconds(),
+        )
+        try:
+            async with asyncio.timeout(timeout_seconds):
+                result = await self._agent.ainvoke(
+                    {"messages": [{"role": "user", "content": prompt}]}
+                )
+        except TimeoutError as exc:
+            raise AgentExecutionError(
+                "provider_timeout",
+                "provider call exceeded the request deadline",
+                retryable=True,
+                provider_id=self.provider_config.provider_id,
+                model=self.provider_config.model,
+            ) from exc
+        except BaseException as exc:
+            raise self._map_provider_error(exc) from exc
         structured = result.get("structured_response")
-        if isinstance(structured, AgentPayload):
-            payload = structured.model_dump()
-        elif isinstance(structured, dict):
-            payload = structured
-        else:
-            raise ValueError("agent_structured_response_missing")
+        try:
+            payload = AgentPayload.model_validate(structured).model_dump()
+        except Exception as exc:
+            raise AgentExecutionError(
+                "structured_output_invalid",
+                "provider response did not match AgentPayload",
+                provider_id=self.provider_config.provider_id,
+                model=self.provider_config.model,
+            ) from exc
+        usage = self._extract_usage(result)
         return AgentResult(
             role=request.role,
             payload=payload,
             runtime_id=self.runtime_id,
             runtime_version=self.runtime_version,
             latency_ms=round((time.perf_counter() - started) * 1000),
-            cost_usd=0,
+            cost_usd=usage.cost_usd,
+            usage=usage,
+            provider_id=self.provider_config.provider_id,
+            model=self.provider_config.model,
+            api_mode=self.provider_config.api_mode,
+        )
+
+    def _map_provider_error(self, error: BaseException) -> AgentExecutionError:
+        text = str(error).lower()
+        status = getattr(error, "status_code", None)
+        if status == 429 or "rate limit" in text or "rate_limited" in text:
+            return AgentExecutionError(
+                "provider_rate_limited",
+                "provider rate limit reached",
+                retryable=True,
+                provider_id=self.provider_config.provider_id,
+                model=self.provider_config.model,
+            )
+        if isinstance(status, int) and status >= 500:
+            return AgentExecutionError(
+                "provider_unavailable",
+                "provider returned a server error",
+                retryable=True,
+                provider_id=self.provider_config.provider_id,
+                model=self.provider_config.model,
+            )
+        return AgentExecutionError(
+            "unknown_runtime_error",
+            "provider runtime failed",
+            provider_id=self.provider_config.provider_id,
+            model=self.provider_config.model,
+        )
+
+    def _extract_usage(self, result: dict[str, object]) -> AgentUsage:
+        usage = result.get("usage_metadata")
+        if not isinstance(usage, dict):
+            messages = result.get("messages")
+            if isinstance(messages, list):
+                for message in messages:
+                    candidate = getattr(message, "usage_metadata", None)
+                    if isinstance(candidate, dict):
+                        usage = candidate
+                        break
+        if not isinstance(usage, dict):
+            return AgentUsage(cost_status="unknown")
+        prompt_tokens = usage.get("input_tokens", usage.get("prompt_tokens"))
+        completion_tokens = usage.get("output_tokens", usage.get("completion_tokens"))
+        total_tokens = usage.get("total_tokens")
+        if (
+            total_tokens is None
+            and isinstance(prompt_tokens, int)
+            and isinstance(completion_tokens, int)
+        ):
+            total_tokens = prompt_tokens + completion_tokens
+        cost_usd: float | None = None
+        cost_status = "unknown"
+        if (
+            isinstance(prompt_tokens, int)
+            and isinstance(completion_tokens, int)
+            and self.provider_config.input_cost_per_million_tokens is not None
+            and self.provider_config.output_cost_per_million_tokens is not None
+        ):
+            cost_usd = (
+                prompt_tokens
+                * self.provider_config.input_cost_per_million_tokens
+                + completion_tokens
+                * self.provider_config.output_cost_per_million_tokens
+            ) / 1_000_000
+            cost_status = "estimated"
+        return AgentUsage(
+            prompt_tokens=prompt_tokens if isinstance(prompt_tokens, int) else None,
+            completion_tokens=completion_tokens if isinstance(completion_tokens, int) else None,
+            total_tokens=total_tokens if isinstance(total_tokens, int) else None,
+            cost_usd=cost_usd,
+            cost_status=cost_status,
+            pricing_version=(
+                self.provider_config.pricing_version
+                if cost_status == "estimated"
+                else None
+            ),
         )

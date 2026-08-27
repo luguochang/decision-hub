@@ -30,6 +30,12 @@ class CommitDecisionService:
     def commit(
         self, run_id: str, event_id: str, candidate: dict[str, object], gate: GateResult
     ) -> str:
+        with self.database.session() as session:
+            existing_run = session.get(RunRecord, run_id)
+            if not existing_run:
+                raise KeyError(run_id)
+            if existing_run.artifact_id:
+                return existing_run.artifact_id
         artifact_id = f"art_{uuid.uuid4().hex}"
         now = utcnow()
         forecasts: list[Forecast] = []
