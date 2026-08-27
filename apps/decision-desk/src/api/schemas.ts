@@ -12,6 +12,11 @@ export {
   runInspectorSchema,
   productHealthSchema,
   pilotReadinessReportSchema,
+  researchMemoSchema,
+  evolutionOverviewSchema,
+  promotionDecisionResultSchema,
+  promotionReviewSchema,
+  workbenchOverviewSchema,
 } from '@decision-hub/contracts-ts'
 export type {
   ArtifactView,
@@ -24,4 +29,11 @@ export type {
   RunInspector,
   ProductHealth,
   PilotReadinessReport,
+  ResearchMemo,
+  EvolutionOverview,
+  PromotionDecisionResult,
+  PromotionDecisionCommand,
+  PromotionReview,
+  PromotionReviewRequest,
+  WorkbenchOverview,
 } from '@decision-hub/contracts-ts'

@@ -38,21 +38,41 @@ def test_api_observation_run_and_outcome(tmp_path: Path) -> None:
     detail = client.get(f"/v1/runs/{body['run_id']}/view").json()
     inspector = client.get(f"/v1/runs/{body['run_id']}/inspector")
     assert inspector.status_code == 200
-    assert len(inspector.json()["calls"]) == 3
-    assert [step["step_name"] for step in inspector.json()["steps"]] == [
+    inspector_body = inspector.json()
+    assert len(inspector_body["calls"]) == 3
+    assert [step["step_name"] for step in inspector_body["steps"]] == [
         "mark_running",
         "freeze_snapshot",
         "research",
         "gate_and_commit",
     ]
-    assert all(step["status"] == "succeeded" for step in inspector.json()["steps"])
-    assert {call["role"] for call in inspector.json()["calls"]} == {
+    assert all(step["status"] == "succeeded" for step in inspector_body["steps"])
+    assert {call["role"] for call in inspector_body["calls"]} == {
         "policy_delta",
         "counter_thesis",
         "decision_synthesis",
     }
-    assert all(call["status"] == "succeeded" for call in inspector.json()["calls"])
-    assert all(call["cost_status"] == "unknown" for call in inspector.json()["calls"])
+    assert all(call["status"] == "succeeded" for call in inspector_body["calls"])
+    assert all(call["cost_status"] == "unknown" for call in inspector_body["calls"])
+    assert inspector_body["versions"]["strategy_version"] == "baseline.v1"
+    assert inspector_body["versions"]["runtime_version"]
+    assert inspector_body["orchestration"] == {
+        "mode": "fixed_graph",
+        "supervisor_role": None,
+        "planned_capabilities": ["counter_thesis", "policy_delta"],
+        "required_capabilities": ["counter_thesis", "policy_delta"],
+        "specialist_coverage": ["counter_thesis", "policy_delta"],
+        "missing_capabilities": [],
+        "replan_count": 0,
+        "experiment_refs": [],
+    }
+    assert len(inspector_body["evidence_lineage"]) == 1
+    evidence = inspector_body["evidence_lineage"][0]
+    assert set(evidence) == {
+        "evidence_id", "source_id", "source_type", "observed_at",
+        "published_at", "received_at", "cutoff_at", "content_hash",
+    }
+    assert evidence["received_at"] <= evidence["cutoff_at"]
     timeline = client.get(f"/v1/runs/{body['run_id']}/timeline")
     assert timeline.status_code == 200
     assert [item["event_type"] for item in timeline.json()["items"]] == [
@@ -61,6 +81,13 @@ def test_api_observation_run_and_outcome(tmp_path: Path) -> None:
         "research.completed",
         "decision.committed",
     ]
+    assert all(
+        set(item) == {
+            "sequence_no", "event_type", "occurred_at",
+            "reference_type", "reference_id",
+        }
+        for item in timeline.json()["items"]
+    )
     forecast_id = detail["artifact"]["forecasts"][0]["forecast_id"]
     outcome = client.post(
         "/v1/outcomes",

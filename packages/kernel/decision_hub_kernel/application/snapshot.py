@@ -29,6 +29,10 @@ class SnapshotService:
                 source_id=envelope.source_id,
                 source_type=envelope.source_type.value,
                 observed_at=envelope.observed_at.isoformat(),
+                published_at=(
+                    envelope.published_at.isoformat() if envelope.published_at else None
+                ),
+                received_at=envelope.received_at.isoformat(),
                 cutoff_at=cutoff.isoformat(),
                 content_hash=envelope.content_hash,
             )
@@ -45,7 +49,7 @@ class SnapshotService:
                     evidence_json=json.dumps(evidence, ensure_ascii=False),
                 )
             )
-        return snapshot_id, [evidence[0]["evidence_id"]]
+        return snapshot_id, [str(evidence[0]["evidence_id"])]
 
     def freeze_for_run(self, run_id: str, event_id: str) -> tuple[str, list[str]]:
         with self.database.session() as session:
@@ -77,6 +81,12 @@ class SnapshotService:
                     source_id=observation.source_id,
                     source_type=observation.source_type,
                     observed_at=observation.observed_at.isoformat(),
+                    published_at=(
+                        observation.published_at.isoformat()
+                        if observation.published_at
+                        else None
+                    ),
+                    received_at=observation.received_at.isoformat(),
                     cutoff_at=observation.received_at.isoformat(),
                     content_hash=observation.content_hash,
                 )
@@ -105,14 +115,18 @@ def _evidence_item(
     source_id: str,
     source_type: str,
     observed_at: str,
+    published_at: str | None,
+    received_at: str,
     cutoff_at: str,
     content_hash: str,
-) -> dict[str, str]:
+) -> dict[str, str | None]:
     semantic = {
         "text": text,
         "source_id": source_id,
         "source_type": source_type,
         "observed_at": observed_at,
+        "published_at": published_at,
+        "received_at": received_at,
         "cutoff_at": cutoff_at,
         "content_hash": content_hash,
     }
