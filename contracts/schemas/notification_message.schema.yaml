@@ -1,0 +1,13 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/notification-message.schema.json
+title: NotificationMessage
+type: object
+additionalProperties: false
+required: [artifact_id, channel, dedupe_key, subject, body, created_at]
+properties:
+  artifact_id: {type: string, minLength: 1}
+  channel: {type: string, minLength: 1}
+  dedupe_key: {type: string, minLength: 1}
+  subject: {type: string, minLength: 1}
+  body: {type: string, minLength: 1}
+  created_at: {type: string, format: date-time}

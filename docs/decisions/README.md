@@ -6,6 +6,8 @@
 
 - [ADR-0001 R0 实现基线](ADR-0001-r0-implementation-baseline.md)
 - [ADR-0002 R0 核心观测、回放与成本语义](ADR-0002-r0-core-observability-replay.md)
+- [ADR-0003 R1 实时来源与可插拔适配器边界](ADR-0003-r1-realtime-plugin-boundary.md)
+- [ADR-0004 冻结历史 Alembic schema snapshot](ADR-0004-freeze-alembic-schema-snapshots.md)
 
 ## 模板
 

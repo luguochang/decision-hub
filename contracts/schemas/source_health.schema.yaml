@@ -1,0 +1,16 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/source-health.schema.json
+title: SourceHealth
+type: object
+additionalProperties: false
+required: [source_id, status, cursor, last_success_at, last_error_at, consecutive_failures, latency_ms, error_code, next_poll_at]
+properties:
+  source_id: {type: string, minLength: 1}
+  status: {type: string}
+  cursor: {type: [string, 'null']}
+  last_success_at: {type: [string, 'null'], format: date-time}
+  last_error_at: {type: [string, 'null'], format: date-time}
+  consecutive_failures: {type: integer, minimum: 0}
+  latency_ms: {type: [integer, 'null'], minimum: 0}
+  error_code: {type: [string, 'null']}
+  next_poll_at: {type: [string, 'null'], format: date-time}

@@ -1,0 +1,13 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/product-health.schema.json
+title: ProductHealth
+type: object
+additionalProperties: false
+required: [status, running_runs, failed_runs, sources]
+properties:
+  status: {type: string, enum: [ok, degraded]}
+  running_runs: {type: integer, minimum: 0}
+  failed_runs: {type: integer, minimum: 0}
+  sources:
+    type: array
+    items: {$ref: source-health.schema.json}

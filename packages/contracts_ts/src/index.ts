@@ -3,6 +3,33 @@ import { z } from 'zod'
 export const runStatusSchema = z.enum(['admitted', 'running', 'completed', 'degraded', 'failed', 'cancelled'])
 export const gateStatusSchema = z.enum(['publish', 'degraded', 'research_only', 'reject'])
 export const directionSchema = z.enum(['long', 'short', 'neutral', 'no_trade'])
+export const sourceManifestSchema = z.object({
+  source_id: z.string().min(1), source_type: z.string().min(1), version: z.string().min(1),
+  capabilities: z.array(z.string()), authority_level: z.string(),
+  poll_interval_seconds: z.number().positive(), max_batch: z.number().int().positive(),
+  allowed_domains: z.array(z.string()).default([]), enabled: z.boolean(),
+})
+export const sourceHealthSchema = z.object({
+  source_id: z.string(), status: z.string(), cursor: z.string().nullable(),
+  last_success_at: z.string().nullable(), last_error_at: z.string().nullable(),
+  consecutive_failures: z.number().int().nonnegative(), latency_ms: z.number().nullable(),
+  error_code: z.string().nullable(), next_poll_at: z.string().nullable(),
+})
+export const marketQuoteSchema = z.object({
+  instrument: z.string(), observed_at: z.string(), received_at: z.string(),
+  bid: z.number().nullable(), ask: z.number().nullable(), last: z.number().nullable(),
+  volume: z.number().nullable(), source_id: z.string(),
+  quality_status: z.enum(['observed', 'estimated', 'unavailable']),
+  benchmark: z.enum(['first_executable', 'vwap_1m', 'last', 'none']),
+})
+export const notificationMessageSchema = z.object({
+  artifact_id: z.string(), channel: z.string(), dedupe_key: z.string(),
+  subject: z.string(), body: z.string(), created_at: z.string(),
+})
+export const productHealthSchema = z.object({
+  status: z.enum(['ok', 'degraded']), running_runs: z.number().int().nonnegative(),
+  failed_runs: z.number().int().nonnegative(), sources: z.array(sourceHealthSchema),
+})
 
 export const forecastSchema = z.object({
   forecast_id: z.string(), artifact_id: z.string(), instrument: z.string(), horizon: z.string(),
@@ -72,3 +99,8 @@ export type DeskSummary = z.infer<typeof deskSummarySchema>
 export type CallView = z.infer<typeof callViewSchema>
 export type StepView = z.infer<typeof stepViewSchema>
 export type RunInspector = z.infer<typeof runInspectorSchema>
+export type SourceManifest = z.infer<typeof sourceManifestSchema>
+export type SourceHealth = z.infer<typeof sourceHealthSchema>
+export type MarketQuote = z.infer<typeof marketQuoteSchema>
+export type NotificationMessage = z.infer<typeof notificationMessageSchema>
+export type ProductHealth = z.infer<typeof productHealthSchema>

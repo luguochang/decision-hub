@@ -68,6 +68,69 @@ class ObservationCreate(BaseModel):
     source_url: HttpUrl | None = None
 
 
+class SourceManifest(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    source_id: str = Field(min_length=1)
+    source_type: str = Field(min_length=1)
+    version: str = Field(min_length=1)
+    capabilities: tuple[str, ...] = ()
+    authority_level: str = "unverified"
+    poll_interval_seconds: float = Field(default=60, gt=0)
+    max_batch: int = Field(default=50, gt=0, le=500)
+    allowed_domains: tuple[str, ...] = ()
+    enabled: bool = True
+
+
+class SourceHealth(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    source_id: str = Field(min_length=1)
+    status: str = "unknown"
+    cursor: str | None = None
+    last_success_at: datetime | None = None
+    last_error_at: datetime | None = None
+    consecutive_failures: int = Field(default=0, ge=0)
+    latency_ms: int | None = Field(default=None, ge=0)
+    error_code: str | None = None
+    next_poll_at: datetime | None = None
+
+
+class ProductHealth(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    status: str
+    running_runs: int = Field(ge=0)
+    failed_runs: int = Field(ge=0)
+    sources: list[SourceHealth] = Field(default_factory=list)
+
+
+class MarketQuote(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    instrument: str = Field(min_length=1)
+    observed_at: datetime
+    received_at: datetime
+    bid: float | None = Field(default=None, ge=0)
+    ask: float | None = Field(default=None, ge=0)
+    last: float | None = Field(default=None, ge=0)
+    volume: float | None = Field(default=None, ge=0)
+    source_id: str = Field(min_length=1)
+    quality_status: str = "observed"
+    benchmark: str = "first_executable"
+
+
+class NotificationMessage(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    artifact_id: str = Field(min_length=1)
+    channel: str = Field(min_length=1)
+    dedupe_key: str = Field(min_length=1)
+    subject: str = Field(min_length=1)
+    body: str = Field(min_length=1)
+    created_at: datetime
+
+
 class Forecast(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

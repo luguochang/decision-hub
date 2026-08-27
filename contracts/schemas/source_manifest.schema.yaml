@@ -1,0 +1,16 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/source-manifest.schema.json
+title: SourceManifest
+type: object
+additionalProperties: false
+required: [source_id, source_type, version, capabilities, authority_level, poll_interval_seconds, max_batch, enabled]
+properties:
+  source_id: {type: string, minLength: 1}
+  source_type: {type: string, minLength: 1}
+  version: {type: string, minLength: 1}
+  capabilities: {type: array, items: {type: string}}
+  authority_level: {type: string}
+  poll_interval_seconds: {type: number, exclusiveMinimum: 0}
+  max_batch: {type: integer, minimum: 1, maximum: 500}
+  allowed_domains: {type: array, items: {type: string}}
+  enabled: {type: boolean}

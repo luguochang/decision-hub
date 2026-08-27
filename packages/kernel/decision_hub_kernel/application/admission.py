@@ -22,9 +22,7 @@ def _hash_text(text: str) -> str:
 
 
 class AdmissionService:
-    def __init__(
-        self, database: Database, *, clock: Callable[[], datetime] = utcnow
-    ) -> None:
+    def __init__(self, database: Database, *, clock: Callable[[], datetime] = utcnow) -> None:
         self.database = database
         self.clock = clock
 
@@ -44,35 +42,50 @@ class AdmissionService:
             source_url=request.source_url,
             content_hash=content_hash,
         )
+        result = self.admit_envelopes((envelope,))
+        return result[0]
+
+    def admit_envelopes(
+        self, envelopes: tuple[TextEnvelope, ...]
+    ) -> list[tuple[str, TextEnvelope, bool]]:
+        """Atomically admit a source batch while preserving PIT timestamps and revisions."""
+        results: list[tuple[str, TextEnvelope, bool]] = []
         with self.database.session() as session:
-            existing = session.query(ObservationRecord).filter_by(content_hash=content_hash).first()
-            if existing:
-                return existing.event_id, envelope, False
-            event_id = f"evt_{uuid.uuid4().hex}"
-            observation_id = f"obs_{uuid.uuid4().hex}"
-            session.add(
-                EventRecord(
-                    event_id=event_id,
-                    event_type=request.event_hint or "macro_event",
-                    occurred_at=observed_at,
-                    received_at=now,
+            for envelope in envelopes:
+                existing = (
+                    session.query(ObservationRecord)
+                    .filter_by(content_hash=envelope.content_hash)
+                    .first()
                 )
-            )
-            session.add(
-                ObservationRecord(
-                    observation_id=observation_id,
-                    event_id=event_id,
-                    source_id=envelope.source_id,
-                    source_type=envelope.source_type.value,
-                    observed_at=envelope.observed_at,
-                    published_at=envelope.published_at,
-                    received_at=envelope.received_at,
-                    language=envelope.language,
-                    text=envelope.raw_text,
-                    content_hash=content_hash,
-                    source_url=str(envelope.source_url) if envelope.source_url else None,
-                    event_hint=envelope.event_hint,
-                    revision_of=envelope.revision_of,
+                if existing:
+                    results.append((existing.event_id, envelope, False))
+                    continue
+                event_id = f"evt_{uuid.uuid4().hex}"
+                observation_id = f"obs_{uuid.uuid4().hex}"
+                session.add(
+                    EventRecord(
+                        event_id=event_id,
+                        event_type=envelope.event_hint or "macro_event",
+                        occurred_at=envelope.observed_at,
+                        received_at=envelope.received_at,
+                    )
                 )
-            )
-            return event_id, envelope, True
+                session.add(
+                    ObservationRecord(
+                        observation_id=observation_id,
+                        event_id=event_id,
+                        source_id=envelope.source_id,
+                        source_type=envelope.source_type.value,
+                        observed_at=envelope.observed_at,
+                        published_at=envelope.published_at,
+                        received_at=envelope.received_at,
+                        language=envelope.language,
+                        text=envelope.raw_text,
+                        content_hash=envelope.content_hash,
+                        source_url=str(envelope.source_url) if envelope.source_url else None,
+                        event_hint=envelope.event_hint,
+                        revision_of=envelope.revision_of,
+                    )
+                )
+                results.append((event_id, envelope, True))
+        return results

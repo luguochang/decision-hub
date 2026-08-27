@@ -33,12 +33,21 @@ from packages.contracts_py.decision_hub_contracts.models import (
     RunInspectorView,
     RunStatus,
     RunView,
+    SourceHealth,
+    SourceManifest,
     StepView,
 )
 
 
 def utcnow() -> datetime:
     return datetime.now(UTC)
+
+
+def as_utc(value: datetime | None) -> datetime | None:
+    """Normalize SQLite's timezone-less datetime values at the public boundary."""
+    if value is None:
+        return None
+    return value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)
 
 
 class Base(DeclarativeBase):
@@ -144,9 +153,7 @@ class RunStepRecord(Base):
     status: Mapped[str] = mapped_column(String(32), default="running")
     attempt: Mapped[int] = mapped_column(Integer, default=1)
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    finished_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     latency_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
     error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
 
@@ -230,6 +237,25 @@ class OutboxRecord(Base):
     dedupe_key: Mapped[str] = mapped_column(String(256), unique=True)
     attempts: Mapped[int] = mapped_column(Integer, default=0)
     sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    next_attempt_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    failed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
+
+class SourceStateRecord(Base):
+    __tablename__ = "source_states"
+    source_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    source_type: Mapped[str] = mapped_column(String(64))
+    manifest_version: Mapped[str] = mapped_column(String(64))
+    cursor: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(String(32), default="unknown")
+    last_success_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_error_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    consecutive_failures: Mapped[int] = mapped_column(Integer, default=0)
+    latency_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    next_poll_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 class Database:
@@ -323,9 +349,7 @@ class Database:
         payload_hash = hashlib.sha256(serialized.encode("utf-8")).hexdigest()
         with self.session() as session:
             existing = (
-                session.query(RunRoleOutputRecord)
-                .filter_by(run_id=run_id, role=role)
-                .first()
+                session.query(RunRoleOutputRecord).filter_by(run_id=run_id, role=role).first()
             )
             if existing:
                 return existing.output_id
@@ -353,15 +377,9 @@ class Database:
             raise ValueError("role output is invalid")
         return payload
 
-    def find_role_output(
-        self, run_id: str, role: str
-    ) -> tuple[str, dict[str, object]] | None:
+    def find_role_output(self, run_id: str, role: str) -> tuple[str, dict[str, object]] | None:
         with self.session() as session:
-            output = (
-                session.query(RunRoleOutputRecord)
-                .filter_by(run_id=run_id, role=role)
-                .first()
-            )
+            output = session.query(RunRoleOutputRecord).filter_by(run_id=run_id, role=role).first()
             if not output:
                 return None
             payload = json.loads(output.payload_json)
@@ -393,6 +411,115 @@ class Database:
                     payload_json=json.dumps(payload or {}, ensure_ascii=False),
                 )
             )
+
+    def ensure_source_state(self, manifest: SourceManifest) -> None:
+        with self.session() as session:
+            existing = session.get(SourceStateRecord, manifest.source_id)
+            if existing:
+                return
+            session.add(
+                SourceStateRecord(
+                    source_id=manifest.source_id,
+                    source_type=manifest.source_type,
+                    manifest_version=manifest.version,
+                    updated_at=utcnow(),
+                )
+            )
+
+    def get_source_health(self, source_id: str) -> SourceHealth:
+        with self.session() as session:
+            state = session.get(SourceStateRecord, source_id)
+            if not state:
+                raise KeyError(source_id)
+            return SourceHealth(
+                source_id=state.source_id,
+                status=state.status,
+                cursor=state.cursor,
+                last_success_at=as_utc(state.last_success_at),
+                last_error_at=as_utc(state.last_error_at),
+                consecutive_failures=state.consecutive_failures,
+                latency_ms=state.latency_ms,
+                error_code=state.error_code,
+                next_poll_at=as_utc(state.next_poll_at),
+            )
+
+    def list_source_health(self) -> list[SourceHealth]:
+        with self.session() as session:
+            rows = (
+                session.query(SourceStateRecord).order_by(SourceStateRecord.source_id.asc()).all()
+            )
+            return [
+                SourceHealth(
+                    source_id=row.source_id,
+                    status=row.status,
+                    cursor=row.cursor,
+                    last_success_at=as_utc(row.last_success_at),
+                    last_error_at=as_utc(row.last_error_at),
+                    consecutive_failures=row.consecutive_failures,
+                    latency_ms=row.latency_ms,
+                    error_code=row.error_code,
+                    next_poll_at=as_utc(row.next_poll_at),
+                )
+                for row in rows
+            ]
+
+    def update_source_success(
+        self,
+        source_id: str,
+        cursor: str | None,
+        latency_ms: int,
+        *,
+        next_poll_at: datetime | None = None,
+    ) -> None:
+        with self.session() as session:
+            state = session.get(SourceStateRecord, source_id)
+            if not state:
+                raise KeyError(source_id)
+            now = utcnow()
+            state.cursor = cursor
+            state.status = "healthy"
+            state.last_success_at = now
+            state.consecutive_failures = 0
+            state.latency_ms = latency_ms
+            state.error_code = None
+            state.next_poll_at = next_poll_at
+            state.updated_at = now
+
+    def update_source_failure(
+        self,
+        source_id: str,
+        error_code: str,
+        latency_ms: int,
+        *,
+        next_poll_at: datetime | None = None,
+    ) -> None:
+        with self.session() as session:
+            state = session.get(SourceStateRecord, source_id)
+            if not state:
+                raise KeyError(source_id)
+            now = utcnow()
+            state.status = "degraded"
+            state.last_error_at = now
+            state.consecutive_failures += 1
+            state.latency_ms = latency_ms
+            state.error_code = error_code
+            state.next_poll_at = next_poll_at
+            state.updated_at = now
+
+    def update_source_disabled(
+        self, source_id: str, *, next_poll_at: datetime | None = None
+    ) -> None:
+        with self.session() as session:
+            state = session.get(SourceStateRecord, source_id)
+            if not state:
+                raise KeyError(source_id)
+            now = utcnow()
+            state.status = "disabled"
+            state.consecutive_failures = 0
+            state.latency_ms = 0
+            state.error_code = "source_disabled"
+            state.next_poll_at = next_poll_at
+            state.updated_at = now
 
     def recovery_candidates(self) -> list[str]:
         with self.session() as session:

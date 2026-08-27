@@ -1,0 +1,17 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/market-quote.schema.json
+title: MarketQuote
+type: object
+additionalProperties: false
+required: [instrument, observed_at, received_at, source_id, quality_status, benchmark]
+properties:
+  instrument: {type: string, minLength: 1}
+  observed_at: {type: string, format: date-time}
+  received_at: {type: string, format: date-time}
+  bid: {type: [number, 'null'], minimum: 0}
+  ask: {type: [number, 'null'], minimum: 0}
+  last: {type: [number, 'null'], minimum: 0}
+  volume: {type: [number, 'null'], minimum: 0}
+  source_id: {type: string, minLength: 1}
+  quality_status: {type: string, enum: [observed, estimated, unavailable]}
+  benchmark: {type: string, enum: [first_executable, vwap_1m, last, none]}
