@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-Decision Hub 已完成 R0 Owner Production Core（提交 `2ee2f8d`）和 [R1 Realtime Event Engine](docs/stages/R1_REALTIME_EVENT_ENGINE.md) 的离线验收，当前正在完成 [R1-L 单 owner 试运行就绪](docs/stages/R1_L_SINGLE_OWNER_PILOT_READINESS.md)。R1 在不改变文本之后核心链路的前提下，以 adapter 接入官方来源、人工转写文本、市场基准、到期评估和通知；R1-L 只补启动预检、组合根和脱敏 API。fixture 证据不等于真实网络稳定性、预测准确率或收益证明；R2 需要新的 owner Stage Gate。
+Decision Hub 已完成 R0 Owner Production Core（提交 `2ee2f8d`）和 [R1 Realtime Event Engine](docs/stages/R1_REALTIME_EVENT_ENGINE.md) 的离线验收；进入 R2 前的 [R1-L 单 owner 试运行就绪](docs/stages/R1_L_SINGLE_OWNER_PILOT_READINESS.md) 离线代码门也已完成（提交 `74c00d1`），当前等待 Live Pilot Gate。R1 在不改变文本之后核心链路的前提下，以 adapter 接入官方来源、人工转写文本、市场基准、到期评估和通知；R1-L 只补启动预检、组合根和脱敏 API。fixture 证据不等于真实网络稳定性、预测准确率或收益证明；R2 需要新的 owner Stage Gate。
 
 ## 唯一有效事实源
 
