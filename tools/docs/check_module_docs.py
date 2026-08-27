@@ -12,6 +12,7 @@ REQUIRED = [
     ROOT / "packages/pilot_runtime/README.md",
     ROOT / "packages/contracts_ts/README.md",
     ROOT / "apps/hub_api/README.md",
+    ROOT / "apps/hub_mcp/README.md",
     ROOT / "apps/hub_worker/README.md",
     ROOT / "apps/decision-desk/README.md",
 ]

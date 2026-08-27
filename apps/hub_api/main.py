@@ -9,15 +9,36 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from packages.contracts_py.decision_hub_contracts.models import (
+    CandidateVersion,
+    CapabilityManifest,
+    EvaluationDatasetManifest,
+    EvolutionOverviewView,
+    ExperienceCreate,
+    ExperienceView,
+    ExperimentManifest,
+    ExperimentResultView,
+    FeedbackCreate,
+    FeedbackView,
     ObservationCreate,
     OutcomeCreate,
     PilotReadinessReport,
+    PromotionDecisionCreate,
+    PromotionDecisionResult,
+    PromotionReviewRequest,
+    PromotionReviewView,
+    ResearchMemoCreate,
+    ResearchMemoView,
+    RunInspectorView,
     RunStatus,
+    RunTimelineView,
+    WorkbenchOverviewView,
 )
 from packages.kernel.decision_hub_kernel.application.admission import AdmissionService
+from packages.kernel.decision_hub_kernel.application.evolution import EvolutionAssetService
 from packages.kernel.decision_hub_kernel.application.health import HealthService
 from packages.kernel.decision_hub_kernel.application.outcome import OutcomeService
 from packages.kernel.decision_hub_kernel.application.source_ingest import SourceIngestionService
+from packages.kernel.decision_hub_kernel.application.workbench import WorkbenchAssetService
 from packages.kernel.decision_hub_kernel.persistence.db import Database
 from packages.kernel.decision_hub_kernel.ports.runtime import AgentExecutionError
 from packages.kernel.decision_hub_kernel.ports.sources import SourceConnector
@@ -50,12 +71,12 @@ def create_app(
                 str(data_dir / "checkpoints" / "decision_graph.sqlite3"),
             )
         )
-    analyzer = build_analyze_text_service(
-        db, runtime, checkpoint_path=checkpoint_path
-    )
+    analyzer = build_analyze_text_service(db, runtime, checkpoint_path=checkpoint_path)
     desk = DecisionDeskQueryService(db)
     health = HealthService(db)
     outcomes = OutcomeService(db)
+    workbench = WorkbenchAssetService(db)
+    evolution = EvolutionAssetService(db)
     source_registry = SourceRegistry()
     for source in (
         list(source_connectors) if source_connectors is not None else official_source_presets()
@@ -76,6 +97,15 @@ def create_app(
         db,
         source_registry.manifests(),
     )
+    app.state.workbench = workbench
+    app.state.evolution = evolution
+
+    def require_owner(owner_id: str | None, declared_owner: str | None = None) -> str:
+        if not owner_id:
+            raise HTTPException(status_code=403, detail="owner_identity_required")
+        if declared_owner is not None and owner_id != declared_owner:
+            raise HTTPException(status_code=403, detail="owner_identity_mismatch")
+        return owner_id
 
     async def execute(event_id: str, run_id: str) -> None:
         try:
@@ -175,14 +205,14 @@ def create_app(
         artifact = db.get_artifact_view(view.artifact_id) if view.artifact_id else None
         return {"run": view, "artifact": artifact}
 
-    @app.get("/v1/runs/{run_id}/timeline")
-    async def run_timeline(run_id: str):
+    @app.get("/v1/runs/{run_id}/timeline", response_model=RunTimelineView)
+    async def run_timeline(run_id: str) -> RunTimelineView:
         if not db.get_run_view(run_id):
             raise HTTPException(status_code=404, detail="run_not_found")
-        return {"run_id": run_id, "items": db.get_timeline(run_id)}
+        return RunTimelineView(run_id=run_id, items=db.get_timeline(run_id))
 
-    @app.get("/v1/runs/{run_id}/inspector")
-    async def run_inspector(run_id: str):
+    @app.get("/v1/runs/{run_id}/inspector", response_model=RunInspectorView)
+    async def run_inspector(run_id: str) -> RunInspectorView:
         view = db.get_run_inspector(run_id)
         if not view:
             raise HTTPException(status_code=404, detail="run_not_found")
@@ -208,6 +238,182 @@ def create_app(
         if not view:
             raise HTTPException(status_code=404, detail="evaluation_not_found")
         return view
+
+    @app.get("/v1/workbench/memos", response_model=list[ResearchMemoView])
+    async def research_memos(limit: int = 100) -> list[ResearchMemoView]:
+        return workbench.list_memos(limit=max(1, min(limit, 100)))
+
+    @app.get("/v1/workbench/overview", response_model=WorkbenchOverviewView)
+    async def workbench_overview(limit: int = 100) -> WorkbenchOverviewView:
+        return workbench.overview(limit=limit)
+
+    @app.post("/v1/workbench/memos", response_model=ResearchMemoView)
+    async def create_research_memo(
+        payload: ResearchMemoCreate,
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+        owner_id: str | None = Header(default=None, alias="X-Owner-Id"),
+    ) -> ResearchMemoView:
+        if not idempotency_key or idempotency_key != payload.request_id:
+            raise HTTPException(status_code=400, detail="idempotency_key_mismatch")
+        if not owner_id or owner_id != payload.created_by:
+            raise HTTPException(status_code=403, detail="owner_identity_mismatch")
+        try:
+            return workbench.create_memo(payload)
+        except ValueError as exc:
+            code = str(exc)
+            status_code = (
+                409
+                if code == "workbench_request_reused"
+                else (
+                    422
+                    if code
+                    in {
+                        "workbench_evidence_not_found",
+                        "workbench_snapshot_mismatch",
+                        "workbench_reference_required",
+                    }
+                    else 404
+                )
+            )
+            raise HTTPException(status_code=status_code, detail=code) from exc
+
+    @app.get("/v1/workbench/feedback", response_model=list[FeedbackView])
+    async def workbench_feedback(limit: int = 100) -> list[FeedbackView]:
+        return workbench.list_feedback(limit=max(1, min(limit, 500)))
+
+    @app.get("/v1/workbench/capabilities", response_model=list[CapabilityManifest])
+    async def workbench_capabilities() -> list[CapabilityManifest]:
+        return workbench.list_capabilities()
+
+    @app.post("/v1/workbench/feedback", response_model=FeedbackView)
+    async def create_workbench_feedback(
+        payload: FeedbackCreate,
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+        owner_id: str | None = Header(default=None, alias="X-Owner-Id"),
+    ):
+        if not idempotency_key or idempotency_key != payload.request_id:
+            raise HTTPException(status_code=400, detail="idempotency_key_mismatch")
+        require_owner(owner_id, payload.created_by)
+        try:
+            return workbench.create_feedback(payload)
+        except ValueError as exc:
+            code = str(exc)
+            status_code = 409 if code == "workbench_request_reused" else 404
+            raise HTTPException(status_code=status_code, detail=code) from exc
+
+    @app.post(
+        "/v1/workbench/capabilities/{capability_id}/status",
+        response_model=CapabilityManifest,
+    )
+    async def set_capability_status(
+        capability_id: str,
+        status_value: str,
+        owner_id: str | None = Header(default=None, alias="X-Owner-Id"),
+    ) -> CapabilityManifest:
+        require_owner(owner_id)
+        try:
+            return workbench.set_capability_status(capability_id, status_value)
+        except ValueError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post("/v1/evolution/experiences", response_model=ExperienceView)
+    async def create_experience(
+        payload: ExperienceCreate,
+        owner_id: str | None = Header(default=None, alias="X-Owner-Id"),
+    ) -> ExperienceView:
+        require_owner(owner_id, payload.created_by)
+        try:
+            return evolution.create_experience(payload)
+        except ValueError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    @app.get("/v1/evolution/overview", response_model=EvolutionOverviewView)
+    async def evolution_overview() -> EvolutionOverviewView:
+        return evolution.overview()
+
+    @app.get("/v1/evolution/failures")
+    async def evolution_failures():
+        return evolution.list_failures()
+
+    @app.get("/v1/evolution/experiences")
+    async def evolution_experiences(limit: int = 100):
+        return evolution.list_experiences(limit=max(1, min(limit, 500)))
+
+    @app.get("/v1/evolution/decisions")
+    async def evolution_decisions(limit: int = 100):
+        return evolution.list_decisions(limit=max(1, min(limit, 500)))
+
+    @app.post("/v1/evolution/datasets")
+    async def register_dataset(
+        payload: EvaluationDatasetManifest,
+        owner_id: str | None = Header(default=None, alias="X-Owner-Id"),
+    ):
+        require_owner(owner_id)
+        try:
+            return evolution.register_dataset(payload)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    @app.post("/v1/evolution/candidates")
+    async def register_candidate(
+        payload: CandidateVersion,
+        owner_id: str | None = Header(default=None, alias="X-Owner-Id"),
+    ):
+        require_owner(owner_id)
+        try:
+            return evolution.register_candidate(payload)
+        except PermissionError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from exc
+
+    @app.post("/v1/evolution/experiments")
+    async def register_experiment(
+        payload: ExperimentManifest,
+        owner_id: str | None = Header(default=None, alias="X-Owner-Id"),
+    ):
+        require_owner(owner_id)
+        try:
+            return evolution.register_experiment(payload)
+        except ValueError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post("/v1/evolution/results")
+    async def record_experiment_result(
+        payload: ExperimentResultView,
+        owner_id: str | None = Header(default=None, alias="X-Owner-Id"),
+    ):
+        require_owner(owner_id)
+        try:
+            return evolution.record_result(payload)
+        except ValueError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post("/v1/evolution/{domain_pack_ref}/decisions")
+    async def promotion_decision(
+        domain_pack_ref: str,
+        payload: PromotionDecisionCreate,
+        owner_id: str | None = Header(default=None, alias="X-Owner-Id"),
+    ) -> PromotionDecisionResult:
+        require_owner(owner_id, payload.owner)
+        try:
+            return evolution.decide(domain_pack_ref, payload)
+        except PermissionError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except RuntimeError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post(
+        "/v1/evolution/{domain_pack_ref}/promotion-reviews",
+        response_model=PromotionReviewView,
+    )
+    async def promotion_review(
+        domain_pack_ref: str, payload: PromotionReviewRequest
+    ) -> PromotionReviewView:
+        try:
+            return evolution.review_promotion(domain_pack_ref, payload)
+        except ValueError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.get("/v1/decision-desk/summary")
     async def summary():

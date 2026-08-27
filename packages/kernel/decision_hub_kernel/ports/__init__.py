@@ -14,6 +14,7 @@ from .sources import (
     SourcePollResult,
     SourceRegistryPort,
 )
+from .workbench import ResearchWorkbenchPort
 from .workflow import DecisionExecutionRequest, DecisionWorkflowExecutor
 
 __all__ = [
@@ -23,6 +24,7 @@ __all__ = [
     "AgentRuntime",
     "DecisionExecutionRequest",
     "DecisionWorkflowExecutor",
+    "ResearchWorkbenchPort",
     "MarketDataPort",
     "MarketQuote",
     "MarketWindowPort",

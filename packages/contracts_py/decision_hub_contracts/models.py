@@ -6,6 +6,114 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
+from .generated.run_inspector import (
+    EvidenceLineage as _EvidenceLineage,
+)
+from .generated.run_inspector import (
+    OrchestrationLineage as _OrchestrationLineage,
+)
+from .generated.run_inspector import (
+    TimelineItem as _TimelineItem,
+)
+from .generated.run_inspector import (
+    VersionLineage as _VersionLineage,
+)
+from .generated.workbench_assets import (
+    ActivePointer as _ActivePointer,
+)
+from .generated.workbench_assets import (
+    CandidateVersion as _CandidateVersion,
+)
+from .generated.workbench_assets import (
+    CapabilityManifest as _CapabilityManifest,
+)
+from .generated.workbench_assets import (
+    EvaluationDatasetManifest as _EvaluationDatasetManifest,
+)
+from .generated.workbench_assets import (
+    EvolutionOverview as _EvolutionOverview,
+)
+from .generated.workbench_assets import (
+    Experience as _Experience,
+)
+from .generated.workbench_assets import (
+    ExperienceCreate as _ExperienceCreate,
+)
+from .generated.workbench_assets import (
+    ExperimentManifest as _ExperimentManifest,
+)
+from .generated.workbench_assets import (
+    ExperimentResult as _ExperimentResult,
+)
+from .generated.workbench_assets import (
+    FailurePattern as _FailurePattern,
+)
+from .generated.workbench_assets import (
+    Feedback as _Feedback,
+)
+from .generated.workbench_assets import (
+    FeedbackCreate as _FeedbackCreate,
+)
+from .generated.workbench_assets import (
+    PromotionDecision as _PromotionDecision,
+)
+from .generated.workbench_assets import (
+    PromotionDecisionCreate as _PromotionDecisionCreate,
+)
+from .generated.workbench_assets import (
+    PromotionDecisionResult as _PromotionDecisionResult,
+)
+from .generated.workbench_assets import (
+    PromotionGateCheck as _PromotionGateCheck,
+)
+from .generated.workbench_assets import (
+    PromotionMetricDelta as _PromotionMetricDelta,
+)
+from .generated.workbench_assets import (
+    PromotionReview as _PromotionReview,
+)
+from .generated.workbench_assets import (
+    PromotionReviewRequest as _PromotionReviewRequest,
+)
+from .generated.workbench_assets import (
+    ResearchMemo as _ResearchMemo,
+)
+from .generated.workbench_assets import (
+    ResearchMemoCreate as _ResearchMemoCreate,
+)
+from .generated.workbench_assets import (
+    WorkbenchOverview as _WorkbenchOverview,
+)
+
+# Stable public names preserve the R0/R1 import surface while the field
+# definitions remain generated exclusively from the canonical schemas.
+ActivePointerView = _ActivePointer
+CandidateVersion = _CandidateVersion
+CapabilityManifest = _CapabilityManifest
+EvaluationDatasetManifest = _EvaluationDatasetManifest
+EvolutionOverviewView = _EvolutionOverview
+ExperienceView = _Experience
+ExperienceCreate = _ExperienceCreate
+ExperimentManifest = _ExperimentManifest
+ExperimentResultView = _ExperimentResult
+FailurePatternView = _FailurePattern
+FeedbackView = _Feedback
+FeedbackCreate = _FeedbackCreate
+PromotionDecisionView = _PromotionDecision
+PromotionDecisionCreate = _PromotionDecisionCreate
+PromotionDecisionResult = _PromotionDecisionResult
+PromotionGateCheckView = _PromotionGateCheck
+PromotionMetricDeltaView = _PromotionMetricDelta
+PromotionReviewView = _PromotionReview
+PromotionReviewRequest = _PromotionReviewRequest
+ResearchMemoView = _ResearchMemo
+ResearchMemoCreate = _ResearchMemoCreate
+WorkbenchOverviewView = _WorkbenchOverview
+EvidenceLineageView = _EvidenceLineage
+OrchestrationLineageView = _OrchestrationLineage
+RunTimelineItemView = _TimelineItem
+VersionLineageView = _VersionLineage
+
 
 class SourceType(StrEnum):
     manual = "manual"
@@ -201,6 +309,7 @@ class RunView(BaseModel):
     event_id: str
     status: RunStatus
     strategy_version: str
+    runtime_version: str = "unknown"
     snapshot_id: str | None = None
     artifact_id: str | None = None
     created_at: datetime
@@ -254,11 +363,18 @@ class StepView(BaseModel):
     error_code: str | None = None
 
 
+class RunTimelineView(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    run_id: str = Field(min_length=1)
+    items: list[RunTimelineItemView] = Field(default_factory=list)
+
+
 class RunInspectorView(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     run: RunView
-    timeline: list[dict[str, object]]
+    timeline: list[RunTimelineItemView]
     steps: list[StepView]
     calls: list[CallView]
     artifact: ArtifactView | None = None
@@ -266,6 +382,9 @@ class RunInspectorView(BaseModel):
     evaluations: list[EvaluationView] = Field(default_factory=list)
     snapshot_cutoff_at: datetime | None = None
     snapshot_hash: str | None = None
+    evidence_lineage: list[EvidenceLineageView] = Field(default_factory=list)
+    versions: VersionLineageView
+    orchestration: OrchestrationLineageView
 
 
 class InboxView(BaseModel):

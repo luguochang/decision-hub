@@ -1,0 +1,72 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/run-inspector.schema.json
+title: RunInspectorView
+type: object
+additionalProperties: false
+required: [run, timeline, steps, calls, artifact, evaluation_count, evaluations, snapshot_cutoff_at, snapshot_hash, evidence_lineage, versions, orchestration]
+properties:
+  run: {type: object}
+  timeline:
+    type: array
+    items: {$ref: '#/$defs/timeline_item'}
+  steps: {type: array, items: {type: object}}
+  calls: {type: array, items: {type: object}}
+  artifact: {type: [object, 'null']}
+  evaluation_count: {type: integer, minimum: 0}
+  evaluations: {type: array, items: {type: object}}
+  snapshot_cutoff_at: {type: [string, 'null'], format: date-time}
+  snapshot_hash: {type: [string, 'null'], pattern: '^[a-f0-9]{64}$'}
+  evidence_lineage:
+    type: array
+    items: {$ref: '#/$defs/evidence_lineage'}
+  versions: {$ref: '#/$defs/version_lineage'}
+  orchestration: {$ref: '#/$defs/orchestration_lineage'}
+$defs:
+  timeline_item:
+    type: object
+    additionalProperties: false
+    required: [sequence_no, event_type, occurred_at, reference_type, reference_id]
+    properties:
+      sequence_no: {type: integer, minimum: 0}
+      event_type: {type: string, minLength: 1}
+      occurred_at: {type: string, format: date-time}
+      reference_type: {type: [string, 'null']}
+      reference_id: {type: [string, 'null']}
+  evidence_lineage:
+    type: object
+    additionalProperties: false
+    required: [evidence_id, source_id, source_type, observed_at, published_at, received_at, cutoff_at, content_hash]
+    properties:
+      evidence_id: {type: string, minLength: 1}
+      source_id: {type: string, minLength: 1}
+      source_type: {type: string, minLength: 1}
+      observed_at: {type: string, format: date-time}
+      published_at: {type: [string, 'null'], format: date-time}
+      received_at: {type: string, format: date-time}
+      cutoff_at: {type: string, format: date-time}
+      content_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+  version_lineage:
+    type: object
+    additionalProperties: false
+    required: [strategy_version, runtime_version, pack_version, provider_ids, models, schema_versions, pricing_versions]
+    properties:
+      strategy_version: {type: string, minLength: 1}
+      runtime_version: {type: string, minLength: 1}
+      pack_version: {type: [string, 'null']}
+      provider_ids: {type: array, items: {type: string}}
+      models: {type: array, items: {type: string}}
+      schema_versions: {type: array, items: {type: string}}
+      pricing_versions: {type: array, items: {type: string}}
+  orchestration_lineage:
+    type: object
+    additionalProperties: false
+    required: [mode, supervisor_role, planned_capabilities, required_capabilities, specialist_coverage, missing_capabilities, replan_count, experiment_refs]
+    properties:
+      mode: {type: string, enum: [fixed_graph, supervisor_candidate]}
+      supervisor_role: {type: [string, 'null']}
+      planned_capabilities: {type: array, items: {type: string}}
+      required_capabilities: {type: array, items: {type: string}}
+      specialist_coverage: {type: array, items: {type: string}}
+      missing_capabilities: {type: array, items: {type: string}}
+      replan_count: {type: integer, minimum: 0, maximum: 1}
+      experiment_refs: {type: array, items: {type: string}}

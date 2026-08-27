@@ -1,4 +1,39 @@
 import { z } from 'zod'
+import {
+  evidenceLineageSchema,
+  orchestrationLineageSchema,
+  runTimelineItemSchema,
+  versionLineageSchema,
+} from './generated/r2'
+
+export {
+  activePointerSchema,
+  candidateVersionSchema,
+  capabilityManifestSchema,
+  evaluationDatasetSchema,
+  evolutionOverviewSchema,
+  experienceCreateSchema,
+  experienceSchema,
+  experimentResultSchema,
+  experimentSchema,
+  failurePatternSchema,
+  feedbackCreateSchema,
+  feedbackSchema,
+  promotionDecisionCommandSchema,
+  promotionDecisionResultSchema,
+  promotionDecisionSchema,
+  promotionGateCheckSchema,
+  promotionMetricDeltaSchema,
+  promotionReviewRequestSchema,
+  promotionReviewSchema,
+  researchMemoCreateSchema,
+  researchMemoSchema,
+  workbenchOverviewSchema,
+  evidenceLineageSchema,
+  orchestrationLineageSchema,
+  runTimelineItemSchema,
+  versionLineageSchema,
+} from './generated/r2'
 
 export const runStatusSchema = z.enum(['admitted', 'running', 'completed', 'degraded', 'failed', 'cancelled'])
 export const gateStatusSchema = z.enum(['publish', 'degraded', 'research_only', 'reject'])
@@ -48,7 +83,7 @@ export const forecastSchema = z.object({
 })
 
 export const runViewSchema = z.object({
-  run_id: z.string(), event_id: z.string(), status: runStatusSchema, strategy_version: z.string(),
+  run_id: z.string(), event_id: z.string(), status: runStatusSchema, strategy_version: z.string(), runtime_version: z.string().default('unknown'),
   snapshot_id: z.string().nullable(), artifact_id: z.string().nullable(), created_at: z.string(),
   updated_at: z.string(), finished_at: z.string().nullable(), latency_ms: z.number().nullable(),
   cost_usd: z.number().nullable(), error_code: z.string().nullable(), headline: z.string().nullable(),
@@ -88,7 +123,7 @@ export const stepViewSchema = z.object({
 
 export const runInspectorSchema = z.object({
   run: runViewSchema,
-  timeline: z.array(z.record(z.string(), z.unknown())),
+  timeline: z.array(runTimelineItemSchema),
   steps: z.array(stepViewSchema),
   calls: z.array(callViewSchema),
   artifact: artifactViewSchema.nullable(),
@@ -99,7 +134,10 @@ export const runInspectorSchema = z.object({
   })),
   snapshot_cutoff_at: z.string().nullable(),
   snapshot_hash: z.string().nullable(),
-})
+  evidence_lineage: z.array(evidenceLineageSchema),
+  versions: versionLineageSchema,
+  orchestration: orchestrationLineageSchema,
+}).strict()
 
 export type Forecast = z.infer<typeof forecastSchema>
 export type GateStatus = z.infer<typeof gateStatusSchema>
@@ -116,3 +154,31 @@ export type NotificationMessage = z.infer<typeof notificationMessageSchema>
 export type ProductHealth = z.infer<typeof productHealthSchema>
 export type PilotReadinessCheck = z.infer<typeof pilotReadinessCheckSchema>
 export type PilotReadinessReport = z.infer<typeof pilotReadinessReportSchema>
+export type {
+  ActivePointer,
+  CandidateVersion,
+  CapabilityManifest,
+  EvaluationDataset,
+  EvidenceLineage,
+  EvolutionOverview,
+  Experience,
+  ExperienceCreate,
+  Experiment,
+  ExperimentResult,
+  FailurePattern,
+  Feedback,
+  FeedbackCreate,
+  OrchestrationLineage,
+  PromotionDecision,
+  PromotionDecisionCommand,
+  PromotionDecisionResult,
+  PromotionGateCheck,
+  PromotionMetricDelta,
+  PromotionReview,
+  PromotionReviewRequest,
+  ResearchMemo,
+  ResearchMemoCreate,
+  RunTimelineItem,
+  VersionLineage,
+  WorkbenchOverview,
+} from './generated/r2'

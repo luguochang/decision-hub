@@ -1,0 +1,332 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/workbench-assets.schema.json
+title: WorkbenchAssets
+type: object
+additionalProperties: false
+required: [schema_version]
+properties:
+  schema_version: {type: string, const: workbench-assets.v1}
+$defs:
+  research_memo_create:
+    type: object
+    additionalProperties: false
+    required: [request_id, run_id, snapshot_id, domain_pack_ref, created_by, claims, evidence_refs, counterpoints, uncertainties, follow_up_questions]
+    properties:
+      request_id: {type: string, minLength: 1}
+      run_id: {type: [string, 'null']}
+      snapshot_id: {type: [string, 'null']}
+      domain_pack_ref: {type: string, minLength: 1}
+      created_by: {type: string, minLength: 1}
+      claims: {type: array, minItems: 1, items: {type: string, minLength: 1}}
+      evidence_refs: {type: array, minItems: 1, items: {type: string, minLength: 1}}
+      counterpoints: {type: array, items: {type: string, minLength: 1}}
+      uncertainties: {type: array, items: {type: string, minLength: 1}}
+      follow_up_questions: {type: array, items: {type: string, minLength: 1}}
+  research_memo:
+    type: object
+    additionalProperties: false
+    required: [memo_id, request_id, run_id, snapshot_id, domain_pack_ref, created_by, claims, evidence_refs, counterpoints, uncertainties, follow_up_questions, status, created_at]
+    properties:
+      memo_id: {type: string, minLength: 1}
+      request_id: {type: string, minLength: 1}
+      run_id: {type: [string, 'null']}
+      snapshot_id: {type: [string, 'null']}
+      domain_pack_ref: {type: string, minLength: 1}
+      created_by: {type: string, minLength: 1}
+      claims: {type: array, minItems: 1, items: {type: string, minLength: 1}}
+      evidence_refs: {type: array, minItems: 1, items: {type: string, minLength: 1}}
+      counterpoints: {type: array, items: {type: string, minLength: 1}}
+      uncertainties: {type: array, items: {type: string, minLength: 1}}
+      follow_up_questions: {type: array, items: {type: string, minLength: 1}}
+      status: {type: string, enum: [draft, submitted, reviewed, accepted, rejected, superseded]}
+      created_at: {type: string, format: date-time}
+  feedback_create:
+    type: object
+    additionalProperties: false
+    required: [request_id, target_type, target_id, created_by, verdict, notes]
+    properties:
+      request_id: {type: string, minLength: 1}
+      target_type: {type: string, enum: [run, memo, experiment, candidate, experience, failure_pattern]}
+      target_id: {type: string, minLength: 1}
+      created_by: {type: string, minLength: 1}
+      verdict: {type: string, enum: [useful, not_useful, incorrect, needs_review]}
+      notes: {type: string, minLength: 1, maxLength: 10000}
+  feedback:
+    type: object
+    additionalProperties: false
+    required: [feedback_id, request_id, target_type, target_id, created_by, verdict, notes, created_at]
+    properties:
+      feedback_id: {type: string, minLength: 1}
+      request_id: {type: string, minLength: 1}
+      target_type: {type: string, enum: [run, memo, experiment, candidate, experience, failure_pattern]}
+      target_id: {type: string, minLength: 1}
+      created_by: {type: string, minLength: 1}
+      verdict: {type: string, enum: [useful, not_useful, incorrect, needs_review]}
+      notes: {type: string, minLength: 1, maxLength: 10000}
+      created_at: {type: string, format: date-time}
+  capability_manifest:
+    type: object
+    additionalProperties: false
+    required: [capability_id, version, capability_type, provider, license, input_schema_ref, output_schema_ref, permissions, network_domains, timeout_seconds, max_cost_usd, status]
+    properties:
+      capability_id: {type: string, minLength: 1}
+      version: {type: string, minLength: 1}
+      capability_type: {type: string, enum: [source, tool, provider, runtime, strategy, workbench]}
+      provider: {type: string, minLength: 1}
+      license: {type: string, minLength: 1}
+      input_schema_ref: {type: string, minLength: 1}
+      output_schema_ref: {type: string, minLength: 1}
+      permissions: {type: array, items: {type: string}}
+      network_domains: {type: array, items: {type: string}}
+      timeout_seconds: {type: number, exclusiveMinimum: 0, maximum: 300}
+      max_cost_usd: {type: [number, 'null'], minimum: 0}
+      status: {type: string, enum: [discovered, audited, enabled, shadow, rejected, retired]}
+  evaluation_dataset_manifest:
+    type: object
+    additionalProperties: false
+    required: [dataset_id, split, manifest_hash, fixture_refs, fixture_hashes, cutoff_rule, label_rule, leakage_audit, authorization, visibility, source_mode, window_start_at, window_end_at, event_family_counts, created_at]
+    properties:
+      dataset_id: {type: string, minLength: 1}
+      split: {type: string, enum: [replay, holdout, shadow, live_observation]}
+      manifest_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      fixture_refs: {type: array, minItems: 1, items: {type: string, minLength: 1}}
+      fixture_hashes:
+        type: object
+        minProperties: 1
+        additionalProperties: {type: string, pattern: '^[a-f0-9]{64}$'}
+      cutoff_rule: {type: string, const: 'published_at <= observed_at <= received_at'}
+      label_rule: {type: string, const: 'outcomes.available_at > received_at'}
+      leakage_audit: {type: string, enum: [passed, failed]}
+      authorization: {type: string, minLength: 1}
+      visibility: {type: string, enum: [owner_only]}
+      source_mode: {type: string, enum: [fixture, prospective]}
+      window_start_at: {type: string, format: date-time}
+      window_end_at: {type: string, format: date-time}
+      event_family_counts:
+        type: object
+        minProperties: 1
+        additionalProperties: {type: integer, minimum: 1}
+      created_at: {type: string, format: date-time}
+  candidate_version:
+    type: object
+    additionalProperties: false
+    required: [candidate_id, candidate_type, content_hash, version, parent_version, status, created_at, content_ref, source]
+    properties:
+      candidate_id: {type: string, minLength: 1}
+      candidate_type: {type: string, enum: [strategy, runtime, profile, doctrine, provider_policy]}
+      content_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      version: {type: string, minLength: 1}
+      parent_version: {type: [string, 'null']}
+      status: {type: string, enum: [candidate, experimental, eligible, active, rejected, retired]}
+      created_at: {type: string, format: date-time}
+      content_ref: {type: [string, 'null']}
+      source: {type: string, minLength: 1}
+  experiment_manifest:
+    type: object
+    additionalProperties: false
+    required: [experiment_id, dataset_id, baseline_ref, candidate_refs, status, created_at, strategy_version, runtime_id, runtime_version, provider_id, model, schema_version, random_seed, randomness_policy, deadline_seconds, max_cost_usd]
+    properties:
+      experiment_id: {type: string, minLength: 1}
+      dataset_id: {type: string, minLength: 1}
+      baseline_ref: {type: string, minLength: 1}
+      candidate_refs: {type: array, minItems: 1, items: {type: string, minLength: 1}}
+      status: {type: string, enum: [registered, running, completed, failed]}
+      created_at: {type: string, format: date-time}
+      strategy_version: {type: string, minLength: 1}
+      runtime_id: {type: string, minLength: 1}
+      runtime_version: {type: string, minLength: 1}
+      provider_id: {type: [string, 'null']}
+      model: {type: [string, 'null']}
+      schema_version: {type: string, minLength: 1}
+      random_seed: {type: [integer, 'null'], minimum: 0}
+      randomness_policy: {type: string, enum: [deterministic, seeded]}
+      deadline_seconds: {type: integer, minimum: 1, maximum: 3600}
+      max_cost_usd: {type: [number, 'null'], minimum: 0}
+  experiment_result:
+    type: object
+    additionalProperties: false
+    required: [result_id, experiment_id, candidate_id, sample_count, brier_score, cost_usd, p95_latency_ms, safety_violations, event_family_counts, created_at, stage, failure_counts, evidence_coverage, directional_accuracy, raw_artifact_refs, scorer_version]
+    properties:
+      result_id: {type: string, minLength: 1}
+      experiment_id: {type: string, minLength: 1}
+      candidate_id: {type: string, minLength: 1}
+      sample_count: {type: integer, minimum: 0}
+      brier_score: {type: [number, 'null'], minimum: 0, maximum: 1}
+      cost_usd: {type: [number, 'null'], minimum: 0}
+      p95_latency_ms: {type: [integer, 'null'], minimum: 0}
+      safety_violations: {type: integer, minimum: 0}
+      event_family_counts:
+        type: object
+        additionalProperties: {type: integer, minimum: 0}
+      created_at: {type: string, format: date-time}
+      stage: {type: string, enum: [replay, holdout, shadow]}
+      failure_counts:
+        type: object
+        additionalProperties: {type: integer, minimum: 0}
+      evidence_coverage: {type: [number, 'null'], minimum: 0, maximum: 1}
+      directional_accuracy: {type: [number, 'null'], minimum: 0, maximum: 1}
+      raw_artifact_refs: {type: array, minItems: 1, items: {type: string, minLength: 1}}
+      scorer_version: {type: string, minLength: 1}
+  active_pointer:
+    type: object
+    additionalProperties: false
+    required: [pointer_id, domain_pack_ref, candidate_id, generation, updated_at]
+    properties:
+      pointer_id: {type: string, minLength: 1}
+      domain_pack_ref: {type: string, minLength: 1}
+      candidate_id: {type: string, minLength: 1}
+      generation: {type: integer, minimum: 0}
+      updated_at: {type: string, format: date-time}
+  promotion_decision_create:
+    type: object
+    additionalProperties: false
+    required: [request_id, candidate_id, owner, decision, reason, evaluation_refs, expected_generation]
+    properties:
+      request_id: {type: string, minLength: 1}
+      candidate_id: {type: string, minLength: 1}
+      owner: {type: string, minLength: 1}
+      decision: {type: string, enum: [promote, reject, rollback]}
+      reason: {type: string, minLength: 1}
+      evaluation_refs: {type: array, items: {type: string, minLength: 1}}
+      expected_generation: {type: integer, minimum: 0}
+  promotion_decision:
+    type: object
+    additionalProperties: false
+    required: [decision_id, request_id, domain_pack_ref, candidate_id, owner, decision, reason, evaluation_refs, previous_candidate_id, resulting_candidate_id, resulting_generation, created_at]
+    properties:
+      decision_id: {type: string, minLength: 1}
+      request_id: {type: string, minLength: 1}
+      domain_pack_ref: {type: string, minLength: 1}
+      candidate_id: {type: string, minLength: 1}
+      owner: {type: string, minLength: 1}
+      decision: {type: string, enum: [promote, reject, rollback]}
+      reason: {type: string, minLength: 1}
+      evaluation_refs: {type: array, items: {type: string, minLength: 1}}
+      previous_candidate_id: {type: [string, 'null']}
+      resulting_candidate_id: {type: [string, 'null']}
+      resulting_generation: {type: integer, minimum: 0}
+      created_at: {type: string, format: date-time}
+  promotion_decision_result:
+    type: object
+    additionalProperties: false
+    required: [decision, active_pointer]
+    properties:
+      decision: {$ref: '#/$defs/promotion_decision'}
+      active_pointer:
+        anyOf:
+          - {$ref: '#/$defs/active_pointer'}
+          - {type: 'null'}
+  promotion_review_request:
+    type: object
+    additionalProperties: false
+    required: [candidate_id, evaluation_refs]
+    properties:
+      candidate_id: {type: string, minLength: 1}
+      evaluation_refs: {type: array, items: {type: string, minLength: 1}}
+  promotion_gate_check:
+    type: object
+    additionalProperties: false
+    required: [rule_id, status, reason_code, detail]
+    properties:
+      rule_id: {type: string, minLength: 1}
+      status: {type: string, enum: [pass, fail]}
+      reason_code: {type: string, minLength: 1}
+      detail: {type: string, minLength: 1}
+  promotion_metric_delta:
+    type: object
+    additionalProperties: false
+    required: [stage, result_id, baseline_result_id, sample_count, candidate_brier_score, baseline_brier_score, brier_delta, candidate_cost_usd, baseline_cost_usd, cost_ratio, p95_latency_ms, safety_violations]
+    properties:
+      stage: {type: string, enum: [replay, holdout, shadow]}
+      result_id: {type: string, minLength: 1}
+      baseline_result_id: {type: string, minLength: 1}
+      sample_count: {type: integer, minimum: 0}
+      candidate_brier_score: {type: [number, 'null'], minimum: 0, maximum: 1}
+      baseline_brier_score: {type: [number, 'null'], minimum: 0, maximum: 1}
+      brier_delta: {type: [number, 'null']}
+      candidate_cost_usd: {type: [number, 'null'], minimum: 0}
+      baseline_cost_usd: {type: [number, 'null'], minimum: 0}
+      cost_ratio: {type: [number, 'null'], minimum: 0}
+      p95_latency_ms: {type: [integer, 'null'], minimum: 0}
+      safety_violations: {type: integer, minimum: 0}
+  promotion_review:
+    type: object
+    additionalProperties: false
+    required: [domain_pack_ref, candidate_id, evaluation_refs, eligible, checks, deltas]
+    properties:
+      domain_pack_ref: {type: string, minLength: 1}
+      candidate_id: {type: string, minLength: 1}
+      evaluation_refs: {type: array, items: {type: string, minLength: 1}}
+      eligible: {type: boolean}
+      checks: {type: array, minItems: 1, items: {$ref: '#/$defs/promotion_gate_check'}}
+      deltas: {type: array, items: {$ref: '#/$defs/promotion_metric_delta'}}
+  failure_pattern:
+    type: object
+    additionalProperties: false
+    required: [pattern_id, failure_code, occurrence_count, impact, source_refs, root_cause_hypothesis, remediation_refs, status, updated_at]
+    properties:
+      pattern_id: {type: string, minLength: 1}
+      failure_code: {type: string, minLength: 1}
+      occurrence_count: {type: integer, minimum: 1}
+      impact: {type: string, minLength: 1}
+      source_refs: {type: array, minItems: 1, items: {type: string, minLength: 1}}
+      root_cause_hypothesis: {type: [string, 'null']}
+      remediation_refs: {type: array, items: {type: string, minLength: 1}}
+      status: {type: string, enum: [open, mitigated, regressed, closed]}
+      updated_at: {type: string, format: date-time}
+  experience_create:
+    type: object
+    additionalProperties: false
+    required: [request_id, domain_pack_ref, event_family, lesson, applicable_conditions, evidence_refs, outcome_refs, evaluation_refs, source_type, created_by]
+    properties:
+      request_id: {type: string, minLength: 1}
+      domain_pack_ref: {type: string, minLength: 1}
+      event_family: {type: string, minLength: 1}
+      lesson: {type: string, minLength: 1, maxLength: 10000}
+      applicable_conditions: {type: array, items: {type: string}}
+      evidence_refs: {type: array, minItems: 1, items: {type: string, minLength: 1}}
+      outcome_refs: {type: array, minItems: 1, items: {type: string, minLength: 1}}
+      evaluation_refs: {type: array, minItems: 1, items: {type: string, minLength: 1}}
+      source_type: {type: string, enum: [owner, evaluation, failure_pattern, agent]}
+      created_by: {type: string, minLength: 1}
+  experience:
+    type: object
+    additionalProperties: false
+    required: [request_id, domain_pack_ref, event_family, lesson, applicable_conditions, evidence_refs, outcome_refs, evaluation_refs, source_type, created_by, experience_id, content_hash, status, available_at, created_at]
+    properties:
+      request_id: {type: string, minLength: 1}
+      domain_pack_ref: {type: string, minLength: 1}
+      event_family: {type: string, minLength: 1}
+      lesson: {type: string, minLength: 1, maxLength: 10000}
+      applicable_conditions: {type: array, items: {type: string}}
+      evidence_refs: {type: array, minItems: 1, items: {type: string, minLength: 1}}
+      outcome_refs: {type: array, minItems: 1, items: {type: string, minLength: 1}}
+      evaluation_refs: {type: array, minItems: 1, items: {type: string, minLength: 1}}
+      source_type: {type: string, enum: [owner, evaluation, failure_pattern, agent]}
+      created_by: {type: string, minLength: 1}
+      experience_id: {type: string, minLength: 1}
+      content_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      status: {type: string, enum: [candidate, verified, retired]}
+      available_at: {type: string, format: date-time}
+      created_at: {type: string, format: date-time}
+  workbench_overview:
+    type: object
+    additionalProperties: false
+    required: [memos, feedback, capabilities]
+    properties:
+      memos: {type: array, items: {$ref: '#/$defs/research_memo'}}
+      feedback: {type: array, items: {$ref: '#/$defs/feedback'}}
+      capabilities: {type: array, items: {$ref: '#/$defs/capability_manifest'}}
+  evolution_overview:
+    type: object
+    additionalProperties: false
+    required: [datasets, candidates, experiments, results, pointers, failures, experiences, decisions]
+    properties:
+      datasets: {type: array, items: {$ref: '#/$defs/evaluation_dataset_manifest'}}
+      candidates: {type: array, items: {$ref: '#/$defs/candidate_version'}}
+      experiments: {type: array, items: {$ref: '#/$defs/experiment_manifest'}}
+      results: {type: array, items: {$ref: '#/$defs/experiment_result'}}
+      pointers: {type: array, items: {$ref: '#/$defs/active_pointer'}}
+      failures: {type: array, items: {$ref: '#/$defs/failure_pattern'}}
+      experiences: {type: array, items: {$ref: '#/$defs/experience'}}
+      decisions: {type: array, items: {$ref: '#/$defs/promotion_decision'}}

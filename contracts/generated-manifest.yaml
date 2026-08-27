@@ -11,6 +11,8 @@ schemas:
   contracts/schemas/outcome.schema.yaml: b477937b57c50fa07c20802c4b5f2a6cd89bf1127fd6d58a48974615296d5340
   contracts/schemas/pilot_readiness.schema.yaml: caea222e7e8bf7f7e2287d30c128e7edff86bd2fb4ec0f97d68400daf0494448
   contracts/schemas/product_health.schema.yaml: 36deb30beef19c761e25e30f786ffd189e903daf545a82a8ab9938ee407964d8
+  contracts/schemas/run_inspector.schema.yaml: 5fa38f64bd62862f6ff5ab58620fd2b792814c874884a9b9218c54ee31d1342e
   contracts/schemas/source_health.schema.yaml: 388643237427002fea48309b1120055976001ccd4863ee5ad1d3aeab35766549
   contracts/schemas/source_manifest.schema.yaml: 403a01d20e79a49b841101bfab8fc571456f35cc8866c1fc67fa49bc155f71e8
   contracts/schemas/text_envelope.schema.yaml: 56e5e1948ef05ae2b53ab2f52691b4edbefc333cc604b0576d49c6ebb7deb380
+  contracts/schemas/workbench_assets.schema.yaml: e113e1433857636a3eb225f682de0c59d318825c21536b8b4ff330abc36dcf47

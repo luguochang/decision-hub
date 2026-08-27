@@ -66,7 +66,7 @@ Decision Hub 不把 DeepSeek Harness（DSH）作为业务核心或唯一运行�
 
 - 提议新增：`ResearchWorkbenchPort`、`CapabilityManifest`、`DshCapabilityAdapter`、可选 `DshAgentRuntime` contract。
 - 必须覆盖：插件准入、许可证/权限 deny、schema invalid、PIT leakage、timeout/429、tool denied、卸载/回滚、DSH 未启动时 Core 可用、candidate 与 baseline 公平 replay。
-- 本 ADR 被 owner 接受前不得新增上述 canonical schema、迁移或生产 adapter；R2-01 负责锁定并生成契约。
+- 本 ADR 已被 owner 接受；R2-01 负责按本边界锁定并生成契约，仍不得因此自动安装社区插件或绕过准入审计。
 
 ## Owner 确认
 

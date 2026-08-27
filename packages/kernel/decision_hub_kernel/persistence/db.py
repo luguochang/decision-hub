@@ -27,15 +27,19 @@ from packages.contracts_py.decision_hub_contracts.models import (
     CallView,
     Direction,
     EvaluationView,
+    EvidenceLineageView,
     Forecast,
     GateDecision,
     GateStatus,
+    OrchestrationLineageView,
     RunInspectorView,
     RunStatus,
+    RunTimelineItemView,
     RunView,
     SourceHealth,
     SourceManifest,
     StepView,
+    VersionLineageView,
 )
 
 
@@ -258,6 +262,159 @@ class SourceStateRecord(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
+class ResearchMemoRecord(Base):
+    __tablename__ = "research_memos"
+    memo_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    request_id: Mapped[str] = mapped_column(String(256), unique=True)
+    run_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    snapshot_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    domain_pack_ref: Mapped[str] = mapped_column(String(128))
+    created_by: Mapped[str] = mapped_column(String(128))
+    status: Mapped[str] = mapped_column(String(32), default="submitted")
+    content_json: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class FeedbackRecord(Base):
+    __tablename__ = "workbench_feedback"
+    feedback_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    request_id: Mapped[str] = mapped_column(String(256), unique=True)
+    target_type: Mapped[str] = mapped_column(String(32))
+    target_id: Mapped[str] = mapped_column(String(128), index=True)
+    created_by: Mapped[str] = mapped_column(String(128))
+    verdict: Mapped[str] = mapped_column(String(32))
+    notes: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class CapabilityRecord(Base):
+    __tablename__ = "capability_manifests"
+    capability_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    version: Mapped[str] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(32), default="discovered")
+    manifest_json: Mapped[str] = mapped_column(Text)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class EvaluationDatasetRecord(Base):
+    __tablename__ = "evaluation_datasets"
+    dataset_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    split: Mapped[str] = mapped_column(String(32))
+    manifest_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    manifest_json: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class CandidateVersionRecord(Base):
+    __tablename__ = "candidate_versions"
+    candidate_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    candidate_type: Mapped[str] = mapped_column(String(32))
+    content_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    version: Mapped[str] = mapped_column(String(64))
+    parent_version: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    status: Mapped[str] = mapped_column(String(32), default="candidate")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    content_ref: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    source: Mapped[str] = mapped_column(String(64), default="owner")
+
+
+class ExperimentRecord(Base):
+    __tablename__ = "experiments"
+    experiment_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    dataset_id: Mapped[str] = mapped_column(String(128), index=True)
+    baseline_ref: Mapped[str] = mapped_column(String(128))
+    candidate_refs_json: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(32), default="registered")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    strategy_version: Mapped[str] = mapped_column(String(64), default="baseline.v1")
+    runtime_id: Mapped[str] = mapped_column(String(64), default="replay")
+    runtime_version: Mapped[str] = mapped_column(String(64), default="replay.v1")
+    provider_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    model: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    schema_version: Mapped[str] = mapped_column(String(64), default="experiment.v1")
+    random_seed: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    randomness_policy: Mapped[str] = mapped_column(String(32), default="deterministic")
+    deadline_seconds: Mapped[int] = mapped_column(Integer, default=300)
+    max_cost_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
+
+
+class ExperimentResultRecord(Base):
+    __tablename__ = "experiment_results"
+    result_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    experiment_id: Mapped[str] = mapped_column(String(128), index=True)
+    candidate_id: Mapped[str] = mapped_column(String(128), index=True)
+    sample_count: Mapped[int] = mapped_column(Integer)
+    brier_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    cost_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
+    p95_latency_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    safety_violations: Mapped[int] = mapped_column(Integer, default=0)
+    event_family_counts_json: Mapped[str] = mapped_column(Text, default="{}")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    stage: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    failure_counts_json: Mapped[str] = mapped_column(Text, default="{}")
+    evidence_coverage: Mapped[float | None] = mapped_column(Float, nullable=True)
+    directional_accuracy: Mapped[float | None] = mapped_column(Float, nullable=True)
+    raw_artifact_refs_json: Mapped[str] = mapped_column(Text, default="[]")
+    scorer_version: Mapped[str] = mapped_column(String(64), default="evaluation.v1")
+
+
+class ActivePointerRecord(Base):
+    __tablename__ = "active_pointers"
+    pointer_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    domain_pack_ref: Mapped[str] = mapped_column(String(128), unique=True)
+    candidate_id: Mapped[str] = mapped_column(String(128))
+    generation: Mapped[int] = mapped_column(Integer, default=0)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class PromotionDecisionRecord(Base):
+    __tablename__ = "promotion_decisions"
+    decision_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    request_id: Mapped[str] = mapped_column(String(256), unique=True)
+    domain_pack_ref: Mapped[str] = mapped_column(String(128), index=True)
+    candidate_id: Mapped[str] = mapped_column(String(128), index=True)
+    owner: Mapped[str] = mapped_column(String(128))
+    decision: Mapped[str] = mapped_column(String(32))
+    reason: Mapped[str] = mapped_column(Text)
+    evaluation_refs_json: Mapped[str] = mapped_column(Text)
+    previous_candidate_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    resulting_candidate_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    resulting_generation: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class FailurePatternRecord(Base):
+    __tablename__ = "failure_patterns"
+    pattern_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    failure_code: Mapped[str] = mapped_column(String(128), unique=True)
+    occurrence_count: Mapped[int] = mapped_column(Integer)
+    impact: Mapped[str] = mapped_column(Text)
+    source_refs_json: Mapped[str] = mapped_column(Text, default="[]")
+    root_cause_hypothesis: Mapped[str | None] = mapped_column(Text, nullable=True)
+    remediation_refs_json: Mapped[str] = mapped_column(Text, default="[]")
+    status: Mapped[str] = mapped_column(String(32), default="open")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ExperienceRecord(Base):
+    __tablename__ = "experiences"
+    experience_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    request_id: Mapped[str] = mapped_column(String(256), unique=True)
+    domain_pack_ref: Mapped[str] = mapped_column(String(128), index=True)
+    event_family: Mapped[str] = mapped_column(String(128), index=True)
+    lesson: Mapped[str] = mapped_column(Text)
+    applicable_conditions_json: Mapped[str] = mapped_column(Text, default="[]")
+    evidence_refs_json: Mapped[str] = mapped_column(Text, default="[]")
+    outcome_refs_json: Mapped[str] = mapped_column(Text, default="[]")
+    evaluation_refs_json: Mapped[str] = mapped_column(Text, default="[]")
+    source_type: Mapped[str] = mapped_column(String(32))
+    created_by: Mapped[str] = mapped_column(String(128))
+    content_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    status: Mapped[str] = mapped_column(String(32), default="candidate")
+    available_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
 class Database:
     def __init__(self, url: str | None = None) -> None:
         data_dir = Path(os.getenv("DECISION_HUB_DATA_DIR", "data/decision-hub"))
@@ -277,6 +434,16 @@ class Database:
     def initialize(self) -> None:
         """Apply the checked-in Alembic head for an application startup."""
         from alembic import command
+
+        command.upgrade(self._alembic_config(), "head")
+
+    def expected_migration_heads(self) -> tuple[str, ...]:
+        """Return the checked-in Alembic heads instead of duplicating a revision constant."""
+        from alembic.script import ScriptDirectory
+
+        return tuple(ScriptDirectory.from_config(self._alembic_config()).get_heads())
+
+    def _alembic_config(self):
         from alembic.config import Config
 
         config = Config(str(Path(__file__).resolve().parents[4] / "alembic.ini"))
@@ -284,7 +451,7 @@ class Database:
             "sqlalchemy.url",
             self.engine.url.render_as_string(hide_password=False),
         )
-        command.upgrade(config, "head")
+        return config
 
     @contextmanager
     def session(self) -> Generator[Session, None, None]:
@@ -309,6 +476,7 @@ class Database:
                 event_id=run.event_id,
                 status=RunStatus(run.status),
                 strategy_version=run.strategy_version,
+                runtime_version=run.runtime_version,
                 snapshot_id=run.snapshot_id,
                 artifact_id=run.artifact_id,
                 created_at=run.created_at,
@@ -596,6 +764,7 @@ class Database:
                     event_id=row.event_id,
                     status=RunStatus(row.status),
                     strategy_version=row.strategy_version,
+                    runtime_version=row.runtime_version,
                     snapshot_id=row.snapshot_id,
                     artifact_id=row.artifact_id,
                     created_at=row.created_at,
@@ -631,22 +800,14 @@ class Database:
                 evaluated_at=evaluation.evaluated_at,
             )
 
-    def get_timeline(self, run_id: str) -> list[dict[str, object]]:
+    def get_timeline(self, run_id: str) -> list[RunTimelineItemView]:
         with self.session() as session:
             rows = session.scalars(
                 select(RunEventRecord)
                 .where(RunEventRecord.run_id == run_id)
                 .order_by(RunEventRecord.sequence_no.asc())
             ).all()
-            return [
-                {
-                    "sequence_no": row.sequence_no,
-                    "event_type": row.event_type,
-                    "occurred_at": row.occurred_at.isoformat(),
-                    "payload": json.loads(row.payload_json),
-                }
-                for row in rows
-            ]
+            return [_timeline_view(row) for row in rows]
 
     def get_run_calls(self, run_id: str) -> list[CallView]:
         with self.session() as session:
@@ -719,6 +880,15 @@ class Database:
                 .order_by(EvaluationRecord.evaluated_at.asc())
             ).all()
             snapshot = session.get(SnapshotRecord, run.snapshot_id) if run.snapshot_id else None
+            evidence_lineage: list[EvidenceLineageView] = []
+            if snapshot is not None:
+                raw_evidence = json.loads(snapshot.evidence_json)
+                if isinstance(raw_evidence, list):
+                    evidence_lineage = [
+                        _evidence_lineage_view(item, snapshot)
+                        for item in raw_evidence
+                        if isinstance(item, dict)
+                    ]
         evaluation_views = [
             EvaluationView(
                 evaluation_id=item.evaluation_id,
@@ -731,17 +901,125 @@ class Database:
             )
             for item in evaluations
         ]
+        timeline = self.get_timeline(run_id)
+        calls = self.get_run_calls(run_id)
+        specialist_roles = sorted(
+            {
+                item.role
+                for item in calls
+                if item.role not in {"decision_synthesis", "research_supervisor"}
+            }
+        )
+        successful_specialists = sorted(
+            {
+                item.role
+                for item in calls
+                if item.status == "succeeded"
+                and item.role not in {"decision_synthesis", "research_supervisor"}
+            }
+        )
+        supervisor_mode = any(item.role == "research_supervisor" for item in calls)
+        experiment_refs = sorted(
+            {
+                item.reference_id
+                for item in timeline
+                if item.reference_type == "experiment" and item.reference_id is not None
+            }
+        )
         return RunInspectorView(
             run=run,
-            timeline=self.get_timeline(run_id),
+            timeline=timeline,
             steps=self.get_run_steps(run_id),
-            calls=self.get_run_calls(run_id),
+            calls=calls,
             artifact=artifact,
             evaluation_count=len(evaluation_views),
             evaluations=evaluation_views,
             snapshot_cutoff_at=snapshot.cutoff_at if snapshot else None,
             snapshot_hash=snapshot.snapshot_hash if snapshot else None,
+            evidence_lineage=evidence_lineage,
+            versions=VersionLineageView(
+                strategy_version=run.strategy_version,
+                runtime_version=run.runtime_version,
+                pack_version=snapshot.pack_version if snapshot else None,
+                provider_ids=sorted({item.provider_id for item in calls if item.provider_id}),
+                models=sorted({item.model for item in calls if item.model}),
+                schema_versions=sorted(
+                    {item.schema_version for item in calls if item.schema_version}
+                ),
+                pricing_versions=sorted(
+                    {item.pricing_version for item in calls if item.pricing_version}
+                ),
+            ),
+            orchestration=OrchestrationLineageView(
+                mode="supervisor_candidate" if supervisor_mode else "fixed_graph",
+                supervisor_role="research_supervisor" if supervisor_mode else None,
+                planned_capabilities=specialist_roles,
+                required_capabilities=specialist_roles,
+                specialist_coverage=successful_specialists,
+                missing_capabilities=sorted(set(specialist_roles) - set(successful_specialists)),
+                replan_count=min(
+                    1, sum(item.event_type == "supervisor.replanned" for item in timeline)
+                ),
+                experiment_refs=experiment_refs,
+            ),
         )
+
+
+def _timeline_view(row: RunEventRecord) -> RunTimelineItemView:
+    payload = json.loads(row.payload_json)
+    reference_type: str | None = None
+    reference_id: str | None = None
+    if isinstance(payload, dict):
+        for key, kind in (
+            ("snapshot_id", "snapshot"),
+            ("artifact_id", "artifact"),
+            ("experiment_id", "experiment"),
+            ("candidate_id", "candidate"),
+        ):
+            value = payload.get(key)
+            if isinstance(value, str):
+                reference_type = kind
+                reference_id = value
+                break
+    return RunTimelineItemView(
+        sequence_no=row.sequence_no,
+        event_type=row.event_type,
+        occurred_at=as_utc(row.occurred_at) or row.occurred_at,
+        reference_type=reference_type,
+        reference_id=reference_id,
+    )
+
+
+def _evidence_lineage_view(
+    item: dict[object, object], snapshot: SnapshotRecord
+) -> EvidenceLineageView:
+    cutoff_at = _parse_utc_timestamp(item.get("cutoff_at")) or as_utc(snapshot.cutoff_at)
+    observed_at = _parse_utc_timestamp(item.get("observed_at"))
+    published_at = _parse_utc_timestamp(item.get("published_at"))
+    received_at = _parse_utc_timestamp(item.get("received_at")) or cutoff_at
+    return EvidenceLineageView.model_validate(
+        {
+            "evidence_id": item.get("evidence_id"),
+            "source_id": item.get("source_id"),
+            "source_type": item.get("source_type"),
+            "observed_at": observed_at,
+            "published_at": published_at,
+            "received_at": received_at,
+            "cutoff_at": cutoff_at,
+            "content_hash": item.get("content_hash"),
+        }
+    )
+
+
+def _parse_utc_timestamp(value: object) -> datetime | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return as_utc(value)
+    if isinstance(value, str):
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        return as_utc(parsed)
+    raise TypeError("timestamp must be an ISO-8601 string or datetime")
 
 
 def _configure_sqlite(dbapi_connection: Any, _connection_record: Any) -> None:
