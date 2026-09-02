@@ -1,0 +1,105 @@
+schema_version: crypto-macro-evidence-policy.v2
+pack_id: crypto_macro.v1
+event_classes:
+  - central_bank_speech
+  - monetary_policy_decision
+  - inflation_release
+  - labor_release
+  - geopolitical_shock
+requirements:
+  - requirement_id: event.identity
+    canonical_requirement_id: event_identity
+    description: Identify the primary event, speaker or document, event time and revision status.
+    importance: hard
+    minimum_fact: true
+    source_priority: [official, verified_web]
+    allowed_fallbacks: [web.fetch, web.search]
+    preferred_capabilities: [official.macro, web.fetch, web.search]
+    freshness_seconds: 604800
+    minimum_independent_sources: 1
+    authority_floor: official
+    confidence_cap: 0.45
+  - requirement_id: policy.delta
+    canonical_requirement_id: policy_or_data_delta
+    description: Establish what changed relative to prior wording, prior value or consensus.
+    importance: hard
+    minimum_fact: true
+    source_priority: [official, audited_aggregator, verified_web]
+    allowed_fallbacks: [web.fetch, web.search]
+    preferred_capabilities: [official.macro, web.fetch, web.search]
+    freshness_seconds: 86400
+    minimum_independent_sources: 1
+    authority_floor: official
+    confidence_cap: 0.5
+  - requirement_id: expectation.pricing
+    canonical_requirement_id: expectation_pricing
+    description: Observe policy expectations, rates repricing or credible positioning evidence.
+    importance: hard
+    minimum_fact: true
+    source_priority: [exchange, audited_aggregator, verified_web]
+    allowed_fallbacks: [web.search]
+    preferred_capabilities: [market.cross_asset, web.search]
+    freshness_seconds: 900
+    minimum_independent_sources: 1
+    authority_floor: exchange
+    confidence_cap: 0.55
+  - requirement_id: macro.transmission
+    canonical_requirement_id: macro_transmission
+    description: Observe the rates and USD transmission path relevant to the event.
+    importance: hard
+    minimum_fact: true
+    source_priority: [official, exchange, audited_aggregator]
+    allowed_fallbacks: [web.search]
+    preferred_capabilities: [market.cross_asset, official.macro, web.search]
+    freshness_seconds: 300
+    minimum_independent_sources: 2
+    authority_floor: exchange
+    confidence_cap: 0.55
+  - requirement_id: cross_asset.confirmation
+    canonical_requirement_id: cross_asset_confirmation
+    description: Check at least one independent risk or liquidity-sensitive cross-asset confirmation.
+    importance: soft
+    minimum_fact: false
+    source_priority: [exchange, audited_aggregator, verified_web]
+    allowed_fallbacks: [web.search]
+    preferred_capabilities: [market.cross_asset, web.search]
+    freshness_seconds: 300
+    minimum_independent_sources: 1
+    authority_floor: verified_web
+    confidence_cap: 0.65
+  - requirement_id: crypto.spot
+    canonical_requirement_id: crypto_spot_confirmation
+    description: Observe BTC spot reaction, volume and the event-time comparison window.
+    importance: hard
+    minimum_fact: true
+    source_priority: [exchange, audited_aggregator]
+    allowed_fallbacks: []
+    preferred_capabilities: [market.crypto_derivatives]
+    freshness_seconds: 60
+    minimum_independent_sources: 1
+    authority_floor: exchange
+    confidence_cap: 0.5
+  - requirement_id: crypto.derivatives
+    canonical_requirement_id: derivatives_crowding
+    description: Observe funding, open interest, basis and available liquidation or flow evidence.
+    importance: hard
+    minimum_fact: true
+    source_priority: [exchange, audited_aggregator]
+    allowed_fallbacks: []
+    preferred_capabilities: [market.crypto_derivatives]
+    freshness_seconds: 60
+    minimum_independent_sources: 1
+    authority_floor: exchange
+    confidence_cap: 0.5
+  - requirement_id: counter.thesis
+    canonical_requirement_id: counter_thesis
+    description: Build the strongest evidence-backed alternative transmission chain.
+    importance: soft
+    minimum_fact: false
+    source_priority: [official, exchange, verified_web]
+    allowed_fallbacks: [web.search]
+    preferred_capabilities: [official.macro, market.cross_asset, web.search]
+    freshness_seconds: 86400
+    minimum_independent_sources: 1
+    authority_floor: verified_web
+    confidence_cap: 0.7

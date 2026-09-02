@@ -43,13 +43,22 @@ class EvaluationRunner:
         dataset: EvaluationDatasetManifest,
         fixture_paths: Sequence[Path],
         runtimes: Mapping[str, AgentRuntime],
+        *,
+        strategy_versions: Mapping[str, str] | None = None,
     ) -> EvaluationRun:
         self._validate_manifest(experiment, dataset, fixture_paths, runtimes)
+        candidate_ids = (experiment.baseline_ref, *experiment.candidate_refs)
+        resolved_versions = strategy_versions or {
+            candidate_id: experiment.strategy_version for candidate_id in candidate_ids
+        }
+        if set(resolved_versions) != set(candidate_ids) or any(
+            not version for version in resolved_versions.values()
+        ):
+            raise ValueError("evaluation_strategy_version_set_mismatch")
         experiment_dir = self.work_dir / experiment.experiment_id
         experiment_dir.mkdir(parents=True, exist_ok=True)
         results: list[ExperimentResultView] = []
         report_paths: list[Path] = []
-        candidate_ids = (experiment.baseline_ref, *experiment.candidate_refs)
         for candidate_id in candidate_ids:
             runtime = runtimes[candidate_id]
             reports: list[dict[str, object]] = []
@@ -58,7 +67,7 @@ class EvaluationRunner:
                 report = await run_fixture(
                     fixture_path,
                     database_path,
-                    strategy_version=experiment.strategy_version,
+                    strategy_version=resolved_versions[candidate_id],
                     runtime=runtime,
                 )
                 reports.append(report)

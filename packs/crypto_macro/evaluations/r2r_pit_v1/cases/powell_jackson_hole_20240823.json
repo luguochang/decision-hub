@@ -1,0 +1,261 @@
+{
+  "archived_capability_fixtures": [
+    {
+      "capability_id": "replay.research",
+      "evidence_candidates": [
+        {
+          "authority": "official",
+          "conflict_group": null,
+          "content_hash": "94b8403a4d959cc1ccd1692c93ce2cccfdfc1aecf2a7e29e6b96b856e3e29d37",
+          "evidence_id": "archive_94b8403a4d959cc1ccd1692c93ce2ccc",
+          "excerpt": "Federal Reserve Chair Jerome Powell delivered the economic outlook address at Jackson Hole on August 23, 2024.",
+          "freshness_status": "unknown",
+          "kind": "official",
+          "observed_at": "2024-08-23T14:00:01Z",
+          "published_at": "2024-08-23T14:00:00Z",
+          "quality": "candidate",
+          "received_at": "2024-08-23T14:00:02Z",
+          "requirement_id": "event_identity",
+          "research_session_id": "archive:powell_jackson_hole_20240823",
+          "round": 1,
+          "source_id": "federalreserve.gov",
+          "source_url": "https://www.federalreserve.gov/newsevents/speech/powell20240823a.htm",
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:powell_jackson_hole_20240823:event_identity"
+        }
+      ],
+      "query_aliases": [
+        "powell_jackson_hole_20240823:event_identity",
+        "Verify event identity for powell_jackson_hole_20240823"
+      ],
+      "requirement_id": "event_identity"
+    },
+    {
+      "capability_id": "replay.research",
+      "evidence_candidates": [
+        {
+          "authority": "official",
+          "conflict_group": null,
+          "content_hash": "f722e5130416eba5d1b341dcb72a6ec1082a7d12643d1f7affe79d6c797b81a2",
+          "evidence_id": "archive_f722e5130416eba5d1b341dcb72a6ec1",
+          "excerpt": "Powell stated that the time had come for policy to adjust and that the direction of travel was clear.",
+          "freshness_status": "unknown",
+          "kind": "official",
+          "observed_at": "2024-08-23T14:00:01Z",
+          "published_at": "2024-08-23T14:00:00Z",
+          "quality": "candidate",
+          "received_at": "2024-08-23T14:00:02Z",
+          "requirement_id": "policy_or_data_delta",
+          "research_session_id": "archive:powell_jackson_hole_20240823",
+          "round": 1,
+          "source_id": "federalreserve.gov",
+          "source_url": "https://www.federalreserve.gov/newsevents/speech/powell20240823a.htm",
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:powell_jackson_hole_20240823:policy_or_data_delta"
+        }
+      ],
+      "query_aliases": [
+        "powell_jackson_hole_20240823:policy_or_data_delta",
+        "Verify policy or data delta for powell_jackson_hole_20240823"
+      ],
+      "requirement_id": "policy_or_data_delta"
+    }
+  ],
+  "case_id": "powell_jackson_hole_20240823",
+  "cutoff_at": "2024-08-23T14:05:00Z",
+  "event_family": "central_bank_speech",
+  "evidence_requirements": [
+    {
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "authority_floor": "official",
+      "confidence_cap": 0.45,
+      "description": "Identify the primary event, speaker or document, event time and revision status.",
+      "freshness_seconds": 604800,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "requirement_id": "event_identity",
+      "source_priority": [
+        "official",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "authority_floor": "official",
+      "confidence_cap": 0.5,
+      "description": "Establish what changed relative to prior wording, prior value or consensus.",
+      "freshness_seconds": 86400,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "requirement_id": "policy_or_data_delta",
+      "source_priority": [
+        "official",
+        "audited_aggregator",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.55,
+      "description": "Observe policy expectations, rates repricing or credible positioning evidence.",
+      "freshness_seconds": 900,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "web.search"
+      ],
+      "requirement_id": "expectation_pricing",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.55,
+      "description": "Observe the rates and USD transmission path relevant to the event.",
+      "freshness_seconds": 300,
+      "importance": "hard",
+      "minimum_independent_sources": 2,
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "official.macro",
+        "web.search"
+      ],
+      "requirement_id": "macro_transmission",
+      "source_priority": [
+        "official",
+        "exchange",
+        "audited_aggregator"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "verified_web",
+      "confidence_cap": 0.65,
+      "description": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation.",
+      "freshness_seconds": 300,
+      "importance": "soft",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "web.search"
+      ],
+      "requirement_id": "cross_asset_confirmation",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.5,
+      "description": "Observe BTC spot reaction, volume and the event-time comparison window.",
+      "freshness_seconds": 60,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "requirement_id": "crypto_spot_confirmation",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ]
+    },
+    {
+      "allowed_fallbacks": [],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.5,
+      "description": "Observe funding, open interest, basis and available liquidation or flow evidence.",
+      "freshness_seconds": 60,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "requirement_id": "derivatives_crowding",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "verified_web",
+      "confidence_cap": 0.7,
+      "description": "Build the strongest evidence-backed alternative transmission chain.",
+      "freshness_seconds": 86400,
+      "importance": "soft",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "official.macro",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "requirement_id": "counter_thesis",
+      "source_priority": [
+        "official",
+        "exchange",
+        "verified_web"
+      ]
+    }
+  ],
+  "expected_hard_requirement_ids": [
+    "event_identity",
+    "policy_or_data_delta",
+    "expectation_pricing",
+    "macro_transmission",
+    "crypto_spot_confirmation",
+    "derivatives_crowding"
+  ],
+  "input_text": "Chair Powell said the time had come for policy to adjust while stressing that timing and pace would depend on incoming data and the balance of risks.",
+  "outcome_available_at": null,
+  "outcome_labels": [],
+  "schema_version": "research-evaluation-case.v1",
+  "source_refs": [
+    "https://www.federalreserve.gov/newsevents/speech/powell20240823a.htm"
+  ],
+  "trigger_evidence": {
+    "authority": "unverified",
+    "content_hash": "87d78f893137fd791f6ee0ddaf0b6f7b79bbeddd47a5b27e410c7c176e1c77ce",
+    "evidence_id": "trigger_powell_jackson_hole_20240823",
+    "excerpt": "Chair Powell said the time had come for policy to adjust while stressing that timing and pace would depend on incoming data and the balance of risks.",
+    "kind": "transcript",
+    "observed_at": "2024-08-23T14:00:00Z",
+    "published_at": "2024-08-23T14:00:00Z",
+    "received_at": "2024-08-23T14:00:02Z",
+    "source_id": "evaluation-catalog",
+    "source_url": "https://www.federalreserve.gov/newsevents/speech/powell20240823a.htm"
+  }
+}

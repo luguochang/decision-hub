@@ -1,0 +1,65 @@
+{
+  "patches": [
+    {
+      "at": 0,
+      "entry": {
+        "kind": "chunks",
+        "chunks": [
+          {
+            "type": "block-start",
+            "index": 0,
+            "blockType": "tool-call"
+          },
+          {
+            "type": "block-end",
+            "index": 0,
+            "block": {
+              "type": "tool-call",
+              "id": "native-research-call",
+              "name": "decision_hub_research",
+              "arguments": "{\"request_id\":\"{{fromRequest:(research-request:[a-z0-9_]+)}}\",\"capability_id\":\"replay.research\",\"requirement_id\":\"event_identity\",\"query\":\"powell_stanford_20240403:event_identity\",\"round\":1,\"mode\":\"replay\",\"observed_at\":\"2026-08-31T00:00:00Z\",\"cutoff_at\":\"2026-08-31T00:00:00Z\",\"target_url\":null,\"symbols\":[],\"fields\":[],\"allowed_domains\":[],\"max_results\":10,\"max_cost_usd\":0}"
+            }
+          },
+          {
+            "type": "finish",
+            "reason": {
+              "kind": "tool-calls"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "at": 1,
+      "entry": {
+        "kind": "chunks",
+        "chunks": [
+          {
+            "type": "block-start",
+            "index": 0,
+            "blockType": "text"
+          },
+          {
+            "type": "text-delta",
+            "index": 0,
+            "text": "{\"schema_version\":\"research-synthesis-candidate.v1\",\"request_id\":\"{{fromRequest:(research-request:[a-z0-9_]+)}}\",\"causal_case\":null,\"horizons\":[]}"
+          },
+          {
+            "type": "block-end",
+            "index": 0,
+            "block": {
+              "type": "text",
+              "text": "{\"schema_version\":\"research-synthesis-candidate.v1\",\"request_id\":\"{{fromRequest:(research-request:[a-z0-9_]+)}}\",\"causal_case\":null,\"horizons\":[]}"
+            }
+          },
+          {
+            "type": "finish",
+            "reason": {
+              "kind": "stop"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

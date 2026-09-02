@@ -6,6 +6,21 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
+from .generated import agentic_research as _agentic_research
+from .generated import dsh_host_bridge as _dsh_host_bridge
+from .generated.evolution_job import CandidateProposal as _CandidateProposal
+from .generated.evolution_job import CapabilityOperation as _CapabilityOperation
+from .generated.evolution_job import EvolutionJob as _EvolutionJob
+from .generated.evolution_job import EvolutionJobCounts as _EvolutionJobCounts
+from .generated.evolution_job import EvolutionJobCreate as _EvolutionJobCreate
+from .generated.evolution_job import EvolutionPlanningContext as _EvolutionPlanningContext
+from .generated.evolution_job import OperationsOverview as _OperationsOverview
+from .generated.evolution_job import RuntimeMode as _RuntimeMode
+from .generated.evolution_job import SearchEvidence as _SearchEvidence
+from .generated.evolution_job import SearchQuery as _SearchQuery
+from .generated.evolution_job import SearchResult as _SearchResult
+from .generated.evolution_job import ServiceHeartbeat as _ServiceHeartbeat
+from .generated.evolution_job import SourceOperation as _SourceOperation
 from .generated.run_inspector import (
     EvidenceLineage as _EvidenceLineage,
 )
@@ -109,10 +124,78 @@ PromotionReviewRequest = _PromotionReviewRequest
 ResearchMemoView = _ResearchMemo
 ResearchMemoCreate = _ResearchMemoCreate
 WorkbenchOverviewView = _WorkbenchOverview
+EvolutionJobCreate = _EvolutionJobCreate
+EvolutionJobView = _EvolutionJob
+EvolutionJobCountsView = _EvolutionJobCounts
+EvolutionPlanningContext = _EvolutionPlanningContext
+CandidateProposal = _CandidateProposal
+SearchQuery = _SearchQuery
+SearchEvidence = _SearchEvidence
+SearchResult = _SearchResult
+SourceOperationView = _SourceOperation
+CapabilityOperationView = _CapabilityOperation
+OperationsOverviewView = _OperationsOverview
+RuntimeModeView = _RuntimeMode
+ServiceHeartbeatView = _ServiceHeartbeat
 EvidenceLineageView = _EvidenceLineage
 OrchestrationLineageView = _OrchestrationLineage
 RunTimelineItemView = _TimelineItem
 VersionLineageView = _VersionLineage
+DshBridgeError = _dsh_host_bridge.DshBridgeError
+DshBusinessFailure = _dsh_host_bridge.DshBusinessFailure
+DshBusinessStatus = _dsh_host_bridge.DshBusinessStatus
+DshHostBridgeContracts = _dsh_host_bridge.DshHostBridgeContracts
+DshHostReadiness = _dsh_host_bridge.DshHostReadiness
+DshResearchIntake = _dsh_host_bridge.DshResearchIntake
+DshResearchIntakeAccepted = _dsh_host_bridge.DshResearchIntakeAccepted
+DshRunSessionLinkView = _dsh_host_bridge.DshRunSessionLinkView
+DshSessionAccepted = _dsh_host_bridge.DshSessionAccepted
+DshSessionCompletion = _dsh_host_bridge.DshSessionCompletion
+DshSessionPrompt = _dsh_host_bridge.DshSessionPrompt
+DshSessionResult = _dsh_host_bridge.DshSessionResult
+DshSessionStatus = _dsh_host_bridge.DshSessionStatus
+DshSessionSubmit = _dsh_host_bridge.DshSessionSubmit
+DshUpstreamIdentity = _dsh_host_bridge.DshUpstreamIdentity
+AgenticResearchContracts = _agentic_research.AgenticResearchContracts
+CausalCase = _agentic_research.CausalCase
+CausalLink = _agentic_research.CausalLink
+ConflictItem = _agentic_research.ConflictItem
+ErrorProvenance = _agentic_research.ErrorProvenance
+CoverageAssessment = _agentic_research.CoverageAssessment
+DomainPackManifest = _agentic_research.DomainPackManifest
+EvidenceCandidate = _agentic_research.EvidenceCandidate
+ResearchInputEvidence = _agentic_research.ResearchInputEvidence
+EvidenceGap = _agentic_research.EvidenceGap
+EvidenceRequirement = _agentic_research.EvidenceRequirement
+ExecutionBudget = _agentic_research.ExecutionBudget
+HorizonDecision = _agentic_research.HorizonDecision
+ProductExtensionManifest = _agentic_research.ProductExtensionManifest
+ResearchCapabilityManifest = _agentic_research.ResearchCapabilityManifest
+ResearchCapabilityQuery = _agentic_research.ResearchCapabilityQuery
+ResearchCapabilityResult = _agentic_research.ResearchCapabilityResult
+ResearchRunQueued = _agentic_research.ResearchRunQueued
+ResearchEvaluationCapabilityFixture = _agentic_research.ResearchEvaluationCapabilityFixture
+ResearchEvaluationCase = _agentic_research.ResearchEvaluationCase
+ResearchEvaluationOutcomeLabel = _agentic_research.ResearchEvaluationOutcomeLabel
+ResearchRuntimeCaseReport = _agentic_research.ResearchRuntimeCaseReport
+ResearchRuntimeComparison = _agentic_research.ResearchRuntimeComparison
+ResearchRuntimeSummary = _agentic_research.ResearchRuntimeSummary
+ResearchPlan = _agentic_research.ResearchPlan
+ResearchRound = _agentic_research.ResearchRound
+ResearchRunCommand = _agentic_research.ResearchRunCommand
+ResearchRunCommandResult = _agentic_research.ResearchRunCommandResult
+ResearchRunDetailView = _agentic_research.ResearchRunDetailView
+ResearchRunView = _agentic_research.ResearchRunView
+ResearchSessionRequest = _agentic_research.ResearchSessionRequest
+ResearchSessionResult = _agentic_research.ResearchSessionResult
+ResearchSynthesisCandidate = _agentic_research.ResearchSynthesisCandidate
+ResearchSnapshotManifest = _agentic_research.ResearchSnapshotManifest
+ResearchStopReason = _agentic_research.ResearchStopReason
+ResearchTask = _agentic_research.ResearchTask
+ResearchTraceEvent = _agentic_research.ResearchTraceEvent
+RoleProfile = _agentic_research.RoleProfile
+ToolInvocation = _agentic_research.ToolInvocation
+ToolResultSummary = _agentic_research.ToolResultSummary
 
 
 class SourceType(StrEnum):

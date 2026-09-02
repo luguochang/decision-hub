@@ -9,6 +9,7 @@ from packages.kernel.decision_hub_kernel.ports.sources import SourceManifest
 from packages.source_adapters.official_feeds import (
     OfficialCalendarSource,
     OfficialFeedSource,
+    official_source_presets,
 )
 from packages.source_adapters.official_feeds.adapter import extract_document_text, parse_feed
 
@@ -121,6 +122,58 @@ def test_feed_batch_cursor_does_not_skip_unemitted_items() -> None:
 
     assert [envelope.raw_text for envelope in first.envelopes] == ["one", "two"]
     assert [envelope.raw_text for envelope in second.envelopes] == ["three"]
+
+
+def test_product_feed_bootstrap_only_establishes_cursor_then_emits_new_items() -> None:
+    initial_body = """<rss><channel>
+      <item><guid>one</guid><title>one</title><pubDate>2026-08-27T01:00:00Z</pubDate></item>
+      <item><guid>two</guid><title>two</title><pubDate>2026-08-27T02:00:00Z</pubDate></item>
+      <item><guid>three</guid><title>three</title><pubDate>2026-08-27T03:00:00Z</pubDate></item>
+    </channel></rss>"""
+    updated_body = """<rss><channel>
+      <item><guid>one</guid><title>one</title><pubDate>2026-08-27T01:00:00Z</pubDate></item>
+      <item><guid>two</guid><title>two</title><pubDate>2026-08-27T02:00:00Z</pubDate></item>
+      <item><guid>three</guid><title>three</title><pubDate>2026-08-27T03:00:00Z</pubDate></item>
+      <item><guid>four</guid><title>four</title><pubDate>2026-08-27T04:00:00Z</pubDate></item>
+    </channel></rss>"""
+    body = initial_body
+
+    async def fetcher(_url: str) -> tuple[int, str]:
+        return 200, body
+
+    source = OfficialFeedSource(
+        SourceManifest(
+            source_id="fed-bounded-bootstrap",
+            source_type="official_feed",
+            version="fixture.v1",
+            authority_level="official",
+            max_batch=2,
+        ),
+        "https://www.federalreserve.gov/fixture.rss",
+        fetcher=fetcher,
+        bootstrap_latest=True,
+    )
+
+    bootstrap = asyncio.run(source.poll())
+    no_change = asyncio.run(source.poll(bootstrap.cursor_after))
+    body = updated_body
+    new_items = asyncio.run(source.poll(bootstrap.cursor_after))
+
+    assert bootstrap.envelopes == ()
+    assert bootstrap.cursor_after is not None and bootstrap.cursor_after.endswith("|three")
+    assert no_change.envelopes == ()
+    assert [envelope.raw_text for envelope in new_items.envelopes] == ["four"]
+
+
+def test_product_official_sources_can_exclude_unscheduled_calendar_activation() -> None:
+    sources = official_source_presets(include_calendar=False)
+
+    assert {source.manifest.source_id for source in sources} == {
+        "fed-press",
+        "fed-speeches",
+        "bls-releases",
+        "bea-news",
+    }
 
 
 def test_calendar_batch_cursor_does_not_skip_unemitted_events() -> None:

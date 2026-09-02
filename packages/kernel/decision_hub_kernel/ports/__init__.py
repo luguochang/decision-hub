@@ -1,5 +1,11 @@
 from packages.contracts_py.decision_hub_contracts.models import SourceHealth
 
+from .research import (
+    ResearchCapabilityAdapter,
+    ResearchCapabilityGateway,
+    ResearchHarnessRuntime,
+    ResearchTraceSink,
+)
 from .runtime import AgentExecutionError, AgentRequest, AgentResult, AgentRuntime
 from .sources import (
     MarketDataPort,
@@ -25,6 +31,10 @@ __all__ = [
     "DecisionExecutionRequest",
     "DecisionWorkflowExecutor",
     "ResearchWorkbenchPort",
+    "ResearchCapabilityAdapter",
+    "ResearchCapabilityGateway",
+    "ResearchHarnessRuntime",
+    "ResearchTraceSink",
     "MarketDataPort",
     "MarketQuote",
     "MarketWindowPort",

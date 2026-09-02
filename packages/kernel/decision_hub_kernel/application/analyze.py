@@ -51,6 +51,30 @@ class AnalyzeTextService:
             self.runs.set_status(run_id, RunStatus.degraded, error_code="duplicate_observation")
         return event_id, run_id, admitted
 
+    def queue_research(
+        self,
+        request: ObservationCreate,
+        idempotency_key: str,
+        *,
+        strategy_version: str = "research.v1",
+    ) -> tuple[str, str, bool]:
+        """Admit a candidate research Run for the durable research worker.
+
+        This method intentionally does not execute a runtime. The API can
+        acknowledge the durable queue while the separate research composition
+        owns DSH/LangGraph execution and recovery.
+        """
+        if not idempotency_key:
+            raise ValueError("idempotency_key_required")
+        event_id, _envelope, _admitted = self.admission.admit(request)
+        run_id, created = self.runs.create(
+            event_id,
+            idempotency_key,
+            strategy_version=strategy_version,
+            admission_origin="manual",
+        )
+        return event_id, run_id, created
+
     async def run_admitted(
         self, event_id: str, run_id: str, _envelope: TextEnvelope | None = None
     ) -> bool:

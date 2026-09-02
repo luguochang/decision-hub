@@ -10,6 +10,7 @@ import time
 from pathlib import Path
 from typing import cast
 
+import httpx2
 import pytest
 from fastapi.testclient import TestClient
 from mcp import ClientSession, StdioServerParameters
@@ -162,19 +163,21 @@ async def test_mcp_streamable_http_official_client_smoke(tmp_path: Path) -> None
         else:
             pytest.fail("hub-mcp streamable HTTP did not become ready")
 
-        async with streamable_http_client(f"http://127.0.0.1:{port}/mcp") as (
-            read_stream,
-            write_stream,
-        ):
-            async with ClientSession(read_stream, write_stream) as session:
-                initialized = await session.initialize()
-                assert initialized.server_info.name == "decision-hub-workbench"
-                tools = await session.list_tools()
-                assert "workbench_overview" in {tool.name for tool in tools.tools}
-                overview = await session.call_tool("workbench_overview", {"limit": 10})
-                assert overview.is_error is False
-                assert overview.structured_content is not None
-                assert overview.structured_content["capabilities"] == []
+        async with httpx2.AsyncClient(trust_env=False) as http_client:
+            async with streamable_http_client(
+                f"http://127.0.0.1:{port}/mcp", http_client=http_client
+            ) as (read_stream, write_stream):
+                async with ClientSession(read_stream, write_stream) as session:
+                    initialized = await session.initialize()
+                    assert initialized.server_info.name == "decision-hub-workbench"
+                    tools = await session.list_tools()
+                    assert "workbench_overview" in {tool.name for tool in tools.tools}
+                    overview = await session.call_tool(
+                        "workbench_overview", {"limit": 10}
+                    )
+                    assert overview.is_error is False
+                    assert overview.structured_content is not None
+                    assert overview.structured_content["capabilities"] == []
     finally:
         process.terminate()
         try:

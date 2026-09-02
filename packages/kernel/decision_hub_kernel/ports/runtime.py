@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Protocol
 
+from packages.contracts_py.decision_hub_contracts import ErrorProvenance
 from packages.contracts_py.decision_hub_contracts.models import TextEnvelope
 
 
@@ -14,6 +15,7 @@ class AgentRequest:
     evidence: tuple[str, ...]
     deadline_at: datetime
     max_tokens: int = 4_000
+    instructions: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -36,6 +38,11 @@ class AgentExecutionError(RuntimeError):
         attempt: int = 1,
         provider_id: str | None = None,
         model: str | None = None,
+        origin: str = "orchestration",
+        cause_code: str | None = None,
+        capability_id: str | None = None,
+        tool_call_id: str | None = None,
+        deadline_ms: int | None = None,
     ) -> None:
         super().__init__(message)
         self.error_code = error_code
@@ -43,6 +50,22 @@ class AgentExecutionError(RuntimeError):
         self.attempt = attempt
         self.provider_id = provider_id
         self.model = model
+        self.origin = origin
+        self.cause_code = cause_code
+        self.capability_id = capability_id
+        self.tool_call_id = tool_call_id
+        self.deadline_ms = deadline_ms
+
+    def provenance(self) -> ErrorProvenance:
+        return ErrorProvenance(
+            error_code=self.error_code,
+            origin=self.origin,  # type: ignore[arg-type]
+            cause_code=self.cause_code,
+            capability_id=self.capability_id,
+            tool_call_id=self.tool_call_id,
+            retryable=self.retryable,
+            deadline_ms=self.deadline_ms,
+        )
 
 
 @dataclass(frozen=True)
@@ -64,6 +87,7 @@ class AgentRuntime(Protocol):
     runtime_id: str
     runtime_version: str
     max_attempts: int
+
     @property
     def cost_budget(self) -> float | None: ...
 

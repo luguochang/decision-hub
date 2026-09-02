@@ -10,6 +10,9 @@ const root = path.resolve(toolDir, '..', '..')
 const output = process.argv[2] ?? path.join(root, 'packages/contracts_ts/src/generated/r2.ts')
 
 const sources = [
+  ['contracts/schemas/dsh_host_bridge.schema.yaml', null],
+  ['contracts/schemas/agentic_research.schema.yaml', null],
+  ['contracts/schemas/evolution_job.schema.yaml', null],
   ['contracts/schemas/workbench_assets.schema.yaml', null],
   ['contracts/schemas/run_inspector.schema.yaml', new Set([
     'timeline_item',

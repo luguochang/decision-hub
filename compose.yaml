@@ -1,0 +1,144 @@
+name: decision-hub
+
+x-hub-environment: &hub-environment
+  DECISION_HUB_DATA_DIR: /app/data/decision-hub
+  DECISION_HUB_LLM_ENABLED: "${DECISION_HUB_LLM_ENABLED:-0}"
+  DECISION_HUB_LLM_API_MODE: "${DECISION_HUB_LLM_API_MODE:-responses}"
+  DECISION_HUB_LLM_CANARY_STATUS: "${DECISION_HUB_LLM_CANARY_STATUS:-not_run}"
+  DECISION_HUB_PROVIDER_ID: "${DECISION_HUB_PROVIDER_ID:-openai-compatible}"
+  DECISION_HUB_MODEL: "${DECISION_HUB_MODEL:-deepseek-chat}"
+  DECISION_HUB_SOURCES_ENABLED: "${DECISION_HUB_SOURCES_ENABLED:-0}"
+  DECISION_HUB_MARKET_ENABLED: "${DECISION_HUB_MARKET_ENABLED:-0}"
+  DECISION_HUB_HEARTBEAT_INTERVAL: "${DECISION_HUB_HEARTBEAT_INTERVAL:-5}"
+  OPENAI_BASE_URL: "${OPENAI_BASE_URL:-}"
+  OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+  DEEPSEEK_API_KEY: "${DEEPSEEK_API_KEY:-}"
+  SUB2API_BASE_URL: "${SUB2API_BASE_URL:-}"
+  SUB2API_API_KEY: "${SUB2API_API_KEY:-}"
+  # The official DSH Web process runs on the host; research workers run in
+  # containers. Keep the container-to-host URL explicit instead of using the
+  # container-local 127.0.0.1 address.
+  DECISION_HUB_DSH_WEB_URL: "${DECISION_HUB_DSH_WEB_INTERNAL_URL:-http://host.docker.internal:3080}"
+  DECISION_HUB_DSH_HOST_SECRET: "${DECISION_HUB_DSH_HOST_KEY:-decision-hub-local-host-key}"
+  DECISION_HUB_DSH_CALLBACK_KEY: "${DECISION_HUB_DSH_CALLBACK_KEY:-decision-hub-local-callback-key}"
+  DECISION_HUB_DSH_RESEARCH_TOOL_KEY: "${DECISION_HUB_DSH_RESEARCH_TOOL_KEY:-decision-hub-local-research-tool-key}"
+  DECISION_HUB_DSH_RUNTIME_MODE: "${DECISION_HUB_DSH_RUNTIME_MODE:-live}"
+  DECISION_HUB_DSH_SOURCE_COMMIT: "${DECISION_HUB_DSH_SOURCE_COMMIT:-}"
+  DECISION_HUB_DSH_SOURCE_VERSION: "${DECISION_HUB_DSH_SOURCE_VERSION:-}"
+  DECISION_HUB_DSH_PLUGIN_BUILD_HASH: "${DECISION_HUB_DSH_PLUGIN_BUILD_HASH:-}"
+  DECISION_HUB_DSH_CALLBACK_SECRET: "${DECISION_HUB_DSH_CALLBACK_SECRET:-decision-hub-local-callback-key}"
+
+services:
+  hub-api:
+    build:
+      context: .
+    environment:
+      <<: *hub-environment
+      DECISION_HUB_INSTANCE_ID: compose-api
+    ports:
+      - "127.0.0.1:${DECISION_HUB_API_PORT:-8000}:8000"
+    volumes:
+      - decision-hub-data:/app/data/decision-hub
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=2)"
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+  hub-realtime-worker:
+    build:
+      context: .
+    command: ["python", "-m", "apps.hub_worker.main", "--role", "realtime", "--interval", "5"]
+    environment:
+      <<: *hub-environment
+      DECISION_HUB_INSTANCE_ID: compose-realtime
+    volumes:
+      - decision-hub-data:/app/data/decision-hub
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    depends_on:
+      hub-api:
+        condition: service_healthy
+
+  hub-evolution-worker:
+    build:
+      context: .
+    command: ["python", "-m", "apps.hub_worker.main", "--role", "evolution", "--interval", "5"]
+    environment:
+      <<: *hub-environment
+      DECISION_HUB_INSTANCE_ID: compose-evolution
+    volumes:
+      - decision-hub-data:/app/data/decision-hub
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    depends_on:
+      hub-api:
+        condition: service_healthy
+
+  research-mcp:
+    build:
+      context: .
+    command: ["python", "-m", "apps.research_mcp.main"]
+    environment:
+      <<: *hub-environment
+      DECISION_HUB_RESEARCH_MCP_HOST: 0.0.0.0
+      DECISION_HUB_RESEARCH_MCP_PORT: 8002
+      DECISION_HUB_RESEARCH_CAPABILITIES: "${DECISION_HUB_RESEARCH_CAPABILITIES:-replay.research}"
+      DECISION_HUB_RESEARCH_REPLAY_FIXTURES: "${DECISION_HUB_RESEARCH_REPLAY_FIXTURES:-/app/packs/crypto_macro/evaluations/r2r_pit_v1/cases/powell_stanford_20240403.json}"
+      DECISION_HUB_SEARCH_MODEL: "${DECISION_HUB_SEARCH_MODEL:-gpt-5.5}"
+      DECISION_HUB_SEARCH_ESTIMATED_COST_PER_CALL_USD: "${DECISION_HUB_SEARCH_ESTIMATED_COST_PER_CALL_USD:-0.01}"
+    expose:
+      - "8002"
+    ports:
+      - "127.0.0.1:${DECISION_HUB_RESEARCH_MCP_PORT:-8002}:8002"
+    # The MCP gateway validates DSH session links and persists accepted
+    # evidence. It must read the same durable SQLite volume as the Hub API and
+    # research worker; an isolated container filesystem would make every live
+    # capability call fail with research_session_not_found.
+    volumes:
+      - decision-hub-data:/app/data/decision-hub
+    restart: unless-stopped
+    depends_on:
+      hub-api:
+        condition: service_healthy
+
+  hub-research-worker:
+    build:
+      context: .
+    command: ["python", "-m", "apps.hub_worker.main", "--role", "research", "--interval", "5"]
+    environment:
+      <<: *hub-environment
+      DECISION_HUB_INSTANCE_ID: compose-research
+      DECISION_HUB_RESEARCH_CAPABILITIES: "${DECISION_HUB_RESEARCH_CAPABILITIES:-replay.research}"
+      DECISION_HUB_RESEARCH_MCP_URL: http://research-mcp:8002/mcp
+      DECISION_HUB_RESEARCH_RUNTIME: "${DECISION_HUB_RESEARCH_RUNTIME:-replay}"
+      DECISION_HUB_RESEARCH_RUNTIME_FIXTURE: "${DECISION_HUB_RESEARCH_RUNTIME_FIXTURE:-/app/packs/crypto_macro/fixtures/research-worker-replay.json}"
+      DECISION_HUB_DSH_PROVIDER: "${DECISION_HUB_DSH_PROVIDER:-deepseek-official}"
+      DECISION_HUB_DSH_MODEL: "${DECISION_HUB_DSH_MODEL:-deepseek-v4-flash}"
+      DECISION_HUB_DSH_SESSION_ROOT: /app/data/dsh-sessions
+      DECISION_HUB_DSH_WORKSPACE: /app
+    volumes:
+      - decision-hub-data:/app/data/decision-hub
+      - decision-hub-dsh-sessions:/app/data/dsh-sessions
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    depends_on:
+      hub-api:
+        condition: service_healthy
+      research-mcp:
+        condition: service_started
+
+volumes:
+  decision-hub-data:
+  decision-hub-dsh-sessions:

@@ -1,0 +1,37 @@
+{
+  "schema_version": "crypto-macro-fact-pack-replay.v1",
+  "pack_id": "crypto_macro.v1",
+  "cutoff_at": "2026-08-29T04:00:00Z",
+  "requirements": {
+    "event.identity": {
+      "success": {"status": "sufficient", "fixture_ref": "r2r_pit_v1/cases/powell_stanford_20240403.json"},
+      "stale": {"status": "stale", "fixture_ref": "r2r_pit_v1/cases/powell_stanford_20240403.json"},
+      "provider_failure": {"status": "failed", "error_code": "search_provider_failed"}
+    },
+    "policy.delta": {
+      "success": {"status": "sufficient", "fixture_ref": "r2r_pit_v1/cases/powell_jackson_hole_20240823.json"},
+      "stale": {"status": "stale", "fixture_ref": "r2r_pit_v1/cases/powell_jackson_hole_20240823.json"},
+      "provider_failure": {"status": "failed", "error_code": "research_capability_timeout"}
+    },
+    "expectation.pricing": {
+      "success": {"status": "sufficient", "fixture_ref": "r2r_pit_v1/cases/fomc_cut_50bp_20240918.json"},
+      "stale": {"status": "stale", "fixture_ref": "r2r_pit_v1/cases/fomc_cut_50bp_20240918.json"},
+      "provider_failure": {"status": "failed", "error_code": "search_provider_failed"}
+    },
+    "macro.transmission": {
+      "success": {"status": "sufficient", "fixture_ref": "r2r_pit_v1/cases/us_cpi_20250115.json"},
+      "stale": {"status": "stale", "fixture_ref": "r2r_pit_v1/cases/us_cpi_20250115.json"},
+      "provider_failure": {"status": "failed", "error_code": "research_capability_timeout"}
+    },
+    "crypto.spot": {
+      "success": {"status": "sufficient", "fixture_ref": "r2r_pit_v1/cases/fomc_cut_25bp_20241107.json"},
+      "stale": {"status": "stale", "fixture_ref": "r2r_pit_v1/cases/fomc_cut_25bp_20241107.json"},
+      "provider_failure": {"status": "failed", "error_code": "search_provider_failed"}
+    },
+    "crypto.derivatives": {
+      "success": {"status": "sufficient", "fixture_ref": "r2r_pit_v1/cases/fomc_cut_25bp_20241218.json"},
+      "stale": {"status": "stale", "fixture_ref": "r2r_pit_v1/cases/fomc_cut_25bp_20241218.json"},
+      "provider_failure": {"status": "failed", "error_code": "research_capability_timeout"}
+    }
+  }
+}

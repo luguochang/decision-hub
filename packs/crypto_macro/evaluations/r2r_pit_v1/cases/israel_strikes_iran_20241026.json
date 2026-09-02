@@ -1,0 +1,261 @@
+{
+  "archived_capability_fixtures": [
+    {
+      "capability_id": "replay.research",
+      "evidence_candidates": [
+        {
+          "authority": "verified_web",
+          "conflict_group": null,
+          "content_hash": "42629dd78ee524c47910cb610cfdd5b1db7df4c6f5b007b77a93bff750bebc99",
+          "evidence_id": "archive_42629dd78ee524c47910cb610cfdd5b1",
+          "excerpt": "Reuters reported Israeli strikes against military targets in Iran on October 26, 2024.",
+          "freshness_status": "unknown",
+          "kind": "web",
+          "observed_at": "2024-10-26T03:00:01Z",
+          "published_at": "2024-10-26T03:00:00Z",
+          "quality": "candidate",
+          "received_at": "2024-10-26T03:00:02Z",
+          "requirement_id": "event_identity",
+          "research_session_id": "archive:israel_strikes_iran_20241026",
+          "round": 1,
+          "source_id": "reuters.com",
+          "source_url": "https://www.reuters.com/world/middle-east/explosions-heard-iran-syria-israel-starts-retaliatory-strikes-2024-10-25/",
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:israel_strikes_iran_20241026:event_identity"
+        }
+      ],
+      "query_aliases": [
+        "israel_strikes_iran_20241026:event_identity",
+        "Verify event identity for israel_strikes_iran_20241026"
+      ],
+      "requirement_id": "event_identity"
+    },
+    {
+      "capability_id": "replay.research",
+      "evidence_candidates": [
+        {
+          "authority": "verified_web",
+          "conflict_group": null,
+          "content_hash": "8be8edecd69827392f4ac623bd2687cd98d7c9c471742acc1c79a4453ae52e75",
+          "evidence_id": "archive_8be8edecd69827392f4ac623bd2687cd",
+          "excerpt": "Israel said the operation was a response to months of attacks and Iran said the strikes caused limited damage, leaving the next retaliation step uncertain.",
+          "freshness_status": "unknown",
+          "kind": "web",
+          "observed_at": "2024-10-26T03:00:01Z",
+          "published_at": "2024-10-26T03:00:00Z",
+          "quality": "candidate",
+          "received_at": "2024-10-26T03:00:02Z",
+          "requirement_id": "policy_or_data_delta",
+          "research_session_id": "archive:israel_strikes_iran_20241026",
+          "round": 1,
+          "source_id": "reuters.com",
+          "source_url": "https://www.reuters.com/world/middle-east/explosions-heard-iran-syria-israel-starts-retaliatory-strikes-2024-10-25/",
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:israel_strikes_iran_20241026:policy_or_data_delta"
+        }
+      ],
+      "query_aliases": [
+        "israel_strikes_iran_20241026:policy_or_data_delta",
+        "Verify policy or data delta for israel_strikes_iran_20241026"
+      ],
+      "requirement_id": "policy_or_data_delta"
+    }
+  ],
+  "case_id": "israel_strikes_iran_20241026",
+  "cutoff_at": "2024-10-26T03:05:00Z",
+  "event_family": "geopolitical_shock",
+  "evidence_requirements": [
+    {
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "authority_floor": "official",
+      "confidence_cap": 0.45,
+      "description": "Identify the primary event, speaker or document, event time and revision status.",
+      "freshness_seconds": 604800,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "requirement_id": "event_identity",
+      "source_priority": [
+        "official",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "authority_floor": "official",
+      "confidence_cap": 0.5,
+      "description": "Establish what changed relative to prior wording, prior value or consensus.",
+      "freshness_seconds": 86400,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "requirement_id": "policy_or_data_delta",
+      "source_priority": [
+        "official",
+        "audited_aggregator",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.55,
+      "description": "Observe policy expectations, rates repricing or credible positioning evidence.",
+      "freshness_seconds": 900,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "web.search"
+      ],
+      "requirement_id": "expectation_pricing",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.55,
+      "description": "Observe the rates and USD transmission path relevant to the event.",
+      "freshness_seconds": 300,
+      "importance": "hard",
+      "minimum_independent_sources": 2,
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "official.macro",
+        "web.search"
+      ],
+      "requirement_id": "macro_transmission",
+      "source_priority": [
+        "official",
+        "exchange",
+        "audited_aggregator"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "verified_web",
+      "confidence_cap": 0.65,
+      "description": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation.",
+      "freshness_seconds": 300,
+      "importance": "soft",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "web.search"
+      ],
+      "requirement_id": "cross_asset_confirmation",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.5,
+      "description": "Observe BTC spot reaction, volume and the event-time comparison window.",
+      "freshness_seconds": 60,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "requirement_id": "crypto_spot_confirmation",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ]
+    },
+    {
+      "allowed_fallbacks": [],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.5,
+      "description": "Observe funding, open interest, basis and available liquidation or flow evidence.",
+      "freshness_seconds": 60,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "requirement_id": "derivatives_crowding",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "verified_web",
+      "confidence_cap": 0.7,
+      "description": "Build the strongest evidence-backed alternative transmission chain.",
+      "freshness_seconds": 86400,
+      "importance": "soft",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "official.macro",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "requirement_id": "counter_thesis",
+      "source_priority": [
+        "official",
+        "exchange",
+        "verified_web"
+      ]
+    }
+  ],
+  "expected_hard_requirement_ids": [
+    "event_identity",
+    "policy_or_data_delta",
+    "expectation_pricing",
+    "macro_transmission",
+    "crypto_spot_confirmation",
+    "derivatives_crowding"
+  ],
+  "input_text": "Israel carried out retaliatory strikes against military targets in Iran, creating a new regional escalation and retaliation decision point.",
+  "outcome_available_at": null,
+  "outcome_labels": [],
+  "schema_version": "research-evaluation-case.v1",
+  "source_refs": [
+    "https://www.reuters.com/world/middle-east/explosions-heard-iran-syria-israel-starts-retaliatory-strikes-2024-10-25/"
+  ],
+  "trigger_evidence": {
+    "authority": "unverified",
+    "content_hash": "c76586052576b77893030325e661f0feaf461b75ed54d50cd18453a45d13f259",
+    "evidence_id": "trigger_israel_strikes_iran_20241026",
+    "excerpt": "Israel carried out retaliatory strikes against military targets in Iran, creating a new regional escalation and retaliation decision point.",
+    "kind": "transcript",
+    "observed_at": "2024-10-26T03:00:00Z",
+    "published_at": "2024-10-26T03:00:00Z",
+    "received_at": "2024-10-26T03:00:02Z",
+    "source_id": "evaluation-catalog",
+    "source_url": "https://www.reuters.com/world/middle-east/explosions-heard-iran-syria-israel-starts-retaliatory-strikes-2024-10-25/"
+  }
+}

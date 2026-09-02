@@ -9,7 +9,7 @@ from sqlalchemy import create_engine, inspect, text
 from packages.kernel.decision_hub_kernel.persistence.db import Database
 
 ROOT = Path(__file__).resolve().parents[2]
-CURRENT_HEAD = "0015_evolution_provenance"
+CURRENT_HEAD = "0027_durable_tool_budget"
 
 
 def upgrade(path: Path, revision: str) -> None:
@@ -73,3 +73,70 @@ def test_r1_0009_upgrades_to_current_head(tmp_path: Path) -> None:
         columns(path, "experiment_results")
     )
     assert {"evaluation_refs_json", "available_at"}.issubset(columns(path, "experiences"))
+    tables = inspect(create_engine(f"sqlite+pysqlite:///{path}")).get_table_names()
+    assert {"evolution_jobs", "service_heartbeats"}.issubset(tables)
+    assert "research_evidence" in tables
+    assert {"snapshot_type", "run_id", "generation", "created_at"}.issubset(
+        columns(path, "snapshots")
+    )
+    assert "decision_snapshot_id" in columns(path, "runs")
+    assert {"lease_owner", "lease_expires_at"}.issubset(columns(path, "runs"))
+    assert "error_provenance_json" in columns(path, "research_trace_events")
+    assert "dsh_session_links" in tables
+    assert {
+        "dsh_session_id",
+        "request_hash",
+        "upstream_identity_json",
+        "last_seq",
+        "deadline_at",
+    }.issubset(
+        columns(path, "dsh_session_links")
+    )
+    assert "dsh_session_prompts" in tables
+    assert {"generation", "dsh_session_id", "request_id", "request_hash", "prompt"}.issubset(
+        columns(path, "dsh_session_prompts")
+    )
+    assert {"admission_origin", "priority"}.issubset(columns(path, "runs"))
+
+
+def test_0025_preserves_historical_run_and_marks_it_legacy(tmp_path: Path) -> None:
+    path = tmp_path / "run-admission-priority.sqlite3"
+    upgrade(path, "0024_dsh_prompt_generations")
+    engine = create_engine(f"sqlite+pysqlite:///{path}")
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "INSERT INTO events "
+                "(event_id, event_type, occurred_at, received_at, generation, status) "
+                "VALUES ('event-legacy', 'macro_event', CURRENT_TIMESTAMP, "
+                "CURRENT_TIMESTAMP, 1, 'active')"
+            )
+        )
+        connection.execute(
+            text(
+                "INSERT INTO runs "
+                "(run_id, event_id, status, strategy_version, runtime_version, "
+                "created_at, updated_at, cost_usd) "
+                "VALUES ('run-legacy', 'event-legacy', 'completed', 'research.v1', 'fixed.v1', "
+                "CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0)"
+            )
+        )
+
+    upgrade(path, CURRENT_HEAD)
+
+    with engine.connect() as connection:
+        row = connection.execute(
+            text(
+                "SELECT run_id, status, strategy_version, runtime_version, "
+                "admission_origin, priority "
+                "FROM runs WHERE run_id = 'run-legacy'"
+            )
+        ).mappings().one()
+    assert dict(row) == {
+        "run_id": "run-legacy",
+        "status": "completed",
+        "strategy_version": "research.v1",
+        "runtime_version": "fixed.v1",
+        "admission_origin": "legacy",
+        "priority": 0,
+    }

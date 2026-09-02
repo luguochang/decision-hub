@@ -1,0 +1,59 @@
+{
+  "schema_version": "research-failure-fixture.v1",
+  "fixture_id": "warsh-insufficient-evidence-2026-08-29",
+  "source": {
+    "event_id": "evt_cf111a1bfc414abbbf7503262235dbd5",
+    "run_id": "run_78b7664c884e4dc6a36fc77454a6e47c",
+    "event_summary": "Owner-submitted Kevin Warsh remarks and their possible BTC market impact.",
+    "provider_payload_included": false
+  },
+  "baseline": {
+    "runtime": "fixed-baseline.v1",
+    "status": "degraded",
+    "gate_status": "research_only",
+    "elapsed_ms": 93700,
+    "tool_call_count": 0,
+    "probability_provenance": null,
+    "horizons": [
+      {
+        "horizon": "30m",
+        "action": "no_trade",
+        "probability": 0.52,
+        "trigger": "Observe DXY, US 2Y/10Y yields, BTC spot and perpetual basis, OI, funding and liquidations for aligned risk contraction; then check whether the September hike probability rises above the event-time estimate and whether BTC breaks its pre-event range.",
+        "invalidation": "The bearish research case fails if yields and DXY reverse, BTC reclaims the pre-event range without long-side stress, later inflation or labor data weaken the inflation-first narrative, or hike pricing falls."
+      },
+      {
+        "horizon": "24h",
+        "action": "no_trade",
+        "probability": 0.52,
+        "trigger": "Observe DXY, US 2Y/10Y yields, BTC spot and perpetual basis, OI, funding and liquidations for aligned risk contraction; then check whether the September hike probability rises above the event-time estimate and whether BTC breaks its pre-event range.",
+        "invalidation": "The bearish research case fails if yields and DXY reverse, BTC reclaims the pre-event range without long-side stress, later inflation or labor data weaken the inflation-first narrative, or hike pricing falls."
+      },
+      {
+        "horizon": "72h",
+        "action": "no_trade",
+        "probability": 0.52,
+        "trigger": "Observe DXY, US 2Y/10Y yields, BTC spot and perpetual basis, OI, funding and liquidations for aligned risk contraction; then check whether the September hike probability rises above the event-time estimate and whether BTC breaks its pre-event range.",
+        "invalidation": "The bearish research case fails if yields and DXY reverse, BTC reclaims the pre-event range without long-side stress, later inflation or labor data weaken the inflation-first narrative, or hike pricing falls."
+      }
+    ]
+  },
+  "declared_missing_evidence": [
+    "dxy",
+    "us_2y_yield",
+    "us_10y_yield",
+    "btc_spot",
+    "btc_perpetual_basis",
+    "open_interest",
+    "funding",
+    "liquidations",
+    "policy_expectation_pricing"
+  ],
+  "expected_violations": [
+    "missing_hard_evidence",
+    "no_tool_continuation",
+    "horizon_output_not_distinct",
+    "uncalibrated_probability",
+    "not_agentic_runtime"
+  ]
+}

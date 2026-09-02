@@ -1,0 +1,196 @@
+{
+  "schema_version": "research-runtime-replay.v1",
+  "runtime_version": "research-replay-fixture.v1",
+  "profile_ref": "crypto_macro.replay.v1",
+  "repeat_last_result": true,
+  "results": [
+    {
+      "schema_version": "research-session-result.v1",
+      "request_id": "archived-request",
+      "research_session_id": "archived-session",
+      "runtime_id": "archived-harness",
+      "runtime_version": "archived-harness.v1",
+      "profile_ref": "archived-profile.v1",
+      "trace_ref": "replay://archived-trace",
+      "trace_hash": "2e88794eee2af242d73868c4a955e40b810e5daa6c37ee9c374f77bb0d276a63",
+      "status": "completed",
+      "rounds": [
+        {
+          "round": 1,
+          "plan": {
+            "plan_id": "worker-plan-1",
+            "objective": "verify event",
+            "tasks": [
+              {
+                "task_id": "worker-task-1",
+                "capability_id": "replay.research",
+                "objective": "verify event",
+                "question": "What is the official event?",
+                "input_evidence_refs": ["archived-trigger-evidence"],
+                "output_schema_ref": "evidence-candidate.v1",
+                "depends_on": [],
+                "success_condition": "one official source",
+                "priority": 1
+              }
+            ],
+            "required_capabilities": ["replay.research"],
+            "created_at": "2026-08-29T12:00:00Z"
+          },
+          "tool_invocations": [
+            {
+              "tool_call_id": "tool-worker-1",
+              "capability_id": "replay.research",
+              "tool_name": "research_capability_execute",
+              "query_summary": "Replay the archived official event identity evidence.",
+              "started_at": "2026-08-29T12:00:00Z",
+              "finished_at": "2026-08-29T12:00:01Z",
+              "status": "succeeded",
+              "attempt": 1,
+              "latency_ms": 1000,
+              "cost_usd": 0.01,
+              "error_code": null,
+              "error": null
+            }
+          ],
+          "tool_results": [
+            {
+              "tool_call_id": "tool-worker-1",
+              "status": "succeeded",
+              "summary": "Archived replay returned one official event identity evidence.",
+              "evidence_refs": ["archived-official-evidence"],
+              "content_ref": null,
+              "content_hash": "86f6c9aade1f8c1adc83d6634396ed50ca50c333c9e29f5396af84104f0193ca",
+              "received_at": "2026-08-29T12:00:01Z",
+              "error_code": null,
+              "error": null
+            }
+          ],
+          "new_evidence_refs": [],
+          "coverage": {
+            "status": "insufficient",
+            "covered_requirement_ids": [],
+            "gaps": [],
+            "conflicts": [],
+            "hard_coverage_ratio": 0.0,
+            "soft_coverage_ratio": 1.0,
+            "assessed_at": "2026-08-29T12:00:00Z"
+          },
+          "started_at": "2026-08-29T12:00:00Z",
+          "finished_at": "2026-08-29T12:00:01Z"
+        }
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archived-official-evidence",
+          "requirement_id": "event_identity",
+          "kind": "official",
+          "authority": "official",
+          "source_id": "official-feed",
+          "source_url": "https://www.federalreserve.gov/",
+          "published_at": "2026-08-29T11:59:50Z",
+          "observed_at": "2026-08-29T11:59:51Z",
+          "received_at": "2026-08-29T11:59:52Z",
+          "content_hash": "86f6c9aade1f8c1adc83d6634396ed50ca50c333c9e29f5396af84104f0193ca",
+          "excerpt": "The official statement confirms the event identity.",
+          "structured_payload_ref": null,
+          "tool_call_id": "tool-worker-1",
+          "research_session_id": "archived-session",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ],
+      "final_coverage": {
+        "status": "insufficient",
+        "covered_requirement_ids": [],
+        "gaps": [],
+        "conflicts": [],
+        "hard_coverage_ratio": 0.0,
+        "soft_coverage_ratio": 1.0,
+        "assessed_at": "2026-08-29T12:00:00Z"
+      },
+      "causal_case": {
+        "case_id": "worker-case-1",
+        "thesis": "The official event creates a bounded bearish candidate.",
+        "main_chain": [
+          {
+            "link_id": "worker-link-1",
+            "claim_type": "fact",
+            "statement": "The official event was identified.",
+            "evidence_refs": ["archived-official-evidence"],
+            "confirmation": "A second official revision confirms it.",
+            "invalidation": "The official source retracts it.",
+            "affected_horizons": ["30m", "24h", "72h"]
+          }
+        ],
+        "opposite_chain": [
+          {
+            "link_id": "worker-link-2",
+            "claim_type": "scenario",
+            "statement": "The event may already be priced in.",
+            "evidence_refs": ["archived-official-evidence"],
+            "confirmation": "Price holds the pre-event range.",
+            "invalidation": "Price breaks lower with confirmation.",
+            "affected_horizons": ["30m", "24h"]
+          }
+        ],
+        "unresolved_questions": [],
+        "evidence_refs": ["archived-official-evidence"]
+      },
+      "horizons": [
+        {
+          "horizon": "30m",
+          "action": "short",
+          "subjective_probability": 0.6,
+          "probability_status": "uncalibrated",
+          "evidence_refs": ["archived-official-evidence"],
+          "trigger": "30m confirmation trigger",
+          "invalidation": "30m thesis invalidation",
+          "expires_at": "2026-08-29T12:30:00Z",
+          "next_review_at": "2026-08-29T12:10:00Z",
+          "missing_facts": [],
+          "confidence_cap_reason": null
+        },
+        {
+          "horizon": "24h",
+          "action": "short",
+          "subjective_probability": 0.6,
+          "probability_status": "uncalibrated",
+          "evidence_refs": ["archived-official-evidence"],
+          "trigger": "24h confirmation trigger",
+          "invalidation": "24h thesis invalidation",
+          "expires_at": "2026-08-30T12:00:00Z",
+          "next_review_at": "2026-08-29T18:00:00Z",
+          "missing_facts": [],
+          "confidence_cap_reason": null
+        },
+        {
+          "horizon": "72h",
+          "action": "short",
+          "subjective_probability": 0.6,
+          "probability_status": "uncalibrated",
+          "evidence_refs": ["archived-official-evidence"],
+          "trigger": "72h confirmation trigger",
+          "invalidation": "72h thesis invalidation",
+          "expires_at": "2026-09-01T12:00:00Z",
+          "next_review_at": "2026-08-30T12:00:00Z",
+          "missing_facts": [],
+          "confidence_cap_reason": null
+        }
+      ],
+      "stop_reason": {
+        "code": "sufficient",
+        "detail": "The bounded research fixture completed.",
+        "bounded": false,
+        "remaining_hard_gaps": []
+      },
+      "total_tool_calls": 1,
+      "total_subagents": 0,
+      "total_tokens": 10,
+      "estimated_cost_usd": 0.01,
+      "started_at": "2026-08-29T12:00:00Z",
+      "finished_at": "2026-08-29T12:00:01Z"
+    }
+  ]
+}

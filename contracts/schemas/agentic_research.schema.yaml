@@ -1,0 +1,690 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/agentic_research.schema.json
+title: AgenticResearchContracts
+type: object
+additionalProperties: false
+required: [schema_version]
+properties:
+  schema_version: {type: string, const: agentic-research.v1}
+$defs:
+  execution_budget:
+    type: object
+    additionalProperties: false
+    required: [max_evidence_rounds, max_tool_calls, max_subagents, total_deadline_seconds, per_tool_timeout_seconds, per_model_step_timeout_seconds, max_structured_repairs, max_estimated_cost_usd]
+    properties:
+      max_evidence_rounds: {type: integer, minimum: 1, maximum: 10}
+      max_tool_calls: {type: integer, minimum: 1, maximum: 100}
+      max_subagents: {type: integer, minimum: 0, maximum: 32}
+      total_deadline_seconds: {type: integer, minimum: 1, maximum: 3600}
+      per_tool_timeout_seconds: {type: integer, minimum: 1, maximum: 600}
+      per_model_step_timeout_seconds: {type: integer, minimum: 1, maximum: 600}
+      max_structured_repairs: {type: integer, minimum: 0, maximum: 5}
+      max_estimated_cost_usd: {type: number, minimum: 0}
+
+  product_extension_manifest:
+    type: object
+    additionalProperties: false
+    required: [schema_version, extension_id, version, task_schema_ref, artifact_schema_ref, evaluation_policy_ref, domain_pack_refs, dsh_bundle_ref]
+    properties:
+      schema_version: {type: string, const: product-extension-manifest.v1}
+      extension_id: {type: string, pattern: '^[a-z][a-z0-9_-]*$'}
+      version: {type: string, minLength: 1}
+      task_schema_ref: {type: string, minLength: 1}
+      artifact_schema_ref: {type: string, minLength: 1}
+      evaluation_policy_ref: {type: string, minLength: 1}
+      domain_pack_refs: {type: array, items: {type: string, minLength: 1}, uniqueItems: true}
+      dsh_bundle_ref: {type: [string, 'null']}
+
+  domain_pack_manifest:
+    type: object
+    additionalProperties: false
+    required: [schema_version, pack_id, version, product_extension_ref, doctrine_ref, evidence_policy_ref, gate_policy_ref, evaluation_policy_ref, role_profile_refs, capability_refs, horizons, execution_budget]
+    properties:
+      schema_version: {type: string, const: domain-pack-manifest.v1}
+      pack_id: {type: string, pattern: '^[a-z][a-z0-9_-]*$'}
+      version: {type: string, minLength: 1}
+      product_extension_ref: {type: string, minLength: 1}
+      doctrine_ref: {type: string, minLength: 1}
+      evidence_policy_ref: {type: string, minLength: 1}
+      gate_policy_ref: {type: string, minLength: 1}
+      evaluation_policy_ref: {type: string, minLength: 1}
+      role_profile_refs: {type: array, items: {type: string, minLength: 1}, minItems: 1, uniqueItems: true}
+      capability_refs: {type: array, items: {type: string, minLength: 1}, minItems: 1, uniqueItems: true}
+      horizons:
+        type: array
+        items: {type: string, enum: [30m, 24h, 72h]}
+        minItems: 3
+        maxItems: 3
+        uniqueItems: true
+      execution_budget: {$ref: '#/$defs/execution_budget'}
+
+  role_profile:
+    type: object
+    additionalProperties: false
+    required: [schema_version, profile_id, version, objective, required_capabilities, allowed_tools, output_schema_ref, evaluation_policy_ref, system_instruction_ref]
+    properties:
+      schema_version: {type: string, const: role-profile.v1}
+      profile_id: {type: string, pattern: '^[a-z][a-z0-9_.-]*$'}
+      version: {type: string, minLength: 1}
+      objective: {type: string, minLength: 1}
+      required_capabilities: {type: array, items: {type: string, minLength: 1}, minItems: 1, uniqueItems: true}
+      allowed_tools: {type: array, items: {type: string, minLength: 1}, uniqueItems: true}
+      output_schema_ref: {type: string, minLength: 1}
+      evaluation_policy_ref: {type: string, minLength: 1}
+      system_instruction_ref: {type: string, minLength: 1}
+
+  research_capability_manifest:
+    type: object
+    additionalProperties: false
+    required: [schema_version, capability_id, version, kind, implementation_ref, input_schema_ref, output_schema_ref, permissions, allowed_domains, timeout_seconds, cost_policy_ref, freshness_policy_ref, license_status, audit_status, replay_policy, secret_policy]
+    properties:
+      schema_version: {type: string, const: research-capability-manifest.v1}
+      capability_id: {type: string, pattern: '^[a-z][a-z0-9_.-]*$'}
+      version: {type: string, minLength: 1}
+      kind: {type: string, enum: [dsh_plugin, mcp, provider, python_adapter, replay]}
+      implementation_ref: {type: string, minLength: 1}
+      input_schema_ref: {type: string, minLength: 1}
+      output_schema_ref: {type: string, minLength: 1}
+      permissions: {type: array, items: {type: string, minLength: 1}, uniqueItems: true}
+      allowed_domains: {type: array, items: {type: string, minLength: 1}, uniqueItems: true}
+      timeout_seconds: {type: integer, minimum: 1, maximum: 600}
+      cost_policy_ref: {type: string, minLength: 1}
+      freshness_policy_ref: {type: string, minLength: 1}
+      license_status: {type: string, enum: [approved, review_required, denied]}
+      audit_status: {type: string, enum: [approved, candidate, denied]}
+      replay_policy: {type: string, enum: [archive_required, deterministic, unavailable]}
+      secret_policy: {type: string, enum: [none, adapter_only, local_secret_store]}
+
+  evidence_requirement:
+    type: object
+    additionalProperties: false
+    required: [requirement_id, description, importance, source_priority, authority_floor, preferred_capabilities, freshness_seconds, minimum_independent_sources, allowed_fallbacks, confidence_cap]
+    properties:
+      requirement_id: {type: string, pattern: '^[a-z][a-z0-9_.-]*$'}
+      description: {type: string, minLength: 1}
+      importance: {type: string, enum: [hard, soft]}
+      source_priority: {type: array, items: {type: string, minLength: 1}, minItems: 1, uniqueItems: true}
+      authority_floor: {type: string, enum: [official, exchange, audited_aggregator, verified_web, search_derived, unverified]}
+      preferred_capabilities: {type: array, items: {type: string, minLength: 1}, minItems: 1, uniqueItems: true}
+      freshness_seconds: {type: integer, minimum: 0}
+      minimum_independent_sources: {type: integer, minimum: 1, maximum: 10}
+      allowed_fallbacks: {type: array, items: {type: string, minLength: 1}, uniqueItems: true}
+      confidence_cap: {type: number, minimum: 0, maximum: 1}
+
+  evidence_candidate:
+    type: object
+    additionalProperties: false
+    required: [evidence_id, requirement_id, kind, authority, source_id, source_url, published_at, observed_at, received_at, content_hash, excerpt, structured_payload_ref, tool_call_id, research_session_id, round, quality, freshness_status, conflict_group]
+    properties:
+      evidence_id: {type: string, minLength: 1}
+      requirement_id: {type: string, minLength: 1}
+      kind: {type: string, enum: [official, market, web, transcript, document]}
+      authority: {type: string, enum: [official, exchange, audited_aggregator, verified_web, search_derived, unverified]}
+      source_id: {type: string, minLength: 1}
+      source_url: {type: [string, 'null'], format: uri}
+      published_at: {type: [string, 'null'], format: date-time}
+      observed_at: {type: string, format: date-time}
+      received_at: {type: string, format: date-time}
+      content_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      excerpt: {type: string, minLength: 1, maxLength: 4000}
+      structured_payload_ref: {type: [string, 'null']}
+      tool_call_id: {type: [string, 'null']}
+      research_session_id: {type: string, minLength: 1}
+      round: {type: integer, minimum: 1}
+      quality: {type: string, enum: [candidate, accepted, rejected, stale, conflicted]}
+      freshness_status: {type: string, enum: [fresh, stale, unknown]}
+      conflict_group: {type: [string, 'null']}
+
+  research_capability_query:
+    type: object
+    additionalProperties: false
+    required: [schema_version, request_id, capability_id, requirement_id, query, target_url, symbols, fields, allowed_domains, max_results, max_cost_usd, research_session_id, round, mode, observed_at, cutoff_at]
+    properties:
+      schema_version: {type: string, const: research-capability-query.v1}
+      request_id: {type: string, minLength: 1}
+      capability_id: {type: string, minLength: 1}
+      requirement_id: {type: string, minLength: 1}
+      query: {type: string, minLength: 1, maxLength: 2000}
+      target_url: {type: [string, 'null'], format: uri}
+      symbols: {type: array, items: {type: string, minLength: 1}, maxItems: 20, uniqueItems: true}
+      fields: {type: array, items: {type: string, minLength: 1}, maxItems: 50, uniqueItems: true}
+      allowed_domains: {type: array, items: {type: string, minLength: 1}, maxItems: 100, uniqueItems: true}
+      max_results: {type: integer, minimum: 1, maximum: 20}
+      max_cost_usd: {type: [number, 'null'], minimum: 0}
+      research_session_id: {type: string, minLength: 1}
+      round: {type: integer, minimum: 1}
+      mode: {type: string, enum: [live, replay]}
+      observed_at: {type: string, format: date-time}
+      requested_observed_at: {type: [string, 'null'], format: date-time}
+      cutoff_at: {type: string, format: date-time}
+
+  research_capability_result:
+    type: object
+    additionalProperties: false
+    required: [schema_version, request_id, capability_id, provider, evidence_candidates, cost_usd, completed_at]
+    properties:
+      schema_version: {type: string, const: research-capability-result.v1}
+      request_id: {type: string, minLength: 1}
+      capability_id: {type: string, minLength: 1}
+      provider: {type: string, minLength: 1}
+      evidence_candidates: {type: array, items: {$ref: '#/$defs/evidence_candidate'}, maxItems: 20}
+      cost_usd: {type: [number, 'null'], minimum: 0}
+      completed_at: {type: string, format: date-time}
+
+  research_run_queued:
+    type: object
+    additionalProperties: false
+    required: [schema_version, event_id, run_id, status, status_url]
+    properties:
+      schema_version: {type: string, const: research-run-queued.v1}
+      event_id: {type: string, minLength: 1, maxLength: 128}
+      run_id: {type: string, minLength: 1, maxLength: 128}
+      status: {type: string, const: queued}
+      status_url: {type: string, minLength: 1, maxLength: 2048}
+
+  research_runtime_case_report:
+    type: object
+    additionalProperties: false
+    required: [schema_version, dataset_id, case_id, runtime_id, runtime_version, status, cutoff_at, started_at, finished_at, latency_ms, result_hash, result, hard_coverage_ratio, hard_gap_count, evidence_count, unattested_evidence_count, pit_violations, horizon_count, horizon_distinct, tool_calls, subagents, total_tokens, estimated_cost_usd, failure_code]
+    properties:
+      schema_version: {type: string, const: research-runtime-case-report.v1}
+      dataset_id: {type: string, minLength: 1}
+      case_id: {type: string, minLength: 1}
+      runtime_id: {type: string, minLength: 1}
+      runtime_version: {type: string, minLength: 1}
+      status: {type: string, enum: [completed, degraded, failed, timeout]}
+      cutoff_at: {type: string, format: date-time}
+      started_at: {type: string, format: date-time}
+      finished_at: {type: string, format: date-time}
+      latency_ms: {type: [integer, 'null'], minimum: 0}
+      result_hash: {type: [string, 'null'], pattern: '^[a-f0-9]{64}$'}
+      result: {anyOf: [{$ref: '#/$defs/research_session_result'}, {type: 'null'}]}
+      hard_coverage_ratio: {type: number, minimum: 0, maximum: 1}
+      hard_gap_count: {type: integer, minimum: 0}
+      evidence_count: {type: integer, minimum: 0}
+      unattested_evidence_count: {type: integer, minimum: 0}
+      pit_violations: {type: integer, minimum: 0}
+      horizon_count: {type: integer, minimum: 0, maximum: 3}
+      horizon_distinct: {type: boolean}
+      tool_calls: {type: integer, minimum: 0}
+      subagents: {type: integer, minimum: 0}
+      total_tokens: {type: [integer, 'null'], minimum: 0}
+      estimated_cost_usd: {type: [number, 'null'], minimum: 0}
+      failure_code: {type: [string, 'null']}
+
+  research_runtime_summary:
+    type: object
+    additionalProperties: false
+    required: [runtime_id, runtime_version, sample_count, completed_count, failed_count, hard_coverage_mean, evidence_count, unattested_evidence_count, pit_violations, horizon_distinct_count, total_tool_calls, total_subagents, total_tokens, estimated_cost_usd, p95_latency_ms, failure_counts]
+    properties:
+      runtime_id: {type: string, minLength: 1}
+      runtime_version: {type: string, minLength: 1}
+      sample_count: {type: integer, minimum: 0}
+      completed_count: {type: integer, minimum: 0}
+      failed_count: {type: integer, minimum: 0}
+      hard_coverage_mean: {type: number, minimum: 0, maximum: 1}
+      evidence_count: {type: integer, minimum: 0}
+      unattested_evidence_count: {type: integer, minimum: 0}
+      pit_violations: {type: integer, minimum: 0}
+      horizon_distinct_count: {type: integer, minimum: 0}
+      total_tool_calls: {type: integer, minimum: 0}
+      total_subagents: {type: integer, minimum: 0}
+      total_tokens: {type: [integer, 'null'], minimum: 0}
+      estimated_cost_usd: {type: [number, 'null'], minimum: 0}
+      p95_latency_ms: {type: [integer, 'null'], minimum: 0}
+      failure_counts:
+        type: object
+        additionalProperties: {type: integer, minimum: 1}
+
+  research_runtime_comparison:
+    type: object
+    additionalProperties: false
+    required: [schema_version, experiment_id, dataset_id, dataset_manifest_hash, baseline_runtime_id, candidate_runtime_id, case_reports, summaries, conclusion]
+    properties:
+      schema_version: {type: string, const: research-runtime-comparison.v1}
+      experiment_id: {type: string, minLength: 1}
+      dataset_id: {type: string, minLength: 1}
+      dataset_manifest_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      baseline_runtime_id: {type: string, minLength: 1}
+      candidate_runtime_id: {type: string, minLength: 1}
+      case_reports:
+        type: array
+        items: {$ref: '#/$defs/research_runtime_case_report'}
+        minItems: 1
+      summaries:
+        type: array
+        items: {$ref: '#/$defs/research_runtime_summary'}
+        minItems: 2
+        maxItems: 2
+      conclusion: {type: string, enum: [pending, promotion_recommended, retain_baseline]}
+
+  research_evaluation_capability_fixture:
+    type: object
+    additionalProperties: false
+    required: [capability_id, requirement_id, query_aliases, evidence_candidates]
+    properties:
+      capability_id: {type: string, minLength: 1}
+      requirement_id: {type: string, minLength: 1}
+      query_aliases:
+        type: array
+        items: {type: string, minLength: 1, maxLength: 2000}
+        minItems: 1
+        uniqueItems: true
+      evidence_candidates:
+        type: array
+        items: {$ref: '#/$defs/evidence_candidate'}
+        minItems: 1
+        maxItems: 20
+
+  research_evaluation_outcome_label:
+    type: object
+    additionalProperties: false
+    required: [label_id, value, available_at, source_ref]
+    properties:
+      label_id: {type: string, minLength: 1}
+      value: {type: string, minLength: 1}
+      available_at: {type: string, format: date-time}
+      source_ref: {type: string, minLength: 1}
+
+  research_evaluation_case:
+    type: object
+    additionalProperties: false
+    required: [schema_version, case_id, event_family, input_text, trigger_evidence, evidence_requirements, expected_hard_requirement_ids, archived_capability_fixtures, cutoff_at, outcome_available_at, outcome_labels, source_refs]
+    properties:
+      schema_version: {type: string, const: research-evaluation-case.v1}
+      case_id: {type: string, pattern: '^[a-z][a-z0-9_.-]*$'}
+      event_family: {type: string, enum: [central_bank_speech, monetary_policy_decision, inflation_release, labor_release, geopolitical_shock]}
+      input_text: {type: string, minLength: 1, maxLength: 10000}
+      trigger_evidence: {$ref: '#/$defs/research_input_evidence'}
+      evidence_requirements:
+        type: array
+        items: {$ref: '#/$defs/evidence_requirement'}
+        minItems: 1
+      expected_hard_requirement_ids:
+        type: array
+        items: {type: string, minLength: 1}
+        minItems: 1
+        uniqueItems: true
+      archived_capability_fixtures:
+        type: array
+        items: {$ref: '#/$defs/research_evaluation_capability_fixture'}
+        minItems: 1
+      cutoff_at: {type: string, format: date-time}
+      outcome_available_at: {type: [string, 'null'], format: date-time}
+      outcome_labels:
+        type: array
+        items: {$ref: '#/$defs/research_evaluation_outcome_label'}
+      source_refs:
+        type: array
+        items: {type: string, minLength: 1}
+        minItems: 1
+        uniqueItems: true
+
+  research_snapshot_manifest:
+    type: object
+    additionalProperties: false
+    required: [schema_version, snapshot_id, run_id, event_id, snapshot_type, generation, parent_snapshot_id, cutoff_at, snapshot_hash, evidence_refs, pack_version, created_at]
+    properties:
+      schema_version: {type: string, const: research-snapshot-manifest.v1}
+      snapshot_id: {type: string, minLength: 1}
+      run_id: {type: string, minLength: 1}
+      event_id: {type: string, minLength: 1}
+      snapshot_type: {type: string, enum: [trigger, decision]}
+      generation: {type: integer, minimum: 1}
+      parent_snapshot_id: {type: [string, 'null']}
+      cutoff_at: {type: string, format: date-time}
+      snapshot_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      evidence_refs: {type: array, items: {type: string, minLength: 1}, minItems: 1, uniqueItems: true}
+      pack_version: {type: string, minLength: 1}
+      created_at: {type: string, format: date-time}
+
+  evidence_gap:
+    type: object
+    additionalProperties: false
+    required: [requirement_id, importance, reason_code, query_hint, attempted_capabilities, blocks_directional_output]
+    properties:
+      requirement_id: {type: string, minLength: 1}
+      importance: {type: string, enum: [hard, soft]}
+      reason_code: {type: string, enum: [missing, stale, low_authority, insufficient_sources, conflict, tool_unavailable]}
+      query_hint: {type: string, minLength: 1}
+      attempted_capabilities: {type: array, items: {type: string, minLength: 1}, uniqueItems: true}
+      blocks_directional_output: {type: boolean}
+
+  conflict_item:
+    type: object
+    additionalProperties: false
+    required: [conflict_id, requirement_id, evidence_refs, severity, summary, resolution_status]
+    properties:
+      conflict_id: {type: string, minLength: 1}
+      requirement_id: {type: string, minLength: 1}
+      evidence_refs: {type: array, items: {type: string, minLength: 1}, minItems: 2, uniqueItems: true}
+      severity: {type: string, enum: [hard, soft]}
+      summary: {type: string, minLength: 1}
+      resolution_status: {type: string, enum: [open, resolved, bounded_stop]}
+
+  coverage_assessment:
+    type: object
+    additionalProperties: false
+    required: [status, covered_requirement_ids, gaps, conflicts, hard_coverage_ratio, soft_coverage_ratio, assessed_at]
+    properties:
+      status: {type: string, enum: [insufficient, sufficient, bounded_stop]}
+      covered_requirement_ids: {type: array, items: {type: string, minLength: 1}, uniqueItems: true}
+      gaps: {type: array, items: {$ref: '#/$defs/evidence_gap'}}
+      conflicts: {type: array, items: {$ref: '#/$defs/conflict_item'}}
+      hard_coverage_ratio: {type: number, minimum: 0, maximum: 1}
+      soft_coverage_ratio: {type: number, minimum: 0, maximum: 1}
+      assessed_at: {type: string, format: date-time}
+
+  research_task:
+    type: object
+    additionalProperties: false
+    required: [task_id, capability_id, objective, question, input_evidence_refs, output_schema_ref, depends_on, success_condition, priority]
+    properties:
+      task_id: {type: string, minLength: 1}
+      capability_id: {type: string, minLength: 1}
+      objective: {type: string, minLength: 1}
+      question: {type: string, minLength: 1}
+      input_evidence_refs: {type: array, items: {type: string, minLength: 1}, uniqueItems: true}
+      output_schema_ref: {type: string, minLength: 1}
+      depends_on: {type: array, items: {type: string, minLength: 1}, uniqueItems: true}
+      success_condition: {type: string, minLength: 1}
+      priority: {type: integer, minimum: 1, maximum: 100}
+
+  research_plan:
+    type: object
+    additionalProperties: false
+    required: [plan_id, objective, tasks, required_capabilities, created_at]
+    properties:
+      plan_id: {type: string, minLength: 1}
+      objective: {type: string, minLength: 1}
+      tasks: {type: array, items: {$ref: '#/$defs/research_task'}, minItems: 1}
+      required_capabilities: {type: array, items: {type: string, minLength: 1}, minItems: 1, uniqueItems: true}
+      created_at: {type: string, format: date-time}
+
+  tool_invocation:
+    type: object
+    additionalProperties: false
+    required: [tool_call_id, capability_id, tool_name, query_summary, started_at, finished_at, status, attempt, latency_ms, cost_usd, error_code]
+    properties:
+      tool_call_id: {type: string, minLength: 1}
+      capability_id: {type: string, minLength: 1}
+      tool_name: {type: string, minLength: 1}
+      query_summary: {type: string, minLength: 1, maxLength: 1000}
+      started_at: {type: string, format: date-time}
+      finished_at: {type: [string, 'null'], format: date-time}
+      status: {type: string, enum: [running, succeeded, failed, denied, timed_out]}
+      attempt: {type: integer, minimum: 1}
+      latency_ms: {type: [integer, 'null'], minimum: 0}
+      cost_usd: {type: [number, 'null'], minimum: 0}
+      error_code: {type: [string, 'null']}
+      error: {anyOf: [{$ref: '#/$defs/error_provenance'}, {type: 'null'}]}
+
+  tool_result_summary:
+    type: object
+    additionalProperties: false
+    required: [tool_call_id, status, summary, evidence_refs, content_ref, content_hash, received_at, error_code]
+    properties:
+      tool_call_id: {type: string, minLength: 1}
+      status: {type: string, enum: [succeeded, failed, denied, timed_out]}
+      summary: {type: string, minLength: 1, maxLength: 2000}
+      evidence_refs: {type: array, items: {type: string, minLength: 1}, uniqueItems: true}
+      content_ref: {type: [string, 'null']}
+      content_hash: {type: [string, 'null'], pattern: '^[a-f0-9]{64}$'}
+      received_at: {type: string, format: date-time}
+      error_code: {type: [string, 'null']}
+      error: {anyOf: [{$ref: '#/$defs/error_provenance'}, {type: 'null'}]}
+
+  error_provenance:
+    type: object
+    additionalProperties: false
+    required: [error_code, origin, cause_code, capability_id, tool_call_id, retryable, deadline_ms]
+    properties:
+      error_code: {type: string, minLength: 1}
+      origin: {type: string, enum: [provider, transport, mcp, dsh, gateway, pit, orchestration]}
+      cause_code: {type: [string, 'null']}
+      capability_id: {type: [string, 'null']}
+      tool_call_id: {type: [string, 'null']}
+      retryable: {type: boolean}
+      deadline_ms: {type: [integer, 'null'], minimum: 0}
+
+  research_round:
+    type: object
+    additionalProperties: false
+    required: [round, plan, tool_invocations, tool_results, new_evidence_refs, coverage, started_at, finished_at]
+    properties:
+      round: {type: integer, minimum: 1}
+      plan: {$ref: '#/$defs/research_plan'}
+      tool_invocations: {type: array, items: {$ref: '#/$defs/tool_invocation'}}
+      tool_results: {type: array, items: {$ref: '#/$defs/tool_result_summary'}}
+      new_evidence_refs: {type: array, items: {type: string, minLength: 1}, uniqueItems: true}
+      coverage: {$ref: '#/$defs/coverage_assessment'}
+      started_at: {type: string, format: date-time}
+      finished_at: {type: string, format: date-time}
+
+  causal_link:
+    type: object
+    additionalProperties: false
+    required: [link_id, claim_type, statement, evidence_refs, confirmation, invalidation, affected_horizons]
+    properties:
+      link_id: {type: string, minLength: 1}
+      claim_type: {type: string, enum: [fact, inference, scenario]}
+      statement: {type: string, minLength: 1}
+      evidence_refs: {type: array, items: {type: string, minLength: 1}, uniqueItems: true}
+      confirmation: {type: string, minLength: 1}
+      invalidation: {type: string, minLength: 1}
+      affected_horizons:
+        type: array
+        items: {type: string, enum: [30m, 24h, 72h]}
+        minItems: 1
+        uniqueItems: true
+
+  causal_case:
+    type: object
+    additionalProperties: false
+    required: [case_id, thesis, main_chain, opposite_chain, unresolved_questions, evidence_refs]
+    properties:
+      case_id: {type: string, minLength: 1}
+      thesis: {type: string, minLength: 1}
+      main_chain: {type: array, items: {$ref: '#/$defs/causal_link'}, minItems: 1}
+      opposite_chain: {type: array, items: {$ref: '#/$defs/causal_link'}, minItems: 1}
+      unresolved_questions: {type: array, items: {type: string, minLength: 1}, uniqueItems: true}
+      evidence_refs: {type: array, items: {type: string, minLength: 1}, minItems: 1, uniqueItems: true}
+
+  horizon_decision:
+    type: object
+    additionalProperties: false
+    required: [horizon, action, subjective_probability, probability_status, evidence_refs, trigger, invalidation, expires_at, next_review_at, missing_facts, confidence_cap_reason]
+    properties:
+      horizon: {type: string, enum: [30m, 24h, 72h]}
+      action: {type: string, enum: [long, short, neutral, no_trade]}
+      subjective_probability: {type: number, minimum: 0, maximum: 1}
+      probability_status: {type: string, enum: [uncalibrated, calibrated]}
+      evidence_refs: {type: array, items: {type: string, minLength: 1}, minItems: 1, uniqueItems: true}
+      trigger: {type: string, minLength: 1}
+      invalidation: {type: string, minLength: 1}
+      expires_at: {type: string, format: date-time}
+      next_review_at: {type: string, format: date-time}
+      missing_facts: {type: array, items: {type: string, minLength: 1}, uniqueItems: true}
+      confidence_cap_reason: {type: [string, 'null']}
+
+  research_stop_reason:
+    type: object
+    additionalProperties: false
+    required: [code, detail, bounded, remaining_hard_gaps]
+    properties:
+      code: {type: string, enum: [sufficient, deadline, cost_budget, tool_budget, round_budget, permission_denied, critical_data_unavailable, runtime_unavailable, cancelled]}
+      detail: {type: string, minLength: 1}
+      bounded: {type: boolean}
+      remaining_hard_gaps: {type: array, items: {type: string, minLength: 1}, uniqueItems: true}
+
+  research_input_evidence:
+    type: object
+    additionalProperties: false
+    required: [evidence_id, kind, authority, source_id, source_url, published_at, observed_at, received_at, content_hash, excerpt]
+    properties:
+      evidence_id: {type: string, minLength: 1}
+      kind: {type: string, enum: [official, market, web, transcript, document]}
+      authority: {type: string, enum: [official, exchange, audited_aggregator, verified_web, search_derived, unverified]}
+      source_id: {type: string, minLength: 1}
+      source_url: {type: [string, 'null'], format: uri}
+      published_at: {type: [string, 'null'], format: date-time}
+      observed_at: {type: string, format: date-time}
+      received_at: {type: string, format: date-time}
+      content_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      excerpt: {type: string, minLength: 1, maxLength: 4000}
+
+  research_session_request:
+    type: object
+    additionalProperties: false
+    required: [schema_version, request_id, run_id, event_id, trigger_snapshot_id, domain_pack_ref, role_profile_ref, execution_mode, pit_cutoff_at, current_round, evidence_refs, input_evidence, evidence_requirements, target_gaps, allowed_capabilities, execution_budget, deadline_at, output_schema_ref, repair_instructions]
+    properties:
+      schema_version: {type: string, const: research-session-request.v1}
+      request_id: {type: string, minLength: 1}
+      run_id: {type: string, minLength: 1}
+      event_id: {type: string, minLength: 1}
+      trigger_snapshot_id: {type: string, minLength: 1}
+      domain_pack_ref: {type: string, minLength: 1}
+      role_profile_ref: {type: string, minLength: 1}
+      execution_mode: {type: string, enum: [live, replay]}
+      pit_cutoff_at: {type: string, format: date-time}
+      current_round: {type: integer, minimum: 1, maximum: 10}
+      evidence_refs: {type: array, items: {type: string, minLength: 1}, minItems: 1, uniqueItems: true}
+      input_evidence: {type: array, items: {$ref: '#/$defs/research_input_evidence'}, minItems: 1, maxItems: 50}
+      evidence_requirements: {type: array, items: {$ref: '#/$defs/evidence_requirement'}, minItems: 1}
+      target_gaps: {type: array, items: {$ref: '#/$defs/evidence_gap'}, maxItems: 50}
+      allowed_capabilities: {type: array, items: {type: string, minLength: 1}, minItems: 1, uniqueItems: true}
+      execution_budget: {$ref: '#/$defs/execution_budget'}
+      deadline_at: {type: string, format: date-time}
+      output_schema_ref: {type: string, minLength: 1}
+      repair_instructions: {type: [string, 'null'], maxLength: 4000}
+
+  research_synthesis_candidate:
+    type: object
+    additionalProperties: false
+    required: [schema_version, request_id, causal_case, horizons]
+    properties:
+      schema_version: {type: string, const: research-synthesis-candidate.v1}
+      request_id: {type: string, minLength: 1}
+      causal_case: {anyOf: [{$ref: '#/$defs/causal_case'}, {type: 'null'}]}
+      horizons: {type: array, items: {$ref: '#/$defs/horizon_decision'}, maxItems: 3}
+
+  research_session_result:
+    type: object
+    additionalProperties: false
+    required: [schema_version, request_id, research_session_id, runtime_id, runtime_version, profile_ref, trace_ref, trace_hash, status, rounds, evidence_candidates, final_coverage, causal_case, horizons, stop_reason, total_tool_calls, total_subagents, total_tokens, estimated_cost_usd, started_at, finished_at]
+    properties:
+      schema_version: {type: string, const: research-session-result.v1}
+      request_id: {type: string, minLength: 1}
+      research_session_id: {type: string, minLength: 1}
+      runtime_id: {type: string, minLength: 1}
+      runtime_version: {type: string, minLength: 1}
+      profile_ref: {type: string, minLength: 1}
+      trace_ref: {type: string, minLength: 1}
+      trace_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      status: {type: string, enum: [completed, degraded, failed, cancelled]}
+      rounds: {type: array, items: {$ref: '#/$defs/research_round'}, minItems: 1}
+      evidence_candidates: {type: array, items: {$ref: '#/$defs/evidence_candidate'}}
+      final_coverage: {$ref: '#/$defs/coverage_assessment'}
+      causal_case: {anyOf: [{$ref: '#/$defs/causal_case'}, {type: 'null'}]}
+      horizons: {type: array, items: {$ref: '#/$defs/horizon_decision'}, maxItems: 3}
+      stop_reason: {$ref: '#/$defs/research_stop_reason'}
+      # Set only when the model synthesis was rejected after trusted
+      # capability progress had already been retained. This marker is not a
+      # model claim; it is produced by the runtime adapter.
+      synthesis_failure_code: {type: [string, 'null'], maxLength: 128}
+      total_tool_calls: {type: integer, minimum: 0}
+      total_subagents: {type: integer, minimum: 0}
+      total_tokens: {type: [integer, 'null'], minimum: 0}
+      estimated_cost_usd: {type: [number, 'null'], minimum: 0}
+      started_at: {type: string, format: date-time}
+      finished_at: {type: string, format: date-time}
+
+  research_trace_event:
+    type: object
+    additionalProperties: false
+    required: [schema_version, run_id, research_session_id, sequence_no, event_type, occurred_at, stage, summary, reference_type, reference_id, status, error_code]
+    properties:
+      schema_version: {type: string, const: research-trace-event.v1}
+      run_id: {type: string, minLength: 1}
+      research_session_id: {type: string, minLength: 1}
+      sequence_no: {type: integer, minimum: 0}
+      event_type: {type: string, enum: [session_started, plan_created, task_started, model_step_started, model_step_completed, tool_started, tool_completed, tool_failed, subagent_started, subagent_completed, evidence_accepted, evidence_rejected, coverage_assessed, replan, round_completed, synthesis_started, session_stopped]}
+      occurred_at: {type: string, format: date-time}
+      stage: {type: string, minLength: 1}
+      summary: {type: string, minLength: 1, maxLength: 2000}
+      reference_type: {type: [string, 'null']}
+      reference_id: {type: [string, 'null']}
+      status: {type: string, enum: [running, succeeded, failed, degraded, denied]}
+      error_code: {type: [string, 'null']}
+      error: {anyOf: [{$ref: '#/$defs/error_provenance'}, {type: 'null'}]}
+
+  research_run_view:
+    type: object
+    additionalProperties: false
+    required: [schema_version, run_id, event_id, event_title, admission_origin, priority, status, stage, runtime_id, profile_ref, current_round, budget, coverage, current_action, stop_reason, latest_sequence_no, artifact_id, available_at, parent_run_id, created_at, updated_at]
+    properties:
+      schema_version: {type: string, const: research-run-view.v2}
+      run_id: {type: string, minLength: 1}
+      event_id: {type: string, minLength: 1}
+      event_title: {type: string, minLength: 1}
+      admission_origin: {type: string, enum: [manual, automatic, scheduled_recheck, legacy]}
+      priority: {type: string, enum: [critical, high, normal, low]}
+      status: {type: string, enum: [admitted, queued, researching, retry_wait, completed, degraded, research_only, rejected, failed, cancelled]}
+      stage: {type: string, enum: [admission, planning, acquiring_evidence, assessing_sufficiency, synthesis, gate, monitoring, done]}
+      runtime_id: {type: string, minLength: 1}
+      profile_ref: {type: string, minLength: 1}
+      current_round: {type: integer, minimum: 0}
+      budget: {$ref: '#/$defs/execution_budget'}
+      coverage: {anyOf: [{$ref: '#/$defs/coverage_assessment'}, {type: 'null'}]}
+      current_action: {type: [string, 'null']}
+      stop_reason: {anyOf: [{$ref: '#/$defs/research_stop_reason'}, {type: 'null'}]}
+      failure: {anyOf: [{$ref: '#/$defs/error_provenance'}, {type: 'null'}]}
+      latest_sequence_no: {type: integer, minimum: 0}
+      artifact_id: {type: [string, 'null']}
+      available_at: {type: [string, 'null'], format: date-time}
+      parent_run_id: {type: [string, 'null']}
+      created_at: {type: string, format: date-time}
+      updated_at: {type: string, format: date-time}
+
+  research_run_detail_view:
+    type: object
+    additionalProperties: false
+    required: [schema_version, run, trigger_snapshot, decision_snapshot, evidence, rounds, causal_case, horizons, trace, total_tool_calls, total_subagents, total_tokens, estimated_cost_usd, scheduled_recheck_at]
+    properties:
+      schema_version: {type: string, const: research-run-detail-view.v1}
+      run: {$ref: '#/$defs/research_run_view'}
+      trigger_snapshot: {anyOf: [{$ref: '#/$defs/research_snapshot_manifest'}, {type: 'null'}]}
+      decision_snapshot: {anyOf: [{$ref: '#/$defs/research_snapshot_manifest'}, {type: 'null'}]}
+      evidence: {type: array, items: {$ref: '#/$defs/evidence_candidate'}}
+      rounds: {type: array, items: {$ref: '#/$defs/research_round'}}
+      causal_case: {anyOf: [{$ref: '#/$defs/causal_case'}, {type: 'null'}]}
+      horizons: {type: array, items: {$ref: '#/$defs/horizon_decision'}, maxItems: 3}
+      trace: {type: array, items: {$ref: '#/$defs/research_trace_event'}}
+      total_tool_calls: {type: integer, minimum: 0}
+      total_subagents: {type: integer, minimum: 0}
+      total_tokens: {type: [integer, 'null'], minimum: 0}
+      estimated_cost_usd: {type: [number, 'null'], minimum: 0}
+      scheduled_recheck_at: {type: [string, 'null'], format: date-time}
+
+  research_run_command:
+    type: object
+    additionalProperties: false
+    required: [schema_version, request_id, command, reason]
+    properties:
+      schema_version: {type: string, const: research-run-command.v1}
+      request_id: {type: string, minLength: 1}
+      command: {type: string, enum: [cancel, retry, recheck, feedback]}
+      reason: {type: string, minLength: 1}
+
+  research_run_command_result:
+    type: object
+    additionalProperties: false
+    required: [schema_version, request_id, command, source_run_id, target_run_id, status, created_at]
+    properties:
+      schema_version: {type: string, const: research-run-command-result.v1}
+      request_id: {type: string, minLength: 1}
+      command: {type: string, enum: [cancel, retry, recheck, feedback]}
+      source_run_id: {type: string, minLength: 1}
+      target_run_id: {type: [string, 'null']}
+      status: {type: string, enum: [accepted, already_applied, rejected]}
+      created_at: {type: string, format: date-time}

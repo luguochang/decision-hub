@@ -55,7 +55,13 @@ def test_complete_local_pilot_configuration_is_ready_without_live_claims(tmp_pat
 
     assert report.status == "ready"
     assert all(item.status == "pass" for item in report.checks)
-    assert report.source_ids == ("fed-press", "bls-releases", "bea-news", "bls-calendar")
+    assert report.source_ids == (
+        "fed-press",
+        "fed-speeches",
+        "bls-releases",
+        "bea-news",
+        "bls-calendar",
+    )
     assert "provider_structured_output" in report.live_canaries_required
     assert "test-secret" not in report.model_dump_json()
 

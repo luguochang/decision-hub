@@ -11,6 +11,11 @@ OFFICIAL_SOURCE_CONFIG = {
         "official",
         "federalreserve.gov",
     ),
+    "fed-speeches": (
+        "https://www.federalreserve.gov/feeds/speeches.xml",
+        "official",
+        "federalreserve.gov",
+    ),
     "bls-releases": (
         "https://www.bls.gov/feed/bls_latest.rss",
         "official",
@@ -23,6 +28,8 @@ OFFICIAL_SOURCE_CONFIG = {
 def official_source_presets(
     fetcher: Fetcher | None = None,
     calendar_fetcher: CalendarFetcher | None = None,
+    *,
+    include_calendar: bool = True,
 ) -> list[SourceConnector]:
     sources: list[SourceConnector] = [
         OfficialFeedSource(
@@ -33,30 +40,32 @@ def official_source_presets(
                 capabilities=("poll", "rss", "revision"),
                 authority_level=authority,
                 poll_interval_seconds=60,
-                max_batch=50,
+                max_batch=10,
                 allowed_domains=(domain,),
             ),
             endpoint,
             fetcher=fetcher,
             include_document_body=True,
             document_fetcher=fetcher,
+            bootstrap_latest=True,
         )
         for source_id, (endpoint, authority, domain) in OFFICIAL_SOURCE_CONFIG.items()
     ]
-    sources.append(
-        OfficialCalendarSource(
-            SourceManifest(
-                source_id="bls-calendar",
-                source_type="official_feed",
-                version="official-calendar.v1",
-                capabilities=("poll", "calendar", "revision"),
-                authority_level="official",
-                poll_interval_seconds=900,
-                max_batch=100,
-                allowed_domains=("bls.gov",),
-            ),
-            "https://www.bls.gov/schedule/news_release/bls.ics",
-            fetcher=calendar_fetcher,
+    if include_calendar:
+        sources.append(
+            OfficialCalendarSource(
+                SourceManifest(
+                    source_id="bls-calendar",
+                    source_type="official_feed",
+                    version="official-calendar.v1",
+                    capabilities=("poll", "calendar", "revision"),
+                    authority_level="official",
+                    poll_interval_seconds=900,
+                    max_batch=100,
+                    allowed_domains=("bls.gov",),
+                ),
+                "https://www.bls.gov/schedule/news_release/bls.ics",
+                fetcher=calendar_fetcher,
+            )
         )
-    )
     return sources

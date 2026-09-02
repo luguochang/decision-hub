@@ -111,6 +111,13 @@ def test_api_requires_idempotency_key(tmp_path: Path) -> None:
     assert response.status_code == 400
 
 
+def test_unknown_api_route_returns_json_404_instead_of_spa_html(tmp_path: Path) -> None:
+    app = create_app(Database(f"sqlite+pysqlite:///{tmp_path / 'unknown-route.sqlite3'}"))
+    response = TestClient(app).get("/v1/does-not-exist")
+    assert response.status_code == 404
+    assert response.json() == {"detail": "api_route_not_found"}
+
+
 def test_api_idempotency_key_returns_same_run(tmp_path: Path) -> None:
     app = create_app(Database(f"sqlite+pysqlite:///{tmp_path / 'idempotency.sqlite3'}"))
     client = TestClient(app)
@@ -127,6 +134,43 @@ def test_api_idempotency_key_returns_same_run(tmp_path: Path) -> None:
     )
     assert first.status_code == second.status_code == 202
     assert first.json()["run_id"] == second.json()["run_id"]
+
+
+def test_research_api_only_admits_durable_candidate_run(tmp_path: Path) -> None:
+    database = Database(f"sqlite+pysqlite:///{tmp_path / 'research-admission.sqlite3'}")
+    client = TestClient(create_app(database))
+    payload = {
+        "text": "The official statement confirms elevated inflation risks.",
+        "source_id": "research-api-fixture",
+        "source_type": "transcript",
+        "language": "en",
+    }
+
+    first = client.post(
+        "/v1/research/observations",
+        headers={"Idempotency-Key": "research-admission-001"},
+        json=payload,
+    )
+    second = client.post(
+        "/v1/research/observations",
+        headers={"Idempotency-Key": "research-admission-001"},
+        json=payload,
+    )
+    distinct_intent = client.post(
+        "/v1/research/observations",
+        headers={"Idempotency-Key": "research-admission-002"},
+        json=payload,
+    )
+
+    assert first.status_code == second.status_code == distinct_intent.status_code == 202
+    assert first.json()["status"] == "queued"
+    assert first.json()["run_id"] == second.json()["run_id"]
+    assert distinct_intent.json()["event_id"] == first.json()["event_id"]
+    assert distinct_intent.json()["run_id"] != first.json()["run_id"]
+    run = client.get(first.json()["status_url"]).json()
+    assert run["status"] == "admitted"
+    assert run["strategy_version"] == "research.v1"
+    assert run["artifact_id"] is None
 
 
 def test_text_input_to_evaluation_output_contract(tmp_path: Path) -> None:

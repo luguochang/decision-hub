@@ -1,0 +1,22 @@
+version: discovery-policy.v1
+source_ids:
+  - fed-press
+  - fed-speeches
+  - bls-releases
+  - bea-news
+high_impact_terms:
+  - fed chair
+  - fomc
+  - powell
+  - warsh
+  - monetary policy
+  - economic outlook
+  - interest rate
+  - inflation
+  - cpi
+  - employment
+  - payroll
+  - treasury
+  - tariff
+  - sanctions
+  - war

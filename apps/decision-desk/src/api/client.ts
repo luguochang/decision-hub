@@ -1,7 +1,16 @@
-import { artifactViewSchema, deskSummarySchema, evolutionOverviewSchema, productHealthSchema, promotionDecisionResultSchema, promotionReviewSchema, researchMemoSchema, runInspectorSchema, runViewSchema, type ArtifactView, type DeskSummary, type EvolutionOverview, type PromotionDecisionCommand, type PromotionReview, type PromotionReviewRequest, type ResearchMemo, type RunInspector, type RunView } from './schemas'
+import { artifactViewSchema, deskSummarySchema, evolutionJobSchema, evolutionOverviewSchema, operationsOverviewSchema, productHealthSchema, promotionDecisionResultSchema, promotionReviewSchema, researchMemoSchema, researchRunCommandResultSchema, researchRunDetailViewSchema, researchRunViewSchema, runInspectorSchema, runViewSchema, type ArtifactView, type EvolutionJob, type EvolutionOverview, type OperationsOverview, type PromotionDecisionCommand, type PromotionReview, type PromotionReviewRequest, type ResearchMemo, type ResearchRunCommand, type ResearchRunCommandResult, type ResearchRunDetailView, type ResearchRunView, type RunInspector, type RunView } from './schemas'
+
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL?.trim() || '').replace(/\/+$/, '')
+
+export function apiUrl(path: string, baseUrl = API_BASE_URL): string {
+  if (/^https?:\/\//i.test(path)) return path
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`
+  const normalizedBase = baseUrl.trim().replace(/\/+$/, '')
+  return `${normalizedBase}${normalizedPath}`
+}
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(path, { headers: { Accept: 'application/json', ...init?.headers }, ...init })
+  const response = await fetch(apiUrl(path), { headers: { Accept: 'application/json', ...init?.headers }, ...init })
   if (!response.ok) {
     const body = await response.json().catch(() => null) as { detail?: unknown } | null
     const detail = typeof body?.detail === 'string' ? body.detail : `API ${response.status}`
@@ -21,23 +30,13 @@ export const api = {
   runInspector: async (id: string): Promise<RunInspector> => runInspectorSchema.parse(await request<unknown>(`/v1/runs/${id}/inspector`)),
   researchMemos: async (): Promise<ResearchMemo[]> => researchMemoSchema.array().parse(await request<unknown>('/v1/workbench/memos')),
   evolutionOverview: async (): Promise<EvolutionOverview> => evolutionOverviewSchema.parse(await request<unknown>('/v1/evolution/overview')),
+  evolutionJobs: async (): Promise<EvolutionJob[]> => evolutionJobSchema.array().parse(await request<unknown>('/v1/evolution/jobs')),
+  operations: async (): Promise<OperationsOverview> => operationsOverviewSchema.parse(await request<unknown>('/v1/operations')),
+  researchRuns: async (): Promise<ResearchRunView[]> => researchRunViewSchema.array().parse(await request<unknown>('/v1/research/runs')),
+  researchRun: async (id: string): Promise<ResearchRunDetailView> => researchRunDetailViewSchema.parse(await request<unknown>(`/v1/research/runs/${encodeURIComponent(id)}`)),
+  researchCommand: async (id: string, payload: ResearchRunCommand, owner: string): Promise<ResearchRunCommandResult> => researchRunCommandResultSchema.parse(await request<unknown>(`/v1/research/runs/${encodeURIComponent(id)}/commands`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': payload.request_id, 'X-Owner-Id': owner }, body: JSON.stringify(payload) })),
+  submitObservation: async (text: string): Promise<{ event_id: string; run_id: string; status_url: string }> => request('/v1/observations', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': crypto.randomUUID() }, body: JSON.stringify({ text, source_id: 'decision-desk', language: 'zh' }) }),
+  submitResearch: async (text: string): Promise<{ event_id: string; run_id: string; status: string; status_url: string }> => request('/v1/research/observations', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': crypto.randomUUID() }, body: JSON.stringify({ text, source_id: 'decision-desk', source_type: 'manual', language: 'zh' }) }),
   promotionReview: async (domainPackRef: string, payload: PromotionReviewRequest): Promise<PromotionReview> => promotionReviewSchema.parse(await request<unknown>(`/v1/evolution/${encodeURIComponent(domainPackRef)}/promotion-reviews`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })),
   promotionDecision: async ({ domain_pack_ref, ...payload }: PromotionDecisionCommand & { domain_pack_ref: string }) => promotionDecisionResultSchema.parse(await request<unknown>(`/v1/evolution/${encodeURIComponent(domain_pack_ref)}/decisions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Owner-Id': payload.owner }, body: JSON.stringify(payload) })),
-}
-
-export const fallbackSummary: DeskSummary = {
-  inbox: {
-    pending_count: 2,
-    running_count: 1,
-    latest: [
-      { run_id: 'run_demo_01', event_id: 'evt_fomc_01', status: 'completed', strategy_version: 'baseline.v1', runtime_version: 'langgraph.v1', snapshot_id: 'snap_01', artifact_id: 'art_demo_01', created_at: new Date(Date.now() - 1000 * 60 * 18).toISOString(), updated_at: new Date(Date.now() - 1000 * 60 * 17).toISOString(), finished_at: new Date(Date.now() - 1000 * 60 * 17).toISOString(), latency_ms: 4120, cost_usd: 0, error_code: null, headline: '政策措辞偏鹰，BTC 短线反应仍需确认', gate_status: 'publish' },
-      { run_id: 'run_demo_02', event_id: 'evt_cpi_02', status: 'degraded', strategy_version: 'baseline.v1', runtime_version: 'langgraph.v1', snapshot_id: 'snap_02', artifact_id: 'art_demo_02', created_at: new Date(Date.now() - 1000 * 60 * 55).toISOString(), updated_at: new Date(Date.now() - 1000 * 60 * 54).toISOString(), finished_at: new Date(Date.now() - 1000 * 60 * 54).toISOString(), latency_ms: 6880, cost_usd: 0, error_code: null, headline: 'CPI 输入缺少跨资产确认', gate_status: 'degraded' },
-    ],
-  },
-  published_count_30d: 14,
-  forecast_count: 42,
-  evaluated_count: 31,
-  health_status: 'ok',
-  active_strategy: 'baseline.v1',
-  active_pack: 'crypto_macro.v1',
 }

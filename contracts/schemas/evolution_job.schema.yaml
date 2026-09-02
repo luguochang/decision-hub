@@ -1,0 +1,182 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/evolution-job.schema.json
+title: EvolutionRuntime
+type: object
+additionalProperties: false
+required: [schema_version]
+properties:
+  schema_version: {type: string, const: evolution-job.v1}
+$defs:
+  evolution_planning_context:
+    type: object
+    additionalProperties: false
+    required: [job_id, domain_pack_ref, context_items, evidence_refs, active_candidate_id, active_candidate_version, active_candidate_content_hash]
+    properties:
+      job_id: {type: string, minLength: 1}
+      domain_pack_ref: {type: string, minLength: 1}
+      context_items: {type: array, minItems: 1, items: {type: string, minLength: 1}}
+      evidence_refs: {type: array, items: {type: string, minLength: 1}}
+      active_candidate_id: {type: [string, 'null']}
+      active_candidate_version: {type: [string, 'null']}
+      active_candidate_content_hash: {type: [string, 'null'], pattern: '^[a-f0-9]{64}$'}
+  candidate_proposal:
+    type: object
+    additionalProperties: false
+    required: [proposal_id, candidate_type, version, parent_version, summary, changes, rationale, evidence_refs]
+    properties:
+      proposal_id: {type: string, minLength: 1}
+      candidate_type: {type: string, enum: [strategy, runtime, profile, doctrine, provider_policy]}
+      version: {type: string, minLength: 1}
+      parent_version: {type: [string, 'null']}
+      summary: {type: string, minLength: 1, maxLength: 10000}
+      changes: {type: array, minItems: 1, items: {type: string, minLength: 1, maxLength: 5000}}
+      rationale: {type: string, minLength: 1, maxLength: 10000}
+      evidence_refs: {type: array, items: {type: string, minLength: 1}}
+  search_query:
+    type: object
+    additionalProperties: false
+    required: [request_id, capability_id, query, allowed_domains, max_results, max_cost_usd, observed_at]
+    properties:
+      request_id: {type: string, minLength: 1}
+      capability_id: {type: string, minLength: 1}
+      query: {type: string, minLength: 1, maxLength: 2000}
+      allowed_domains: {type: array, items: {type: string, minLength: 1}}
+      max_results: {type: integer, minimum: 1, maximum: 20}
+      max_cost_usd: {type: [number, 'null'], minimum: 0}
+      observed_at: {type: string, format: date-time}
+  search_evidence:
+    type: object
+    additionalProperties: false
+    required: [evidence_id, title, snippet, source_url, observed_at, published_at, received_at, content_hash]
+    properties:
+      evidence_id: {type: string, minLength: 1}
+      title: {type: string, minLength: 1}
+      snippet: {type: string, minLength: 1, maxLength: 20000}
+      source_url: {type: string, format: uri}
+      observed_at: {type: string, format: date-time}
+      published_at: {type: [string, 'null'], format: date-time}
+      received_at: {type: string, format: date-time}
+      content_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+  search_result:
+    type: object
+    additionalProperties: false
+    required: [request_id, capability_id, provider, evidence, cost_usd, completed_at]
+    properties:
+      request_id: {type: string, minLength: 1}
+      capability_id: {type: string, minLength: 1}
+      provider: {type: string, minLength: 1}
+      evidence: {type: array, items: {$ref: '#/$defs/search_evidence'}}
+      cost_usd: {type: [number, 'null'], minimum: 0}
+      completed_at: {type: string, format: date-time}
+  evolution_job_create:
+    type: object
+    additionalProperties: false
+    required: [trigger_key, trigger_type, domain_pack_ref, input_refs, max_attempts]
+    properties:
+      trigger_key: {type: string, minLength: 1, maxLength: 512}
+      trigger_type: {type: string, enum: [scheduled, feedback, failure_pattern, evaluation_batch]}
+      domain_pack_ref: {type: string, minLength: 1}
+      input_refs: {type: array, minItems: 1, items: {type: string, minLength: 1}}
+      max_attempts: {type: integer, minimum: 1, maximum: 10}
+  evolution_job:
+    type: object
+    additionalProperties: false
+    required: [job_id, schema_version, trigger_key, trigger_type, domain_pack_ref, status, stage, input_refs, candidate_id, experiment_refs, result_refs, attempt, max_attempts, lease_owner, lease_expires_at, next_attempt_at, last_error_code, created_at, updated_at, finished_at]
+    properties:
+      job_id: {type: string, minLength: 1}
+      schema_version: {type: string, const: evolution-job.v1}
+      trigger_key: {type: string, minLength: 1, maxLength: 512}
+      trigger_type: {type: string, enum: [scheduled, feedback, failure_pattern, evaluation_batch]}
+      domain_pack_ref: {type: string, minLength: 1}
+      status: {type: string, enum: [queued, running, retry_wait, pending_owner_review, completed, failed, cancelled]}
+      stage: {type: string, enum: [discover, plan, candidate, replay, holdout, shadow, review]}
+      input_refs: {type: array, minItems: 1, items: {type: string, minLength: 1}}
+      candidate_id: {type: [string, 'null']}
+      experiment_refs: {type: array, items: {type: string, minLength: 1}}
+      result_refs: {type: array, items: {type: string, minLength: 1}}
+      attempt: {type: integer, minimum: 0}
+      max_attempts: {type: integer, minimum: 1, maximum: 10}
+      lease_owner: {type: [string, 'null']}
+      lease_expires_at: {type: [string, 'null'], format: date-time}
+      next_attempt_at: {type: [string, 'null'], format: date-time}
+      last_error_code: {type: [string, 'null']}
+      created_at: {type: string, format: date-time}
+      updated_at: {type: string, format: date-time}
+      finished_at: {type: [string, 'null'], format: date-time}
+  service_heartbeat:
+    type: object
+    additionalProperties: false
+    required: [service_id, role, instance_id, version, mode, status, interval_seconds, started_at, heartbeat_at, last_error_code]
+    properties:
+      service_id: {type: string, minLength: 1}
+      role: {type: string, enum: [api, realtime_worker, research_worker, evolution_worker]}
+      instance_id: {type: [string, 'null'], minLength: 1}
+      version: {type: [string, 'null'], minLength: 1}
+      mode: {type: [string, 'null'], minLength: 1}
+      status: {type: string, enum: [online, stale, offline]}
+      interval_seconds: {type: [number, 'null'], exclusiveMinimum: 0, maximum: 3600}
+      started_at: {type: [string, 'null'], format: date-time}
+      heartbeat_at: {type: [string, 'null'], format: date-time}
+      last_error_code: {type: [string, 'null']}
+  runtime_mode:
+    type: object
+    additionalProperties: false
+    required: [runtime_id, runtime_version, mode, provider_configured, live_canary_status, model, api_mode]
+    properties:
+      runtime_id: {type: string, minLength: 1}
+      runtime_version: {type: string, minLength: 1}
+      mode: {type: string, enum: [fake, replay, provider]}
+      provider_configured: {type: boolean}
+      live_canary_status: {type: string, enum: [not_run, passed, failed, unknown]}
+      model: {type: [string, 'null']}
+      api_mode: {type: [string, 'null']}
+  evolution_job_counts:
+    type: object
+    additionalProperties: false
+    required: [queued, running, retry_wait, pending_owner_review, completed, failed, cancelled]
+    properties:
+      queued: {type: integer, minimum: 0}
+      running: {type: integer, minimum: 0}
+      retry_wait: {type: integer, minimum: 0}
+      pending_owner_review: {type: integer, minimum: 0}
+      completed: {type: integer, minimum: 0}
+      failed: {type: integer, minimum: 0}
+      cancelled: {type: integer, minimum: 0}
+  source_operation:
+    type: object
+    additionalProperties: false
+    required: [source_id, status, enabled, cursor, last_success_at, next_poll_at, consecutive_failures, error_code]
+    properties:
+      source_id: {type: string, minLength: 1}
+      status: {type: string, minLength: 1}
+      enabled: {type: boolean}
+      cursor: {type: [string, 'null']}
+      last_success_at: {type: [string, 'null'], format: date-time}
+      next_poll_at: {type: [string, 'null'], format: date-time}
+      consecutive_failures: {type: integer, minimum: 0}
+      error_code: {type: [string, 'null']}
+  capability_operation:
+    type: object
+    additionalProperties: false
+    required: [capability_id, capability_type, status, permissions, network_domains, timeout_seconds, max_cost_usd]
+    properties:
+      capability_id: {type: string, minLength: 1}
+      capability_type: {type: string, minLength: 1}
+      status: {type: string, minLength: 1}
+      permissions: {type: array, items: {type: string}}
+      network_domains: {type: array, items: {type: string}}
+      timeout_seconds: {type: number, exclusiveMinimum: 0}
+      max_cost_usd: {type: [number, 'null'], minimum: 0}
+  operations_overview:
+    type: object
+    additionalProperties: false
+    required: [schema_version, checked_at, services, runtime, sources, capabilities, jobs, recent_jobs]
+    properties:
+      schema_version: {type: string, const: operations-overview.v1}
+      checked_at: {type: string, format: date-time}
+      services: {type: array, items: {$ref: '#/$defs/service_heartbeat'}}
+      runtime: {$ref: '#/$defs/runtime_mode'}
+      sources: {type: array, items: {$ref: '#/$defs/source_operation'}}
+      capabilities: {type: array, items: {$ref: '#/$defs/capability_operation'}}
+      jobs: {$ref: '#/$defs/evolution_job_counts'}
+      recent_jobs: {type: array, items: {$ref: '#/$defs/evolution_job'}}

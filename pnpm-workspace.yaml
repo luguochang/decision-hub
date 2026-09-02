@@ -1,5 +1,9 @@
 packages:
   - apps/decision-desk
+  - extensions/dsh/decision-hub
   - packages/contracts_ts
 allowBuilds:
   esbuild: true
+minimumReleaseAgeExclude:
+  - '@deepseek-ai/cosmokit@1.8.3'
+  - '@deepseek-ai/schemastery@3.18.2'

@@ -1,0 +1,104 @@
+schema_version: crypto-macro-capability-bindings.v1
+default_policy: deny
+capabilities:
+  - schema_version: research-capability-manifest.v1
+    capability_id: web.search
+    version: 1.0.0
+    kind: python_adapter
+    implementation_ref: adapter://openai/responses-web-search
+    input_schema_ref: agentic_research.schema.yaml#/$defs/research_capability_query
+    output_schema_ref: agentic_research.schema.yaml#/$defs/research_capability_result
+    permissions: [network:https, search:broad]
+    allowed_domains: []
+    timeout_seconds: 20
+    cost_policy_ref: ../pack.yaml#execution_budget
+    freshness_policy_ref: ../evidence/source_manifest.yaml
+    license_status: approved
+    audit_status: approved
+    replay_policy: archive_required
+    secret_policy: adapter_only
+  - schema_version: research-capability-manifest.v1
+    capability_id: web.fetch
+    version: 1.0.0-candidate
+    kind: dsh_plugin
+    implementation_ref: candidate://dsh/tool/web.fetch
+    input_schema_ref: web-fetch-request.v1
+    output_schema_ref: agentic_research.schema.yaml#/$defs/evidence_candidate
+    permissions: [network:https]
+    allowed_domains: []
+    timeout_seconds: 20
+    cost_policy_ref: ../pack.yaml#execution_budget
+    freshness_policy_ref: ../evidence/source_manifest.yaml
+    license_status: review_required
+    audit_status: candidate
+    replay_policy: archive_required
+    secret_policy: adapter_only
+  - schema_version: research-capability-manifest.v1
+    capability_id: official.macro
+    version: 1.0.0
+    kind: python_adapter
+    implementation_ref: adapter://provider/official_sources
+    input_schema_ref: official-source-query.v1
+    output_schema_ref: agentic_research.schema.yaml#/$defs/evidence_candidate
+    permissions: [network:https]
+    allowed_domains:
+      - federalreserve.gov
+      - bls.gov
+      - bea.gov
+      - treasury.gov
+      - cmegroup.com
+    timeout_seconds: 20
+    cost_policy_ref: ../pack.yaml#execution_budget
+    freshness_policy_ref: ../evidence/source_manifest.yaml
+    license_status: approved
+    audit_status: approved
+    replay_policy: archive_required
+    secret_policy: none
+  - schema_version: research-capability-manifest.v1
+    capability_id: market.crypto_derivatives
+    version: 1.1.0
+    kind: python_adapter
+    implementation_ref: adapter://provider/market/coinex-public
+    input_schema_ref: market-snapshot-request.v1
+    output_schema_ref: agentic_research.schema.yaml#/$defs/evidence_candidate
+    permissions: [network:https]
+    allowed_domains: [api.coinex.com]
+    timeout_seconds: 20
+    cost_policy_ref: ../pack.yaml#execution_budget
+    freshness_policy_ref: ../evidence/source_manifest.yaml
+    license_status: approved
+    audit_status: approved
+    replay_policy: archive_required
+    secret_policy: none
+  - schema_version: research-capability-manifest.v1
+    capability_id: market.cross_asset
+    version: 1.0.0
+    kind: python_adapter
+    implementation_ref: adapter://provider/macro_market/fred
+    input_schema_ref: market-snapshot-request.v1
+    output_schema_ref: agentic_research.schema.yaml#/$defs/evidence_candidate
+    permissions: [network:https]
+    allowed_domains: [fred.stlouisfed.org]
+    timeout_seconds: 20
+    cost_policy_ref: ../pack.yaml#execution_budget
+    freshness_policy_ref: ../evidence/source_manifest.yaml
+    license_status: approved
+    audit_status: approved
+    replay_policy: archive_required
+    secret_policy: none
+  - schema_version: research-capability-manifest.v1
+    capability_id: replay.research
+    version: 1.0.0
+    kind: replay
+    implementation_ref: adapter://runtime/replay-research
+    input_schema_ref: replay-research-query.v1
+    output_schema_ref: agentic_research.schema.yaml#/$defs/evidence_candidate
+    permissions: [fixture:read]
+    allowed_domains: []
+    timeout_seconds: 5
+    cost_policy_ref: no-external-cost.v1
+    freshness_policy_ref: fixture-pit.v1
+    license_status: approved
+    audit_status: approved
+    replay_policy: deterministic
+    secret_policy: none

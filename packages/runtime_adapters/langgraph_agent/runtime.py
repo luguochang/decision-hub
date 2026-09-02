@@ -54,8 +54,22 @@ class LangGraphAgentRuntime:
     runtime_id = "langgraph-native"
     runtime_version = "langgraph-native.v1"
 
-    def __init__(self, provider_config: ProviderConfig | None = None) -> None:
-        self._fallback = FakeAgentRuntime()
+    def __init__(
+        self,
+        provider_config: ProviderConfig | None = None,
+        *,
+        response_model: type[BaseModel] = AgentPayload,
+        fallback_runtime: FakeAgentRuntime | None = None,
+        system_prompt: str | None = None,
+    ) -> None:
+        self._fallback = fallback_runtime or FakeAgentRuntime()
+        self.response_model = response_model
+        self.system_prompt = system_prompt or (
+            "You are a constrained market decision specialist. Return only the requested "
+            "structured fields. Separate facts from inferences, include a counter-thesis, "
+            "and never claim certainty from a single text source. Every field is required; "
+            "use an empty string or empty list when a role has no value for that field."
+        )
         self.enabled = os.getenv("DECISION_HUB_LLM_ENABLED", "0") == "1"
         self.provider_config = provider_config or ProviderConfig.from_env()
         self.capability_manifest = self.provider_config.capability_manifest()
@@ -65,6 +79,14 @@ class LangGraphAgentRuntime:
         self._agent: Any = None
         if self.enabled:
             self._agent = self._build_agent()
+
+    @property
+    def effective_runtime_id(self) -> str:
+        return self.runtime_id if self.enabled else self._fallback.runtime_id
+
+    @property
+    def effective_runtime_version(self) -> str:
+        return self.runtime_version if self.enabled else self._fallback.runtime_version
 
     @staticmethod
     def resolve_api_mode() -> str:
@@ -115,13 +137,8 @@ class LangGraphAgentRuntime:
         return create_agent(
             model,
             tools=[],
-            system_prompt=(
-                "You are a constrained market decision specialist. Return only the requested "
-                "structured fields. Separate facts from inferences, include a counter-thesis, "
-                "and never claim certainty from a single text source. Every field is required; "
-                "use an empty string or empty list when a role has no value for that field."
-            ),
-            response_format=AgentPayload,
+            system_prompt=self.system_prompt,
+            response_format=self.response_model,
             name="decision-hub-specialist",
         )
 
@@ -132,9 +149,16 @@ class LangGraphAgentRuntime:
         prompt = (
             f"Role: {request.role}\n"
             f"Evidence IDs: {', '.join(request.evidence)}\n"
-            f"Text:\n{request.text}\n\n"
-            "Use the evidence IDs as citations when directly supported. Fill every schema field; "
-            "use an empty string or empty list for fields outside this role."
+            + (
+                "Candidate instructions:\n"
+                + "\n".join(f"- {item}" for item in request.instructions)
+                + "\n"
+                if request.instructions
+                else ""
+            )
+            + f"Text:\n{request.text}\n\n"
+            + "Use the evidence IDs as citations when directly supported. Fill every schema "
+            + "field; use an empty string or empty list for fields outside this role."
         )
         if self._agent is None:
             raise AgentExecutionError("configuration_invalid", "agent is not configured")
@@ -163,11 +187,11 @@ class LangGraphAgentRuntime:
             ) from exc
         structured = result.get("structured_response")
         try:
-            payload = AgentPayload.model_validate(structured).model_dump()
+            payload = self.response_model.model_validate(structured).model_dump()
         except Exception as exc:
             raise AgentExecutionError(
                 "structured_output_invalid",
-                "provider response did not match AgentPayload",
+                f"provider response did not match {self.response_model.__name__}",
                 provider_id=self.provider_config.provider_id,
                 model=self.provider_config.model,
             ) from exc

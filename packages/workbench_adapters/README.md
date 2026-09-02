@@ -15,3 +15,7 @@
 ## 测试
 
 `tests/workbench` 覆盖 deny-by-default、引用校验、幂等和 DSH 未启动时 Core 可用。
+
+R2-R-07 的 G1-B/C 已完成错误来源和并行调用失败隔离；本适配层不扩大 DSH 权限或
+网络 capability。G2-C 真实 Search canary 仍需 owner 确认，详见
+[阶段卡](../../docs/stages/R2_R_07_SEARCH_RELIABILITY_ERROR_PROVENANCE.md)。

@@ -23,7 +23,18 @@ def _run(command: list[str]) -> None:
 
 
 def _secret_scan() -> None:
-    ignored = {".git", ".venv", "node_modules", "dist", "__pycache__", ".pytest_cache"}
+    ignored = {
+        ".git",
+        ".venv",
+        ".cache",
+        "node_modules",
+        "dist",
+        "__pycache__",
+        ".pytest_cache",
+        # Local SQLite/session state and provider credentials are explicitly
+        # gitignored runtime data, not repository artifacts to scan.
+        "data",
+    }
     matches: list[str] = []
     for path in ROOT.rglob("*"):
         if not path.is_file() or any(part in ignored for part in path.parts):

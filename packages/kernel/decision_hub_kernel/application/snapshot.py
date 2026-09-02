@@ -47,6 +47,9 @@ class SnapshotService:
                     cutoff_at=cutoff,
                     snapshot_hash=snapshot_hash,
                     evidence_json=json.dumps(evidence, ensure_ascii=False),
+                    snapshot_type="trigger",
+                    generation=1,
+                    created_at=utcnow(),
                 )
             )
         return snapshot_id, [str(evidence[0]["evidence_id"])]
@@ -94,7 +97,7 @@ class SnapshotService:
             snapshot_hash = hashlib.sha256(
                 json.dumps(evidence, sort_keys=True).encode()
             ).hexdigest()
-            snapshot_id = f"snap_{snapshot_hash[:32]}"
+            snapshot_id = _run_snapshot_id(run_id, snapshot_hash)
             session.add(
                 SnapshotRecord(
                     snapshot_id=snapshot_id,
@@ -102,6 +105,10 @@ class SnapshotService:
                     cutoff_at=observation.received_at,
                     snapshot_hash=snapshot_hash,
                     evidence_json=json.dumps(evidence, ensure_ascii=False),
+                    snapshot_type="trigger",
+                    run_id=run_id,
+                    generation=1,
+                    created_at=utcnow(),
                 )
             )
             run.snapshot_id = snapshot_id
@@ -134,3 +141,8 @@ def _evidence_item(
         json.dumps(semantic, ensure_ascii=False, sort_keys=True).encode("utf-8")
     ).hexdigest()
     return {"evidence_id": f"ev_{digest[:32]}", **semantic}
+
+
+def _run_snapshot_id(run_id: str, snapshot_hash: str) -> str:
+    digest = hashlib.sha256(f"{run_id}:{snapshot_hash}".encode()).hexdigest()
+    return f"snap_{digest[:32]}"

@@ -93,6 +93,135 @@ class SnapshotRecord(Base):
     snapshot_hash: Mapped[str] = mapped_column(String(64))
     evidence_json: Mapped[str] = mapped_column(Text)
     pack_version: Mapped[str] = mapped_column(String(64), default="crypto_macro.v1")
+    snapshot_type: Mapped[str] = mapped_column(String(32), default="trigger")
+    run_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    parent_snapshot_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    generation: Mapped[int] = mapped_column(Integer, default=1)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ResearchEvidenceRecord(Base):
+    __tablename__ = "research_evidence"
+    evidence_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    run_id: Mapped[str] = mapped_column(String(128), index=True)
+    capability_id: Mapped[str] = mapped_column(String(128), index=True)
+    requirement_id: Mapped[str] = mapped_column(String(128), index=True)
+    kind: Mapped[str] = mapped_column(String(32))
+    authority: Mapped[str] = mapped_column(String(32))
+    source_id: Mapped[str] = mapped_column(String(256))
+    source_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    content_hash: Mapped[str] = mapped_column(String(64), index=True)
+    excerpt: Mapped[str] = mapped_column(Text)
+    structured_payload_ref: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    tool_call_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    research_session_id: Mapped[str] = mapped_column(String(256), index=True)
+    round: Mapped[int] = mapped_column(Integer)
+    quality: Mapped[str] = mapped_column(String(32))
+    freshness_status: Mapped[str] = mapped_column(String(32))
+    conflict_group: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    accepted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ResearchResultRecord(Base):
+    __tablename__ = "research_results"
+    run_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    schema_version: Mapped[str] = mapped_column(String(64))
+    payload_json: Mapped[str] = mapped_column(Text)
+    payload_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ResearchTraceRecord(Base):
+    __tablename__ = "research_trace_events"
+    __table_args__ = (
+        UniqueConstraint("run_id", "sequence_no", name="uq_research_trace_sequence"),
+        UniqueConstraint("run_id", "event_hash", name="uq_research_trace_hash"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    run_id: Mapped[str] = mapped_column(String(128), index=True)
+    research_session_id: Mapped[str] = mapped_column(String(256), index=True)
+    sequence_no: Mapped[int] = mapped_column(Integer)
+    event_type: Mapped[str] = mapped_column(String(64))
+    occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    stage: Mapped[str] = mapped_column(String(64))
+    summary: Mapped[str] = mapped_column(Text)
+    reference_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    reference_id: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    status: Mapped[str] = mapped_column(String(32))
+    error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    error_provenance_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    event_hash: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ResearchCommandRecord(Base):
+    __tablename__ = "research_commands"
+    request_id: Mapped[str] = mapped_column(String(256), primary_key=True)
+    run_id: Mapped[str] = mapped_column(String(128), index=True)
+    command: Mapped[str] = mapped_column(String(32))
+    reason: Mapped[str] = mapped_column(Text)
+    target_run_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    status: Mapped[str] = mapped_column(String(32))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ResearchToolCallReservationRecord(Base):
+    __tablename__ = "research_tool_call_reservations"
+    run_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    request_id: Mapped[str] = mapped_column(String(256), primary_key=True)
+    research_session_id: Mapped[str] = mapped_column(String(256), nullable=False)
+    generation: Mapped[int] = mapped_column(Integer, nullable=False)
+    capability_id: Mapped[str] = mapped_column(String(128), nullable=False)
+    status: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    result_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    error_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    reserved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+
+class DshSessionLinkRecord(Base):
+    __tablename__ = "dsh_session_links"
+    __table_args__ = (
+        UniqueConstraint("dsh_session_id", name="uq_dsh_session_links_session_id"),
+    )
+    run_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    dsh_session_id: Mapped[str] = mapped_column(String(256), nullable=False)
+    request_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    state: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    generation: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    upstream_identity_json: Mapped[str] = mapped_column(Text, nullable=False)
+    plugin_build_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    # Nullable for rows created before the durable deadline migration. The
+    # gateway rejects such rows instead of guessing a time boundary.
+    deadline_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    max_tool_calls: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    tool_calls_started: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    terminal_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_seq: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    trace_ref: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    result_ref: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    result_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class DshSessionPromptRecord(Base):
+    __tablename__ = "dsh_session_prompts"
+    run_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    generation: Mapped[int] = mapped_column(Integer, primary_key=True)
+    dsh_session_id: Mapped[str] = mapped_column(String(256), nullable=False, index=True)
+    request_id: Mapped[str] = mapped_column(String(256), nullable=False, unique=True)
+    request_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    prompt: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
 class RunRecord(Base):
@@ -101,9 +230,12 @@ class RunRecord(Base):
     event_id: Mapped[str] = mapped_column(String(128), index=True)
     idempotency_key: Mapped[str | None] = mapped_column(String(256), unique=True, nullable=True)
     snapshot_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    decision_snapshot_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
     status: Mapped[str] = mapped_column(String(32), default=RunStatus.admitted.value)
     strategy_version: Mapped[str] = mapped_column(String(64), default="baseline.v1")
     runtime_version: Mapped[str] = mapped_column(String(64), default="fake.v1")
+    admission_origin: Mapped[str] = mapped_column(String(32), default="manual", index=True)
+    priority: Mapped[int] = mapped_column(Integer, default=100, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -111,6 +243,16 @@ class RunRecord(Base):
     cost_usd: Mapped[float | None] = mapped_column(Float, nullable=True, default=None)
     error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
     artifact_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    available_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, index=True
+    )
+    parent_run_id: Mapped[str | None] = mapped_column(
+        String(128), nullable=True, index=True
+    )
+    lease_owner: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    lease_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
 
 class RunEventRecord(Base):
@@ -415,6 +557,45 @@ class ExperienceRecord(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
+class EvolutionJobRecord(Base):
+    __tablename__ = "evolution_jobs"
+    job_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    schema_version: Mapped[str] = mapped_column(String(64))
+    trigger_key: Mapped[str] = mapped_column(String(512), unique=True, index=True)
+    trigger_type: Mapped[str] = mapped_column(String(32))
+    domain_pack_ref: Mapped[str] = mapped_column(String(128), index=True)
+    status: Mapped[str] = mapped_column(String(32), index=True)
+    stage: Mapped[str] = mapped_column(String(32))
+    input_refs_json: Mapped[str] = mapped_column(Text)
+    candidate_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    experiment_refs_json: Mapped[str] = mapped_column(Text)
+    result_refs_json: Mapped[str] = mapped_column(Text)
+    attempt: Mapped[int] = mapped_column(Integer, default=0)
+    max_attempts: Mapped[int] = mapped_column(Integer)
+    lease_owner: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    lease_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    next_attempt_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class ServiceHeartbeatRecord(Base):
+    __tablename__ = "service_heartbeats"
+    service_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    role: Mapped[str] = mapped_column(String(32))
+    instance_id: Mapped[str] = mapped_column(String(128))
+    version: Mapped[str] = mapped_column(String(64))
+    mode: Mapped[str] = mapped_column(String(64))
+    interval_seconds: Mapped[float] = mapped_column(Float)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    heartbeat_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    last_error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
+
 class Database:
     def __init__(self, url: str | None = None) -> None:
         data_dir = Path(os.getenv("DECISION_HUB_DATA_DIR", "data/decision-hub"))
@@ -694,7 +875,11 @@ class Database:
             rows = session.scalars(
                 select(RunRecord)
                 .where(RunRecord.status.in_([RunStatus.admitted.value, RunStatus.running.value]))
-                .order_by(RunRecord.created_at.asc())
+                .order_by(
+                    RunRecord.priority.desc(),
+                    RunRecord.created_at.asc(),
+                    RunRecord.run_id.asc(),
+                )
             ).all()
             return [row.run_id for row in rows]
 

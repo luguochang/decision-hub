@@ -1,0 +1,242 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/dsh-host-bridge.schema.json
+title: DshHostBridgeContracts
+type: object
+additionalProperties: false
+required: [schema_version]
+properties:
+  schema_version: {type: string, const: dsh-host-bridge.v1}
+$defs:
+  dsh_research_intake:
+    type: object
+    additionalProperties: false
+    required: [schema_version, text, source_id, language, client_session_id]
+    properties:
+      schema_version: {type: string, const: dsh-research-intake.v1}
+      text: {type: string, minLength: 1, maxLength: 200000}
+      source_id: {type: string, minLength: 1, maxLength: 128}
+      language: {type: string, minLength: 2, maxLength: 16}
+      client_session_id: {type: [string, 'null'], maxLength: 256}
+
+  dsh_research_intake_accepted:
+    type: object
+    additionalProperties: false
+    required: [schema_version, event_id, run_id, status, status_url, decision_desk_url]
+    properties:
+      schema_version: {type: string, const: dsh-research-intake-accepted.v1}
+      event_id: {type: string, minLength: 1, maxLength: 128}
+      run_id: {type: string, minLength: 1, maxLength: 128}
+      status: {type: string, enum: [queued]}
+      status_url: {type: string, minLength: 1, maxLength: 2048}
+      decision_desk_url: {type: string, format: uri, maxLength: 2048}
+
+  dsh_upstream_identity:
+    type: object
+    additionalProperties: false
+    required: [source_commit, source_version, package_versions, plugin_build_hash]
+    properties:
+      source_commit: {type: string, pattern: '^[a-f0-9]{40}$'}
+      source_version: {type: string, minLength: 1, maxLength: 128}
+      package_versions:
+        type: object
+        additionalProperties: {type: string, minLength: 1, maxLength: 128}
+      plugin_build_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+
+  dsh_host_readiness:
+    type: object
+    additionalProperties: false
+    required: [schema_version, ready, version_compatible, session_controller, client_plugin, hub_reachable, upstream_identity, checked_at, error_code]
+    properties:
+      schema_version: {type: string, const: dsh-host-readiness.v1}
+      ready: {type: boolean}
+      version_compatible: {type: boolean}
+      session_controller: {type: boolean}
+      client_plugin: {type: boolean}
+      hub_reachable: {type: boolean}
+      upstream_identity: {$ref: '#/$defs/dsh_upstream_identity'}
+      checked_at: {type: string, format: date-time}
+      error_code: {type: [string, 'null'], maxLength: 128}
+
+  dsh_session_submit:
+    type: object
+    additionalProperties: false
+    required: [schema_version, run_id, request_hash, deterministic_session_id, deterministic_request_id, workspace_ref, prompt_ref, agent_preset, permission_ref, deadline_at, model_step_timeout_ms, max_tool_calls, generation]
+    properties:
+      schema_version: {type: string, const: dsh-session-submit.v1}
+      run_id: {type: string, minLength: 1, maxLength: 128}
+      request_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      deterministic_session_id: {type: string, minLength: 1, maxLength: 256}
+      deterministic_request_id: {type: string, minLength: 1, maxLength: 256}
+      workspace_ref: {type: string, minLength: 1, maxLength: 2048}
+      prompt_ref: {type: string, minLength: 1, maxLength: 2048}
+      agent_preset: {type: [string, 'null'], maxLength: 256}
+      permission_ref: {type: string, minLength: 1, maxLength: 2048}
+      deadline_at: {type: string, format: date-time}
+      # Host-enforced per-model-step watchdog budget, in milliseconds.
+      # Keep this separate from the product total deadline so a slow provider
+      # cannot consume the entire run without producing a terminal state.
+      model_step_timeout_ms: {type: integer, minimum: 1000, maximum: 600000}
+      # Immutable product-level ceiling. A generation may receive a smaller
+      # remaining budget in its prompt, but the Host/Gateway never enlarges
+      # this durable Run limit.
+      max_tool_calls: {type: integer, minimum: 1, maximum: 100}
+      generation: {type: integer, minimum: 1}
+
+  dsh_session_prompt:
+    type: object
+    additionalProperties: false
+    required: [schema_version, run_id, dsh_session_id, request_id, request_hash, generation, prompt]
+    properties:
+      schema_version: {type: string, const: dsh-session-prompt.v1}
+      run_id: {type: string, minLength: 1, maxLength: 128}
+      dsh_session_id: {type: string, minLength: 1, maxLength: 256}
+      request_id: {type: string, minLength: 1, maxLength: 256}
+      request_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      generation: {type: integer, minimum: 1}
+      prompt: {type: string, minLength: 1, maxLength: 1048576}
+
+  dsh_session_accepted:
+    type: object
+    additionalProperties: false
+    required: [schema_version, run_id, dsh_session_id, accepted_at, generation]
+    properties:
+      schema_version: {type: string, const: dsh-session-accepted.v1}
+      run_id: {type: string, minLength: 1, maxLength: 128}
+      dsh_session_id: {type: string, minLength: 1, maxLength: 256}
+      accepted_at: {type: string, format: date-time}
+      generation: {type: integer, minimum: 1}
+
+  dsh_session_status:
+    type: object
+    additionalProperties: false
+    required: [schema_version, run_id, dsh_session_id, state, generation, last_seq, observed_at, error_code]
+    properties:
+      schema_version: {type: string, const: dsh-session-status.v1}
+      run_id: {type: string, minLength: 1, maxLength: 128}
+      dsh_session_id: {type: string, minLength: 1, maxLength: 256}
+      state: {type: string, enum: [admitted, running, idle, completed, failed, cancelled, unknown]}
+      generation: {type: integer, minimum: 1}
+      last_seq: {type: integer, minimum: 0}
+      observed_at: {type: string, format: date-time}
+      error_code: {type: [string, 'null'], maxLength: 128}
+
+  dsh_bridge_error:
+    type: object
+    additionalProperties: false
+    required: [code, message, retryable]
+    properties:
+      code: {type: string, minLength: 1, maxLength: 128}
+      message: {type: string, minLength: 1, maxLength: 4000}
+      retryable: {type: boolean}
+
+  dsh_session_completion:
+    type: object
+    additionalProperties: false
+    required: [schema_version, run_id, dsh_session_id, terminal_status, generation, last_seq, trace_ref, result_ref, result_hash, completed_at, error]
+    properties:
+      schema_version: {type: string, const: dsh-session-completion.v1}
+      run_id: {type: string, minLength: 1, maxLength: 128}
+      dsh_session_id: {type: string, minLength: 1, maxLength: 256}
+      terminal_status: {type: string, enum: [completed, failed, cancelled]}
+      generation: {type: integer, minimum: 1}
+      last_seq: {type: integer, minimum: 0}
+      trace_ref: {type: [string, 'null'], maxLength: 2048}
+      result_ref: {type: [string, 'null'], maxLength: 2048}
+      result_hash: {type: [string, 'null'], pattern: '^[a-f0-9]{64}$'}
+      completed_at: {type: string, format: date-time}
+      error:
+        anyOf:
+          - {$ref: '#/$defs/dsh_bridge_error'}
+          - {type: 'null'}
+
+  dsh_session_result:
+    type: object
+    additionalProperties: false
+    required: [schema_version, run_id, dsh_session_id, generation, last_seq, final_response, finish_reason, events_json, started_at, finished_at, trace_ref, result_hash]
+    properties:
+      schema_version: {type: string, const: dsh-session-result.v1}
+      run_id: {type: string, minLength: 1, maxLength: 128}
+      dsh_session_id: {type: string, minLength: 1, maxLength: 256}
+      generation: {type: integer, minimum: 1}
+      last_seq: {type: integer, minimum: 0}
+      final_response: {type: string, maxLength: 1048576}
+      finish_reason: {type: [string, 'null'], maxLength: 128}
+      events_json: {type: string, minLength: 2, maxLength: 8388608}
+      started_at: {type: string, format: date-time}
+      finished_at: {type: string, format: date-time}
+      trace_ref: {type: string, minLength: 1, maxLength: 2048}
+      result_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+
+  dsh_run_session_link_view:
+    type: object
+    additionalProperties: false
+    required: [schema_version, run_id, dsh_session_id, request_hash, state, generation, upstream_identity, deadline_at, max_tool_calls, tool_calls_started, accepted_at, last_seen_at, terminal_at, last_seq, trace_ref, result_ref, result_hash, error_code, created_at, updated_at]
+    properties:
+      schema_version: {type: string, const: dsh-run-session-link.v1}
+      run_id: {type: string, minLength: 1, maxLength: 128}
+      dsh_session_id: {type: string, minLength: 1, maxLength: 256}
+      request_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      state: {type: string, enum: [admitted, running, idle, completed, failed, cancelled, unknown]}
+      generation: {type: integer, minimum: 1}
+      upstream_identity: {$ref: '#/$defs/dsh_upstream_identity'}
+      # Durable execution ceiling copied from the accepted DSH submission.
+      # A missing value on a legacy row is fail-closed at the capability gateway.
+      deadline_at: {type: [string, 'null'], format: date-time}
+      # Nullable only for historical rows created before migration 0027. A
+      # re-admission may fill the immutable ceiling; execution otherwise fails closed.
+      max_tool_calls: {type: [integer, 'null'], minimum: 1, maximum: 100}
+      tool_calls_started: {type: integer, minimum: 0}
+      accepted_at: {type: [string, 'null'], format: date-time}
+      last_seen_at: {type: [string, 'null'], format: date-time}
+      terminal_at: {type: [string, 'null'], format: date-time}
+      last_seq: {type: integer, minimum: 0}
+      trace_ref: {type: [string, 'null'], maxLength: 2048}
+      result_ref: {type: [string, 'null'], maxLength: 2048}
+      result_hash: {type: [string, 'null'], pattern: '^[a-f0-9]{64}$'}
+      error_code: {type: [string, 'null'], maxLength: 128}
+      created_at: {type: string, format: date-time}
+      updated_at: {type: string, format: date-time}
+
+  dsh_business_failure:
+    type: object
+    additionalProperties: false
+    required: [capability_id, error_code, origin, cause_code, retryable]
+    properties:
+      capability_id: {type: string, minLength: 1, maxLength: 256}
+      error_code: {type: string, minLength: 1, maxLength: 128}
+      origin: {type: string, enum: [provider, transport, mcp, dsh, gateway, pit, orchestration]}
+      cause_code: {type: [string, 'null'], maxLength: 128}
+      retryable: {type: boolean}
+
+  dsh_business_status:
+    type: object
+    additionalProperties: false
+    required: [schema_version, status, gate_status, coverage_status, hard_coverage_ratio, stop_reason_code, stop_reason_detail, failures]
+    properties:
+      schema_version: {type: string, const: dsh-business-status.v1}
+      status: {type: string, enum: [queued, researching, completed, degraded, research_only, rejected, failed, cancelled]}
+      gate_status: {type: [string, 'null'], enum: [publish, degraded, research_only, reject, null]}
+      coverage_status: {type: [string, 'null'], enum: [insufficient, sufficient, bounded_stop, null]}
+      hard_coverage_ratio: {type: [number, 'null'], minimum: 0, maximum: 1}
+      stop_reason_code: {type: [string, 'null'], maxLength: 128}
+      stop_reason_detail: {type: [string, 'null'], maxLength: 2000}
+      failures: {type: array, items: {$ref: '#/$defs/dsh_business_failure'}, maxItems: 16}
+
+  dsh_browser_status:
+    type: object
+    additionalProperties: false
+    required: [schema_version, ready, runtime_mode, interaction_mode, run_id, dsh_session_id, state, error_code, decision_desk_url, business]
+    properties:
+      schema_version: {type: string, const: dsh-browser-status.v1}
+      ready: {type: boolean}
+      runtime_mode: {type: string, enum: [live, replay]}
+      interaction_mode: {type: string, enum: [interactive, read_only]}
+      run_id: {type: [string, 'null'], minLength: 1, maxLength: 128}
+      dsh_session_id: {type: [string, 'null'], minLength: 1, maxLength: 256}
+      state:
+        anyOf:
+          - {type: string, enum: [admitted, running, idle, completed, failed, cancelled, unknown]}
+          - {type: 'null'}
+      error_code: {type: [string, 'null'], maxLength: 128}
+      decision_desk_url: {type: string, format: uri, maxLength: 2048}
+      business: {anyOf: [{$ref: '#/$defs/dsh_business_status'}, {type: 'null'}]}

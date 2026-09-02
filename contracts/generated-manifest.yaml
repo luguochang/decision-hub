@@ -2,8 +2,11 @@ manifest_version: contracts.v1
 schemas:
   contracts/events/run_event.schema.yaml: 8a41bfb20cfa552caba9c9af3711269b8b83c6697736c4dcb6c611d28554f2dd
   contracts/policies/gate_policy.schema.yaml: ee9664cdcc93f1619ae3454d953235263ab1bbc0d6432cb57f908c099888321b
+  contracts/schemas/agentic_research.schema.yaml: 4a853f49ffdaae397838ffa2077056a97ff8d85422cfa1dde0962c07dce7512d
   contracts/schemas/artifact.schema.yaml: 7eb372a42d40aac1ddf3717f23b6786fc4b6803c2097b1412466e006053eb9f1
   contracts/schemas/common.schema.yaml: 2d210425d08c160bbb31861e6ae114efffc0c95aced9f0eab905a90a56a23196
+  contracts/schemas/dsh_host_bridge.schema.yaml: a4e6848f02ed983e2298319f8e8256035be944878ff74b810f02f51e62a5a50a
+  contracts/schemas/evolution_job.schema.yaml: 201415b9240e8b0f5a0b0b461b01deaf183056bef29db2adcf7bdaa52f410e4c
   contracts/schemas/forecast.schema.yaml: 0ce75395087a0404dfedbb5f05a52bfd3836c7cc425d29e5dea53728f229cf2f
   contracts/schemas/market_quote.schema.yaml: 53c40ccb0d14ec30b74af161679423b08240779924605be825f5b75bde50014e
   contracts/schemas/notification_message.schema.yaml: e485cc1d4d685c86017721768586f7bbc5f9c79079ee302bc609ddf91aaa73c0
@@ -15,4 +18,4 @@ schemas:
   contracts/schemas/source_health.schema.yaml: 388643237427002fea48309b1120055976001ccd4863ee5ad1d3aeab35766549
   contracts/schemas/source_manifest.schema.yaml: 403a01d20e79a49b841101bfab8fc571456f35cc8866c1fc67fa49bc155f71e8
   contracts/schemas/text_envelope.schema.yaml: 56e5e1948ef05ae2b53ab2f52691b4edbefc333cc604b0576d49c6ebb7deb380
-  contracts/schemas/workbench_assets.schema.yaml: e113e1433857636a3eb225f682de0c59d318825c21536b8b4ff330abc36dcf47
+  contracts/schemas/workbench_assets.schema.yaml: 4bde0b324883f59af2bb154144ad73dc18aa6e737b48f0b7bb836ee1d358f1f8

@@ -1,0 +1,261 @@
+{
+  "archived_capability_fixtures": [
+    {
+      "capability_id": "replay.research",
+      "evidence_candidates": [
+        {
+          "authority": "official",
+          "conflict_group": null,
+          "content_hash": "7a90d0d9debb6eb5fce6b5fc0aba4d7ef606e1785cd63e3f119eb27de390e16b",
+          "evidence_id": "archive_7a90d0d9debb6eb5fce6b5fc0aba4d7e",
+          "excerpt": "The Bureau of Labor Statistics released the January 2025 Employment Situation on February 7, 2025.",
+          "freshness_status": "unknown",
+          "kind": "official",
+          "observed_at": "2025-02-07T13:30:01Z",
+          "published_at": "2025-02-07T13:30:00Z",
+          "quality": "candidate",
+          "received_at": "2025-02-07T13:30:02Z",
+          "requirement_id": "event_identity",
+          "research_session_id": "archive:us_jobs_20250207",
+          "round": 1,
+          "source_id": "bls.gov",
+          "source_url": "https://www.bls.gov/news.release/archives/empsit_02072025.htm",
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:us_jobs_20250207:event_identity"
+        }
+      ],
+      "query_aliases": [
+        "us_jobs_20250207:event_identity",
+        "Verify event identity for us_jobs_20250207"
+      ],
+      "requirement_id": "event_identity"
+    },
+    {
+      "capability_id": "replay.research",
+      "evidence_candidates": [
+        {
+          "authority": "official",
+          "conflict_group": null,
+          "content_hash": "ca8e2629c03445ba7a26d79f09b2d9680251a537531955a7b75627bd3d2a00e0",
+          "evidence_id": "archive_ca8e2629c03445ba7a26d79f09b2d968",
+          "excerpt": "Total nonfarm payroll employment rose by 143,000 and the unemployment rate edged down to 4.0 percent.",
+          "freshness_status": "unknown",
+          "kind": "official",
+          "observed_at": "2025-02-07T13:30:01Z",
+          "published_at": "2025-02-07T13:30:00Z",
+          "quality": "candidate",
+          "received_at": "2025-02-07T13:30:02Z",
+          "requirement_id": "policy_or_data_delta",
+          "research_session_id": "archive:us_jobs_20250207",
+          "round": 1,
+          "source_id": "bls.gov",
+          "source_url": "https://www.bls.gov/news.release/archives/empsit_02072025.htm",
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:us_jobs_20250207:policy_or_data_delta"
+        }
+      ],
+      "query_aliases": [
+        "us_jobs_20250207:policy_or_data_delta",
+        "Verify policy or data delta for us_jobs_20250207"
+      ],
+      "requirement_id": "policy_or_data_delta"
+    }
+  ],
+  "case_id": "us_jobs_20250207",
+  "cutoff_at": "2025-02-07T13:35:00Z",
+  "event_family": "labor_release",
+  "evidence_requirements": [
+    {
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "authority_floor": "official",
+      "confidence_cap": 0.45,
+      "description": "Identify the primary event, speaker or document, event time and revision status.",
+      "freshness_seconds": 604800,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "requirement_id": "event_identity",
+      "source_priority": [
+        "official",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "authority_floor": "official",
+      "confidence_cap": 0.5,
+      "description": "Establish what changed relative to prior wording, prior value or consensus.",
+      "freshness_seconds": 86400,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "requirement_id": "policy_or_data_delta",
+      "source_priority": [
+        "official",
+        "audited_aggregator",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.55,
+      "description": "Observe policy expectations, rates repricing or credible positioning evidence.",
+      "freshness_seconds": 900,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "web.search"
+      ],
+      "requirement_id": "expectation_pricing",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.55,
+      "description": "Observe the rates and USD transmission path relevant to the event.",
+      "freshness_seconds": 300,
+      "importance": "hard",
+      "minimum_independent_sources": 2,
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "official.macro",
+        "web.search"
+      ],
+      "requirement_id": "macro_transmission",
+      "source_priority": [
+        "official",
+        "exchange",
+        "audited_aggregator"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "verified_web",
+      "confidence_cap": 0.65,
+      "description": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation.",
+      "freshness_seconds": 300,
+      "importance": "soft",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "web.search"
+      ],
+      "requirement_id": "cross_asset_confirmation",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.5,
+      "description": "Observe BTC spot reaction, volume and the event-time comparison window.",
+      "freshness_seconds": 60,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "requirement_id": "crypto_spot_confirmation",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ]
+    },
+    {
+      "allowed_fallbacks": [],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.5,
+      "description": "Observe funding, open interest, basis and available liquidation or flow evidence.",
+      "freshness_seconds": 60,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "requirement_id": "derivatives_crowding",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "verified_web",
+      "confidence_cap": 0.7,
+      "description": "Build the strongest evidence-backed alternative transmission chain.",
+      "freshness_seconds": 86400,
+      "importance": "soft",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "official.macro",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "requirement_id": "counter_thesis",
+      "source_priority": [
+        "official",
+        "exchange",
+        "verified_web"
+      ]
+    }
+  ],
+  "expected_hard_requirement_ids": [
+    "event_identity",
+    "policy_or_data_delta",
+    "expectation_pricing",
+    "macro_transmission",
+    "crypto_spot_confirmation",
+    "derivatives_crowding"
+  ],
+  "input_text": "US nonfarm payroll employment rose by 143,000 in January 2025 and unemployment edged down to 4.0 percent.",
+  "outcome_available_at": null,
+  "outcome_labels": [],
+  "schema_version": "research-evaluation-case.v1",
+  "source_refs": [
+    "https://www.bls.gov/news.release/archives/empsit_02072025.htm"
+  ],
+  "trigger_evidence": {
+    "authority": "unverified",
+    "content_hash": "393d55b58728c85fcfd0df62004789d9ca855fa4ed17967319a5f402c5d29878",
+    "evidence_id": "trigger_us_jobs_20250207",
+    "excerpt": "US nonfarm payroll employment rose by 143,000 in January 2025 and unemployment edged down to 4.0 percent.",
+    "kind": "transcript",
+    "observed_at": "2025-02-07T13:30:00Z",
+    "published_at": "2025-02-07T13:30:00Z",
+    "received_at": "2025-02-07T13:30:02Z",
+    "source_id": "evaluation-catalog",
+    "source_url": "https://www.bls.gov/news.release/archives/empsit_02072025.htm"
+  }
+}

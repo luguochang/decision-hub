@@ -1,0 +1,261 @@
+{
+  "archived_capability_fixtures": [
+    {
+      "capability_id": "replay.research",
+      "evidence_candidates": [
+        {
+          "authority": "official",
+          "conflict_group": null,
+          "content_hash": "ae0b5c4bb64e0d766988197453107b92e6e9c86a91c228db6fbef60bfa30d970",
+          "evidence_id": "archive_ae0b5c4bb64e0d766988197453107b92",
+          "excerpt": "The Bureau of Economic Analysis released January 2025 personal income and outlays data on February 28, 2025.",
+          "freshness_status": "unknown",
+          "kind": "official",
+          "observed_at": "2025-02-28T13:30:01Z",
+          "published_at": "2025-02-28T13:30:00Z",
+          "quality": "candidate",
+          "received_at": "2025-02-28T13:30:02Z",
+          "requirement_id": "event_identity",
+          "research_session_id": "archive:us_pce_20250228",
+          "round": 1,
+          "source_id": "bea.gov",
+          "source_url": "https://www.bea.gov/news/2025/personal-income-and-outlays-january-2025",
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:us_pce_20250228:event_identity"
+        }
+      ],
+      "query_aliases": [
+        "us_pce_20250228:event_identity",
+        "Verify event identity for us_pce_20250228"
+      ],
+      "requirement_id": "event_identity"
+    },
+    {
+      "capability_id": "replay.research",
+      "evidence_candidates": [
+        {
+          "authority": "official",
+          "conflict_group": null,
+          "content_hash": "469dc6174fbc76ba835eea09da38d3fdd70ce63d28709d6c60994d4f83987720",
+          "evidence_id": "archive_469dc6174fbc76ba835eea09da38d3fd",
+          "excerpt": "The PCE price index increased 0.3 percent in January and 2.5 percent from one year earlier; the core index rose 0.3 percent and 2.6 percent year over year.",
+          "freshness_status": "unknown",
+          "kind": "official",
+          "observed_at": "2025-02-28T13:30:01Z",
+          "published_at": "2025-02-28T13:30:00Z",
+          "quality": "candidate",
+          "received_at": "2025-02-28T13:30:02Z",
+          "requirement_id": "policy_or_data_delta",
+          "research_session_id": "archive:us_pce_20250228",
+          "round": 1,
+          "source_id": "bea.gov",
+          "source_url": "https://www.bea.gov/news/2025/personal-income-and-outlays-january-2025",
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:us_pce_20250228:policy_or_data_delta"
+        }
+      ],
+      "query_aliases": [
+        "us_pce_20250228:policy_or_data_delta",
+        "Verify policy or data delta for us_pce_20250228"
+      ],
+      "requirement_id": "policy_or_data_delta"
+    }
+  ],
+  "case_id": "us_pce_20250228",
+  "cutoff_at": "2025-02-28T13:35:00Z",
+  "event_family": "inflation_release",
+  "evidence_requirements": [
+    {
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "authority_floor": "official",
+      "confidence_cap": 0.45,
+      "description": "Identify the primary event, speaker or document, event time and revision status.",
+      "freshness_seconds": 604800,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "requirement_id": "event_identity",
+      "source_priority": [
+        "official",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "authority_floor": "official",
+      "confidence_cap": 0.5,
+      "description": "Establish what changed relative to prior wording, prior value or consensus.",
+      "freshness_seconds": 86400,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "requirement_id": "policy_or_data_delta",
+      "source_priority": [
+        "official",
+        "audited_aggregator",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.55,
+      "description": "Observe policy expectations, rates repricing or credible positioning evidence.",
+      "freshness_seconds": 900,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "web.search"
+      ],
+      "requirement_id": "expectation_pricing",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.55,
+      "description": "Observe the rates and USD transmission path relevant to the event.",
+      "freshness_seconds": 300,
+      "importance": "hard",
+      "minimum_independent_sources": 2,
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "official.macro",
+        "web.search"
+      ],
+      "requirement_id": "macro_transmission",
+      "source_priority": [
+        "official",
+        "exchange",
+        "audited_aggregator"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "verified_web",
+      "confidence_cap": 0.65,
+      "description": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation.",
+      "freshness_seconds": 300,
+      "importance": "soft",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "web.search"
+      ],
+      "requirement_id": "cross_asset_confirmation",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.5,
+      "description": "Observe BTC spot reaction, volume and the event-time comparison window.",
+      "freshness_seconds": 60,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "requirement_id": "crypto_spot_confirmation",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ]
+    },
+    {
+      "allowed_fallbacks": [],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.5,
+      "description": "Observe funding, open interest, basis and available liquidation or flow evidence.",
+      "freshness_seconds": 60,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "requirement_id": "derivatives_crowding",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "verified_web",
+      "confidence_cap": 0.7,
+      "description": "Build the strongest evidence-backed alternative transmission chain.",
+      "freshness_seconds": 86400,
+      "importance": "soft",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "official.macro",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "requirement_id": "counter_thesis",
+      "source_priority": [
+        "official",
+        "exchange",
+        "verified_web"
+      ]
+    }
+  ],
+  "expected_hard_requirement_ids": [
+    "event_identity",
+    "policy_or_data_delta",
+    "expectation_pricing",
+    "macro_transmission",
+    "crypto_spot_confirmation",
+    "derivatives_crowding"
+  ],
+  "input_text": "US PCE prices rose 0.3 percent in January 2025; excluding food and energy, prices also rose 0.3 percent.",
+  "outcome_available_at": null,
+  "outcome_labels": [],
+  "schema_version": "research-evaluation-case.v1",
+  "source_refs": [
+    "https://www.bea.gov/news/2025/personal-income-and-outlays-january-2025"
+  ],
+  "trigger_evidence": {
+    "authority": "unverified",
+    "content_hash": "9e1555368ce9228ad12cb2b808c7f7c0957ea76f8a713e3ab67b8346f2433b97",
+    "evidence_id": "trigger_us_pce_20250228",
+    "excerpt": "US PCE prices rose 0.3 percent in January 2025; excluding food and energy, prices also rose 0.3 percent.",
+    "kind": "transcript",
+    "observed_at": "2025-02-28T13:30:00Z",
+    "published_at": "2025-02-28T13:30:00Z",
+    "received_at": "2025-02-28T13:30:02Z",
+    "source_id": "evaluation-catalog",
+    "source_url": "https://www.bea.gov/news/2025/personal-income-and-outlays-january-2025"
+  }
+}

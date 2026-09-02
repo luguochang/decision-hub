@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import inspect
 import json
 import time
@@ -8,10 +9,12 @@ from collections.abc import Awaitable, Callable, Mapping
 from datetime import UTC, datetime
 from typing import cast
 
+from packages.contracts_py.decision_hub_contracts.models import CandidateProposal
 from packages.kernel.decision_hub_kernel.ports.runtime import (
     AgentExecutionError,
     AgentRequest,
     AgentResult,
+    AgentRuntime,
     AgentUsage,
 )
 from packages.runtime_adapters.errors import map_runtime_error
@@ -20,6 +23,57 @@ RuntimeCallable = Callable[
     [AgentRequest],
     Awaitable[AgentResult | Mapping[str, object]] | AgentResult | Mapping[str, object],
 ]
+
+
+class CandidateConfigurationRuntime:
+    """Apply an immutable CandidateProposal to an existing runtime.
+
+    The wrapper changes the actual AgentRequest rather than merely relabelling an
+    unchanged runtime. Provider and harness adapters can therefore consume the same
+    candidate instructions without the evaluation layer knowing their implementation.
+    """
+
+    def __init__(self, base: AgentRuntime, proposal: CandidateProposal) -> None:
+        self._base = base
+        self.proposal = proposal
+        digest = hashlib.sha256(
+            proposal.model_dump_json().encode("utf-8")
+        ).hexdigest()[:16]
+        self.runtime_id = f"candidate-config:{self._base.runtime_id}"
+        self.runtime_version = f"candidate-config.v1:{digest}"
+        self.max_attempts = self._base.max_attempts
+        self.cost_budget = self._base.cost_budget
+
+    async def execute(self, request: AgentRequest) -> AgentResult:
+        instructions = (
+            f"Candidate type: {self.proposal.candidate_type}",
+            f"Candidate version: {self.proposal.version}",
+            f"Candidate summary: {self.proposal.summary}",
+            *(f"Candidate change: {item}" for item in self.proposal.changes),
+        )
+        result = await self._base.execute(
+            AgentRequest(
+                role=request.role,
+                text=request.text,
+                evidence=request.evidence,
+                deadline_at=request.deadline_at,
+                max_tokens=request.max_tokens,
+                instructions=(*request.instructions, *instructions),
+            )
+        )
+        return AgentResult(
+            role=result.role,
+            payload=result.payload,
+            runtime_id=self.runtime_id,
+            runtime_version=self.runtime_version,
+            latency_ms=result.latency_ms,
+            cost_usd=result.cost_usd,
+            usage=result.usage,
+            provider_id=result.provider_id,
+            model=result.model,
+            api_mode=result.api_mode,
+            schema_version=result.schema_version,
+        )
 
 
 class CandidateAgentRuntime:

@@ -7,6 +7,8 @@
 
 > 本文是 R2 的已接受执行规格。授权范围仅为 R2-00 至 R2-05 和退出门所需实现；不授权自动交易、公共插件市场、多用户、第二领域、远程高可用或任意社区插件接入。
 
+> 2026-08-29 事后验收说明：本阶段 `done (offline U2)` 只表示 Workbench、Evaluation、candidate seam 与 Promotion/Rollback 工程底座完成，不表示真实 DSH SDK、Web/Market tool loop 或正式主链主动补证已经完成。该缺口由 proposed [R2-R](R2_R_AGENTIC_RESEARCH_RUNTIME.md) 处理，未通过 owner gate 前不得回写为 R2 已交付能力。
+
 ## 0. 产品形态、可用阶段与停止条件
 
 Decision Hub 不是无限追加功能的 Agent 平台。每个阶段都必须有一个可交付的产品形态；阶段退出后先运行、观测和积累证据，不自动开启下一阶段。
@@ -15,7 +17,7 @@ Decision Hub 不是无限追加功能的 Agent 平台。每个阶段都必须有
 |---|---|---|---|
 | `U0` | R0 本地文本决策核心 | owner 手工提交文本，得到带 PIT、证据、Gate、Forecast 和后续 Evaluation 的决策支持 | 真实来源连续监听、预测准确率或盈利 |
 | `U1` | R1/R1-L 单 owner 试运行 | 在 owner 明确通过 Live Pilot Gate、来源/通知授权和本机 readiness 后，进行有限真实运行 | 长期稳定性、自动交易、统计显著超额收益 |
-| `U2` | R2 Decision Workbench v1 | 研究、运行、实验、资产、候选比较、人工 Promotion/Rollback 和经过审计的插件桥接形成闭环；这是首个成熟的个人产品形态 | 候选一定优于 baseline，或已经证明可规模化盈利 |
+| `U2` | R2 Decision Workbench v1 | 运行、实验、资产、候选比较、人工 Promotion/Rollback 和经过审计的插件桥接形成工程闭环；是治理/工作台产品形态，不代表主动研究 Agent 已实现 | 候选一定优于 baseline，或已经证明可规模化盈利 |
 | `U3` | R3 多领域/远程部署扩展 | 只有 R2 运行证据证明有真实需求时，才增加 A 股、美股、PPT 或远程高可用 | 默认需要微服务、公共插件市场或多用户 SaaS |
 
 本 R2 的停止条件是：`R2-00` 至 `R2-05` 退出门全部通过，owner 完成一次明确的 Stage Gate，并把系统转入观察期。观察期内只修复已证实的缺陷、记录 FailurePattern 和评测证据，不以“再加一个插件/页面/领域”为理由自动开启 R3。新范围必须另立 Stage Charter；R2 通过本身不等于预测效果已证明。

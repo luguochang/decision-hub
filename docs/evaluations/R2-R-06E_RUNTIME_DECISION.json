@@ -1,0 +1,96 @@
+{
+  "schema_version": "research-runtime-decision-package.v1",
+  "package_id": "r2-r-06e-20260830",
+  "generated_at": "2026-08-30T00:00:00Z",
+  "stage": "R2-R-06E",
+  "conclusion": "retain_baseline",
+  "promotion_eligible": false,
+  "active_pointer_changed": false,
+  "baseline": {
+    "runtime_id": "fixed-baseline",
+    "runtime_version": "fixed-baseline.v1",
+    "experiment_id": "r2-r-06c-20260830-repair-full-12case",
+    "sample_count": 12,
+    "completed_count": 12,
+    "failed_count": 0,
+    "hard_coverage_mean": 0.0,
+    "evidence_count": 0,
+    "unattested_evidence_count": 0,
+    "pit_violations": 0,
+    "horizon_distinct_count": 0,
+    "total_tool_calls": 0,
+    "p95_latency_ms": 121336,
+    "estimated_cost_usd": null
+  },
+  "candidate": {
+    "runtime_id": "dsh",
+    "runtime_version": "dsh-sdk-0.1.1rc1",
+    "profile_ref": "decision-research.v1:faf1b3115f7d339c",
+    "experiment_id": "r2-r-06c-20260830-repair-full-12case",
+    "sample_count": 12,
+    "completed_count": 9,
+    "failed_count": 3,
+    "hard_coverage_mean": 0.16666666666666666,
+    "evidence_count": 12,
+    "unattested_evidence_count": 1,
+    "pit_violations": 0,
+    "horizon_distinct_count": 8,
+    "total_tool_calls": 43,
+    "p95_latency_ms": 180177,
+    "estimated_cost_usd": null,
+    "failure_counts": {
+      "dsh_evidence_unattested": 1,
+      "dsh_session_incomplete": 1,
+      "provider_timeout": 1
+    }
+  },
+  "real_event": {
+    "event_id": "evt_3e8f70f7d39c4c6881a84e3e667c75b5",
+    "run_id": "run_27acb7c425914bc7a69060637ea1feb3",
+    "source_url": "https://www.federalreserve.gov/newsevents/speech/warsh20260828a.htm",
+    "runtime_id": "dsh",
+    "model": "gpt-5.5",
+    "provider": "deepseek-official",
+    "status": "degraded",
+    "gate_status": "reject",
+    "artifact_id": "art_651db94418d74d00ac3c79f4b73279bf",
+    "latency_ms": 100646,
+    "tool_calls": 1,
+    "evidence_count": 0,
+    "failure_code": "dsh_tool_failed",
+    "underlying_capability_failure": "research_capability_failed",
+    "stop_code": "critical_data_unavailable",
+    "active_pointer_changed": false
+  },
+  "blocking_checks": {
+    "pit_violations_zero": true,
+    "unattested_evidence_zero": false,
+    "candidate_hard_coverage_not_lower_than_baseline": true,
+    "candidate_horizon_distinctness_complete": false,
+    "real_event_trace_and_result_replayable": true,
+    "real_event_evidence_sufficient": false,
+    "cost_known_and_within_budget": false,
+    "owner_usefulness_accepted": false
+  },
+  "owner_usefulness": {
+    "status": "pending",
+    "form_version": "r2-r-06d-owner-usefulness.v1",
+    "questions": [
+      "相较手工查证，是否减少了查证时间？（是/否/无法判断）",
+      "报告是否能解释证据、反方和停止原因？（是/否/部分）",
+      "在当前失败和延迟下，是否值得继续作为 candidate？（是/否）",
+      "最值得保留或修正的一个能力是什么？"
+    ]
+  },
+  "next_minimum_candidate": {
+    "scope": "search reliability and error provenance only",
+    "must_preserve": [
+      "ResearchHarnessRuntime adapter boundary",
+      "DSH evidence attestation",
+      "deny-by-default capability gateway",
+      "Fixed active pointer",
+      "existing Run/Evidence/Snapshot/Artifact ledger"
+    ],
+    "requires_new_owner_gate": true
+  }
+}

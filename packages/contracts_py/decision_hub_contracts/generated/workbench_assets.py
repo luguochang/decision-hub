@@ -176,7 +176,7 @@ class ExperimentManifest(BaseModel):
     model: str | None
     schema_version: Annotated[str, Field(min_length=1)]
     random_seed: Annotated[int | None, Field(ge=0)]
-    randomness_policy: Literal["deterministic", "seeded"]
+    randomness_policy: Literal["deterministic", "seeded", "provider_default"]
     deadline_seconds: Annotated[int, Field(ge=1, le=3600)]
     max_cost_usd: Annotated[float | None, Field(ge=0.0)]
 

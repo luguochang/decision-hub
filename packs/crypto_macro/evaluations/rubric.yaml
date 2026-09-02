@@ -1,0 +1,43 @@
+schema_version: crypto-macro-research-rubric.v1
+required_checks:
+  - check_id: pit_integrity
+    category: evidence
+    failure_is_blocking: true
+  - check_id: hard_evidence_coverage
+    category: evidence
+    failure_is_blocking: true
+  - check_id: citation_authority_and_precision
+    category: evidence
+    failure_is_blocking: true
+  - check_id: gap_to_tool_continuation
+    category: agent_trajectory
+    failure_is_blocking: true
+  - check_id: bounded_stop_consistency
+    category: agent_trajectory
+    failure_is_blocking: true
+  - check_id: causal_chain_completeness
+    category: decision_quality
+    failure_is_blocking: false
+  - check_id: counter_thesis_quality
+    category: decision_quality
+    failure_is_blocking: false
+  - check_id: horizon_distinctness
+    category: decision_quality
+    failure_is_blocking: true
+  - check_id: probability_provenance
+    category: decision_quality
+    failure_is_blocking: true
+prospective_metrics:
+  - brier_score
+  - direction_accuracy
+  - mfe
+  - mae
+  - net_return_after_cost
+operational_metrics:
+  - latency_ms
+  - tool_calls
+  - subagents
+  - tokens
+  - estimated_cost_usd
+  - recovery_count
+promotion_rule: Owner review is mandatory; replay quality cannot prove profitability.

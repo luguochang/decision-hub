@@ -13,6 +13,30 @@ from jsonschema import Draft202012Validator
 ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "contracts" / "generated-manifest.yaml"
 PYTHON_GENERATED = {
+    ROOT / "contracts" / "schemas" / "dsh_host_bridge.schema.yaml": (
+        ROOT
+        / "packages"
+        / "contracts_py"
+        / "decision_hub_contracts"
+        / "generated"
+        / "dsh_host_bridge.py"
+    ),
+    ROOT / "contracts" / "schemas" / "agentic_research.schema.yaml": (
+        ROOT
+        / "packages"
+        / "contracts_py"
+        / "decision_hub_contracts"
+        / "generated"
+        / "agentic_research.py"
+    ),
+    ROOT / "contracts" / "schemas" / "evolution_job.schema.yaml": (
+        ROOT
+        / "packages"
+        / "contracts_py"
+        / "decision_hub_contracts"
+        / "generated"
+        / "evolution_job.py"
+    ),
     ROOT / "contracts" / "schemas" / "workbench_assets.schema.yaml": (
         ROOT
         / "packages"

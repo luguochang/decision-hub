@@ -13,6 +13,20 @@ def map_runtime_error(
     """Map provider/harness exceptions into the bounded product taxonomy."""
 
     text = str(error).lower()
+    existing_code = getattr(error, "error_code", None)
+    if isinstance(existing_code, str) and existing_code:
+        return AgentExecutionError(
+            existing_code,
+            str(error),
+            retryable=bool(getattr(error, "retryable", False)),
+            provider_id=provider_id,
+            model=model,
+            origin=str(getattr(error, "origin", "provider")),
+            cause_code=getattr(error, "cause_code", None),
+            capability_id=getattr(error, "capability_id", None),
+            tool_call_id=getattr(error, "tool_call_id", None),
+            deadline_ms=getattr(error, "deadline_ms", None),
+        )
     status = getattr(error, "status_code", None)
     response = getattr(error, "response", None)
     if not isinstance(status, int):
@@ -25,6 +39,8 @@ def map_runtime_error(
             retryable=True,
             provider_id=provider_id,
             model=model,
+            origin="provider",
+            cause_code="rate_limited",
         )
     if status in {408, 504} or "timed out" in text or "timeout" in text:
         return AgentExecutionError(
@@ -33,6 +49,8 @@ def map_runtime_error(
             retryable=True,
             provider_id=provider_id,
             model=model,
+            origin="transport",
+            cause_code="timeout",
         )
     if isinstance(status, int) and status >= 500:
         return AgentExecutionError(
@@ -41,10 +59,14 @@ def map_runtime_error(
             retryable=True,
             provider_id=provider_id,
             model=model,
+            origin="provider",
+            cause_code="server_error",
         )
     return AgentExecutionError(
         fallback_code,
         "runtime failed",
         provider_id=provider_id,
         model=model,
+        origin="provider",
+        cause_code=type(error).__name__.lower(),
     )

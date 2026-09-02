@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { sourceHealthDisplay } from '../App'
-import { fallbackSummary } from './client'
-import { productHealthSchema, runInspectorSchema } from './schemas'
+import { apiUrl } from './client'
+import { operationsOverviewSchema, productHealthSchema, runInspectorSchema } from './schemas'
 
 const inspectorFixture = {
   run: { run_id: 'run-1', event_id: 'event-1', status: 'completed', strategy_version: 'baseline.v1', runtime_version: 'langgraph.v1', snapshot_id: 'snapshot-1', artifact_id: null, created_at: '2026-08-27T01:00:00Z', updated_at: '2026-08-27T01:00:01Z', finished_at: '2026-08-27T01:00:01Z', latency_ms: 1000, cost_usd: null, error_code: null, headline: null, gate_status: null },
@@ -14,10 +14,25 @@ const inspectorFixture = {
 }
 
 describe('Decision Desk API fixtures', () => {
-  it('keeps the UI contract focused on product views', () => {
-    expect(fallbackSummary.inbox.latest).toHaveLength(2)
-    expect(fallbackSummary.inbox.latest[0].gate_status).toBe('publish')
-    expect(fallbackSummary.active_pack).toBe('crypto_macro.v1')
+  it('keeps same-origin API paths by default and supports an isolated target', () => {
+    expect(apiUrl('/v1/health', '')).toBe('/v1/health')
+    expect(apiUrl('v1/health', 'http://127.0.0.1:8030/')).toBe('http://127.0.0.1:8030/v1/health')
+    expect(apiUrl('https://example.test/v1/health', 'http://127.0.0.1:8030')).toBe('https://example.test/v1/health')
+  })
+
+  it('accepts nullable offline heartbeat without inventing an instance', () => {
+    const operations = operationsOverviewSchema.parse({
+      schema_version: 'operations-overview.v1',
+      checked_at: '2026-08-29T01:00:00Z',
+      services: [{ service_id: 'hub-evolution-worker', role: 'evolution_worker', instance_id: null, version: null, mode: null, status: 'offline', interval_seconds: null, started_at: null, heartbeat_at: null, last_error_code: null }],
+      runtime: { runtime_id: 'fake', runtime_version: 'fake.v1', mode: 'fake', provider_configured: false, live_canary_status: 'not_run', model: null, api_mode: null },
+      sources: [], capabilities: [],
+      jobs: { queued: 0, running: 0, retry_wait: 0, pending_owner_review: 0, completed: 0, failed: 0, cancelled: 0 },
+      recent_jobs: [],
+    })
+    expect(operations.services[0].status).toBe('offline')
+    expect(operations.services[0].instance_id).toBeNull()
+    expect(operations.runtime.provider_configured).toBe(false)
   })
 
   it('turns a degraded source into a compact health summary', () => {

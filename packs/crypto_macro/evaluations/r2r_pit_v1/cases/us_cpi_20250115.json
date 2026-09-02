@@ -1,0 +1,261 @@
+{
+  "archived_capability_fixtures": [
+    {
+      "capability_id": "replay.research",
+      "evidence_candidates": [
+        {
+          "authority": "official",
+          "conflict_group": null,
+          "content_hash": "186a12eda30b20db6a2e4ef407cfe3c7cdd53a03f58718584e34a6067f1c1a3f",
+          "evidence_id": "archive_186a12eda30b20db6a2e4ef407cfe3c7",
+          "excerpt": "The Bureau of Labor Statistics released December 2024 Consumer Price Index data on January 15, 2025.",
+          "freshness_status": "unknown",
+          "kind": "official",
+          "observed_at": "2025-01-15T13:30:01Z",
+          "published_at": "2025-01-15T13:30:00Z",
+          "quality": "candidate",
+          "received_at": "2025-01-15T13:30:02Z",
+          "requirement_id": "event_identity",
+          "research_session_id": "archive:us_cpi_20250115",
+          "round": 1,
+          "source_id": "bls.gov",
+          "source_url": "https://www.bls.gov/news.release/archives/cpi_01152025.htm",
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:us_cpi_20250115:event_identity"
+        }
+      ],
+      "query_aliases": [
+        "us_cpi_20250115:event_identity",
+        "Verify event identity for us_cpi_20250115"
+      ],
+      "requirement_id": "event_identity"
+    },
+    {
+      "capability_id": "replay.research",
+      "evidence_candidates": [
+        {
+          "authority": "official",
+          "conflict_group": null,
+          "content_hash": "aea256939b84353bc236380322e02cd28df97b3aa33eb7409cb473038432143e",
+          "evidence_id": "archive_aea256939b84353bc236380322e02cd2",
+          "excerpt": "The all-items index increased 0.4 percent in December and 2.9 percent over the twelve months ending December.",
+          "freshness_status": "unknown",
+          "kind": "official",
+          "observed_at": "2025-01-15T13:30:01Z",
+          "published_at": "2025-01-15T13:30:00Z",
+          "quality": "candidate",
+          "received_at": "2025-01-15T13:30:02Z",
+          "requirement_id": "policy_or_data_delta",
+          "research_session_id": "archive:us_cpi_20250115",
+          "round": 1,
+          "source_id": "bls.gov",
+          "source_url": "https://www.bls.gov/news.release/archives/cpi_01152025.htm",
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:us_cpi_20250115:policy_or_data_delta"
+        }
+      ],
+      "query_aliases": [
+        "us_cpi_20250115:policy_or_data_delta",
+        "Verify policy or data delta for us_cpi_20250115"
+      ],
+      "requirement_id": "policy_or_data_delta"
+    }
+  ],
+  "case_id": "us_cpi_20250115",
+  "cutoff_at": "2025-01-15T13:35:00Z",
+  "event_family": "inflation_release",
+  "evidence_requirements": [
+    {
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "authority_floor": "official",
+      "confidence_cap": 0.45,
+      "description": "Identify the primary event, speaker or document, event time and revision status.",
+      "freshness_seconds": 604800,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "requirement_id": "event_identity",
+      "source_priority": [
+        "official",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "authority_floor": "official",
+      "confidence_cap": 0.5,
+      "description": "Establish what changed relative to prior wording, prior value or consensus.",
+      "freshness_seconds": 86400,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "requirement_id": "policy_or_data_delta",
+      "source_priority": [
+        "official",
+        "audited_aggregator",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.55,
+      "description": "Observe policy expectations, rates repricing or credible positioning evidence.",
+      "freshness_seconds": 900,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "web.search"
+      ],
+      "requirement_id": "expectation_pricing",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.55,
+      "description": "Observe the rates and USD transmission path relevant to the event.",
+      "freshness_seconds": 300,
+      "importance": "hard",
+      "minimum_independent_sources": 2,
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "official.macro",
+        "web.search"
+      ],
+      "requirement_id": "macro_transmission",
+      "source_priority": [
+        "official",
+        "exchange",
+        "audited_aggregator"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "verified_web",
+      "confidence_cap": 0.65,
+      "description": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation.",
+      "freshness_seconds": 300,
+      "importance": "soft",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "web.search"
+      ],
+      "requirement_id": "cross_asset_confirmation",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.5,
+      "description": "Observe BTC spot reaction, volume and the event-time comparison window.",
+      "freshness_seconds": 60,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "requirement_id": "crypto_spot_confirmation",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ]
+    },
+    {
+      "allowed_fallbacks": [],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.5,
+      "description": "Observe funding, open interest, basis and available liquidation or flow evidence.",
+      "freshness_seconds": 60,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "requirement_id": "derivatives_crowding",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "verified_web",
+      "confidence_cap": 0.7,
+      "description": "Build the strongest evidence-backed alternative transmission chain.",
+      "freshness_seconds": 86400,
+      "importance": "soft",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "official.macro",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "requirement_id": "counter_thesis",
+      "source_priority": [
+        "official",
+        "exchange",
+        "verified_web"
+      ]
+    }
+  ],
+  "expected_hard_requirement_ids": [
+    "event_identity",
+    "policy_or_data_delta",
+    "expectation_pricing",
+    "macro_transmission",
+    "crypto_spot_confirmation",
+    "derivatives_crowding"
+  ],
+  "input_text": "US CPI rose 0.4 percent in December 2024 and 2.9 percent over twelve months.",
+  "outcome_available_at": null,
+  "outcome_labels": [],
+  "schema_version": "research-evaluation-case.v1",
+  "source_refs": [
+    "https://www.bls.gov/news.release/archives/cpi_01152025.htm"
+  ],
+  "trigger_evidence": {
+    "authority": "unverified",
+    "content_hash": "b724a68953ded604054f946e76fb172d70e353a087a4d8e4181ee0ea253de3b6",
+    "evidence_id": "trigger_us_cpi_20250115",
+    "excerpt": "US CPI rose 0.4 percent in December 2024 and 2.9 percent over twelve months.",
+    "kind": "transcript",
+    "observed_at": "2025-01-15T13:30:00Z",
+    "published_at": "2025-01-15T13:30:00Z",
+    "received_at": "2025-01-15T13:30:02Z",
+    "source_id": "evaluation-catalog",
+    "source_url": "https://www.bls.gov/news.release/archives/cpi_01152025.htm"
+  }
+}

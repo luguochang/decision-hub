@@ -1,0 +1,261 @@
+{
+  "archived_capability_fixtures": [
+    {
+      "capability_id": "replay.research",
+      "evidence_candidates": [
+        {
+          "authority": "official",
+          "conflict_group": null,
+          "content_hash": "7bf88eb071723c45f1f928d5f170d0ab00cd7f58f1b00261aaa3aea6b9821b45",
+          "evidence_id": "archive_7bf88eb071723c45f1f928d5f170d0ab",
+          "excerpt": "Federal Reserve Chair Jerome Powell delivered remarks on the economic outlook at Stanford on April 3, 2024.",
+          "freshness_status": "unknown",
+          "kind": "official",
+          "observed_at": "2024-04-03T16:10:01Z",
+          "published_at": "2024-04-03T16:10:00Z",
+          "quality": "candidate",
+          "received_at": "2024-04-03T16:10:02Z",
+          "requirement_id": "event_identity",
+          "research_session_id": "archive:powell_stanford_20240403",
+          "round": 1,
+          "source_id": "federalreserve.gov",
+          "source_url": "https://www.federalreserve.gov/newsevents/speech/powell20240403a.htm",
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:powell_stanford_20240403:event_identity"
+        }
+      ],
+      "query_aliases": [
+        "powell_stanford_20240403:event_identity",
+        "Verify event identity for powell_stanford_20240403"
+      ],
+      "requirement_id": "event_identity"
+    },
+    {
+      "capability_id": "replay.research",
+      "evidence_candidates": [
+        {
+          "authority": "official",
+          "conflict_group": null,
+          "content_hash": "c430183df4de6ebc53414a73416a805b6dba95dac53d68f59401cd0d049f86e0",
+          "evidence_id": "archive_c430183df4de6ebc53414a73416a805b",
+          "excerpt": "Powell said it was too soon to say whether recent inflation readings represented more than a bump and emphasized the need for greater confidence before reducing the policy rate.",
+          "freshness_status": "unknown",
+          "kind": "official",
+          "observed_at": "2024-04-03T16:10:01Z",
+          "published_at": "2024-04-03T16:10:00Z",
+          "quality": "candidate",
+          "received_at": "2024-04-03T16:10:02Z",
+          "requirement_id": "policy_or_data_delta",
+          "research_session_id": "archive:powell_stanford_20240403",
+          "round": 1,
+          "source_id": "federalreserve.gov",
+          "source_url": "https://www.federalreserve.gov/newsevents/speech/powell20240403a.htm",
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:powell_stanford_20240403:policy_or_data_delta"
+        }
+      ],
+      "query_aliases": [
+        "powell_stanford_20240403:policy_or_data_delta",
+        "Verify policy or data delta for powell_stanford_20240403"
+      ],
+      "requirement_id": "policy_or_data_delta"
+    }
+  ],
+  "case_id": "powell_stanford_20240403",
+  "cutoff_at": "2024-04-03T16:15:00Z",
+  "event_family": "central_bank_speech",
+  "evidence_requirements": [
+    {
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "authority_floor": "official",
+      "confidence_cap": 0.45,
+      "description": "Identify the primary event, speaker or document, event time and revision status.",
+      "freshness_seconds": 604800,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "requirement_id": "event_identity",
+      "source_priority": [
+        "official",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "authority_floor": "official",
+      "confidence_cap": 0.5,
+      "description": "Establish what changed relative to prior wording, prior value or consensus.",
+      "freshness_seconds": 86400,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "requirement_id": "policy_or_data_delta",
+      "source_priority": [
+        "official",
+        "audited_aggregator",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.55,
+      "description": "Observe policy expectations, rates repricing or credible positioning evidence.",
+      "freshness_seconds": 900,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "web.search"
+      ],
+      "requirement_id": "expectation_pricing",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.55,
+      "description": "Observe the rates and USD transmission path relevant to the event.",
+      "freshness_seconds": 300,
+      "importance": "hard",
+      "minimum_independent_sources": 2,
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "official.macro",
+        "web.search"
+      ],
+      "requirement_id": "macro_transmission",
+      "source_priority": [
+        "official",
+        "exchange",
+        "audited_aggregator"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "verified_web",
+      "confidence_cap": 0.65,
+      "description": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation.",
+      "freshness_seconds": 300,
+      "importance": "soft",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "web.search"
+      ],
+      "requirement_id": "cross_asset_confirmation",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.5,
+      "description": "Observe BTC spot reaction, volume and the event-time comparison window.",
+      "freshness_seconds": 60,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "requirement_id": "crypto_spot_confirmation",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ]
+    },
+    {
+      "allowed_fallbacks": [],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.5,
+      "description": "Observe funding, open interest, basis and available liquidation or flow evidence.",
+      "freshness_seconds": 60,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "requirement_id": "derivatives_crowding",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "verified_web",
+      "confidence_cap": 0.7,
+      "description": "Build the strongest evidence-backed alternative transmission chain.",
+      "freshness_seconds": 86400,
+      "importance": "soft",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "official.macro",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "requirement_id": "counter_thesis",
+      "source_priority": [
+        "official",
+        "exchange",
+        "verified_web"
+      ]
+    }
+  ],
+  "expected_hard_requirement_ids": [
+    "event_identity",
+    "policy_or_data_delta",
+    "expectation_pricing",
+    "macro_transmission",
+    "crypto_spot_confirmation",
+    "derivatives_crowding"
+  ],
+  "input_text": "Chair Powell said recent inflation readings were higher than expected and that policy decisions would remain data dependent.",
+  "outcome_available_at": null,
+  "outcome_labels": [],
+  "schema_version": "research-evaluation-case.v1",
+  "source_refs": [
+    "https://www.federalreserve.gov/newsevents/speech/powell20240403a.htm"
+  ],
+  "trigger_evidence": {
+    "authority": "unverified",
+    "content_hash": "99fc30960f4bf6fac0f2ee29b32c5a6e117a2939fd2cb52051f41746cf5c8f65",
+    "evidence_id": "trigger_powell_stanford_20240403",
+    "excerpt": "Chair Powell said recent inflation readings were higher than expected and that policy decisions would remain data dependent.",
+    "kind": "transcript",
+    "observed_at": "2024-04-03T16:10:00Z",
+    "published_at": "2024-04-03T16:10:00Z",
+    "received_at": "2024-04-03T16:10:02Z",
+    "source_id": "evaluation-catalog",
+    "source_url": "https://www.federalreserve.gov/newsevents/speech/powell20240403a.htm"
+  }
+}

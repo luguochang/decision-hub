@@ -133,6 +133,8 @@ BDD 场景必须覆盖：正常路径、重复请求、拒绝/降级、超时/Pr
 
 本项目的薄层仅负责领域 schema、版本、权限、PIT、Gate、业务状态、评测和 Query/View。若框架能力不足，先写证据和 ADR；不得在 Provider、Graph node 或 API route 中复制一套协议、重试、trace 或事务机制。
 
+R2-R 决策边界：2026-08-29 的真实事件验收已证明“单角色 `create_agent` seam 存在”不等于完整研究 Harness 已交付。Owner 已接受 [ADR-0008](../decisions/ADR-0008-agentic-research-runtime.md)：在更高层 `ResearchHarnessRuntime` 复用 DSH 的 tool/subagent/session loop，LangGraph 只管理产品生命周期。本节的原则解释为“复用已选择 Harness 的 loop，禁止自写”，而不是永远锁定 LangChain 为唯一 Harness；candidate 仍需到 R2-R-06 才能决定是否 promotion。
+
 ## 7. 上下文长度与目的漂移控制
 
 ### 7.1 两层上下文
@@ -141,6 +143,8 @@ BDD 场景必须覆盖：正常路径、重复请求、拒绝/降级、超时/Pr
 
 1. 短上下文：`INDEX.md`、`PROJECT_CHARTER.md`、当前 Stage Charter、任务卡。
 2. 专项上下文：受影响模块 README、相关 canonical schema、直接依赖代码和测试。
+
+长任务或新 Agent 接管时，先读 `docs/context/CURRENT_STATE.md`、`CURRENT_DECISIONS.md` 和 `HANDOFF.md`。这些文件只负责导航和当前投影；若与 ADR/schema/Stage Charter 冲突，以后者为准并修正投影，不能让 `docs/context/` 成为第二套架构真源。
 
 完整总架构和历史研究只在需要解释冲突或做架构决策时读取，不默认复制到每次任务提示中。
 
@@ -203,6 +207,9 @@ Codex 在以下情况必须停止实现并报告，而不是自动扩展：
 | 运行状态或完成度 | `docs/IMPLEMENTATION_STATUS.md`、`ROADMAP.md` | 固定验证命令 |
 | 临时探索和实验 | `tmp/` 或 `research/` | 提炼后删除/归档 |
 | 每个可回滚小任务 | 一个独立 Git commit | commit message + tests |
+| 长任务状态/当前决策投影 | `docs/context/CURRENT_STATE.md`、`CURRENT_DECISIONS.md` | 引用 ADR/Stage/schema；不复制决策正文 |
+
+平台、领域、阶段和决策文档必须分开：跨领域所有权进入 `docs/platform/`，领域方法进入 `docs/domains/<domain>/`，阶段执行进入 `docs/stages/`，不可逆决定进入 `docs/decisions/`。禁止在旧总架构末尾持续追加聊天记录或每日进度。
 
 文档更新和代码更新必须在同一个任务提交中完成；不能先改行为，之后靠聊天“以后补文档”。
 

@@ -1,0 +1,261 @@
+{
+  "archived_capability_fixtures": [
+    {
+      "capability_id": "replay.research",
+      "evidence_candidates": [
+        {
+          "authority": "official",
+          "conflict_group": null,
+          "content_hash": "af94dde6cf8d1c0633c46358617127d61ec474769a129eccd5b5b0144d229e15",
+          "evidence_id": "archive_af94dde6cf8d1c0633c46358617127d6",
+          "excerpt": "The Federal Reserve published its September 18, 2024 monetary policy decision.",
+          "freshness_status": "unknown",
+          "kind": "official",
+          "observed_at": "2024-09-18T18:00:01Z",
+          "published_at": "2024-09-18T18:00:00Z",
+          "quality": "candidate",
+          "received_at": "2024-09-18T18:00:02Z",
+          "requirement_id": "event_identity",
+          "research_session_id": "archive:fomc_cut_50bp_20240918",
+          "round": 1,
+          "source_id": "federalreserve.gov",
+          "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20240918a.htm",
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:fomc_cut_50bp_20240918:event_identity"
+        }
+      ],
+      "query_aliases": [
+        "fomc_cut_50bp_20240918:event_identity",
+        "Verify event identity for fomc_cut_50bp_20240918"
+      ],
+      "requirement_id": "event_identity"
+    },
+    {
+      "capability_id": "replay.research",
+      "evidence_candidates": [
+        {
+          "authority": "official",
+          "conflict_group": null,
+          "content_hash": "b799af99928b328f97f99ffeb469b0034ae5561e3e36405f441cc9b5dfb4b73f",
+          "evidence_id": "archive_b799af99928b328f97f99ffeb469b003",
+          "excerpt": "The Committee lowered the target range for the federal funds rate by one-half percentage point to 4.75 to 5 percent.",
+          "freshness_status": "unknown",
+          "kind": "official",
+          "observed_at": "2024-09-18T18:00:01Z",
+          "published_at": "2024-09-18T18:00:00Z",
+          "quality": "candidate",
+          "received_at": "2024-09-18T18:00:02Z",
+          "requirement_id": "policy_or_data_delta",
+          "research_session_id": "archive:fomc_cut_50bp_20240918",
+          "round": 1,
+          "source_id": "federalreserve.gov",
+          "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20240918a.htm",
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:fomc_cut_50bp_20240918:policy_or_data_delta"
+        }
+      ],
+      "query_aliases": [
+        "fomc_cut_50bp_20240918:policy_or_data_delta",
+        "Verify policy or data delta for fomc_cut_50bp_20240918"
+      ],
+      "requirement_id": "policy_or_data_delta"
+    }
+  ],
+  "case_id": "fomc_cut_50bp_20240918",
+  "cutoff_at": "2024-09-18T18:05:00Z",
+  "event_family": "monetary_policy_decision",
+  "evidence_requirements": [
+    {
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "authority_floor": "official",
+      "confidence_cap": 0.45,
+      "description": "Identify the primary event, speaker or document, event time and revision status.",
+      "freshness_seconds": 604800,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "requirement_id": "event_identity",
+      "source_priority": [
+        "official",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "authority_floor": "official",
+      "confidence_cap": 0.5,
+      "description": "Establish what changed relative to prior wording, prior value or consensus.",
+      "freshness_seconds": 86400,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "requirement_id": "policy_or_data_delta",
+      "source_priority": [
+        "official",
+        "audited_aggregator",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.55,
+      "description": "Observe policy expectations, rates repricing or credible positioning evidence.",
+      "freshness_seconds": 900,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "web.search"
+      ],
+      "requirement_id": "expectation_pricing",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.55,
+      "description": "Observe the rates and USD transmission path relevant to the event.",
+      "freshness_seconds": 300,
+      "importance": "hard",
+      "minimum_independent_sources": 2,
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "official.macro",
+        "web.search"
+      ],
+      "requirement_id": "macro_transmission",
+      "source_priority": [
+        "official",
+        "exchange",
+        "audited_aggregator"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "verified_web",
+      "confidence_cap": 0.65,
+      "description": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation.",
+      "freshness_seconds": 300,
+      "importance": "soft",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "web.search"
+      ],
+      "requirement_id": "cross_asset_confirmation",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ]
+    },
+    {
+      "allowed_fallbacks": [],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.5,
+      "description": "Observe BTC spot reaction, volume and the event-time comparison window.",
+      "freshness_seconds": 60,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "requirement_id": "crypto_spot_confirmation",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ]
+    },
+    {
+      "allowed_fallbacks": [],
+      "authority_floor": "exchange",
+      "confidence_cap": 0.5,
+      "description": "Observe funding, open interest, basis and available liquidation or flow evidence.",
+      "freshness_seconds": 60,
+      "importance": "hard",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "requirement_id": "derivatives_crowding",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ]
+    },
+    {
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "authority_floor": "verified_web",
+      "confidence_cap": 0.7,
+      "description": "Build the strongest evidence-backed alternative transmission chain.",
+      "freshness_seconds": 86400,
+      "importance": "soft",
+      "minimum_independent_sources": 1,
+      "preferred_capabilities": [
+        "official.macro",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "requirement_id": "counter_thesis",
+      "source_priority": [
+        "official",
+        "exchange",
+        "verified_web"
+      ]
+    }
+  ],
+  "expected_hard_requirement_ids": [
+    "event_identity",
+    "policy_or_data_delta",
+    "expectation_pricing",
+    "macro_transmission",
+    "crypto_spot_confirmation",
+    "derivatives_crowding"
+  ],
+  "input_text": "The FOMC lowered the federal funds target range by 50 basis points to 4.75-5.00 percent.",
+  "outcome_available_at": null,
+  "outcome_labels": [],
+  "schema_version": "research-evaluation-case.v1",
+  "source_refs": [
+    "https://www.federalreserve.gov/newsevents/pressreleases/monetary20240918a.htm"
+  ],
+  "trigger_evidence": {
+    "authority": "unverified",
+    "content_hash": "024ee9fa9d1cf2c6d38e88adf554c8906df6b1ab16d0abe097b3ab92acd6e18e",
+    "evidence_id": "trigger_fomc_cut_50bp_20240918",
+    "excerpt": "The FOMC lowered the federal funds target range by 50 basis points to 4.75-5.00 percent.",
+    "kind": "transcript",
+    "observed_at": "2024-09-18T18:00:00Z",
+    "published_at": "2024-09-18T18:00:00Z",
+    "received_at": "2024-09-18T18:00:02Z",
+    "source_id": "evaluation-catalog",
+    "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20240918a.htm"
+  }
+}

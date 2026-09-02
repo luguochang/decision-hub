@@ -1,9 +1,11 @@
 # Decision Hub 产品架构基线 V1
 
 > **状态：R0 核心已完成；owner 已确认 OD-01～OD-16 推荐默认。本文件仍是架构、契约和边界的唯一基线。**
-> **日期：2026-08-26（Asia/Shanghai）**  
-> **适用对象：单 owner 的事件驱动市场决策产品；首个场景为宏观事件对 BTC 与国际黄金的影响。**  
+> **日期：2026-08-26（Asia/Shanghai）**
+> **适用对象：单 owner 的事件驱动市场决策产品；首个场景为宏观事件对 BTC 与国际黄金的影响。**
 > **实施规则：所有 R0-R3 都在同一架构、同一领域账本和同一公开契约上增加永久能力，不做“先做一套、后搬家”的阶段迁移。R0 文本核心已通过离线验收；ASR/音频只通过来源适配边界接入。**
+
+> **2026-08-30 实施状态：R2-R 已按 [R2-R Stage Charter](docs/stages/R2_R_AGENTIC_RESEARCH_RUNTIME.md) 和 [ADR-0008](docs/decisions/ADR-0008-agentic-research-runtime.md) 完成 candidate path。DSH `ResearchHarnessRuntime`、主动补证、双 Snapshot、durable worker、可观测前端和 R2-R-06E 价值验收均已落地；Runtime 决策为 `retain_baseline / pending_owner_review`，Fixed 仍是 active，DSH 不得自动 Promotion。**
 
 ## 1. 先定义产品，而不是先定义 Workflow 或 Agent
 

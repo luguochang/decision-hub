@@ -1,0 +1,18 @@
+{
+  "schema_version": "decision-hub.dsh-upstream-lock.v1",
+  "repository": "https://github.com/deepseek-ai/deepseek-harness",
+  "commit": "0a53fb55bea101816fa226bb964ae2bed71c343b",
+  "source_version": "0.1.2-alpha.2",
+  "archive_url": "https://codeload.github.com/deepseek-ai/deepseek-harness/tar.gz/0a53fb55bea101816fa226bb964ae2bed71c343b",
+  "archive_sha256": "935574f69c8bb10b697cf8abe8c0449dab783e9f73dc3f224629458b6f65b980",
+  "license": "MIT",
+  "node": "^22.19.0 || >=24.0.0",
+  "pnpm": "11.7.0",
+  "packages": {
+    "@deepseek-ai/dsh-root": "0.1.2-alpha.2",
+    "@deepseek-ai/dsh-web-app": "0.1.2-alpha.2",
+    "@deepseek-ai/dsh-api-session-controller": "0.1.2-alpha.2",
+    "@deepseek-ai/dsh-host-webserver": "0.1.2-alpha.2",
+    "@deepseek-ai/dsh-client-modules": "0.1.2-alpha.2"
+  }
+}

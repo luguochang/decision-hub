@@ -9,9 +9,11 @@ Decision Hub 持续把有时间边界的文本和事件证据，转换为可证�
 
 ## 当前大阶段
 
-**R2-DECISION-WORKBENCH-V1（R2-00 至 R2-05 离线 U2 工程退出门已完成；观察期）**
+**PRODUCT-CLOSEOUT-01 DSH Native Trader Pilot（implementation in progress）**
 
-R0/R1/R1-L 离线代码门和 [R2 Decision Workbench 与自主进化 Stage Charter](../stages/R2_DECISION_WORKBENCH_EVOLUTION.md) 的 R2-00 至 R2-05 离线 U2 工程退出门已完成。当前只运行、观测、记录 FailurePattern 和补充真实评测证据；不自动开始 R3。Live Pilot、真实 DSH/Pi/Provider、外部通知和生产 shadow 仍需独立授权。本页只保留稳定的产品目的、不变量和当前阶段锚点。
+R0/R1/R2/R2-L 工程底座退出门已经完成。Owner 已接受 [R2-R Stage Charter](../stages/R2_R_AGENTIC_RESEARCH_RUNTIME.md) 与 [ADR-0008](../decisions/ADR-0008-agentic-research-runtime.md)，并授权 R2-R-00 至 R2-R-06；R2-R-00 至 R2-R-06E 已完成，Runtime 决策为 `retain_baseline / pending_owner_review`。Fixed 继续 active，DSH 保持 candidate/shadow。R2-R-07 的 G1-A/B/C/D 与 G2-A/B 已完成离线实现，G2-C live canary 与 G2-D 事实充分度验收仍需独立确认，不进入 R3。所有更长期工作以[产品收口与后续总计划](../product/PRODUCT_COMPLETION_AND_FUTURE_PLAN.md)的 G1-G6 为准，不再按临时问题无限扩展。
+
+2026-08-30 产品失败复盘后，产品方向按已接受的 [ADR-0012 DSH-first 产品重新收口与实时研究闭环](../decisions/ADR-0012-dsh-first-product-rebaseline.md) 和 [ADR-0013 DSH Web 原生插件集成](../decisions/ADR-0013-dsh-web-native-plugin-upstream-integration.md) 收口。DSH-NATIVE-CORE 的官方 Web/Host/Client/耐久桥接工程门已完成；当前唯一执行阶段是 [PRODUCT-CLOSEOUT-01](../stages/PRODUCT_CLOSEOUT_01_DSH_NATIVE_TRADER_PILOT.md)，按 [产品执行总方案](../product/PRODUCT_EXECUTION_MASTER_PLAN.md) 收口 C1-C7 的单 owner Trader Pilot。真实 Search/Official/Market、G3 价值观察、active Promotion、ASR/PPT/第二领域仍需独立 Gate。Fixed 保持 active、DSH candidate/shadow、Replay 诊断态。工程 `done` 不等于 `product_ready`。
 
 最近完成的总目标是 [R1 Realtime Event Engine](../stages/R1_REALTIME_EVENT_ENGINE.md)：来源文本、市场事实和已提交 outbox 已复用 R0 主链，并未创建第二个 Agent runtime、账本或 Gate。它证明离线工程闭环，不证明真实网络稳定性、预测准确率或盈利能力。
 
@@ -41,7 +43,7 @@ R0/R1/R1-L 离线代码门和 [R2 Decision Workbench 与自主进化 Stage Chart
 
 - 不做音频捕获、ASR 推理、OCR、自动交易或直播自动执行；R1 只接收已经转写的文本。
 - 不把未经授权的网页抓取、搜索摘要或模型总结作为唯一 canonical source。
-- 不接入 DSH/Pi 生产主链，不 clone DSH，不创建第二个业务账本。
+- R2-R-06 通过前不把 DSH candidate 提升为正式 active runtime；不 clone DSH，不创建第二个业务账本。
 - 不做自动交易、自动晋级、在线修改 Gate 或用户系统。
 - 不因为 Provider 不兼容而重写 LangChain/LangGraph/OpenAI SDK；先在 Adapter 边界记录证据。
 - 不新增没有调用方的基础设施、服务、目录或通用 `utils/`。

@@ -165,6 +165,11 @@ class EvolutionAssetService:
             session.add(CandidateVersionRecord(**candidate.model_dump()))
         return candidate
 
+    def get_candidate(self, candidate_id: str) -> CandidateVersion | None:
+        with self.database.session() as session:
+            row = session.get(CandidateVersionRecord, candidate_id)
+            return self._candidate(row) if row is not None else None
+
     def register_experiment(self, experiment: ExperimentManifest) -> ExperimentManifest:
         if len(set(experiment.candidate_refs)) != len(experiment.candidate_refs):
             raise ValueError("experiment_candidate_duplicate")
@@ -179,8 +184,8 @@ class EvolutionAssetService:
             existing = session.get(ExperimentRecord, experiment.experiment_id)
             if existing:
                 stored = self._experiment(existing)
-                if stored.model_dump(exclude={"created_at"}) != experiment.model_dump(
-                    exclude={"created_at"}
+                if stored.model_dump(exclude={"created_at", "status"}) != experiment.model_dump(
+                    exclude={"created_at", "status"}
                 ):
                     raise ValueError("experiment_request_reused")
                 return stored
@@ -988,6 +993,64 @@ class EvolutionAssetService:
                 .one_or_none()
             )
             return self._pointer(row) if row is not None else None
+
+    def ensure_release_baseline(
+        self,
+        domain_pack_ref: str,
+        *,
+        version: str = "baseline.v1",
+    ) -> ActivePointerView:
+        """Install the shipped baseline only when a domain has no active pointer.
+
+        This is release bootstrap, not candidate promotion. Once a pointer exists,
+        only the owner-only Promotion/Rollback service may change it.
+        """
+        payload = {
+            "schema_version": "release-baseline.v1",
+            "domain_pack_ref": domain_pack_ref,
+            "version": version,
+        }
+        content_hash = hashlib.sha256(
+            json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest()
+        candidate_id = f"release_baseline_{content_hash[:24]}"
+        now = self.clock()
+        with self.database.session() as session:
+            pointer = (
+                session.query(ActivePointerRecord)
+                .filter_by(domain_pack_ref=domain_pack_ref)
+                .one_or_none()
+            )
+            if pointer is not None:
+                if session.get(CandidateVersionRecord, pointer.candidate_id) is None:
+                    raise ValueError("active_pointer_candidate_not_found")
+                return self._pointer(pointer)
+            candidate = session.get(CandidateVersionRecord, candidate_id)
+            if candidate is None:
+                candidate = CandidateVersionRecord(
+                    candidate_id=candidate_id,
+                    candidate_type="strategy",
+                    content_hash=content_hash,
+                    version=version,
+                    parent_version=None,
+                    status="active",
+                    created_at=now,
+                    content_ref=None,
+                    source="release",
+                )
+                session.add(candidate)
+            else:
+                candidate.status = "active"
+            pointer = ActivePointerRecord(
+                pointer_id=f"pointer:{domain_pack_ref}",
+                domain_pack_ref=domain_pack_ref,
+                candidate_id=candidate_id,
+                generation=1,
+                updated_at=now,
+            )
+            session.add(pointer)
+            session.flush()
+            return self._pointer(pointer)
 
     def overview(self) -> EvolutionOverviewView:
         with self.database.session() as session:

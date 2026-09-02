@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
@@ -19,12 +19,15 @@ from packages.kernel.decision_hub_kernel.application.run import RunService
 from packages.kernel.decision_hub_kernel.persistence.db import Database, utcnow
 from packages.kernel.decision_hub_kernel.ports.sources import SourceRegistryPort
 
+RunStrategySelector = Callable[[SourceManifest, TextEnvelope], Iterable[str]]
+
 
 class RunTarget(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     event_id: str
     run_id: str
+    strategy_version: str = "baseline.v1"
 
 
 class SourceIngestResult(BaseModel):
@@ -51,12 +54,16 @@ class SourceIngestionService:
         admission: AdmissionService | None = None,
         runs: RunService | None = None,
         clock: Callable[[], datetime] = utcnow,
+        strategy_selector: RunStrategySelector | None = None,
+        immediate_strategy_versions: Iterable[str] = ("baseline.v1",),
     ) -> None:
         self.database = database
         self.registry = registry
         self.admission = admission or AdmissionService(database)
         self.runs = runs or RunService(database)
         self.clock = clock
+        self.strategy_selector = strategy_selector or _baseline_strategy
+        self.immediate_strategy_versions = frozenset(immediate_strategy_versions)
         for manifest in registry.manifests():
             self.database.ensure_source_state(manifest)
 
@@ -111,13 +118,41 @@ class SourceIngestionService:
             )
             targets: list[RunTarget] = []
             for event_id, envelope, _created in admitted:
-                run_id, run_created = self.runs.create(
-                    event_id,
-                    idempotency_key=f"source:{source_id}:{envelope.content_hash}",
+                strategies = tuple(
+                    dict.fromkeys(
+                        strategy
+                        for strategy in self.strategy_selector(source.manifest, envelope)
+                        if strategy
+                    )
                 )
-                run = self.database.get_run_record(run_id)
-                if run_created or (run and run.status == RunStatus.admitted.value):
-                    targets.append(RunTarget(event_id=event_id, run_id=run_id))
+                if not strategies:
+                    raise SourceContractError("strategy selector returned no strategy")
+                for strategy_version in strategies:
+                    # Keep the historical baseline idempotency key stable. Research
+                    # candidates use an independent key so shadow runs never claim
+                    # or overwrite the baseline Run.
+                    key = (
+                        f"source:{source_id}:{envelope.content_hash}"
+                        if strategy_version == "baseline.v1"
+                        else f"source:{source_id}:{envelope.content_hash}:{strategy_version}"
+                    )
+                    run_id, run_created = self.runs.create(
+                        event_id,
+                        idempotency_key=key,
+                        strategy_version=strategy_version,
+                        admission_origin="automatic",
+                    )
+                    run = self.database.get_run_record(run_id)
+                    if strategy_version in self.immediate_strategy_versions and (
+                        run_created or (run and run.status == RunStatus.admitted.value)
+                    ):
+                        targets.append(
+                            RunTarget(
+                                event_id=event_id,
+                                run_id=run_id,
+                                strategy_version=strategy_version,
+                            )
+                        )
             latency_ms = round((time.perf_counter() - started) * 1000)
             next_poll_at = result.next_poll_at or self.clock() + timedelta(
                 seconds=source.manifest.poll_interval_seconds
@@ -183,6 +218,12 @@ class SourceIngestionService:
 
 class SourceContractError(ValueError):
     error_code = "source_invalid_payload"
+
+
+def _baseline_strategy(_manifest: SourceManifest, _envelope: TextEnvelope) -> tuple[str, ...]:
+    """Preserve the R0/R1 behavior when no discovery policy is configured."""
+
+    return ("baseline.v1",)
 
 
 def _source_error_code(error: Exception) -> str:

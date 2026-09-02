@@ -1,0 +1,38 @@
+schema_version: crypto-macro-horizon-gates.v1
+directional_publish:
+  require_all_hard_evidence: true
+  reject_open_hard_conflicts: true
+  require_event_identity: true
+  require_probability_status: true
+  uncalibrated_probability_cap: 0.7
+horizon_independence:
+  required_horizons: [30m, 24h, 72h]
+  reject_exact_duplicate_signature: true
+  signature_fields: [evidence_refs, trigger, invalidation, expires_at, next_review_at]
+horizons:
+  30m:
+    required_requirements: [event_identity, policy_or_data_delta, macro_transmission, crypto_spot_confirmation, derivatives_crowding]
+    max_market_age_seconds: 60
+    default_expiry_seconds: 1800
+    default_recheck_seconds: 300
+  24h:
+    required_requirements: [event_identity, policy_or_data_delta, expectation_pricing, macro_transmission, crypto_spot_confirmation, derivatives_crowding]
+    max_market_age_seconds: 300
+    default_expiry_seconds: 86400
+    default_recheck_seconds: 3600
+  72h:
+    required_requirements: [event_identity, policy_or_data_delta, expectation_pricing, macro_transmission, cross_asset_confirmation]
+    max_market_age_seconds: 3600
+    default_expiry_seconds: 259200
+    default_recheck_seconds: 21600
+bounded_stop:
+  allowed_reasons:
+    - deadline
+    - cost_budget
+    - tool_budget
+    - round_budget
+    - permission_denied
+    - critical_data_unavailable
+    - runtime_unavailable
+    - cancelled
+  unresolved_hard_gap_gate: research_only

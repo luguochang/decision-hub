@@ -1,9 +1,17 @@
 # Decision Hub 执行路线图
 
-版本：`ROADMAP-2026-08-26.v1`  
+版本：`ROADMAP-2026-08-26.v1`
 用途：把 [产品架构基线](../DECISION_HUB_PRODUCT_ARCHITECTURE_V1.md) 中的 R0-R3 规划转换为 GitHub 可逐项追踪的执行清单。本文是里程碑状态入口；每个任务的实现边界、框架复用和 Codex 提示词见 [分阶段执行设计](EXECUTION_PLAN.md)，不替代架构基线、契约和 ADR。
 
-R0/R1/R1-L 离线代码门和 R2-00 至 R2-05 的离线 U2 工程退出门已完成。R2 的 [Stage Charter](stages/R2_DECISION_WORKBENCH_EVOLUTION.md) 当前进入观察期；不自动开始 R3。
+R0/R1/R1-L、R2-00 至 R2-05、R2-L、R2-R-00 至 R2-R-06E、DSH-NATIVE-CORE 和
+`PRODUCT-CLOSEOUT-01` 的 E1/E2-R/E2-L 已完成。官方 DSH Web 真实主线已完成受管 Session、
+两轮主动补证、可信账本、代码 Gate、双前端一致性和后台自动复查，当前可作为单 owner、
+单机、只读的 `research_only` 试点使用。Runtime 决策仍为 `retain_baseline`：Fixed active，
+DSH candidate/shadow，不自动 Promotion。当前唯一入口是
+[产品交付控制书与最终验收包](product/PRODUCT_DELIVERY_CONTROL_BOOK_2026-09-01.md)，下一阶段
+只做 E3 前瞻价值观察，不自动进入 R3 或新功能阶段。
+
+DSH-NATIVE-CORE 的工程验收已完成。详细任务卡、失败根因和退出证据见 [DSH-NATIVE-CORE 完成实施方案](stages/DSH_NATIVE_CORE_COMPLETION_PLAN.md) 与 [Replay/恢复验收记录](evaluations/DSH_NATIVE_CORE_REPLAY_MATRIX_2026-08-31.md)。NATIVE-00 至 NATIVE-05、NC-01 至 NC-07 均有官方 Web/插件/桥接/replay/恢复/回滚/浏览器证据。Owner 已确认后续进入唯一的 [PRODUCT-CLOSEOUT-01](stages/PRODUCT_CLOSEOUT_01_DSH_NATIVE_TRADER_PILOT.md)，按 C1-C7 收口首个 Trader Pilot；不自动切 active pointer，不扩大到 ASR/PPT/第二领域。
 
 ## 使用规则
 
@@ -22,7 +30,7 @@ R0-A 文本核心纵向链已完成。R0-B、R0-C、R0-D 已通过 `R0-CORE-COMP
 
 - [x] `R0-01` 仓库工程治理：canonical schema、codegen check、ADR、模块 README、TDD/SDD、`.gitignore`。
 - [x] `R0-02` 文本纵向链：`ObservationCreate -> TextEnvelope -> Event/Observation -> Snapshot -> Run`。
-- [x] `R0-03` LangGraph decision/research graph；policy delta 与 counter-thesis 并行。
+- [x] `R0-03` LangGraph fixed baseline decision/research graph；policy delta 与 counter-thesis 并行。该退出门只证明纵向链，不证明 Agentic Research。
 - [x] `R0-04` AgentRuntime port：Fake、Replay、LangGraph-native Runtime。
 - [x] `R0-05` 严格 `AgentPayload` 和 OpenAI-compatible Responses/Chat adapter 配置。
 - [x] `R0-06` 确定性 Gate、Artifact、30m/24h/72h Forecast。
@@ -40,9 +48,9 @@ R0-A 文本核心纵向链已完成。R0-B、R0-C、R0-D 已通过 `R0-CORE-COMP
 - [x] `R0-15` SQLite backup、restore、integrity、retention 工具和升级迁移；自动 watchdog 保留为后续调度能力。
 - [x] `R0-16` ReleaseManifest、failure injection、安装/升级/恢复 runbook 和离线 core acceptance。
 
-### 当前阶段
+### 历史阶段说明
 
-R0 核心闭环和 R1 实时事件离线闭环均已完成；当前阶段是进入 R2 前的 `R1-L` 单 owner 试运行就绪收口。不能因为 R1 完成而把 DSH/Pi、自动交易、实时 ASR 或第二领域倒灌进来。R2 必须重新获得 owner Stage Gate。
+R0/R1/R1-L 已完成既定工程退出门；其 fixed baseline 保留为回放和降级路径，不能因测试通过就把它解释为具备搜索、工具和 replan 的智能体。
 
 ### R1-L：Single-Owner Pilot Readiness（离线代码门已通过，等待 Live Pilot Gate）
 
@@ -68,7 +76,7 @@ R1 开始真实直播监听或外部通知前，必须新增对应 ADR、Provide
 
 ## R2：Decision Workbench 与自主进化
 
-详细边界、契约、DSH 插件桥接、任务依赖、BDD/TDD 验收门和 owner 决策项见 [R2 Stage Charter](stages/R2_DECISION_WORKBENCH_EVOLUTION.md) 及 [ADR-0005](decisions/ADR-0005-dsh-harness-plugin-bridge.md)。当前状态：`done (offline U2) / observation`；真实运行效果仍需独立证据。
+详细边界、契约、DSH 插件桥接、任务依赖、BDD/TDD 验收门和 owner 决策项见 [R2 Stage Charter](stages/R2_DECISION_WORKBENCH_EVOLUTION.md) 及 [ADR-0005](decisions/ADR-0005-dsh-harness-plugin-bridge.md)。当前状态：Workbench/Evaluation/Promotion 工程底座 `done (offline U2)`；真实 DSH Research Runtime、工具循环和主动补证未完成。
 
 - [x] `R2-00` Kernel/Orchestration 边界对齐：移除 Kernel application 对 LangGraph/LangChain 编排细节的直接依赖，保持 R0/R1 行为不变（见 [ADR-0006](decisions/ADR-0006-kernel-orchestration-boundary-alignment.md)）。
 - [x] `R2-01` Core MCP、Workbench/Capability contract 与 DSH ResearchMemo adapter；DSH 只能提交研究候选，不能写业务账本或默认发布版本。
@@ -77,12 +85,70 @@ R1 开始真实直播监听或外部通知前，必须新增对应 ADR、Provide
 - [x] `R2-04` LangGraph Supervisor/Evolution candidate：统一 Runtime contract、有限 replan、replay/holdout/离线 shadow 对照，不改变正式 pointer。
 - [x] `R2-05` Promotion Gate、CAS active pointer、原子回滚、版本 registry 和人工 Promotion Desk。
 
+## R2-L：Live Observation Pilot
+
+详细运行拓扑、Job 状态机、触发器、Capability、前端和退出门见 [R2-L Stage Charter](stages/R2_L_LIVE_OBSERVATION_PILOT.md) 与 [ADR-0007](decisions/ADR-0007-live-observation-runtime.md)。这是 R2 的运行化收口，不是 R3。
+
+- [x] `R2-L-00` canonical Evolution Job/heartbeat 契约、0016 migration、Repository/Service。
+- [x] `R2-L-01` deterministic trigger、lease/CAS、retry/recovery EvolutionScheduler。
+- [x] `R2-L-02` 复用 Supervisor/Evaluation/Evolution 服务生成候选、评测和 pending owner review。
+- [x] `R2-L-03` API/realtime/evolution 三逻辑进程、heartbeat、Compose 配置和进程 smoke（本机通过，镜像 registry smoke blocked）。
+- [x] `R2-L-04` 审计受控的 SearchCapabilityPort、manifest gate 和 live canary seam（默认关闭）。
+- [x] `R2-L-05` Decision Desk Operations/Evolution 人可读视图。
+- [x] `R2-L-06` 全量回归、故障恢复、本机 acceptance、runbook 和状态收口。
+
+## R2-R：Agentic Research Runtime（completed / retain baseline）
+
+详细定义、偏差证据、Runtime 选择、双层循环、双 Snapshot、代码结构、BDD/TDD 和退出门见 [R2-R Stage Charter](stages/R2_R_AGENTIC_RESEARCH_RUNTIME.md) 与 [ADR-0008](decisions/ADR-0008-agentic-research-runtime.md)。跨领域所有权和交易员 Skill 拆分见 [平台基线](platform/PLATFORM_BASELINE.md)、[ADR-0009](decisions/ADR-0009-product-platform-extension-boundary.md) 与 [Crypto Macro Domain Pack](domains/crypto_macro/README.md)。R2-R-00 至 R2-R-06E 已完成，Runtime 决策为 `retain_baseline`；不切 active pointer，不扩大范围。
+
+- [x] `R2-R-00` canonical agentic research contract、Warsh failure fixture、Pack requirements。
+- [x] `R2-R-01` 真实 DSH Python SDK + 受限 `decision-research` profile ResearchHarnessRuntime、Session/Tool/Subagent/Trace adapter。
+- [x] `R2-R-02` Web/Official/Market Tool Gateway、EvidenceCandidate 和 Trigger/Decision 双 Snapshot（offline done）。
+- [x] `R2-R-03` bounded evidence rounds、Sufficiency/Conflict Gate、CausalCase 与独立 HorizonDecision；已接入独立 `research.v1` candidate path，legacy Fixed baseline 保留。
+- [x] `R2-R-04` durable research worker、Run lease/recovery、自动 discovery、scheduled recheck；真实子进程恢复和 single commit 通过。
+- [x] `R2-R-05` Research Result/Trace Query/View/SSE、Plan/Evidence/Tool/Sufficiency/Causal/Horizon 人可读前端；四视口与控制台验收通过。
+- [x] `R2-R-06` 12 个 PIT 事件 Fixed vs DSH 对比、一个真实事件、失败归档和 Runtime 决策包；结论 `retain_baseline`，owner usefulness 表单待填写，不自动 Promotion。
+
+### R2-R-07：Search Reliability 与 Error Provenance（completed / E2-L passed）
+
+R2-R-06E 的真实 Run 暴露了服务端时间戳、并行工具失败隔离、错误来源保真和失败状态前端投影缺口。G1-A/B/C/D 与 G2-A/B 已完成；详细目标、BDD/TDD 任务卡、停止条件和 G2-C live gate 见 [R2-R-07 阶段卡](stages/R2_R_07_SEARCH_RELIABILITY_ERROR_PROVENANCE.md)。
+
+- [x] `R2-R-07A` server-owned PIT time 与兼容投影（G1 offline）
+- [x] `R2-R-07B` Provider/Search/MCP/DSH/outer timeout 错误分类和 provenance（G1 offline）
+- [x] `R2-R-07C` 并行 capability 单任务隔离与部分结果保留（G1 offline）
+- [x] `R2-R-07D` Research View/API/SSE/UI 失败状态投影和幂等 retry/recheck（G1 offline）
+- [x] `R2-R-07E` 六类事实 manifest、replay success/stale/provider_failure 与离线回归（G2-A/B）
+- [x] `R2-R-07E-live` 正式 DSH Session 已调用 Search/Official/Market；Search timeout 与 stale
+  Evidence 按 provenance/Gate 保留，Official/Market 成功 Evidence 不丢失，E2-L 以
+  `research_only` 解释性终态通过
+
+G1/G2 代码、离线回归和 E2-L 真实 Web 验收已完成；这证明失败边界和有界补证可用，不
+证明 Search 长期稳定或预测价值。E3 前不扩大 capability、不修改 active pointer、不进入 R3。
+
 ## R3：领域与部署扩展
+
+状态：`blocked by owner gate and follow-up evidence`。R2-R 已完成但 DSH 未通过 Promotion 门；R3 不能在 owner 没有接受新候选前启动。
 
 - [ ] `R3-01` A 股 Domain Pack，复用 Kernel/Run/Evidence/Evaluation，不把 BTC 字段扩散到 Core。
 - [ ] `R3-02` 美股/宏观 Domain Pack，单独定义市场时段、执行基准和来源契约。
 - [ ] `R3-03` PPT 等非市场产品使用独立 Domain Extension，验证 Kernel 的跨产品复用。
 - [ ] `R3-04` 只有出现跨机器高可用、并发写入、远程只读或长期大规模 tick 数据需求时，才评估 PostgreSQL/远程部署。
+
+## PRODUCT-CLOSEOUT-01：DSH Native Trader Pilot
+
+状态：`E1/E2-R/E2-L passed / E3 prospective observation`。DSH Web、Hub 控制面和
+`crypto_macro` Domain Pack 已收口为单 owner、单机、只读的 `research_only` 试点。
+当前唯一执行入口和停止线见 [产品交付控制书](product/PRODUCT_DELIVERY_CONTROL_BOOK_2026-09-01.md)，
+正式 Run、后台 child recheck、双前端、截图 hash 和完整质量门见
+[E2-L 真实产品验收记录](evaluations/E2L_LIVE_PRODUCT_ACCEPTANCE_2026-09-01.md)。
+
+- [x] `C1` 统一启动器、Trader 工作区和 DSH/Hub/Desk 双向链接（工程门；产品价值待验收）
+- [x] `C2` 正式 `dsh-web` Runtime 选择、readiness、失败/重启语义（工程门；Provider 成功路径待验收）
+- [x] `C3` 缺口驱动补证 loop、部分失败保留和人可读停止（工程/replay）
+- [x] `C4` Search/Official/Market contract/canary 和正式 DSH Session 解释性闭环；真实 timeout/stale 保留
+- [x] `C5` DSH 报告、outbox/dry-run 通知和失败可观测展示（工程/replay）
+- [x] `C6` Outcome/Evaluation/Experience 工程资产；14 天/20 事件 E3 观察窗口是唯一下一阶段
+- [x] `C7` 单机一键启动、恢复、备份、交付 runbook 和当前 UI 移动/console 资产
 
 ## 产品可用阶段
 
@@ -92,10 +158,12 @@ R1 开始真实直播监听或外部通知前，必须新增对应 ADR、Provide
 |---|---|---|---|
 | `U0` | R0 本地文本决策核心 | 已通过 R0 离线验收 | 可用于人工提交文本和复盘，不代表实时来源或收益 |
 | `U1` | R1/R1-L 单 owner 试运行 | R1-L 离线门已通过，且 owner 另行通过 Live Pilot Gate | 可有限运行真实来源/通知，仍需观察稳定性和效果 |
-| `U2` | R2 Decision Workbench v1 | R2-00 至 R2-05 退出门全部通过，owner Promotion/Rollback 可审计 | 这是首个成熟个人产品闭环；不自动宣称预测优势 |
+| `U2` | R2 Decision Workbench v1 | R2-00 至 R2-05 退出门全部通过，owner Promotion/Rollback 可审计 | Workbench/Evaluation/治理工程闭环；不代表研究智能体或预测优势 |
+| `U2.1` | R2-R Research Agent Pilot | R2-R-00 至 R2-R-06 通过且 owner 接受 Runtime 决策；当前工程链已完成，但 DSH 结论为 `retain_baseline`、usefulness 待 owner | 只能继续 Fixed baseline + candidate/shadow 观察，不宣称 DSH active 或盈利 |
+| `U2.2` | DSH Native Trader research-only Pilot | E2-L 官方 Web 真实主线、代码 Gate、双前端和后台复查通过 | 可由单 owner 试用并进入 E3；不自动交易，不代表预测或盈利优势 |
 | `U3` | 多领域和远程部署 | R2 观察期证明新领域或规模需求，并另立 Charter/ADR | 仅按真实需求扩展，不预建泛化基础设施 |
 
-R2 通过后进入观察期，不自动开启 R3。新领域、公共插件市场、多用户或远程高可用都必须有独立价值证据和新的 Stage Gate。
+R2 工程底座通过不等于研究智能体可用。R2-R 已完成验收但 DSH 未通过 Promotion，因此 R3 仍不启动；新领域、公共插件市场、多用户或远程高可用都必须有独立价值证据和新的 Stage Gate。
 
 ## 明确暂不做
 
@@ -113,4 +181,5 @@ R2 通过后进入观察期，不自动开启 R3。新领域、公共插件市�
 | `R0-Release` | Provider contract、backup/recovery、可观测 Run Inspector、ReleaseManifest | `done` |
 | `R1-Realtime` | 授权来源、事件调度、行情基准、Outcome 到期和通知 | `done`（离线 fixture） |
 | `R2-Workbench` | DSH MCP、完整观测、实验、候选晋级和回滚 | `done`（离线 U2；观察期，未证明真实收益） |
+| `R2-R-Agentic` | DSH Harness tool/subagent loop、主动补证、双 Snapshot、充分度 Gate、自动触发和人可读轨迹 | `completed / retain_baseline / owner review pending` |
 | `R3-Domains` | 第二领域真实复用和按需远程部署 | `planned` |

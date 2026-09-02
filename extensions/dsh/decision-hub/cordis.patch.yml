@@ -1,0 +1,23 @@
+# Official Decision Hub Host bundle layer. Secrets stay in the process
+# environment and are never copied into this document or emitted by the plugin.
+- insert:
+    - id: decision-hub
+      name: '@decision-hub/dsh-plugin'
+      config:
+        hubBaseUrl: !!js process.env.DECISION_HUB_API_URL ?? 'http://127.0.0.1:8000'
+        decisionDeskBaseUrl: !!js process.env.DECISION_HUB_DESK_URL ?? 'http://127.0.0.1:8000'
+        inboundKey: !!js process.env.DECISION_HUB_DSH_HOST_KEY
+        callbackKey: !!js process.env.DECISION_HUB_DSH_CALLBACK_KEY
+        ownerId: !!js process.env.DECISION_HUB_OWNER_ID ?? 'dsh-web-owner'
+        # The launcher changes cwd to the pinned upstream checkout before
+        # starting the official CLI. Keep the product workspace explicit so
+        # Host-created Sessions belong to the registered DSH Workspace.
+        defaultWorkspaceCwd: !!js process.env.DECISION_HUB_DSH_WORKSPACE_CWD ?? process.cwd()
+        clientPlugin: true
+        requireClientPlugin: true
+        callbackTimeoutMs: !!js Number(process.env.DECISION_HUB_DSH_CALLBACK_TIMEOUT_MS ?? 5000)
+        callbackAttempts: !!js Number(process.env.DECISION_HUB_DSH_CALLBACK_ATTEMPTS ?? 3)
+        runtimeMode: !!js process.env.DECISION_HUB_DSH_RUNTIME_MODE
+        sourceCommit: !!js process.env.DECISION_HUB_DSH_SOURCE_COMMIT
+        sourceVersion: !!js process.env.DECISION_HUB_DSH_SOURCE_VERSION
+        pluginBuildHash: !!js process.env.DECISION_HUB_DSH_PLUGIN_BUILD_HASH

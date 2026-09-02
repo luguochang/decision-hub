@@ -59,7 +59,9 @@ class RealtimeScheduler:
             for poll in poll_results
             for target in poll.run_targets
         }
-        for event_id, run_id in self.ingestion.runs.admitted_targets():
+        for event_id, run_id in self.ingestion.runs.admitted_targets(
+            strategy_version="baseline.v1"
+        ):
             targets_by_run.setdefault(run_id, RunTarget(event_id=event_id, run_id=run_id))
         started = 0
         failed = 0

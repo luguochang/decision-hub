@@ -139,7 +139,7 @@ $defs:
       model: {type: [string, 'null']}
       schema_version: {type: string, minLength: 1}
       random_seed: {type: [integer, 'null'], minimum: 0}
-      randomness_policy: {type: string, enum: [deterministic, seeded]}
+      randomness_policy: {type: string, enum: [deterministic, seeded, provider_default]}
       deadline_seconds: {type: integer, minimum: 1, maximum: 3600}
       max_cost_usd: {type: [number, 'null'], minimum: 0}
   experiment_result:

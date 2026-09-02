@@ -1,0 +1,29 @@
+schema_version: domain-pack-manifest.v1
+pack_id: crypto_macro
+version: 1.0.0
+product_extension_ref: decision.v1
+doctrine_ref: doctrine/causal-chain.md
+evidence_policy_ref: evidence/source_manifest.yaml
+gate_policy_ref: gates/horizons.yaml
+evaluation_policy_ref: evaluations/rubric.yaml
+role_profile_refs:
+  - profiles/manager.yaml
+  - profiles/counter-thesis.yaml
+  - profiles/data-quality.yaml
+capability_refs:
+  - web.search
+  - web.fetch
+  - official.macro
+  - market.crypto_derivatives
+  - market.cross_asset
+  - replay.research
+horizons: [30m, 24h, 72h]
+execution_budget:
+  max_evidence_rounds: 3
+  max_tool_calls: 12
+  max_subagents: 6
+  total_deadline_seconds: 480
+  per_tool_timeout_seconds: 20
+  per_model_step_timeout_seconds: 150
+  max_structured_repairs: 1
+  max_estimated_cost_usd: 1.0

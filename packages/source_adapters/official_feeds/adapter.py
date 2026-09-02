@@ -46,6 +46,7 @@ class OfficialFeedSource:
         format_hint: str = "auto",
         include_document_body: bool = False,
         document_fetcher: Fetcher | None = None,
+        bootstrap_latest: bool = False,
     ) -> None:
         self.manifest = manifest
         self.endpoint = endpoint
@@ -53,6 +54,7 @@ class OfficialFeedSource:
         self.format_hint = format_hint
         self.include_document_body = include_document_body
         self.document_fetcher = document_fetcher or self.fetcher
+        self.bootstrap_latest = bootstrap_latest
 
     async def poll(self, cursor: str | None = None) -> SourcePollResult:
         status_code, body = await self.fetcher(self.endpoint)
@@ -63,6 +65,14 @@ class OfficialFeedSource:
         fetched_at = datetime.now(UTC)
         items = sorted(parse_feed(body, self.format_hint), key=_cursor_for)
         selected = _after_cursor(items, cursor)
+        if cursor is None and self.bootstrap_latest:
+            return SourcePollResult(
+                source_id=self.manifest.source_id,
+                cursor_before=None,
+                cursor_after=_cursor_for(items[-1]) if items else None,
+                envelopes=(),
+                fetched_at=fetched_at,
+            )
         envelopes_list: list[TextEnvelope] = []
         for item in selected[: self.manifest.max_batch]:
             text = (f"{item.title}\n{item.summary}").strip()

@@ -1,0 +1,49 @@
+{
+  "authorization": "owner:r2-r-06",
+  "created_at": "2026-08-30T00:00:00Z",
+  "cutoff_rule": "published_at <= observed_at <= received_at",
+  "dataset_id": "crypto_macro.r2r_pit.v1",
+  "event_family_counts": {
+    "central_bank_speech": 2,
+    "geopolitical_shock": 2,
+    "inflation_release": 3,
+    "labor_release": 2,
+    "monetary_policy_decision": 3
+  },
+  "fixture_hashes": {
+    "cases/fomc_cut_25bp_20241107.json": "3853027d03354dce3efc1d84a5e5e67f34149ad495aa87e33c0d1e5f0ca20bf7",
+    "cases/fomc_cut_25bp_20241218.json": "6b66846f2c8bedd2dde19496e9662c5e075f56af7bbd97f811c7be9412877bd1",
+    "cases/fomc_cut_50bp_20240918.json": "433301280b14576795e6f51752c63060c08fc5d349604031078d7dca9897cc5b",
+    "cases/iran_attack_israel_20240413.json": "6690cb06285802a3dd1cda322d88221276395907050910a82132ca0c2e870bca",
+    "cases/israel_strikes_iran_20241026.json": "5f6be8299bcdfd08a3ec54fe4b72f215b077ce59be26b1b5d3a54bea08037263",
+    "cases/powell_jackson_hole_20240823.json": "a535638ce9f4c0cd5218e1b44d3bad76efadba530fe6e8ec5740a72b0ea0cc47",
+    "cases/powell_stanford_20240403.json": "1365b56a91874c98aea0625971dc91b722d495d7c25afb3e53452ddadd030623",
+    "cases/us_cpi_20250115.json": "740cf09cbdcab22f8cde82ed37a048e7a4eb6efeff5df65d862d31c0d60cf63c",
+    "cases/us_cpi_20250212.json": "e170de11989e31e5038ac348df7da4870cd097cf1c8ca9ecf5c058b1b17245bb",
+    "cases/us_jobs_20250207.json": "003b778cd9ab13d8b00618bedf90089e44965dd5b99b162f60c2e9dd0056f85d",
+    "cases/us_jobs_20250307.json": "5cb2a0d50d5e7c61bbdcc3ebd4e54b7455afb83bf481a00ca497633ac39069fe",
+    "cases/us_pce_20250228.json": "46f2a43ef0d24667faaa6aa4354a8fb3c61978d86569e1228d6c47174afee554"
+  },
+  "fixture_refs": [
+    "cases/powell_stanford_20240403.json",
+    "cases/powell_jackson_hole_20240823.json",
+    "cases/fomc_cut_50bp_20240918.json",
+    "cases/fomc_cut_25bp_20241107.json",
+    "cases/fomc_cut_25bp_20241218.json",
+    "cases/us_cpi_20250115.json",
+    "cases/us_cpi_20250212.json",
+    "cases/us_pce_20250228.json",
+    "cases/us_jobs_20250207.json",
+    "cases/us_jobs_20250307.json",
+    "cases/iran_attack_israel_20240413.json",
+    "cases/israel_strikes_iran_20241026.json"
+  ],
+  "label_rule": "outcomes.available_at > received_at",
+  "leakage_audit": "passed",
+  "manifest_hash": "57d67e6094e00f5a8131f9fcd583d1d6e443dd097a823ff18ade55d23fad01d0",
+  "source_mode": "fixture",
+  "split": "replay",
+  "visibility": "owner_only",
+  "window_end_at": "2025-03-07T13:35:00Z",
+  "window_start_at": "2024-04-03T16:10:02Z"
+}

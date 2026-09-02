@@ -31,6 +31,8 @@
 
 没有可测价值的基础设施不进入当前阶段。未来能力只保留契约出口，不提前创建空模块。
 
+2026-08-31 owner 已接受 [ADR-0012](decisions/ADR-0012-dsh-first-product-rebaseline.md) 和 [ADR-0013](decisions/ADR-0013-dsh-web-native-plugin-upstream-integration.md)。DSH-NATIVE-CORE 的固定官方 DSH Web、原生插件、durable bridge 和 replay E2E 已完成；当前执行获授权的 [PRODUCT-CLOSEOUT-01 Stage Charter](stages/PRODUCT_CLOSEOUT_01_DSH_NATIVE_TRADER_PILOT.md) C1-C7。`done` 仍不表示产品实时可用；真实 live canary 只能按 C4 的隔离、只读边界执行，不能切 active pointer 或扩展 ASR、PPT、第二领域和插件市场。
+
 ### 2.2 复用矩阵：什么由框架负责，什么由本项目负责
 
 | 能力 | 直接复用 | 本项目只实现的薄层 | 明确禁止 |
@@ -50,6 +52,8 @@
 
 判断标准不是“能不能自己写”，而是“是否属于 Decision Hub 的不可替换产品资产”。协议、loop、图运行、checkpoint 和 tracing 不属于产品资产；契约、PIT、Gate、Forecast/Outcome、评测和版本血缘属于产品资产。
 
+R2-R accepted 修订说明：上表中的 LangChain Agent loop 是当前 fixed baseline 的既有选择，不等于必须继续用它建设完整 Harness。[ADR-0008](decisions/ADR-0008-agentic-research-runtime.md) 已接受，在 `ResearchHarnessRuntime` 层复用 DSH Python SDK 和受限 `decision-research` profile 的 tool/subagent/session loop；“不自写 loop”的治理原则保持不变。
+
 ### 2.3 一条正式生产链，多个可替换候选
 
 R0 只保留一条正式链：
@@ -65,7 +69,7 @@ TextEnvelope
   -> Outcome/Evaluation
 ```
 
-`FakeAgentRuntime` 和 `ReplayAgentRuntime` 用于测试；`LangGraphAgentRuntime` 是 R0 正式外部模型适配；Pi、DSH 只能通过同一个 Runtime 或 ResearchMemo port 做候选/研究对照。候选 Runtime 必须在相同 PIT fixture、相同输出契约和相同评测上证明质量、成本或可靠性优势后，才可能改变 active pointer。
+`FakeAgentRuntime` 和 `ReplayAgentRuntime` 用于测试；`LangGraphAgentRuntime` 是 R0 的单角色外部模型适配。2026-08-29 真实验收确认现有 `AgentRuntime`/fixed graph 不等于完整研究 Harness。R2-R 拟新增更高层 `ResearchHarnessRuntime`，由 DSH Python SDK + `decision-research` candidate 实现有状态工具/子 Agent 会话；任何 candidate 仍必须在相同 PIT fixture、输出契约和评测上证明优势后，才可能改变 active pointer。
 
 ## 3. 阶段总览和阶段门
 
@@ -78,7 +82,9 @@ TextEnvelope
 | R0-D | R0 发布基线 | ReleaseManifest、runbook、CI | `done` | R0 Definition of Done 全部满足 |
 | R1 | 真实事件来源和按需触发 | SourcePlugin、scheduler、outbox | `done`（离线 fixture） | 授权来源、事件游标、行情基准和通知测试通过 |
 | R2 | Workbench 与自主进化 | DSH MCP、replay/shadow、Promotion | `done`（离线 U2；观察期） | 候选可比较、人工晋级、可回滚 |
-| R3 | 第二领域和按需部署扩展 | Domain Extension、PostgreSQL 迁移出口 | `planned` | 第二领域复用 Kernel，不复制主链 |
+| R2-L | Live Observation 运行化收口 | existing scheduler/Supervisor/Evaluation、SQLite lease、React Query | `done (offline + local process acceptance) / observation` | 三进程可恢复、Job 可观察、候选只待 owner review；Compose registry smoke blocked |
+| R2-R | Agentic Research Runtime | DSH Python SDK + 受限 research profile、LangGraph lifecycle、Tool Gateway、双 Snapshot | `done / retain_baseline / owner review pending` | 候选链主动补证、真实工具循环、独立周期、自动触发、可恢复/可观测、Fixed vs DSH 真实验收；DSH 未晋级 active |
+| R3 | 第二领域和按需部署扩展 | Domain Extension、PostgreSQL 迁移出口 | `blocked by R2-R` | 第二领域复用 Kernel，不复制主链 |
 
 ### 阶段门的固定顺序
 
@@ -356,7 +362,89 @@ R2 的目标不是“让 Agent 自己改代码”，而是把失败样本、反�
 
 验收：自主进化只能产生候选；所有晋级可解释、可回滚、可重放；Gate 规则不能由 Agent 修改。
 
+## R2-L：Live Observation Pilot（已完成离线/本机退出门）
+
+R2-L 是 R2 Workbench 的运行化收口，不新增第二套 Agent 平台。详细契约、BDD 场景和故障矩阵见 [R2-L Stage Charter](stages/R2_L_LIVE_OBSERVATION_PILOT.md)；运行时边界见 [ADR-0007](decisions/ADR-0007-live-observation-runtime.md)。
+
+### 目标和产品结果
+
+把 R0 文本决策链、R1 来源/到期链、R2 Supervisor/Evaluation/Promotion 组合成单 owner 本机产品：API、realtime worker、evolution worker 三个逻辑进程共享 SQLite WAL；source poll -> R0 Decision Graph -> Gate -> Forecast/Outbox；trigger -> durable Evolution Job -> candidate -> replay/holdout/shadow -> `pending_owner_review`。任何 Agent、DSH、Pi 或插件只能提出候选，不能发布、交易或修改 Gate。
+
+### 实现边界
+
+| 任务 | 实现与复用 | 退出证据 |
+|---|---|---|
+| R2-L-00/01 | canonical `evolution-job.v1`、0016 migration、JobPolicy、trigger key、CAS lease、renew/recovery、有限 retry | contract/migration/evolution tests |
+| R2-L-02 | 复用 LangGraph Supervisor、EvaluationRunner、EvolutionAssetService；immutable artifact、动态 active baseline、raw-first、重启幂等 | evolution executor tests |
+| R2-L-03 | `hub-worker --role realtime/evolution`、durable heartbeat、独立 composition、Compose 配置 | worker process tests、local acceptance |
+| R2-L-04 | `SearchCapabilityPort` + audited manifest gate + fake/OpenAI-compatible seam；默认关闭、PIT/域/预算 fail-closed | capability tests |
+| R2-L-05 | `/v1/operations`、`/v1/evolution/jobs`、Operations/Evolution Query/View 和真实空/失败状态 | API/Vitest/build/browser checks |
+| R2-L-06 | runbook、全量回归、恢复与三进程 acceptance、状态/CHANGELOG 收口 | `tools/live_observation_acceptance.py` |
+
+### 当前状态和限制
+
+R2-L 的离线质量门和本机三进程 acceptance 已通过，当前进入 observation。`docker compose config --quiet` 通过，但本轮 `docker compose build` 因 Docker Hub/GHCR registry 请求超时，未取得真实镜像运行证据；这属于外部环境阻塞。真实 Provider/source/search/market/notification 长期运行、预测准确率、盈利、生产高可用、自动 Promotion/交易和第二领域仍未证明，也不在本阶段范围内。R3 必须等待 observation 证据和新的 owner Stage Gate。
+
+固定验证命令：
+
+```bash
+./.venv/bin/python -m tools.contract_codegen check
+./.venv/bin/python tools/docs/check_module_docs.py
+./.venv/bin/ruff check .
+./.venv/bin/pyright
+./.venv/bin/pytest -m "not live" -q
+pnpm --dir apps/decision-desk test
+pnpm --dir apps/decision-desk build
+./.venv/bin/python tools/live_observation_acceptance.py
+```
+
+## R2-R：Agentic Research Runtime（completed / retain_baseline / owner review pending）
+
+R2-R 是对研究执行层的架构纠偏，不是新增第二个产品。完整定义、代码结构、七张任务卡、BDD/TDD 和迁移边界见 [R2-R Stage Charter](stages/R2_R_AGENTIC_RESEARCH_RUNTIME.md)；Harness 决策见 [ADR-0008](decisions/ADR-0008-agentic-research-runtime.md)。R2-R-00 至 R2-R-06E 已完成，独立 research candidate path 已具备 durable worker、自动 discovery、recheck、真实进程 recovery、规范化可观测性和 Research Command Center。06E Runtime 决策为 `retain_baseline / pending_owner_review`，DSH 不写 active pointer；G1/G2 已按独立授权完成离线实现，后续 live canary 仍需单独 gate。
+
+### 产品问题
+
+现有正式路径固定执行 policy/counter/synthesis，没有给模型 Web/Market tools、真实 DSH Session、缺口 continuation 或充分度路由。真实 Warsh Run 虽列出关键数据缺口，仍只能输出三个完全相同的 `no_trade / 52%`。R2-L 的 Search Capability 只是默认关闭的执行 seam，Evolution Supervisor 也不在正式决策链。
+
+### 实施决策
+
+```text
+Source/Manual -> queued Run -> Trigger Snapshot
+  -> LangGraph product lifecycle
+  -> DSH ResearchHarnessRuntime (tool/subagent/session loop)
+  -> EvidenceCandidate normalization
+  -> code Sufficiency/Conflict policy
+  -> bounded continuation or Decision Snapshot
+  -> CausalCase + independent 30m/24h/72h
+  -> deterministic Gate -> ledger/evaluation
+```
+
+- DSH 使用基于完整 `sdk`/base 能力集的受限 `decision-research` profile，首批只作为 candidate；默认禁用 shell、文件写入、任意插件安装和宿主凭据访问，当前 fixed graph 保留 baseline/fallback。
+- LangGraph 不重写通用 tool loop，只管理最多三轮 evidence round、checkpoint、恢复、Gate 和 commit。
+- Web Search/Fetch 处理未知长尾；Official/Market typed tools 处理高频权威事实和精确数值。
+- `/v1/research/observations` 不使用 `BackgroundTasks` 执行长研究；`hub-worker --role research` 通过 durable Run claim 和 LangGraph checkpoint 恢复。legacy `/v1/observations` 的 Fixed baseline `BackgroundTasks` 兼容语义暂不迁移，不能误写为 R2-R 缺口。
+- Trigger Snapshot 保存触发时事实，Decision Snapshot 冻结研究后真正使用的证据；Replay 只能使用 archived tool gateway。
+- R2-R-06 已完成一个真实事件和 12 个 PIT 对照，但 DSH 未通过 Promotion 门；不能以测试数量替代长期稳定性、owner usefulness 或盈利证据。
+
+### 任务顺序
+
+`R2-R-00 contract/failure fixture -> R2-R-01 DSH runtime -> R2-R-02 evidence/tools/dual snapshot -> R2-R-03 agentic graph/horizons -> R2-R-04 research worker/auto trigger -> R2-R-05 UI -> R2-R-06 evaluation/owner acceptance`。
+
+阶段实现必须继续按任务卡顺序推进，不能跳到 UI、ASR、单个临时市场接口或 Prompt 调优。
+
+### R2-R-07：Search Reliability 与 Error Provenance（G1/G2 offline complete / live Search failed safely）
+
+R2-R-06E 的真实事件 Run 已证明 DSH 能规划证据缺口，但暴露出模型可填写可信 `observed_at`、并行 MCP 失败 abort 其他调用、PIT 错误被粗略压成 `provider_timeout`、以及失败 Run 前端状态投影不完整的问题。R2-R-07 只修这些边界，不重新实现 DSH Agent Loop、MCP、搜索协议、LangGraph 或账本。完整 BDD/TDD 和代码路径见 [R2-R-07 Stage Charter](stages/R2_R_07_SEARCH_RELIABILITY_ERROR_PROVENANCE.md)。
+
+任务顺序：`R2-R-07A PIT time -> R2-R-07B error provenance -> R2-R-07C parallel isolation -> R2-R-07D UI projection -> G2-A manifest -> G2-B replay -> G2-C isolated canary -> G2-D sufficiency acceptance`。
+
+G1-A/B/C/D 与 G2-A/B 已由 Agent 按契约先行、BDD/TDD、回放和静态检查完成。Owner 已授权的限时外部 Search canary 以 `research_capability_timeout` 安全失败；当前只允许闭合 E2-L，不得把时间戳、数据源接口或人工重试交给 owner 补齐。
+
+R2-R-07 完成后仍保持 Fixed active、DSH candidate/shadow；只有新的真实 canary、错误分类、可观察前端和 owner usefulness 证据都满足时，才重新评估 Promotion。
+
 ## 12. R3：多领域与部署扩展
+
+R3 之前必须先完成并由 owner 接受 [R2-R Agentic Research Runtime](stages/R2_R_AGENTIC_RESEARCH_RUNTIME.md)。研究核心仍停留在 fixed workflow 时，不允许用第二领域或更多页面绕开效果问题。
 
 ### R3-A：A 股、美股和宏观
 

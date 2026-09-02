@@ -1,0 +1,26 @@
+# Offline-only overlay for the DSH-NATIVE-CORE replay acceptance.
+# The official Web composition still owns Session, Agent Loop, Tool and JSONL;
+# this layer replaces only the model transport with the upstream replay adapter.
+- id: llm-deepseek
+  disabled: true
+- insert:
+    - id: llm-replay
+      # The replay package is installed only into the temporary acceptance
+      # profile; it is not a production Web dependency.
+      name: '@deepseek-ai/dsh-llm-replay'
+      config:
+        file: !!js process.env.DSH_SNAPSHOT_FILE
+        overrideFile: !!js process.env.DSH_SNAPSHOT_OVERRIDE
+        paceMs: !!js Number(process.env.DSH_REPLAY_PACE_MS ?? 0)
+        # The Web composer resolves a provider before it sends the first
+        # prompt.  Keep the replay route explicit so the official DSH
+        # SessionController can select the same route used by the fixture.
+        # This catalog is acceptance-only; it does not become a production
+        # model/provider configuration.
+        providers:
+          - id: deepseek-official
+            name: DeepSeek (replay)
+            models:
+              - id: deepseek-v4-flash
+                name: DeepSeek-V4-Flash (replay)
+                contextWindow: 128000

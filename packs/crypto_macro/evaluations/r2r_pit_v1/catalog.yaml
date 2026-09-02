@@ -1,0 +1,102 @@
+schema_version: research-evaluation-catalog.v1
+dataset_id: crypto_macro.r2r_pit.v1
+created_at: 2026-08-30T00:00:00Z
+cases:
+  - case_id: powell_stanford_20240403
+    event_family: central_bank_speech
+    published_at: 2024-04-03T16:10:00Z
+    source_id: federalreserve.gov
+    source_url: https://www.federalreserve.gov/newsevents/speech/powell20240403a.htm
+    input_text: Chair Powell said recent inflation readings were higher than expected and that policy decisions would remain data dependent.
+    event_excerpt: Federal Reserve Chair Jerome Powell delivered remarks on the economic outlook at Stanford on April 3, 2024.
+    delta_excerpt: Powell said it was too soon to say whether recent inflation readings represented more than a bump and emphasized the need for greater confidence before reducing the policy rate.
+  - case_id: powell_jackson_hole_20240823
+    event_family: central_bank_speech
+    published_at: 2024-08-23T14:00:00Z
+    source_id: federalreserve.gov
+    source_url: https://www.federalreserve.gov/newsevents/speech/powell20240823a.htm
+    input_text: Chair Powell said the time had come for policy to adjust while stressing that timing and pace would depend on incoming data and the balance of risks.
+    event_excerpt: Federal Reserve Chair Jerome Powell delivered the economic outlook address at Jackson Hole on August 23, 2024.
+    delta_excerpt: Powell stated that the time had come for policy to adjust and that the direction of travel was clear.
+  - case_id: fomc_cut_50bp_20240918
+    event_family: monetary_policy_decision
+    published_at: 2024-09-18T18:00:00Z
+    source_id: federalreserve.gov
+    source_url: https://www.federalreserve.gov/newsevents/pressreleases/monetary20240918a.htm
+    input_text: The FOMC lowered the federal funds target range by 50 basis points to 4.75-5.00 percent.
+    event_excerpt: The Federal Reserve published its September 18, 2024 monetary policy decision.
+    delta_excerpt: The Committee lowered the target range for the federal funds rate by one-half percentage point to 4.75 to 5 percent.
+  - case_id: fomc_cut_25bp_20241107
+    event_family: monetary_policy_decision
+    published_at: 2024-11-07T19:00:00Z
+    source_id: federalreserve.gov
+    source_url: https://www.federalreserve.gov/newsevents/pressreleases/monetary20241107a.htm
+    input_text: The FOMC lowered the federal funds target range by 25 basis points to 4.50-4.75 percent.
+    event_excerpt: The Federal Reserve published its November 7, 2024 monetary policy decision.
+    delta_excerpt: The Committee lowered the target range for the federal funds rate by one-quarter percentage point to 4.50 to 4.75 percent.
+  - case_id: fomc_cut_25bp_20241218
+    event_family: monetary_policy_decision
+    published_at: 2024-12-18T19:00:00Z
+    source_id: federalreserve.gov
+    source_url: https://www.federalreserve.gov/newsevents/pressreleases/monetary20241218a.htm
+    input_text: The FOMC lowered the federal funds target range by 25 basis points to 4.25-4.50 percent.
+    event_excerpt: The Federal Reserve published its December 18, 2024 monetary policy decision.
+    delta_excerpt: The Committee lowered the target range for the federal funds rate by one-quarter percentage point to 4.25 to 4.50 percent.
+  - case_id: us_cpi_20250115
+    event_family: inflation_release
+    published_at: 2025-01-15T13:30:00Z
+    source_id: bls.gov
+    source_url: https://www.bls.gov/news.release/archives/cpi_01152025.htm
+    input_text: US CPI rose 0.4 percent in December 2024 and 2.9 percent over twelve months.
+    event_excerpt: The Bureau of Labor Statistics released December 2024 Consumer Price Index data on January 15, 2025.
+    delta_excerpt: The all-items index increased 0.4 percent in December and 2.9 percent over the twelve months ending December.
+  - case_id: us_cpi_20250212
+    event_family: inflation_release
+    published_at: 2025-02-12T13:30:00Z
+    source_id: bls.gov
+    source_url: https://www.bls.gov/news.release/archives/cpi_02122025.htm
+    input_text: US CPI rose 0.5 percent in January 2025 and 3.0 percent over twelve months.
+    event_excerpt: The Bureau of Labor Statistics released January 2025 Consumer Price Index data on February 12, 2025.
+    delta_excerpt: The all-items index increased 0.5 percent in January and 3.0 percent over the twelve months ending January.
+  - case_id: us_pce_20250228
+    event_family: inflation_release
+    published_at: 2025-02-28T13:30:00Z
+    source_id: bea.gov
+    source_url: https://www.bea.gov/news/2025/personal-income-and-outlays-january-2025
+    input_text: US PCE prices rose 0.3 percent in January 2025; excluding food and energy, prices also rose 0.3 percent.
+    event_excerpt: The Bureau of Economic Analysis released January 2025 personal income and outlays data on February 28, 2025.
+    delta_excerpt: The PCE price index increased 0.3 percent in January and 2.5 percent from one year earlier; the core index rose 0.3 percent and 2.6 percent year over year.
+  - case_id: us_jobs_20250207
+    event_family: labor_release
+    published_at: 2025-02-07T13:30:00Z
+    source_id: bls.gov
+    source_url: https://www.bls.gov/news.release/archives/empsit_02072025.htm
+    input_text: US nonfarm payroll employment rose by 143,000 in January 2025 and unemployment edged down to 4.0 percent.
+    event_excerpt: The Bureau of Labor Statistics released the January 2025 Employment Situation on February 7, 2025.
+    delta_excerpt: Total nonfarm payroll employment rose by 143,000 and the unemployment rate edged down to 4.0 percent.
+  - case_id: us_jobs_20250307
+    event_family: labor_release
+    published_at: 2025-03-07T13:30:00Z
+    source_id: bls.gov
+    source_url: https://www.bls.gov/news.release/archives/empsit_03072025.htm
+    input_text: US nonfarm payroll employment rose by 151,000 in February 2025 and unemployment edged up to 4.1 percent.
+    event_excerpt: The Bureau of Labor Statistics released the February 2025 Employment Situation on March 7, 2025.
+    delta_excerpt: Total nonfarm payroll employment rose by 151,000 and the unemployment rate edged up to 4.1 percent.
+  - case_id: iran_attack_israel_20240413
+    event_family: geopolitical_shock
+    published_at: 2024-04-13T22:00:00Z
+    source_id: bidenwhitehouse.archives.gov
+    source_url: https://bidenwhitehouse.archives.gov/briefing-room/statements-releases/2024/04/13/statement-from-president-joe-biden-on-irans-attacks-against-the-state-of-israel/
+    input_text: Iran launched an unprecedented aerial attack against Israel, sharply raising regional escalation risk.
+    event_excerpt: President Biden issued a statement on Iran's April 13, 2024 attacks against Israel.
+    delta_excerpt: The statement described an unprecedented aerial attack launched from Iran and Yemen involving drones and missiles.
+  - case_id: israel_strikes_iran_20241026
+    event_family: geopolitical_shock
+    published_at: 2024-10-26T03:00:00Z
+    source_id: reuters.com
+    source_url: https://www.reuters.com/world/middle-east/explosions-heard-iran-syria-israel-starts-retaliatory-strikes-2024-10-25/
+    authority: verified_web
+    kind: web
+    input_text: Israel carried out retaliatory strikes against military targets in Iran, creating a new regional escalation and retaliation decision point.
+    event_excerpt: Reuters reported Israeli strikes against military targets in Iran on October 26, 2024.
+    delta_excerpt: Israel said the operation was a response to months of attacks and Iran said the strikes caused limited damage, leaving the next retaliation step uncertain.

@@ -1,6 +1,6 @@
 # Decision Hub TDD / SDD 与自测规范
 
-版本：`TDD-SDD-2026-08-26.v1`  
+版本：`TDD-SDD-2026-08-26.v1`
 适用范围：R0 文本输入到决策、预测、结果评估的纵向链；未来来源、领域 Pack、Runtime 和前端模块也必须遵守本规范。
 
 ## 1. 目的与边界
@@ -138,4 +138,4 @@ Live canary 的通过条件是：Provider 返回可解析的 `AgentPayload`，�
 
 ## 9. 当前基线与剩余缺口
 
-截至 2026-08-28，R0/R1/R1-L 离线代码门和 R2-00 至 R2-05 的离线 U2 工程退出门已通过：文本纵向链、来源/调度/outbox、PIT replay/holdout/离线 shadow、Run Inspector、Workbench/Core MCP、评测资产、候选 Runtime、Supervisor 和人工 Promotion/Rollback 均有可重复测试证据。外部 Provider 的一次兼容性 canary 不能证明生产稳定性；真实来源/行情/通知、实时 ASR、真实 DSH/Pi 插件、长期 production shadow、预测准确率和盈利能力仍未完成验证。任何实现或报告必须保持这一边界。
+截至 2026-08-30，R0/R1/R1-L 离线代码门、R2-00 至 R2-05 离线 U2 工程退出门、R2-L 本机工程门和 R2-R-00 至 R2-R-06E candidate path 均有可重复测试证据：文本 fixed baseline、来源/调度/outbox、PIT replay/holdout/离线 shadow、Run Inspector、Workbench/Core MCP、评测资产、Evolution Supervisor、DSH Harness tool loop、主动补证、双 Snapshot、durable worker、Research Trace 和人工 Promotion/Rollback 均已覆盖。R2-R-06E 的结论是 `retain_baseline / pending_owner_review`；外部 Provider/真实事件证据仍不能证明 DSH 已晋级 active、生产稳定性、预测准确率或盈利能力，后续任何 Search reliability 候选必须建立新的 BDD/TDD 和 owner gate。

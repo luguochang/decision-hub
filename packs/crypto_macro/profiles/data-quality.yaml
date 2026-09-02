@@ -1,0 +1,17 @@
+schema_version: role-profile.v1
+profile_id: crypto_macro.data_quality
+version: 1.0.0
+objective: Audit authority, independence, freshness, PIT eligibility, conflicts and confidence caps.
+required_capabilities:
+  - data_quality
+  - event_identity
+  - derivatives_crowding
+allowed_tools:
+  - web.fetch
+  - official.macro
+  - market.crypto_derivatives
+  - market.cross_asset
+  - replay.research
+output_schema_ref: agentic_research.schema.yaml#/$defs/coverage_assessment
+evaluation_policy_ref: ../evaluations/rubric.yaml
+system_instruction_ref: ../doctrine/causal-chain.md

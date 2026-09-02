@@ -1,0 +1,19 @@
+{
+  "fixture_id": "evolution-holdout-powell.v1",
+  "split": "holdout",
+  "received_at": "2026-08-25T09:00:02Z",
+  "observation": {
+    "text": "Powell says rates may stay higher for longer while inflation remains elevated.",
+    "source_id": "fixture-evolution-holdout",
+    "source_type": "manual",
+    "language": "en",
+    "event_hint": "powell",
+    "observed_at": "2026-08-25T09:00:00Z",
+    "published_at": "2026-08-25T08:59:00Z"
+  },
+  "outcomes": [
+    {"horizon": "30m", "available_at": "2026-08-25T09:31:00Z", "return_pct": -0.8, "direction_correct": true, "fees": 0.1, "slippage": 0.1, "quality_status": "fixture"},
+    {"horizon": "24h", "available_at": "2026-08-26T09:01:00Z", "return_pct": -1.4, "direction_correct": true, "fees": 0.1, "slippage": 0.1, "quality_status": "fixture"},
+    {"horizon": "72h", "available_at": "2026-08-28T09:01:00Z", "return_pct": 0.4, "direction_correct": false, "fees": 0.1, "slippage": 0.1, "quality_status": "fixture"}
+  ]
+}
