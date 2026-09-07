@@ -49,6 +49,8 @@ else
   node "$repo_root/infra/dsh/verify-upstream.mjs" "$source_dir" >/dev/null
 fi
 mkdir -p "$web_home"
+source "$repo_root/infra/dsh/home-lock.sh"
+dsh_acquire_home_lock "$web_home"
 
 expected_pnpm="$(node -e "const p=require(process.argv[1]); process.stdout.write(p.pnpm)" "$repo_root/infra/dsh/upstream.lock.json")"
 if command -v corepack >/dev/null 2>&1; then
@@ -61,6 +63,45 @@ dsh_cli=(node "$source_dir/apps/cli/lib/bin.js")
 export DSH_HOME="$web_home"
 plugin_dir="$repo_root/extensions/dsh/decision-hub"
 preset_root="$repo_root/infra/dsh/presets"
+
+# Optional official DSH observability bundle. It is deliberately opt-in so
+# the product launcher and existing replay/live profiles keep their current
+# dependency closure. The version is read from the repository lock and the
+# package is installed through DSH's own profile plugin command; no upstream
+# source or business module imports the plugin.
+if [[ "${DSH_OBSERVABILITY_ENABLED:-0}" == "1" ]]; then
+  observability_lock="$repo_root/infra/dsh/observability/plugin.lock.json"
+  if [[ ! -f "$observability_lock" ]]; then
+    echo "DSH observability lock is missing: $observability_lock" >&2
+    exit 1
+  fi
+  observability_package="$(node -e "const p=require(process.argv[1]); if(p.package !== '@loongsuite/dsh-plugin' || p.version !== '0.1.2') process.exit(1); process.stdout.write(p.package + '@' + p.version)" "$observability_lock")" || {
+    echo "DSH observability lock does not contain the approved package/version" >&2
+    exit 1
+  }
+  "${dsh_cli[@]}" plugin --profile web add --save-exact "$observability_package"
+  node - "$web_home/profiles/web/package.json" "$observability_package" <<'NODE'
+const fs = require('node:fs')
+const [manifestPath, packageSpec] = process.argv.slice(2)
+const separator = packageSpec.lastIndexOf('@')
+const name = packageSpec.slice(0, separator)
+const version = packageSpec.slice(separator + 1)
+const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+if (manifest.dependencies?.[name] !== version) {
+  throw new Error(`observability package is not exact-pinned: ${name}=${manifest.dependencies?.[name]}`)
+}
+NODE
+  observability_integrity="$(node -e "const p=require(process.argv[1]); process.stdout.write(p.integrity)" "$observability_lock")"
+  node - "$web_home/profiles/web/pnpm-lock.yaml" "$observability_integrity" <<'NODE'
+const fs = require('node:fs')
+const [lockPath, integrity] = process.argv.slice(2)
+const lock = fs.readFileSync(lockPath, 'utf8')
+const match = lock.match(/'@loongsuite\/dsh-plugin@0\.1\.2':\n(?:  .*\n)*?    resolution: \{integrity: ([^}]+)\}/)
+if (match?.[1] !== integrity) {
+  throw new Error('observability pnpm lock integrity does not match plugin.lock.json')
+}
+NODE
+fi
 
 # Build the plugin before it is installed into the profile. The upstream
 # client-modules host serves the packaged `./client` export and fails loudly

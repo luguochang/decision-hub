@@ -11,6 +11,7 @@ allowed_tools:
   - web.fetch
   - official.macro
   - market.cross_asset
+  - macro.cross_asset_intraday
 output_schema_ref: agentic_research.schema.yaml#/$defs/causal_case
 evaluation_policy_ref: ../evaluations/rubric.yaml
 system_instruction_ref: ../doctrine/causal-chain.md

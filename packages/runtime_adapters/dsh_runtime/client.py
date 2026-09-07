@@ -46,11 +46,11 @@ class DshRuntimeConfig(BaseModel):
             shutdown_timeout_seconds=float(
                 os.getenv("DECISION_HUB_DSH_SHUTDOWN_TIMEOUT_SECONDS", "2")
             ),
-            base_url=_first_nonempty(
-                "DECISION_HUB_DSH_BASE_URL",
-                "DEEPSEEK_BASE_URL",
-                "SUB2API_BASE_URL",
-                "OPENAI_BASE_URL",
+            # Provider namespaces are deliberately isolated.  An unrelated
+            # OPENAI_BASE_URL in the shell must never reroute the official
+            # DeepSeek adapter (and pair a DeepSeek key with a different API).
+            base_url=_base_url_for_provider(
+                os.getenv("DECISION_HUB_DSH_PROVIDER", "deepseek-official")
             ),
             research_mcp_url=_optional_http_url(
                 os.getenv("DECISION_HUB_RESEARCH_MCP_URL")
@@ -218,6 +218,17 @@ def _first_nonempty(*names: str) -> str | None:
         if value:
             return value
     return None
+
+
+def _base_url_for_provider(provider: str) -> str | None:
+    """Resolve an endpoint without crossing provider credential namespaces."""
+
+    explicit = _first_nonempty("DECISION_HUB_DSH_BASE_URL")
+    if explicit is not None:
+        return explicit
+    if provider == "deepseek-official":
+        return _first_nonempty("DEEPSEEK_BASE_URL", "SUB2API_BASE_URL")
+    return _first_nonempty("OPENAI_BASE_URL", "SUB2API_BASE_URL")
 
 
 def _optional_http_url(value: str | None) -> AnyHttpUrl | None:

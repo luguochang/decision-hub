@@ -6,6 +6,7 @@ import pytest
 from packages.contracts_py.decision_hub_contracts import (
     EvidenceCandidate,
     EvidenceRequirement,
+    FactEnvelope,
 )
 from packages.kernel.decision_hub_kernel.decision.sufficiency import (
     EvidenceSufficiencyError,
@@ -57,6 +58,36 @@ def _evidence(**overrides: Any) -> EvidenceCandidate:
     return EvidenceCandidate.model_validate(values)
 
 
+def _fact(**overrides: Any) -> FactEnvelope:
+    values = {
+        "schema_version": "fact-envelope.v1",
+        "fact_id": "fact-1",
+        "evidence_id": "evidence-1",
+        "requirement_id": "rates",
+        "metric_family": "macro.rates",
+        "field": "level",
+        "instrument": "DGS2",
+        "venue": None,
+        "value": 4.2,
+        "unit": "yield_percent",
+        "window_start_at": NOW - timedelta(minutes=5),
+        "window_end_at": NOW - timedelta(minutes=4),
+        "event_offset": "t-5m",
+        "observed_at": NOW - timedelta(seconds=10),
+        "received_at": NOW - timedelta(seconds=5),
+        "published_at": NOW - timedelta(minutes=5),
+        "source_id": "treasury",
+        "independence_group": "treasury:DGS2",
+        "quality": "accepted",
+        "delay_class": "realtime",
+        "payload_schema_ref": "test.fact.v1",
+        "payload_hash": "1" * 64,
+        "attributes": {},
+    }
+    values.update(overrides)
+    return FactEnvelope.model_validate(values)
+
+
 def test_hard_requirement_is_covered_only_by_fresh_authoritative_evidence() -> None:
     result = assess_evidence_sufficiency([_requirement()], [_evidence()], cutoff_at=NOW)
     assert result.status == "sufficient"
@@ -106,3 +137,124 @@ def test_naive_datetime_is_rejected() -> None:
             [_evidence()],
             cutoff_at=datetime(2026, 8, 29, 12),
         )
+
+
+def test_crypto_derivatives_cannot_satisfy_policy_expectation_pricing() -> None:
+    requirement = _requirement(
+        requirement_id="expectation_pricing",
+        source_priority=["exchange"],
+        authority_floor="exchange",
+        accepted_metric_families=["macro.policy_expectation"],
+        required_metric_families=["macro.policy_expectation"],
+        required_fields=["level", "delta"],
+        required_event_offsets=["t-5m", "t+1m"],
+        field_units={"level": ["probability"], "delta": ["percentage_point"]},
+        allowed_delay_classes=["realtime"],
+        semantic_policy_ref="crypto_macro.fact_semantics.v1#expectation_pricing",
+    )
+    evidence = _evidence(
+        requirement_id="expectation_pricing",
+        authority="exchange",
+        kind="market",
+    )
+    fact = _fact(
+        requirement_id="expectation_pricing",
+        metric_family="crypto.derivatives",
+        field="funding_rate",
+        unit="rate",
+    )
+
+    result = assess_evidence_sufficiency(
+        [requirement], [evidence], facts=[fact], cutoff_at=NOW
+    )
+
+    assert result.status == "insufficient"
+    assert result.gaps[0].reason_code == "semantic_mismatch"
+
+
+def test_current_snapshot_cannot_satisfy_an_event_window_delta() -> None:
+    requirement = _requirement(
+        accepted_metric_families=["crypto.spot"],
+        required_metric_families=["crypto.spot"],
+        required_fields=["price", "volume", "event_return"],
+        required_event_offsets=["t-5m", "t+1m"],
+        field_units={
+            "price": ["usdt"],
+            "volume": ["btc"],
+            "event_return": ["percent"],
+        },
+        venue_required=True,
+        allowed_delay_classes=["realtime"],
+        semantic_policy_ref="crypto_macro.fact_semantics.v1#crypto_spot",
+    )
+    facts = [
+        _fact(
+            fact_id="price",
+            metric_family="crypto.spot",
+            field="price",
+            unit="usdt",
+            venue="coinex",
+            event_offset="t+1m",
+        ),
+        _fact(
+            fact_id="volume",
+            metric_family="crypto.spot",
+            field="volume",
+            unit="btc",
+            venue="coinex",
+            event_offset="t+1m",
+        ),
+        _fact(
+            fact_id="return",
+            metric_family="crypto.spot",
+            field="event_return",
+            unit="percent",
+            venue="coinex",
+            event_offset="t+1m",
+        ),
+    ]
+
+    result = assess_evidence_sufficiency(
+        [requirement], [_evidence()], facts=facts, cutoff_at=NOW
+    )
+
+    assert result.status == "insufficient"
+    assert result.gaps[0].reason_code == "no_baseline"
+
+
+def test_wrong_fact_unit_is_a_semantic_mismatch() -> None:
+    requirement = _requirement(
+        accepted_metric_families=["macro.rates"],
+        required_fields=["level"],
+        field_units={"level": ["yield_percent"]},
+        allowed_delay_classes=["realtime"],
+        semantic_policy_ref="crypto_macro.fact_semantics.v1#rates",
+    )
+    result = assess_evidence_sufficiency(
+        [requirement],
+        [_evidence()],
+        facts=[_fact(unit="usd")],
+        cutoff_at=NOW,
+    )
+    assert result.gaps[0].reason_code == "semantic_mismatch"
+
+
+def test_complete_semantic_fact_set_covers_requirement() -> None:
+    requirement = _requirement(
+        accepted_metric_families=["macro.rates"],
+        required_metric_families=["macro.rates"],
+        required_fields=["level", "event_return"],
+        required_event_offsets=["t-5m", "t+1m"],
+        field_units={"level": ["yield_percent"], "event_return": ["bps"]},
+        allowed_delay_classes=["realtime"],
+        semantic_policy_ref="crypto_macro.fact_semantics.v1#rates",
+    )
+    facts = [
+        _fact(fact_id="baseline", field="level", event_offset="t-5m"),
+        _fact(fact_id="reaction", field="event_return", unit="bps", event_offset="t+1m"),
+    ]
+    result = assess_evidence_sufficiency(
+        [requirement], [_evidence()], facts=facts, cutoff_at=NOW
+    )
+    assert result.status == "sufficient"
+    assert result.covered_requirement_ids == ["rates"]

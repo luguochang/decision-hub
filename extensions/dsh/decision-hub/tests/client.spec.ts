@@ -19,12 +19,16 @@ function loadClientTestSurface(): {
   shouldPollReport: (link: unknown, detail: unknown, error: unknown) => boolean
   terminalReportModelOf: (link: unknown, error: unknown) => any
   reportViewRegistration: () => { name: string; id: string; order: number; label: string }
+  inboxViewRegistration: () => { name: string; id: string; order: number; label: string }
+  inboxItemModelOf: (value: unknown) => any
+  openInboxSessionOf: (sessions: unknown, value: unknown, currentSessionId: string | null) => Promise<boolean>
   retryCommand: (runId: string) => unknown
   intakeAction: (state: string, runId: string | null, managed?: boolean) => string
   managedSubmissionOf: (value: unknown) => any
   managedSessionIdOf: (value: unknown, currentSessionId: string | null) => string | null
   openManagedSessionOf: (sessions: unknown, value: unknown, currentSessionId: string | null) => Promise<boolean>
   conversationSessionIdOf: (props: unknown) => string | null
+  conversationScopeProps: (props: unknown, owned?: Record<string, unknown>) => Record<string, unknown>
   productWorkspaceOf: (value: unknown) => any
   latestProductSessionOf: (workspace: unknown, snapshot: unknown, archived?: unknown) => string | null
   autoSelectProductWorkspace: (sessions: unknown, workspaces: unknown) => () => void
@@ -259,6 +263,10 @@ describe('Decision Hub DSH Client projection', () => {
     })
     expect(model.stopReason).toContain('47 facts retained')
     expect(model.failures[0].error_code).toBe('dsh_evidence_unattested')
+
+    expect(reportStateOf(link, null, 'research_report_unavailable')).toBe('terminal_error')
+    expect(terminalReportModelOf({ ...link, business: { ...link.business, stop_reason_detail: null } }, 'research_report_unavailable'))
+      .toMatchObject({ status: 'failed', stopReason: 'research_report_unavailable' })
   })
 
   it('keeps refreshing a readable report until the Hub business reaches a terminal state', () => {
@@ -278,6 +286,69 @@ describe('Decision Hub DSH Client projection', () => {
     expect(registration.id).not.toBe('trajectory')
   })
 
+  it('registers a separate official active-research Inbox view', () => {
+    expect(loadClientTestSurface().inboxViewRegistration()).toEqual({
+      name: 'conversation.view', id: 'decision-hub-inbox', order: 10, label: '主动研究',
+    })
+    const source = readFileSync(resolve(process.cwd(), 'src/client/index.js'), 'utf8')
+    expect(source).toContain("fetch('/api/decision-hub/inbox?limit=100'")
+    expect(source).toContain("inboxViewRegistration(), props => createElement(ResearchInboxView")
+  })
+
+  it('maps canonical Inbox state without exposing raw JSON', () => {
+    const { inboxItemModelOf } = loadClientTestSurface()
+    const model = inboxItemModelOf({
+      event_id: 'event-fed-1', event_title: 'Fed Chair speech', event_family: 'central_bank_speech',
+      run_id: 'run-1', dsh_session_id: 'dsh-1', status: 'research_only',
+      baseline_status: 'ready', gate_status: 'research_only', notification_status: 'delivered',
+      admission_origin: 'automatic', report_available: true, headline: '研究结论', summary: '关键事实仍受限。',
+      scheduled_at: null, next_recheck_at: '2026-09-05T10:00:00Z', updated_at: '2026-09-05T09:00:00Z',
+    })
+    expect(model).toMatchObject({
+      eventId: 'event-fed-1', title: 'Fed Chair speech', status: '仅研究', baseline: '基线就绪',
+      gate: '仅研究', notification: '通知已送达', origin: '自动发现', runId: 'run-1',
+      sessionId: 'dsh-1', canOpenSession: true, isWatchOnly: false, reportAvailable: true,
+    })
+    expect(JSON.stringify(model)).not.toContain('schema_version')
+  })
+
+  it('keeps watch-only Inbox items sessionless', async () => {
+    const { inboxItemModelOf, openInboxSessionOf } = loadClientTestSurface()
+    const item = {
+      event_id: 'event-watch', event_title: 'Upcoming CPI', event_family: 'macro_release',
+      run_id: null, dsh_session_id: null, status: 'watching', baseline_status: 'pending', gate_status: null,
+      notification_status: 'not_applicable', admission_origin: 'automatic', report_available: false, updated_at: '2026-09-05T09:00:00Z',
+    }
+    expect(inboxItemModelOf(item)).toMatchObject({
+      status: '观察中', baseline: '基线采集中', canOpenSession: false, isWatchOnly: true,
+    })
+    const sessions = { refresh: async () => { throw new Error('must not refresh') } }
+    await expect(openInboxSessionOf(sessions, item, null)).resolves.toBe(false)
+  })
+
+  it('opens only a canonical Inbox managed Session through the official controller', async () => {
+    const { openInboxSessionOf } = loadClientTestSurface()
+    const calls: string[] = []
+    const sessions = {
+      refresh: async () => { calls.push('refresh') },
+      binding: (id: string) => { calls.push('binding:' + id); return { sessionId: id } },
+      open: (id: string) => { calls.push('open:' + id) },
+    }
+    await expect(openInboxSessionOf(sessions, {
+      event_id: 'event-1', event_title: 'Event', run_id: 'run-1', dsh_session_id: 'dsh-managed',
+      status: 'report_ready', baseline_status: 'ready', gate_status: 'publish',
+      notification_status: 'delivered', admission_origin: 'automatic', report_available: true,
+    }, 'dsh-current')).resolves.toBe(true)
+    expect(calls).toEqual(['refresh', 'binding:dsh-managed', 'open:dsh-managed'])
+  })
+
+  it('does not inject a duplicate full report into the composer dock', () => {
+    const source = readFileSync(resolve(process.cwd(), 'src/client/index.js'), 'utf8')
+    expect(source).toContain("ctx.slots.inject('conversation.view'")
+    expect(source).not.toContain("ctx.slots.inject('conversation.composer.dock'")
+    expect(source).not.toContain('decision-hub-report-inline')
+  })
+
   it('builds one deterministic retry command per failed source Run', () => {
     expect(loadClientTestSurface().retryCommand('run/one')).toEqual({
       schema_version: 'research-run-command.v1',
@@ -293,6 +364,18 @@ describe('Decision Hub DSH Client projection', () => {
     expect(intakeAction('tracking', 'run-2')).toBe('disabled')
     expect(intakeAction('error', 'run-2')).toBe('retry')
     expect(intakeAction('complete', 'run-2')).toBe('submit')
+  })
+
+  it('routes native send and Enter through the Hub intake intent only for unmanaged research', () => {
+    const { researchComposerSubmitIntent } = loadClientTestSurface()
+    const sendTarget = { closest: (selector: string) => selector.includes('发送消息') ? {} : null }
+    const inputTarget = { closest: (selector: string) => selector.includes('data-composer-input') ? {} : null }
+
+    expect(researchComposerSubmitIntent({ type: 'click', target: sendTarget })).toBe(true)
+    expect(researchComposerSubmitIntent({ type: 'keydown', key: 'Enter', shiftKey: false, isComposing: false, target: inputTarget })).toBe(true)
+    expect(researchComposerSubmitIntent({ type: 'keydown', key: 'Enter', shiftKey: true, isComposing: false, target: inputTarget })).toBe(false)
+    expect(researchComposerSubmitIntent({ type: 'keydown', key: 'Enter', shiftKey: false, isComposing: true, target: inputTarget })).toBe(false)
+    expect(researchComposerSubmitIntent({ type: 'click', target: inputTarget })).toBe(false)
   })
 
   it('treats an already linked DSH session as managed and never offers a second mainline intake', () => {
@@ -317,6 +400,25 @@ describe('Decision Hub DSH Client projection', () => {
     expect(conversationSessionIdOf({ sessionId: 'direct-session' })).toBe('direct-session')
     expect(conversationSessionIdOf({ session: { sessionId: 'nested-session' } })).toBe('nested-session')
     expect(conversationSessionIdOf({})).toBeNull()
+  })
+
+  it('projects a non-enumerable official Session identity across nested plugin views', () => {
+    const { conversationScopeProps } = loadClientTestSurface()
+    const hostProps = Object.defineProperty({}, 'sessionId', {
+      value: ' dsh-managed-session ',
+      enumerable: false,
+    })
+
+    expect({ ...hostProps }).not.toHaveProperty('sessionId')
+    expect(conversationScopeProps(hostProps, { surface: 'view' })).toEqual({
+      surface: 'view',
+      sessionId: 'dsh-managed-session',
+    })
+
+    const source = readFileSync(resolve(process.cwd(), 'src/client/index.js'), 'utf8')
+    expect(source).toContain('createElement(ResearchReportCard, conversationScopeProps(props')
+    expect(source).toContain('createElement(ResearchInboxView, conversationScopeProps(props')
+    expect(source).toContain('createElement(ResearchIntakeControl, conversationScopeProps(props')
   })
 
   it('refreshes and opens a Host-created Session through the official controller', async () => {

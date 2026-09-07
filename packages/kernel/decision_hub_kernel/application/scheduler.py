@@ -14,6 +14,7 @@ from packages.kernel.decision_hub_kernel.application.source_ingest import (
     SourceIngestResult,
 )
 from packages.kernel.decision_hub_kernel.persistence.db import utcnow
+from packages.kernel.decision_hub_kernel.ports.sources import EventWindowSamplerPort
 
 
 class SchedulerReport(BaseModel):
@@ -24,6 +25,9 @@ class SchedulerReport(BaseModel):
     runs_failed: int = 0
     outcomes_processed: int = 0
     notifications_delivered: int = 0
+    window_samples_attempted: int = 0
+    window_samples_captured: int = 0
+    window_samples_failed: int = 0
     generated_at: datetime
 
 
@@ -37,12 +41,14 @@ class RealtimeScheduler:
         run_executor: Callable[[RunTarget], Awaitable[None]] | None = None,
         outcomes: DueOutcomeService | None = None,
         notifications: NotificationDispatcher | None = None,
+        window_sampler: EventWindowSamplerPort | None = None,
         clock: Callable[[], datetime] = utcnow,
     ) -> None:
         self.ingestion = ingestion
         self.run_executor = run_executor
         self.outcomes = outcomes
         self.notifications = notifications
+        self.window_sampler = window_sampler
         self.clock = clock
 
     async def tick(self) -> SchedulerReport:
@@ -52,6 +58,18 @@ class RealtimeScheduler:
                 for manifest in self.ingestion.registry.manifests()
             ]
         )
+        # Advance calendar watches in the same durable scheduler tick. The
+        # sampler/provider is a separate seam and may capture due slots later.
+        window_report = (
+            await self.ingestion.event_watches.capture_due(
+                self.window_sampler,
+                now=self.clock(),
+            )
+            if self.window_sampler is not None
+            else None
+        )
+        if window_report is None:
+            self.ingestion.event_watches.advance(now=self.clock())
         # Poll results are the fast path; durable admitted Runs cover a crash after
         # cursor commit and before graph execution.
         targets_by_run = {
@@ -80,6 +98,9 @@ class RealtimeScheduler:
             runs_failed=failed,
             outcomes_processed=outcomes,
             notifications_delivered=delivered,
+            window_samples_attempted=window_report.attempted if window_report else 0,
+            window_samples_captured=window_report.captured if window_report else 0,
+            window_samples_failed=window_report.failed if window_report else 0,
             generated_at=self.clock(),
         )
 

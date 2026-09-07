@@ -1,0 +1,12 @@
+{
+  "schema_version": "decision-hub.dsh-observability-plugin-lock.v1",
+  "package": "@loongsuite/dsh-plugin",
+  "version": "0.1.2",
+  "integrity": "sha512-eOnFHG6HoQ3exJSDetv2W8VXmAWsJv1rfdoHjFdDmuPuMPIymZAKH4gbXSDOZWEipDxEeCufqzd3Ob1i1U59+w==",
+  "tarball": "https://registry.npmjs.org/@loongsuite/dsh-plugin/-/dsh-plugin-0.1.2.tgz",
+  "license": "Apache-2.0",
+  "node": ">=22.19.0",
+  "dsh_source_version": "0.1.2-alpha.2",
+  "dsh_source_commit": "0a53fb55bea101816fa226bb964ae2bed71c343b",
+  "compatibility_status": "exact_canary_passed_2026-09-02"
+}

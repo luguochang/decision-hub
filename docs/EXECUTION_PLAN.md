@@ -15,7 +15,7 @@
 3. 为了修当前错误修改架构，造成协议、账本和运行时后续无法迁移。
 4. 阶段目标从“验证决策价值”漂移成“打磨看起来复杂的基础设施”。
 
-本文件不创建第二套架构，不覆盖 V1 中已经确认的 OD-01～OD-16；如果本文件与 V1、ADR、canonical schema 或模块 README 冲突，必须停止实现并先修订 ADR。
+本文件不创建第二套架构，不覆盖 V1 中已经确认的 OD-01～OD-16；如果本文件与 V1、ADR、canonical schema 或模块 README 冲突，必须停止实现并先修订 ADR。当前产品事实充分度执行入口为 [PD Stage Charter](stages/PD_PRODUCT_FACT_SUFFICIENCY_AND_ACTIVE_DELIVERY.md)：PD-00..06 runtime closeout 已完成，当前唯一下一阶段是 [PD-07 前瞻价值观察](stages/PD_07_PROSPECTIVE_VALUE_OBSERVATION.md)。观察时钟只能从第一条合格未来 EventWatch 开始，不能用历史/replay 回填，也不能在价值门通过前宣称产品交付；本轮工程收口细节见 [主动研究交付修复方案](product/PRODUCT_AGENTIC_FACT_SUFFICIENCY_REMEDIATION_2026-09-05.md)。
 
 ## 2. 总体实施原则
 
@@ -84,6 +84,7 @@ TextEnvelope
 | R2 | Workbench 与自主进化 | DSH MCP、replay/shadow、Promotion | `done`（离线 U2；观察期） | 候选可比较、人工晋级、可回滚 |
 | R2-L | Live Observation 运行化收口 | existing scheduler/Supervisor/Evaluation、SQLite lease、React Query | `done (offline + local process acceptance) / observation` | 三进程可恢复、Job 可观察、候选只待 owner review；Compose registry smoke blocked |
 | R2-R | Agentic Research Runtime | DSH Python SDK + 受限 research profile、LangGraph lifecycle、Tool Gateway、双 Snapshot | `done / retain_baseline / owner review pending` | 候选链主动补证、真实工具循环、独立周期、自动触发、可恢复/可观测、Fixed vs DSH 真实验收；DSH 未晋级 active |
+| G2-AF | 主动事实获取与自主研究 | DSH Agent Loop、LangGraph lifecycle、Capability Catalog、DSH native Search/Tavily/Fetch/Typed Provider adapter | `G2-AF-01..04 technical gates passed / G2-AF-05 observation` | hard gap 有未尝试 fallback 时继续；DSH/Tavily Search 只做 discovery，原文/typed provider 验证后入账；事件自动触发、报告/通知/复查已贯通；完成前瞻价值门前不切 active |
 | R3 | 第二领域和按需部署扩展 | Domain Extension、PostgreSQL 迁移出口 | `blocked by R2-R` | 第二领域复用 Kernel，不复制主链 |
 
 ### 阶段门的固定顺序

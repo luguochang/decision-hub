@@ -41,6 +41,17 @@ def test_provider_config_reads_chat_mode_without_changing_contract(
     assert config.capability_manifest().supports_api_mode("chat") is True
 
 
+def test_provider_config_treats_empty_optional_base_urls_as_unset(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OPENAI_BASE_URL", "")
+    monkeypatch.setenv("SUB2API_BASE_URL", "")
+
+    config = ProviderConfig.from_env()
+
+    assert config.base_url is None
+
+
 def test_provider_config_rejects_unknown_api_mode_before_provider_call(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

@@ -26,6 +26,17 @@ window.__ModuleLoader__.load({
       completed: '研究完成', degraded: '研究降级完成', research_only: '仅研究完成',
       rejected: '研究已拒绝', failed: '研究失败', cancelled: '研究已取消',
     }
+    const inboxStatusLabels = {
+      watching: '观察中', queued: '排队中', researching: '研究中', report_ready: '报告就绪',
+      research_only: '仅研究', rejected: '已拒绝', failed: '失败', cancelled: '已取消',
+    }
+    const baselineStatusLabels = {
+      not_applicable: '无需基线', pending: '基线采集中', ready: '基线就绪', unavailable: '基线不可用',
+    }
+    const notificationStatusLabels = {
+      not_applicable: '无需通知', pending: '通知待发送', retry_wait: '通知待重试',
+      delivered: '通知已送达', failed: '通知失败',
+    }
     const FINAL_BUSINESS = new Set(['completed', 'degraded', 'research_only', 'rejected', 'failed', 'cancelled'])
         const STATUS_POLL_MS = 3_000
     const PRODUCT_WORKSPACE_TITLE = 'Crypto Macro Trader'
@@ -113,6 +124,17 @@ window.__ModuleLoader__.load({
           return target.closest('[data-composer-input], [aria-label="发送消息"]') !== null
         }
 
+        function researchComposerSubmitIntent(event) {
+          const target = event?.target
+          if (target === null || typeof target !== 'object' || typeof target.closest !== 'function') return false
+          if (event.type === 'click') return target.closest('[aria-label="发送消息"]') !== null
+          return event.type === 'keydown'
+            && event.key === 'Enter'
+            && event.shiftKey !== true
+            && event.isComposing !== true
+            && target.closest('[data-composer-input]') !== null
+        }
+
         function composerText(documentLike) {
           const input = documentLike?.querySelector?.('[data-composer-input]')
           return typeof input?.textContent === 'string' ? input.textContent.trim() : ''
@@ -147,6 +169,10 @@ window.__ModuleLoader__.load({
           if (direct.length > 0) return direct
           const nested = typeof props?.session?.sessionId === 'string' ? props.session.sessionId.trim() : ''
           return nested.length > 0 ? nested : null
+        }
+
+        function conversationScopeProps(props, owned = {}) {
+          return { ...owned, sessionId: conversationSessionIdOf(props) }
         }
 
         function researchStatusUrl(runId) {
@@ -237,6 +263,47 @@ window.__ModuleLoader__.load({
 
     function reportViewRegistration() {
       return { name: 'conversation.view', id: 'decision-hub-report', order: 20, label: '研究报告' }
+    }
+
+    function inboxViewRegistration() {
+      return { name: 'conversation.view', id: 'decision-hub-inbox', order: 10, label: '主动研究' }
+    }
+
+    function inboxItemModelOf(item) {
+      if (item === null || typeof item !== 'object' || typeof item.event_id !== 'string') return null
+      const sessionId = typeof item.dsh_session_id === 'string' && item.dsh_session_id.trim().length > 0
+        ? item.dsh_session_id.trim()
+        : null
+      const runId = typeof item.run_id === 'string' && item.run_id.trim().length > 0
+        ? item.run_id.trim()
+        : null
+      return {
+        eventId: item.event_id,
+        title: item.event_title || item.event_id,
+        family: item.event_family || '未分类事件',
+        status: inboxStatusLabels[item.status] || item.status,
+        statusCode: item.status,
+        baseline: baselineStatusLabels[item.baseline_status] || item.baseline_status,
+        gate: item.gate_status ? gateLabels[item.gate_status] || item.gate_status : '待裁决',
+        notification: notificationStatusLabels[item.notification_status] || item.notification_status,
+        origin: originLabels[item.admission_origin] || item.admission_origin,
+        headline: item.headline || null,
+        summary: item.summary || null,
+        scheduledAt: item.scheduled_at || null,
+        nextRecheckAt: item.next_recheck_at || null,
+        updatedAt: item.updated_at || null,
+        runId,
+        sessionId,
+        reportAvailable: item.report_available === true,
+        canOpenSession: sessionId !== null,
+        isWatchOnly: item.status === 'watching' && runId === null,
+      }
+    }
+
+    async function openInboxSessionOf(sessions, item, currentSessionId) {
+      const model = inboxItemModelOf(item)
+      if (model === null || !model.canOpenSession) return false
+      return openManagedSessionOf(sessions, { dsh_session_id: model.sessionId }, currentSessionId)
     }
 
     function reportModelOf(link, detail) {
@@ -618,7 +685,122 @@ window.__ModuleLoader__.load({
           width: '100%', minWidth: 0, boxSizing: 'border-box', padding: '20px clamp(12px, 3vw, 32px)',
           overflowY: 'auto', color: 'inherit',
         },
-      }, createElement(ResearchReportCard, { ...props, surface: 'view' }))
+      }, createElement(ResearchReportCard, conversationScopeProps(props, { surface: 'view' })))
+    }
+
+    function formatInboxTime(value) {
+      if (typeof value !== 'string' || value.length === 0) return null
+      const parsed = new Date(value)
+      if (Number.isNaN(parsed.getTime())) return value
+      return parsed.toLocaleString('zh-CN', { hour12: false })
+    }
+
+    function ResearchInboxView(props) {
+      const currentSessionId = conversationSessionIdOf(props)
+      const [state, setState] = useState({ phase: 'loading', items: [], error: null })
+      const [opening, setOpening] = useState(null)
+
+      useEffect(() => {
+        let cancelled = false
+        const controller = new AbortController()
+        fetch('/api/decision-hub/inbox?limit=100', {
+          signal: controller.signal, headers: { accept: 'application/json' },
+        })
+          .then(async response => {
+            const payload = await response.json()
+            if (!response.ok) throw new Error(payload?.error?.code || 'research_inbox_unavailable')
+            return payload
+          })
+          .then(payload => {
+            if (cancelled) return
+            const items = Array.isArray(payload?.items)
+              ? payload.items.map(inboxItemModelOf).filter(Boolean)
+              : []
+            setState({ phase: 'ready', items, error: null })
+          })
+          .catch(error => {
+            if (cancelled || error?.name === 'AbortError') return
+            setState({ phase: 'error', items: [], error: error?.message || 'research_inbox_unavailable' })
+          })
+        return () => { cancelled = true; controller.abort() }
+      }, [])
+
+      const openSession = async model => {
+        if (!model.canOpenSession || typeof props.openInboxSession !== 'function') return
+        setOpening(model.eventId)
+        try {
+          await props.openInboxSession({ dsh_session_id: model.sessionId }, currentSessionId)
+        } catch {
+          setState(previous => ({ ...previous, error: '受管 Session 暂不可用，请稍后重试' }))
+        } finally {
+          setOpening(null)
+        }
+      }
+
+      return createElement('main', {
+        'data-decision-hub-inbox-view': state.phase,
+        style: {
+          width: '100%', minWidth: 0, boxSizing: 'border-box', padding: '20px clamp(12px, 3vw, 32px)',
+          overflowY: 'auto', color: 'inherit',
+        },
+      }, createElement('section', { style: inboxShellStyle },
+      createElement('header', {
+        style: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '12px', flexWrap: 'wrap' },
+      },
+      createElement('div', null,
+        createElement('span', { style: reportEyebrowStyle }, '主动研究'),
+        createElement('h2', { style: { margin: '3px 0 0', fontSize: '16px', lineHeight: 1.4, fontWeight: 650 } },
+          '事件观察与研究收件箱'),
+      ),
+      createElement('span', { style: { fontSize: '11px', color: 'var(--dsw-alias-label-secondary)' } },
+        state.phase === 'ready' ? String(state.items.length) + ' 项' : '同步中'),
+      ),
+      state.error ? createElement('p', {
+        role: 'alert', style: { margin: '10px 0 0', color: 'var(--dsw-alias-status-error)', fontSize: '12px' },
+      }, state.error) : null,
+      state.phase === 'loading' ? createElement('p', { style: inboxEmptyStyle }, '正在读取主动研究任务') : null,
+      state.phase === 'ready' && state.items.length === 0
+        ? createElement('p', { style: inboxEmptyStyle }, '暂无主动研究')
+        : null,
+      state.items.length > 0 ? createElement('div', { style: inboxListStyle }, ...state.items.map(model =>
+        createElement('article', {
+          key: model.eventId + ':' + (model.runId || 'watch'),
+          'data-decision-hub-inbox-status': model.statusCode,
+          style: inboxItemStyle,
+        },
+        createElement('header', {
+          style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap' },
+        },
+        createElement('div', { style: { minWidth: 0, flex: '1 1 320px' } },
+          createElement('span', { style: reportEyebrowStyle }, model.family + ' · ' + model.origin),
+          createElement('h3', {
+            style: { margin: '3px 0 0', fontSize: '14px', lineHeight: 1.45, fontWeight: 650, overflowWrap: 'anywhere' },
+          }, model.title),
+        ),
+        createElement('div', { style: { display: 'flex', gap: '5px', flexWrap: 'wrap' } },
+          reportBadge(model.status), reportBadge(model.gate)),
+        ),
+        model.headline ? createElement('p', { style: { margin: '9px 0 0', fontSize: '13px', lineHeight: 1.5, fontWeight: 550 } }, model.headline) : null,
+        model.summary ? createElement('p', { style: { ...reportCompactTextStyle, color: 'var(--dsw-alias-label-secondary)' } }, model.summary) : null,
+        createElement('div', { style: inboxMetaStyle },
+          createElement('span', null, model.baseline),
+          createElement('span', null, model.notification),
+          model.scheduledAt ? createElement('span', null, '计划 ' + formatInboxTime(model.scheduledAt)) : null,
+          model.nextRecheckAt ? createElement('span', null, '复查 ' + formatInboxTime(model.nextRecheckAt)) : null,
+          model.updatedAt ? createElement('span', null, '更新 ' + formatInboxTime(model.updatedAt)) : null,
+        ),
+        createElement('div', { style: { marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' } },
+          model.canOpenSession ? createElement('button', {
+            type: 'button', disabled: opening === model.eventId,
+            onClick: () => { void openSession(model) },
+            style: inboxActionStyle,
+          }, opening === model.eventId ? '正在打开...' : '打开研究会话') : null,
+          model.isWatchOnly ? createElement('span', { style: { fontSize: '11px', color: 'var(--dsw-alias-label-secondary)' } },
+            '尚未触发研究，不创建空会话') : null,
+          model.reportAvailable && !model.canOpenSession ? createElement('span', { style: { fontSize: '11px', color: 'var(--dsw-alias-label-secondary)' } },
+            '报告已记录，等待会话关联') : null,
+        )))
+      ) : null))
     }
 
     const reportShellStyle = {
@@ -628,6 +810,24 @@ window.__ModuleLoader__.load({
     }
     const viewReportShellStyle = {
       ...reportShellStyle, maxWidth: '1040px', margin: '0 auto', padding: '16px',
+    }
+    const inboxShellStyle = {
+      width: '100%', maxWidth: '1040px', margin: '0 auto', boxSizing: 'border-box',
+      border: '1px solid var(--dsw-alias-border-normal)', borderRadius: '8px',
+      background: 'var(--dsw-alias-bg-base)', padding: '16px', color: 'inherit',
+    }
+    const inboxListStyle = { marginTop: '14px', display: 'grid', gap: '8px' }
+    const inboxItemStyle = {
+      minWidth: 0, boxSizing: 'border-box', borderTop: '1px solid var(--dsw-alias-border-normal)', padding: '12px 0 2px',
+    }
+    const inboxMetaStyle = {
+      marginTop: '9px', display: 'flex', gap: '10px', flexWrap: 'wrap', fontSize: '11px',
+      color: 'var(--dsw-alias-label-secondary)',
+    }
+    const inboxEmptyStyle = { margin: '16px 0 0', fontSize: '13px', color: 'var(--dsw-alias-label-secondary)' }
+    const inboxActionStyle = {
+      minHeight: '32px', padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--dsw-alias-border-normal)',
+      background: 'var(--dsw-alias-interactive-bg-default)', color: 'inherit', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
     }
     const reportEyebrowStyle = { fontSize: '11px', fontWeight: 650, color: 'var(--dsw-alias-label-secondary)' }
     const reportCompactTextStyle = { margin: '6px 0 0', fontSize: '11px', lineHeight: 1.45, overflowWrap: 'anywhere' }
@@ -862,6 +1062,25 @@ window.__ModuleLoader__.load({
             ? '研究中'
             : isBusy ? '建立中...' : isRetry ? '重新研究' : '建立研究任务'
 
+          useEffect(() => {
+            if (mode !== 'live' || action !== 'submit' || submission.managed) return undefined
+            const card = document.querySelector('[data-composer-card]')
+            if (card === null) return undefined
+            const intercept = event => {
+              if (!researchComposerSubmitIntent(event)) return
+              event.preventDefault()
+              event.stopPropagation()
+              if (typeof event.stopImmediatePropagation === 'function') event.stopImmediatePropagation()
+              void submit()
+            }
+            card.addEventListener('click', intercept, true)
+            card.addEventListener('keydown', intercept, true)
+            return () => {
+              card.removeEventListener('click', intercept, true)
+              card.removeEventListener('keydown', intercept, true)
+            }
+          }, [mode, action, submission.managed, sessionId])
+
           if (mode !== 'live' || action === 'hidden') return null
           return createElement('div', {
             'data-decision-hub-research-intake': submission.state,
@@ -894,11 +1113,14 @@ window.__ModuleLoader__.load({
 
     module.exports = {
       inject: ['slots', 'sessions', 'workspaces'],
-          __test: { PRODUCT_WORKSPACE_TITLE, productWorkspaceOf, latestProductSessionOf, autoSelectProductWorkspace, businessDetailOf, failureLabel, hubStatusLabel, shouldPollStatus, shouldPollReport, runtimeModeLabel, runtimeNotice, protectedComposerTarget, composerText, intakePayload, intakeHeaders, researchStatusUrl, researchReportUrl, reportModelOf, reportStateOf, terminalReportModelOf, reportViewRegistration, retryCommand, intakeAction, managedSubmissionOf, managedSessionIdOf, openManagedSessionOf, conversationSessionIdOf },
+          __test: { PRODUCT_WORKSPACE_TITLE, productWorkspaceOf, latestProductSessionOf, autoSelectProductWorkspace, businessDetailOf, failureLabel, hubStatusLabel, shouldPollStatus, shouldPollReport, runtimeModeLabel, runtimeNotice, protectedComposerTarget, researchComposerSubmitIntent, composerText, intakePayload, intakeHeaders, researchStatusUrl, researchReportUrl, reportModelOf, reportStateOf, terminalReportModelOf, reportViewRegistration, inboxViewRegistration, inboxItemModelOf, openInboxSessionOf, retryCommand, intakeAction, managedSubmissionOf, managedSessionIdOf, openManagedSessionOf, conversationSessionIdOf, conversationScopeProps },
           apply(ctx) {
             const sessions = ctx.get('sessions')
             const workspaces = ctx.get('workspaces')
             const openManagedSession = (payload, currentSessionId) => (
+              openManagedSessionOf(sessions, payload, currentSessionId)
+            )
+            const openInboxSession = (payload, currentSessionId) => (
               openManagedSessionOf(sessions, payload, currentSessionId)
             )
             ctx.effect(
@@ -912,6 +1134,8 @@ window.__ModuleLoader__.load({
             }, HubStatusUtility))
             ctx.slots.inject('conversation.view', () => ctx.slots.register(
               reportViewRegistration(), ResearchReportView))
+            ctx.slots.inject('conversation.view', () => ctx.slots.register(
+              inboxViewRegistration(), props => createElement(ResearchInboxView, conversationScopeProps(props, { openInboxSession }))))
             ctx.slots.inject('conversation.input.dock', () => ctx.slots.register({
               name: 'conversation.input.dock',
               id: 'decision-hub-runtime-notice',
@@ -921,12 +1145,7 @@ window.__ModuleLoader__.load({
               name: 'conversation.input.dock',
               id: 'decision-hub-research-intake',
               order: 10,
-            }, props => createElement(ResearchIntakeControl, { ...props, openManagedSession })))
-            ctx.slots.inject('conversation.composer.dock', () => ctx.slots.register({
-              name: 'conversation.composer.dock',
-              id: 'decision-hub-report-inline',
-              order: 20,
-            }, ResearchReportCard))
+            }, props => createElement(ResearchIntakeControl, conversationScopeProps(props, { openManagedSession }))))
           },
     }
 

@@ -3,13 +3,31 @@
 版本：`ROADMAP-2026-08-26.v1`
 用途：把 [产品架构基线](../DECISION_HUB_PRODUCT_ARCHITECTURE_V1.md) 中的 R0-R3 规划转换为 GitHub 可逐项追踪的执行清单。本文是里程碑状态入口；每个任务的实现边界、框架复用和 Codex 提示词见 [分阶段执行设计](EXECUTION_PLAN.md)，不替代架构基线、契约和 ADR。
 
+当前执行路线已由 owner 收口到 `PD-00..07`。`PD-00..01` 已完成 requirement lineage、typed
+`FactEnvelope`、crypto-macro 语义 Gate、durable EventWatch 和八个事件窗口；`PD-02A/B` 已完成
+Provider 契约、失败审计和 Pack 驱动的 OKX/CoinEx stable Router composition；`PD-02C` 已完成
+事件窗口 archive、sampler、Run/EventWatch lineage、archive route 和 FactStore/Gate 回放闭环；
+`PD-02D` 已完成 order-book imbalance proxy、Pack route 与衍生品完整窗口语义回放；`PD-02E`
+已完成 provider-neutral intraday macro/expectation seam 与离线完整语义回放，但真实供应商仍
+blocked。`PD-02F` Pack/profile/composition closure、`PD-02G` public adapter canary 和 `PD-03`
+Source Registry/官方 `event.identity` parser 已完成；PD-04..06 的主动调度、Inbox、报告、通知、
+recheck、DSH 轨迹和 Decision Desk 运行收口已完成。下文 R0..G2-AF 保留为历史工程里程碑，不能覆盖当前 PD Stage，也
+不能把历史 coverage 追认为金融语义充分。
+
 R0/R1/R1-L、R2-00 至 R2-05、R2-L、R2-R-00 至 R2-R-06E、DSH-NATIVE-CORE 和
 `PRODUCT-CLOSEOUT-01` 的 E1/E2-R/E2-L 已完成。官方 DSH Web 真实主线已完成受管 Session、
 两轮主动补证、可信账本、代码 Gate、双前端一致性和后台自动复查，当前可作为单 owner、
 单机、只读的 `research_only` 试点使用。Runtime 决策仍为 `retain_baseline`：Fixed active，
-DSH candidate/shadow，不自动 Promotion。当前唯一入口是
-[产品交付控制书与最终验收包](product/PRODUCT_DELIVERY_CONTROL_BOOK_2026-09-01.md)，下一阶段
-只做 E3 前瞻价值观察，不自动进入 R3 或新功能阶段。
+DSH candidate/shadow，不自动 Promotion。当前架构/交付基线仍以
+[产品交付控制书与最终验收包](product/PRODUCT_DELIVERY_CONTROL_BOOK_2026-09-01.md) 为准；
+Owner 于 2026-09-02 授权 [D2 官方 DeepSeek Live 主流程复验](stages/D2_OFFICIAL_DEEPSEEK_LIVE_FLOW_PLAN.md)
+作为当前交付阻断修复。D2 已在 2026-09-03 真实跑通到安全终态：Provider、DSH Session、主动补证、
+Evidence/PIT/Coverage/Gate 均有证据，但 synthesis 以 `structured_output_invalid` 安全失败。
+D2 专属浏览器资产和最终质量门已通过：新 bundle 桌面/移动页面只有一个报告区域，移动视口无横向
+溢出，console error 为 0；插件 57、Decision Desk 10、Python 395 项测试及静态/契约/文档门
+通过。此前工作树复跑记录为 Python `446 passed`、DSH Plugin `60 passed + build`、Decision Desk `10 passed + build`；2026-09-04 最新全量 Python 复核为 `445 passed, 1 failed`，失败是 `10ms` DSH Web 超时用例在 Host `submit` 前已截止、远端没有可取消 Session，但旧断言仍无条件要求 cancel。该测试语义红灯必须在 PD 实现前收口，不能把历史绿灯冒充当前状态。D2 记录中的 Python `395` 保留为 D2 完成时点的历史证据，不与本次复跑混用。D2 不新增功能、不切 active pointer；为回应 hard gap 暴露的问题，`G2-AF-01..04` 技术门已通过，但最新交付阻断审计已提议暂停直接进入 G2-AF-05，等待 owner 决定是否以 `PD-00..07` 取代当前观察路线。
+详见 [D2 真实验收记录](evaluations/DSH_DEEPSEEK_LIVE_FLOW_ACCEPTANCE_2026-09-03.md) 和
+[D2 执行清单](stages/D2_OFFICIAL_DEEPSEEK_LIVE_EXECUTION_CHECKLIST_2026-09-03.md)。
 
 DSH-NATIVE-CORE 的工程验收已完成。详细任务卡、失败根因和退出证据见 [DSH-NATIVE-CORE 完成实施方案](stages/DSH_NATIVE_CORE_COMPLETION_PLAN.md) 与 [Replay/恢复验收记录](evaluations/DSH_NATIVE_CORE_REPLAY_MATRIX_2026-08-31.md)。NATIVE-00 至 NATIVE-05、NC-01 至 NC-07 均有官方 Web/插件/桥接/replay/恢复/回滚/浏览器证据。Owner 已确认后续进入唯一的 [PRODUCT-CLOSEOUT-01](stages/PRODUCT_CLOSEOUT_01_DSH_NATIVE_TRADER_PILOT.md)，按 C1-C7 收口首个 Trader Pilot；不自动切 active pointer，不扩大到 ASR/PPT/第二领域。
 
@@ -124,6 +142,42 @@ R2-R-06E 的真实 Run 暴露了服务端时间戳、并行工具失败隔离、
 
 G1/G2 代码、离线回归和 E2-L 真实 Web 验收已完成；这证明失败边界和有界补证可用，不
 证明 Search 长期稳定或预测价值。E3 前不扩大 capability、不修改 active pointer、不进入 R3。
+
+## G2-AF：主动事实获取与自主研究（G2-AF-01..04 technical gates passed / G2-AF-05 observation）
+
+当前 hard gap 过早停止、Search 未形成可用 fallback、事件调度未与 DSH 主动研究贯通的问题，
+统一记录在 [G2-AF 主动事实获取与自主研究阶段方案](stages/G2_AF_ACTIVE_FACT_ACQUISITION_AND_AUTONOMOUS_RESEARCH.md)。
+该阶段是 G2 事实覆盖收口与 G3 prospective value observation 的桥接执行书，不新增第二套
+Agent loop：DSH 负责内层 Supervisor，LangGraph 只负责产品生命周期，Hub 负责 Capability
+Catalog、PIT、Evidence、Gate、调度、通知和资产。官方 DSH 上游已核实包含原生
+`web_search`，且 2026-09-03 native route probe 已通过；后续 DSH native 为 discovery primary，
+Tavily Search/Extract 官方 MCP 仅作为按需 fallback/独立交叉索引，Brave/SearXNG 只作为后续回退候选。
+
+- [x] `G2-AF-01` Capability Catalog、六类 requirement fallback、成本/超时/权限/失败码契约
+- [x] `G2-AF-02` DSH 原生 Search -> Fetch/typed provider -> Evidence attribution 隔离 canary；Tavily live fallback 单独等待 secret 轮换
+- [x] `G2-AF-03` DSH 同 Session 三轮 gap-driven continuation、部分失败保留、synthesis attestation
+- [x] `G2-AF-04` 日历/feed admission -> durable Run -> 报告/Outbox/单次通知/复查前瞻链
+- [ ] `G2-AF-05` 14 天或 20 个高影响事件 prospective observation，做 promote/retain/stop
+
+最终隔离 canary 已由官方 feed 自动触发并在 DSH 完成 3 轮、20/24 calls、13 条 Evidence、
+83.33% hard coverage、Artifact、通知和 child recheck；终态为 `degraded/research_only`。
+Tavily 旧 key 未读取或持久化，正式 fallback canary 仍需轮换 secret；Fixed active/DSH
+candidate-shadow 不变。G2-AF-05 已统一由
+[PD-07 前瞻价值观察阶段卡](stages/PD_07_PROSPECTIVE_VALUE_OBSERVATION.md)承接；下一步只冻结
+prospective cohort 并开始真实未来事件观察，不自动开启 R3。
+
+## OBS-01：DSH 技术可观测插件（已通过隔离 canary）
+
+以 DSH 官方 profile seam 接入 `@loongsuite/dsh-plugin@0.1.2`，只投影技术运行 Trace/Metric，
+不复制 Hub 业务账本、不采集正文、不启用 LoongSuite Pilot。版本、integrity、运行脚本和
+退出证据见 [ADR-0021](decisions/ADR-0021-dsh-observability-plugin.md) 与
+[OBS 评估记录](evaluations/DSH_OBSERVABILITY_PLUGIN_ASSESSMENT_2026-09-02.md)。
+
+- [x] `OBS-01` exact-version profile 安装、OTLP payload/Span 结构、`dsh.session.id` 和
+  `captureContent=false` canary；exporter 不可用时 DSH/Hub 仍 fail-open。
+- [ ] `OBS-02` 可选 TelemetryRef/Query View；必须在不复制 Span 的前提下另立 owner gate。
+- [ ] `OBS-03` LoongSuite Pilot 多 Agent 采集；只有第二个真实 Agent 出现后评估，不能与独立
+  插件同时作为同一 DSH Trace 的采集主责。
 
 ## R3：领域与部署扩展
 

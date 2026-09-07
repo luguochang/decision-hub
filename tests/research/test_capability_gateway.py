@@ -249,6 +249,7 @@ async def test_gateway_reports_server_owned_pit_failure_with_provenance() -> Non
         "tool_call_id": "capability-request-1",
         "retryable": False,
         "deadline_ms": None,
+        "provider_attempts": [],
     }
 
 
@@ -458,6 +459,50 @@ async def test_web_search_adapter_reuses_search_port_and_marks_summary_search_de
 
     assert result.evidence_candidates[0].authority == "search_derived"
     assert result.evidence_candidates[0].kind == "web"
+
+
+@pytest.mark.asyncio
+async def test_web_search_adapter_deduplicates_identical_provider_hits() -> None:
+    source_url = AnyUrl("https://www.federalreserve.gov/newsevents/speech/example.htm")
+    published_at = NOW - timedelta(hours=1)
+    snippet = "Inflation risks remain elevated."
+    from packages.kernel.decision_hub_kernel.application.search import (
+        search_evidence_content_hash,
+    )
+
+    content_hash = search_evidence_content_hash(
+        title="Policy speech",
+        snippet=snippet,
+        source_url=str(source_url),
+        published_at=published_at,
+    )
+
+    class DuplicateSearchPort:
+        async def search(self, query: SearchQuery) -> SearchResult:
+            item = SearchEvidence(
+                evidence_id="provider-hit",
+                title="Policy speech",
+                snippet=snippet,
+                source_url=source_url,
+                observed_at=NOW,
+                published_at=published_at,
+                received_at=NOW,
+                content_hash=content_hash,
+            )
+            return SearchResult(
+                request_id=query.request_id,
+                capability_id=query.capability_id,
+                provider="search-fixture",
+                evidence=[item, item.model_copy(update={"evidence_id": "provider-hit-2"})],
+                cost_usd=0.01,
+                completed_at=NOW,
+            )
+
+    result = await WebSearchResearchAdapter(DuplicateSearchPort()).execute(
+        _query(capability_id="web.search", target_url=None, domains=["federalreserve.gov"])
+    )
+
+    assert len(result.evidence_candidates) == 1
 
 
 @pytest.mark.asyncio

@@ -18,12 +18,13 @@ from packages.contracts_py.decision_hub_contracts import (
 from packages.contracts_py.decision_hub_contracts.models import RunStatus, SourceType
 from packages.kernel.decision_hub_kernel.application.admission import AdmissionService
 from packages.kernel.decision_hub_kernel.application.commit import CommitDecisionService
+from packages.kernel.decision_hub_kernel.application.event_watch import EventWatchService
 from packages.kernel.decision_hub_kernel.application.research_evidence import (
     research_evidence_content_hash,
 )
 from packages.kernel.decision_hub_kernel.application.run import RunService
 from packages.kernel.decision_hub_kernel.application.snapshot import SnapshotService
-from packages.kernel.decision_hub_kernel.persistence.db import Database, RunRecord
+from packages.kernel.decision_hub_kernel.persistence.db import Database, OutboxRecord, RunRecord
 from packages.kernel.decision_hub_kernel.ports.runtime import AgentExecutionError
 
 NOW = datetime(2026, 8, 29, 12, 0, tzinfo=UTC)
@@ -81,9 +82,10 @@ def _result(request: ResearchSessionRequest, *, fail: bool = False) -> ResearchS
             "plan_id": "worker-plan-1",
             "objective": "verify event",
             "tasks": [
-                {
-                    "task_id": "worker-task-1",
-                    "capability_id": "replay.research",
+                    {
+                        "task_id": "worker-task-1",
+                        "requirement_id": "event_identity",
+                        "capability_id": "replay.research",
                     "objective": "verify event",
                     "question": "What is the official event?",
                     "input_evidence_refs": list(request.evidence_refs),
@@ -243,6 +245,8 @@ def test_research_request_accepts_manual_text_without_published_at(tmp_path: Pat
     )
 
     assert request.input_evidence[0].published_at is None
+    assert request.event_watch is None
+    assert request.event_window_samples == []
 
 
 def test_replay_worker_request_declares_replay_execution_mode(tmp_path: Path) -> None:
@@ -259,6 +263,35 @@ def test_replay_worker_request_declares_replay_execution_mode(tmp_path: Path) ->
     assert request.execution_mode == "replay"
     assert request.pit_cutoff_at < request.deadline_at
     assert request.pit_cutoff_at == request.input_evidence[0].received_at
+
+
+def test_research_request_projects_retrospective_watch_without_faking_baseline(
+    tmp_path: Path,
+) -> None:
+    database, event_id, run_id = _admitted_run(tmp_path)
+    watch = EventWatchService(database, clock=lambda: NOW).ensure_watch(
+        event_id=event_id,
+        source_id="manual-text",
+        event_family="central_bank_speech",
+        scheduled_at=NOW - timedelta(days=1),
+        window_offsets=("t-5m", "t+1m"),
+    )
+
+    request = ResearchRequestFactory(
+        database,
+        pack_root=PACK_ROOT,
+        execution_mode="live",
+        clock=lambda: NOW,
+    ).build(event_id, run_id)
+
+    assert watch.status == "retrospective_only"
+    assert watch.baseline_status == "unavailable"
+    assert request.event_watch == watch
+    samples = request.event_window_samples or []
+    assert {item.offset for item in samples} == {"t-5m", "t+1m"}
+    assert next(item for item in samples if item.offset == "t-5m").status == (
+        "baseline_unavailable"
+    )
 
 
 def test_research_request_bounds_long_source_excerpt_without_changing_snapshot_hash(
@@ -299,6 +332,7 @@ def test_research_worker_projects_agentic_result_into_existing_ledger(tmp_path: 
         database,
         runtime,
         pack_root=PACK_ROOT,
+        execution_mode="replay",
         # Replay fixtures own their clock; wall-clock time must not change
         # whether the deterministic next-review child is scheduled.
         clock=lambda: NOW,
@@ -327,6 +361,10 @@ def test_research_worker_projects_agentic_result_into_existing_ledger(tmp_path: 
     assert {item.horizon for item in artifact.forecasts} == {"30m", "24h", "72h"}
     assert [item.direction.value for item in artifact.forecasts] == ["no_trade"] * 3
     assert all(item.probability == pytest.approx(0.5) for item in artifact.forecasts)
+    with database.session() as session:
+        outbox = session.query(OutboxRecord).one()
+        assert outbox.artifact_id == report.artifact_id
+        assert outbox.dedupe_key == f"artifact:{report.artifact_id}:local"
     event_types = [item.event_type for item in database.get_timeline(run_id)]
     assert set(event_types) == {
         "decision.committed",
@@ -355,9 +393,43 @@ def test_research_worker_marks_runtime_failure_and_keeps_no_artifact(tmp_path: P
     assert run.status == "failed"
     assert run.error_code == "provider_timeout"
     assert run.artifact_id is None
+    with database.session() as session:
+        assert session.query(OutboxRecord).count() == 0
     assert [item.event_type for item in database.get_timeline(run_id)] == [
         "research.agentic.failed"
     ]
+
+
+def test_value_evaluation_failure_does_not_reclassify_committed_run(
+    tmp_path: Path,
+) -> None:
+    database, _event_id, run_id = _admitted_run(tmp_path)
+    worker = DurableResearchWorker(
+        database,
+        FakeResearchRuntime(),
+        pack_root=PACK_ROOT,
+        clock=lambda: NOW,
+    )
+
+    class BrokenEvaluation:
+        def evaluate_current(self, _run_id: str) -> None:
+            raise RuntimeError("evaluation store unavailable")
+
+    worker.value_evaluations = BrokenEvaluation()  # type: ignore[assignment]
+
+    report = asyncio.run(worker.tick())
+
+    assert report is not None
+    assert report.status == "research_only"
+    assert report.artifact_id is not None
+    run = database.get_run_record(run_id)
+    assert run is not None
+    assert run.status == "degraded"
+    assert run.error_code is None
+    assert run.artifact_id == report.artifact_id
+    event_types = [item.event_type for item in database.get_timeline(run_id)]
+    assert "research.agentic.failed" not in event_types
+    assert "research.value_evaluation.failed" in event_types
 
 
 def test_research_worker_does_not_reclaim_terminal_or_unadmitted_runs(tmp_path: Path) -> None:

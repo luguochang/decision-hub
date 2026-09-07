@@ -9,9 +9,11 @@ from langgraph.graph.state import Checkpointer
 
 from packages.contracts_py.decision_hub_contracts import (
     CoverageAssessment,
+    ErrorProvenance,
     EvidenceCandidate,
     EvidenceRequirement,
     ExecutionBudget,
+    FactEnvelope,
     HorizonDecision,
     ResearchInputEvidence,
     ResearchSessionRequest,
@@ -19,6 +21,7 @@ from packages.contracts_py.decision_hub_contracts import (
     ResearchStopReason,
     ResearchTraceEvent,
 )
+from packages.kernel.decision_hub_kernel.application.fact_store import ResearchFactStore
 from packages.kernel.decision_hub_kernel.application.research_evidence import (
     ResearchEvidenceService,
 )
@@ -27,8 +30,10 @@ from packages.kernel.decision_hub_kernel.decision.sufficiency import (
 )
 from packages.kernel.decision_hub_kernel.ports.research import (
     ResearchHarnessRuntime,
+    ResearchProgressReader,
     ResearchTraceSink,
 )
+from packages.kernel.decision_hub_kernel.ports.runtime import AgentExecutionError
 from packages.orchestration.langgraph.state.research import AgenticResearchState
 
 
@@ -37,11 +42,14 @@ def initial_research_state(request: ResearchSessionRequest) -> AgenticResearchSt
         "request": request.model_dump(mode="json"),
         "requirements": [item.model_dump(mode="json") for item in request.evidence_requirements],
         "evidence": [],
+        "facts": [],
         "rounds": [],
         "current_round": request.current_round,
         "previous_evidence_ids": [],
         "total_tool_calls": 0,
         "total_subagents": 0,
+        "attempted_capabilities_by_requirement": {},
+        "retryable_failures": 0,
         "total_tokens": 0,
         "estimated_cost_usd": 0.0,
         "decision_cutoff_at": _initial_decision_cutoff(request).isoformat(),
@@ -55,12 +63,15 @@ def build_agentic_research_graph(
     *,
     checkpointer: Checkpointer = None,
     trace_sink: ResearchTraceSink | None = None,
+    progress_reader: ResearchProgressReader | None = None,
 ):
     """Build the product-level evidence-round graph around one Harness loop.
 
     DSH owns the inner model/tool/subagent loop. This graph only decides whether
     the next bounded evidence round is necessary and freezes the final snapshot.
     """
+
+    fact_store = ResearchFactStore(evidence_service.database)
 
     async def emit(
         request: ResearchSessionRequest,
@@ -73,6 +84,7 @@ def build_agentic_research_graph(
         reference_type: str | None = None,
         reference_id: str | None = None,
         error_code: str | None = None,
+        error: ErrorProvenance | None = None,
     ) -> None:
         if trace_sink is None:
             return
@@ -90,6 +102,7 @@ def build_agentic_research_graph(
                 "reference_id": reference_id,
                 "status": status,
                 "error_code": error_code,
+                "error": error,
             }
         )
         await trace_sink.emit(event)
@@ -113,6 +126,7 @@ def build_agentic_research_graph(
             for item in (EvidenceRequirement.model_validate(raw) for raw in state["requirements"])
         }
         existing = [EvidenceCandidate.model_validate(raw) for raw in state.get("evidence", [])]
+        existing_facts = [FactEnvelope.model_validate(raw) for raw in state.get("facts", [])]
         coverage = (
             _coverage_from_state(state)
             if state.get("coverage")
@@ -120,8 +134,10 @@ def build_agentic_research_graph(
                 requirements.values(),
                 existing,
                 cutoff_at=_decision_cutoff(state, base_request),
+                facts=existing_facts,
             )
         )
+        coverage = _coverage_with_attempts(coverage, state)
         await emit(
             base_request,
             event_type="coverage_assessed",
@@ -145,9 +161,8 @@ def build_agentic_research_graph(
                 reference_type="round",
                 reference_id=str(current_round),
             )
-        remaining_tool_calls = (
-            base_request.execution_budget.max_tool_calls
-            - state.get("total_tool_calls", 0)
+        remaining_tool_calls = base_request.execution_budget.max_tool_calls - state.get(
+            "total_tool_calls", 0
         )
         if remaining_tool_calls <= 0:
             raise RuntimeError("research_tool_budget_exhausted_before_round")
@@ -159,13 +174,89 @@ def build_agentic_research_graph(
                 ),
                 "input_evidence": _input_evidence(base_request.input_evidence, existing),
                 "target_gaps": coverage.gaps,
+                "evidence_requirements": requirements_for_round(
+                    base_request.evidence_requirements,
+                    state,
+                    allowed_capabilities=base_request.allowed_capabilities,
+                ),
                 "execution_budget": base_request.execution_budget.model_copy(
                     update={"max_tool_calls": remaining_tool_calls}
                 ),
                 "repair_instructions": base_request.repair_instructions,
             }
         )
-        result = await runtime.execute(request, trace_sink=trace_sink)
+        try:
+            result = await runtime.execute(request, trace_sink=trace_sink)
+        except AgentExecutionError as exc:
+            # Once at least one complete DSH generation has produced an
+            # attested synthesis, a later retryable continuation failure must
+            # not erase that work. Capability results are already committed at
+            # the Gateway boundary, so refresh Evidence and finalize the last
+            # trusted synthesis as a visibly degraded research-only artifact.
+            # A first-round failure or any non-retryable contract/PIT failure
+            # remains a hard failure and is handled by the Worker.
+            if not state.get("latest_result") or not exc.retryable:
+                raise
+            failure_at = _continuation_failure_cutoff(
+                state,
+                base_request,
+                evidence_service.list_run_evidence(base_request.run_id),
+            )
+            all_evidence = evidence_service.list_run_evidence(base_request.run_id)
+            all_facts = fact_store.list_run_facts(base_request.run_id)
+            previous_ids = set(state.get("previous_evidence_ids", []))
+            new_ids = [
+                item.evidence_id
+                for item in all_evidence
+                if item.quality == "accepted" and item.evidence_id not in previous_ids
+            ]
+            deterministic_coverage = assess_evidence_sufficiency(
+                requirements.values(), all_evidence, cutoff_at=failure_at, facts=all_facts
+            )
+            deterministic_coverage = _coverage_with_attempts(
+                deterministic_coverage,
+                state,
+            )
+            provenance = exc.provenance()
+            await emit(
+                request,
+                event_type="round_completed",
+                stage="acquiring_evidence",
+                summary=(
+                    f"Continuation round {current_round} stopped at {exc.error_code}; "
+                    "the last attested synthesis and durable Evidence were retained."
+                ),
+                occurred_at=failure_at,
+                status="degraded",
+                reference_type="round",
+                reference_id=str(current_round),
+                error_code=exc.error_code,
+                error=provenance,
+            )
+            observed_tool_calls = (
+                progress_reader.tool_calls_started(base_request.run_id)
+                if progress_reader is not None
+                else None
+            )
+            return {
+                "evidence": [item.model_dump(mode="json") for item in all_evidence],
+                "facts": [item.model_dump(mode="json") for item in all_facts],
+                "coverage": deterministic_coverage.model_dump(mode="json"),
+                "previous_evidence_ids": [item.evidence_id for item in all_evidence],
+                "new_evidence_ids": new_ids,
+                "total_tool_calls": max(state.get("total_tool_calls", 0), observed_tool_calls or 0),
+                "decision_cutoff_at": failure_at.isoformat(),
+                "continuation_failure": {
+                    "round": current_round,
+                    "occurred_at": failure_at.isoformat(),
+                    "provenance": provenance.model_dump(mode="json"),
+                },
+            }
+        attempted_by_requirement = _merge_attempts(
+            state.get("attempted_capabilities_by_requirement", {}),
+            attempts_from_result(result, request),
+        )
+        retryable_failures = state.get("retryable_failures", 0) + _retryable_failure_count(result)
         round_cutoff = _round_cutoff(state, request, result)
         if result.rounds:
             await emit(
@@ -184,7 +275,14 @@ def build_agentic_research_graph(
             requirements=requirements,
             cutoff_at=round_cutoff,
         )
+        fact_store.accept_facts(
+            run_id=request.run_id,
+            capability_id="dsh.research",
+            facts=result.facts or [],
+            cutoff_at=round_cutoff,
+        )
         all_evidence = evidence_service.list_run_evidence(request.run_id)
+        all_facts = fact_store.list_run_facts(request.run_id)
         for item in accepted:
             accepted_event = item.quality == "accepted"
             await emit(
@@ -209,7 +307,11 @@ def build_agentic_research_graph(
             and item.evidence_id not in set(state.get("previous_evidence_ids", []))
         ]
         deterministic_coverage = assess_evidence_sufficiency(
-            requirements.values(), all_evidence, cutoff_at=round_cutoff
+            requirements.values(), all_evidence, cutoff_at=round_cutoff, facts=all_facts
+        )
+        deterministic_coverage = _coverage_with_attempts(
+            deterministic_coverage,
+            {"attempted_capabilities_by_requirement": attempted_by_requirement},
         )
         await emit(
             request,
@@ -243,17 +345,18 @@ def build_agentic_research_graph(
             rounds = [*state.get("rounds", []), round_record.model_dump(mode="json")]
         else:  # defensive; the contract normally requires at least one round
             rounds = list(state.get("rounds", []))
-        total_cost = _sum_optional(
-            state.get("estimated_cost_usd"), result.estimated_cost_usd
-        )
+        total_cost = _sum_optional(state.get("estimated_cost_usd"), result.estimated_cost_usd)
         return {
             "evidence": [item.model_dump(mode="json") for item in all_evidence],
+            "facts": [item.model_dump(mode="json") for item in all_facts],
             "rounds": rounds,
             "latest_result": result.model_dump(mode="json"),
             "synthesis_failure_code": result.synthesis_failure_code,
             "coverage": deterministic_coverage.model_dump(mode="json"),
             "previous_evidence_ids": [item.evidence_id for item in all_evidence],
             "new_evidence_ids": new_ids,
+            "attempted_capabilities_by_requirement": attempted_by_requirement,
+            "retryable_failures": retryable_failures,
             "total_tool_calls": state.get("total_tool_calls", 0) + result.total_tool_calls,
             "total_subagents": state.get("total_subagents", 0) + result.total_subagents,
             "total_tokens": _sum_optional(state.get("total_tokens"), result.total_tokens),
@@ -263,18 +366,9 @@ def build_agentic_research_graph(
         }
 
     def route_after_round(state: AgenticResearchState) -> Literal["next_round", "finalize"]:
-        coverage = _coverage_from_state(state)
-        request = ResearchSessionRequest.model_validate(state["request"])
-        budget = request.execution_budget
-        if coverage.status == "sufficient":
+        if state.get("continuation_failure"):
             return "finalize"
-        if state.get("total_tool_calls", 0) >= budget.max_tool_calls:
-            return "finalize"
-        if state.get("total_subagents", 0) > budget.max_subagents:
-            return "finalize"
-        if state.get("current_round", 1) >= budget.max_evidence_rounds:
-            return "finalize"
-        return "next_round" if state.get("new_evidence_ids") else "finalize"
+        return "next_round" if should_continue_after_round(state) else "finalize"
 
     def next_round(state: AgenticResearchState) -> dict[str, object]:
         return {"current_round": state.get("current_round", 1) + 1}
@@ -295,6 +389,20 @@ def build_agentic_research_graph(
         coverage = _coverage_from_state(state)
         budget = request.execution_budget
         stop_code, detail = _stop_reason(state, coverage, budget)
+        continuation_failure = state.get("continuation_failure")
+        if continuation_failure:
+            provenance = continuation_failure.get("provenance", {})
+            error_code = (
+                provenance.get("error_code")
+                if isinstance(provenance, dict)
+                else "research_continuation_failed"
+            )
+            stop_code = "critical_data_unavailable"
+            detail = (
+                f"Continuation round {continuation_failure.get('round')} stopped at "
+                f"{error_code}; the last attested synthesis and all durable Evidence "
+                "were retained, but directional publication was suppressed."
+            )
         synthesis_failure_code = state.get("synthesis_failure_code")
         if synthesis_failure_code is not None:
             # A sufficient evidence set cannot repair a rejected model
@@ -320,6 +428,7 @@ def build_agentic_research_graph(
             # product decision. The ledger applies the same guard defensively.
             horizons = [_fail_closed_horizon(item, stop_code) for item in horizons]
         evidence = [EvidenceCandidate.model_validate(raw) for raw in state.get("evidence", [])]
+        facts = [FactEnvelope.model_validate(raw) for raw in state.get("facts", [])]
         snapshot = evidence_service.freeze_decision_snapshot(
             run_id=request.run_id,
             evidence_refs=[item.evidence_id for item in evidence if item.quality == "accepted"],
@@ -343,6 +452,7 @@ def build_agentic_research_graph(
                     for raw in state.get("rounds", [])
                 ],
                 "evidence_candidates": evidence,
+                "facts": facts,
                 "final_coverage": coverage,
                 "horizons": horizons or [],
                 "stop_reason": stop,
@@ -351,6 +461,11 @@ def build_agentic_research_graph(
                 "total_tokens": state.get("total_tokens"),
                 "estimated_cost_usd": state.get("estimated_cost_usd"),
                 "synthesis_failure_code": synthesis_failure_code,
+                "finished_at": (
+                    datetime.fromisoformat(str(continuation_failure["occurred_at"]))
+                    if continuation_failure
+                    else latest.finished_at
+                ),
             }
         )
         await emit(
@@ -358,7 +473,7 @@ def build_agentic_research_graph(
             event_type="session_stopped",
             stage="done",
             summary=detail,
-            occurred_at=latest.finished_at,
+            occurred_at=final.finished_at,
             status="succeeded" if stop_code == "sufficient" else "degraded",
             reference_type="stop_reason",
             reference_id=stop_code,
@@ -382,9 +497,179 @@ def build_agentic_research_graph(
 
 
 def _trigger_cutoff(request: ResearchSessionRequest) -> datetime:
-    return max(
-        item.received_at for item in request.input_evidence
-    ).astimezone(UTC)
+    return max(item.received_at for item in request.input_evidence).astimezone(UTC)
+
+
+def should_continue_after_round(state: AgenticResearchState) -> bool:
+    """Return whether an unresolved run still has an audited path to try.
+
+    A round that produced no accepted evidence is not terminal by itself. The
+    supervisor may continue through a declared fallback or a retryable failure
+    while deterministic run budgets remain available.
+    """
+
+    coverage = _coverage_from_state(state)
+    if state.get("continuation_failure"):
+        return False
+    request = ResearchSessionRequest.model_validate(state["request"])
+    budget = request.execution_budget
+    if coverage.status == "sufficient":
+        return False
+    if state.get("total_tool_calls", 0) >= budget.max_tool_calls:
+        return False
+    if state.get("total_subagents", 0) > budget.max_subagents:
+        return False
+    if state.get("current_round", 1) >= budget.max_evidence_rounds:
+        return False
+    # Replay fixtures intentionally expose one aggregate capability whose
+    # output changes by generation.  They have no per-requirement ladder to
+    # advance, so a bounded replay run must be allowed to request the next
+    # generation while it remains insufficient.  Keep this exception
+    # explicitly isolated from live DSH: production runs must continue only
+    # through declared, untried or retryable routes.
+    replay_capabilities = set(request.allowed_capabilities)
+    if (
+        request.execution_mode == "replay"
+        and replay_capabilities == {"replay.research"}
+        and state.get("latest_result")
+        and state.get("current_round", 1) == 1
+        and state.get("new_evidence_ids")
+    ):
+        return True
+    if state.get("retryable_failures", 0) > 0:
+        return True
+
+    requirements = {item.requirement_id: item for item in request.evidence_requirements}
+    attempted = state.get("attempted_capabilities_by_requirement", {})
+    allowed = set(request.allowed_capabilities)
+    for gap in coverage.gaps:
+        requirement = requirements.get(gap.requirement_id)
+        if requirement is None:
+            continue
+        already = set(attempted.get(gap.requirement_id, []))
+        declared = (*requirement.preferred_capabilities, *requirement.allowed_fallbacks)
+        if any(capability in allowed and capability not in already for capability in declared):
+            return True
+    if state.get("new_evidence_ids"):
+        return any(
+            capability in allowed
+            for gap in coverage.gaps
+            if (requirement := requirements.get(gap.requirement_id)) is not None
+            for capability in (
+                *requirement.preferred_capabilities,
+                *requirement.allowed_fallbacks,
+            )
+        )
+    return False
+
+
+def _continuation_failure_cutoff(
+    state: AgenticResearchState,
+    request: ResearchSessionRequest,
+    evidence: Sequence[EvidenceCandidate],
+) -> datetime:
+    cutoff = _decision_cutoff(state, request)
+    for item in evidence:
+        cutoff = max(cutoff, item.received_at.astimezone(UTC))
+    return min(cutoff, request.deadline_at.astimezone(UTC))
+
+
+def _coverage_with_attempts(
+    coverage: CoverageAssessment,
+    state: AgenticResearchState | dict[str, object],
+) -> CoverageAssessment:
+    attempted = state.get("attempted_capabilities_by_requirement", {})
+    if not isinstance(attempted, dict):
+        return coverage
+    gaps = [
+        gap.model_copy(
+            update={
+                "attempted_capabilities": list(
+                    dict.fromkeys(str(item) for item in attempted.get(gap.requirement_id, []))
+                )
+            }
+        )
+        for gap in coverage.gaps
+    ]
+    return coverage.model_copy(update={"gaps": gaps})
+
+
+def requirements_for_round(
+    requirements: Sequence[EvidenceRequirement],
+    state: AgenticResearchState,
+    *,
+    allowed_capabilities: Sequence[str] | None = None,
+) -> list[EvidenceRequirement]:
+    """Project only untried capability routes executable by this Run."""
+
+    attempted = state.get("attempted_capabilities_by_requirement", {})
+    available = {*allowed_capabilities, "web.search"} if allowed_capabilities is not None else None
+    result: list[EvidenceRequirement] = []
+    for requirement in requirements:
+        already = set(attempted.get(requirement.requirement_id, []))
+        ladder = list(
+            dict.fromkeys(
+                capability
+                for capability in (
+                    *requirement.preferred_capabilities,
+                    *requirement.allowed_fallbacks,
+                )
+                if capability not in already and (available is None or capability in available)
+            )
+        )
+        if not ladder and available is not None and state.get("new_evidence_ids"):
+            ladder = list(
+                dict.fromkeys(
+                    capability
+                    for capability in (
+                        *requirement.preferred_capabilities,
+                        *requirement.allowed_fallbacks,
+                    )
+                    if capability in available
+                )
+            )
+        if ladder:
+            result.append(requirement.model_copy(update={"preferred_capabilities": ladder}))
+        elif available is None:
+            result.append(requirement)
+    return result
+
+
+def attempts_from_result(
+    result: ResearchSessionResult,
+    request: ResearchSessionRequest,
+) -> dict[str, list[str]]:
+    if not result.rounds:
+        return {}
+    round_record = result.rounds[-1]
+    attempts: dict[str, list[str]] = {}
+    valid_requirement_ids = {item.requirement_id for item in request.evidence_requirements}
+    for task in round_record.plan.tasks:
+        if task.requirement_id not in valid_requirement_ids:
+            raise ValueError("research_task_requirement_mismatch")
+        attempts.setdefault(task.requirement_id, []).append(task.capability_id)
+    return attempts
+
+
+def _merge_attempts(
+    previous: dict[str, list[str]],
+    current: dict[str, list[str]],
+) -> dict[str, list[str]]:
+    merged = {key: list(value) for key, value in previous.items()}
+    for requirement_id, capabilities in current.items():
+        merged[requirement_id] = list(
+            dict.fromkeys((*merged.get(requirement_id, []), *capabilities))
+        )
+    return merged
+
+
+def _retryable_failure_count(result: ResearchSessionResult) -> int:
+    if not result.rounds:
+        return 0
+    return sum(
+        invocation.error is not None and invocation.error.retryable
+        for invocation in result.rounds[-1].tool_invocations
+    )
 
 
 def _initial_decision_cutoff(request: ResearchSessionRequest) -> datetime:
@@ -393,9 +678,7 @@ def _initial_decision_cutoff(request: ResearchSessionRequest) -> datetime:
     return _trigger_cutoff(request)
 
 
-def _decision_cutoff(
-    state: AgenticResearchState, request: ResearchSessionRequest
-) -> datetime:
+def _decision_cutoff(state: AgenticResearchState, request: ResearchSessionRequest) -> datetime:
     raw = state.get("decision_cutoff_at")
     if raw is None:
         return _initial_decision_cutoff(request)

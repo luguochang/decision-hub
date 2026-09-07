@@ -41,13 +41,16 @@ from packages.contracts_py.decision_hub_contracts.models import (
     PromotionDecisionResult,
     PromotionReviewRequest,
     PromotionReviewView,
+    ResearchInboxView,
     ResearchMemoCreate,
     ResearchMemoView,
+    ResearchObservabilityView,
     ResearchRunCommand,
     ResearchRunCommandResult,
     ResearchRunDetailView,
     ResearchRunQueued,
     ResearchRunView,
+    ResearchValueEvaluation,
     RunInspectorView,
     RunStatus,
     RunTimelineView,
@@ -339,6 +342,35 @@ def create_app(
     @app.get("/v1/research/runs", response_model=list[ResearchRunView])
     async def research_runs(limit: int = Query(default=100, ge=1, le=500)):
         return research_query.list(limit=limit)
+
+    @app.get("/v1/research/inbox", response_model=ResearchInboxView)
+    async def research_inbox(
+        limit: int = Query(default=100, ge=1, le=500),
+    ) -> ResearchInboxView:
+        return research_query.inbox(limit=limit)
+
+    @app.get(
+        "/v1/research/runs/{run_id}/observability",
+        response_model=ResearchObservabilityView,
+    )
+    async def research_run_observability(run_id: str) -> ResearchObservabilityView:
+        view = research_query.observability_view(run_id)
+        if view is None:
+            raise HTTPException(status_code=404, detail="research_run_not_found")
+        return view
+
+    @app.get(
+        "/v1/research/runs/{run_id}/value-evaluation",
+        response_model=ResearchValueEvaluation,
+    )
+    async def research_run_value_evaluation(run_id: str) -> ResearchValueEvaluation:
+        view = research_query.value_evaluation(run_id)
+        if view is None:
+            raise HTTPException(
+                status_code=404,
+                detail="research_value_evaluation_not_found",
+            )
+        return view
 
     @app.get("/v1/research/runs/{run_id}", response_model=ResearchRunDetailView)
     async def research_run_detail(run_id: str) -> ResearchRunDetailView:

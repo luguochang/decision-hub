@@ -3,12 +3,13 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import json
-from collections.abc import Mapping
-from datetime import UTC, datetime
-from typing import cast
+from collections.abc import Awaitable, Callable, Mapping
+from datetime import UTC, datetime, timedelta
+from typing import TypeVar, cast
 
 from packages.contracts_py.decision_hub_contracts import (
     DshBridgeError,
+    DshHostReadiness,
     DshSessionCompletion,
     DshSessionPrompt,
     DshSessionResult,
@@ -28,6 +29,8 @@ from .profile import build_trusted_web_research_prompt
 from .result_mapper import map_evidence_only_result, map_session_result
 from .web_host_client import DshHostClient
 
+_T = TypeVar("_T")
+
 
 class DshWebResearchRuntime:
     """Run one product request through a persistent official DSH Web Host."""
@@ -41,12 +44,16 @@ class DshWebResearchRuntime:
         client: DshHostClient,
         *,
         poll_interval_seconds: float = 0.25,
+        readiness_grace_seconds: float = 10.0,
     ) -> None:
         if poll_interval_seconds <= 0:
             raise ValueError("dsh_web_poll_interval_invalid")
+        if readiness_grace_seconds <= 0:
+            raise ValueError("dsh_web_readiness_grace_invalid")
         self.links = links
         self.client = client
         self.poll_interval_seconds = poll_interval_seconds
+        self.readiness_grace_seconds = readiness_grace_seconds
         self.runtime_version = "dsh-web-unverified"
 
     async def execute(
@@ -54,16 +61,7 @@ class DshWebResearchRuntime:
         request: ResearchSessionRequest,
         trace_sink: ResearchTraceSink | None = None,
     ) -> ResearchSessionResult:
-        readiness = await self.client.readiness()
-        if not readiness.ready:
-            raise AgentExecutionError(
-                readiness.error_code or "dsh_host_not_ready",
-                "DSH Web Host is not ready for a canonical research session",
-                retryable=True,
-                provider_id="dsh-web",
-                origin="dsh",
-                cause_code=readiness.error_code or "readiness_failed",
-            )
+        readiness = await self._wait_for_readiness(deadline_at=request.deadline_at)
         self.runtime_version = (
             f"dsh-web-{readiness.upstream_identity.source_version}"
             f"+{readiness.upstream_identity.plugin_build_hash[:12]}"
@@ -116,7 +114,11 @@ class DshWebResearchRuntime:
                     cause_code="request_hash_conflict",
                 )
             self.links.reserve(submit, readiness.upstream_identity)
-        accepted = await self.client.submit(submit)
+        accepted = await self._retry_host_call(
+            lambda: self.client.submit(submit),
+            deadline_at=submit.deadline_at,
+            operation="submit",
+        )
         self.links.accepted(accepted)
         fallback_used = False
         try:
@@ -229,7 +231,10 @@ class DshWebResearchRuntime:
         self, request: ResearchSessionRequest, submit: DshSessionSubmit
     ) -> DshSessionResult:
         while True:
-            remaining = (request.deadline_at - datetime.now(UTC)).total_seconds()
+            # The durable DSH link owns the Run deadline. A caller may rebuild a
+            # request while recovering a worker, but that must not extend the
+            # original product budget or make a late Host result unreachable.
+            remaining = (submit.deadline_at - datetime.now(UTC)).total_seconds()
             if remaining <= 0:
                 await self._cancel_best_effort(submit, "product_deadline_elapsed")
                 raise AgentExecutionError(
@@ -241,13 +246,21 @@ class DshWebResearchRuntime:
                     cause_code="dsh_web_deadline_elapsed",
                     deadline_ms=round(request.execution_budget.total_deadline_seconds * 1000),
                 )
-            status = await self.client.status(submit)
+            status = await self._retry_host_call(
+                lambda: self.client.status(submit),
+                deadline_at=submit.deadline_at,
+                operation="status",
+            )
             if status.state not in {"completed", "failed", "cancelled"}:
                 self.links.observe(status)
                 await asyncio.sleep(min(self.poll_interval_seconds, remaining))
                 continue
             if status.state == "completed":
-                result = await self.client.result(submit)
+                result = await self._retry_host_call(
+                    lambda: self.client.result(submit),
+                    deadline_at=submit.deadline_at,
+                    operation="result",
+                )
                 _validate_result(result, submit)
                 self.links.complete(
                     DshSessionCompletion(
@@ -295,6 +308,85 @@ class DshWebResearchRuntime:
                 origin="dsh",
                 cause_code=status.state,
             )
+
+    async def _wait_for_readiness(self, *, deadline_at: datetime) -> DshHostReadiness:
+        grace_deadline = min(
+            deadline_at,
+            datetime.now(UTC) + timedelta(seconds=self.readiness_grace_seconds),
+        )
+
+        async def require_ready() -> DshHostReadiness:
+            readiness = await self.client.readiness()
+            if readiness.ready:
+                return readiness
+            error_code = readiness.error_code or "dsh_host_not_ready"
+            raise AgentExecutionError(
+                error_code,
+                "DSH Web Host is not ready for a canonical research session",
+                retryable=error_code
+                in {"host_hub_unreachable", "host_not_ready", "dsh_host_not_ready"},
+                provider_id="dsh-web",
+                origin="dsh",
+                cause_code=error_code,
+            )
+
+        return await self._retry_host_call(
+            require_ready,
+            deadline_at=grace_deadline,
+            operation="readiness",
+        )
+
+    async def _retry_host_call(
+        self,
+        call: Callable[[], Awaitable[_T]],
+        *,
+        deadline_at: datetime,
+        operation: str,
+    ) -> _T:
+        """Retry only transient Host transport failures within the Run budget.
+
+        DSH Web is a separate process. A short restart, proxy hiccup, or HTTP
+        5xx must not turn a Host session that later completed into a product
+        failure. Authentication, protocol, permission, and other non-retryable
+        errors still fail immediately. The helper is intentionally local to
+        this adapter so it does not introduce another orchestration state
+        machine.
+        """
+
+        attempts = 0
+        last_error: AgentExecutionError | None = None
+        while True:
+            remaining = (deadline_at - datetime.now(UTC)).total_seconds()
+            if remaining <= 0:
+                if last_error is not None:
+                    raise _retry_deadline_error(last_error, attempts, operation)
+                raise AgentExecutionError(
+                    "provider_timeout",
+                    f"DSH Web {operation} exceeded the product deadline",
+                    retryable=True,
+                    provider_id="dsh-web",
+                    origin="orchestration",
+                    cause_code=f"dsh_web_{operation}_deadline_elapsed",
+                )
+            try:
+                return await call()
+            except asyncio.CancelledError:
+                raise
+            except AgentExecutionError as exc:
+                if not exc.retryable:
+                    raise
+                attempts += 1
+                last_error = exc
+                # Keep the retry budget short and deterministic: 1x, 2x, 4x,
+                # then a capped delay. The product deadline remains the hard
+                # ceiling, so a Host restart cannot create an unbounded wait.
+                delay = min(
+                    self.poll_interval_seconds * (2 ** min(attempts - 1, 3)),
+                    remaining,
+                )
+                if delay <= 0:
+                    raise _retry_deadline_error(exc, attempts, operation) from exc
+                await asyncio.sleep(delay)
 
     async def _cancel_best_effort(self, submit: DshSessionSubmit, reason: str) -> None:
         try:
@@ -353,6 +445,26 @@ class DshWebResearchRuntime:
 
     async def close(self) -> None:
         await self.client.close()
+
+
+def _retry_deadline_error(
+    error: AgentExecutionError, attempts: int, operation: str
+) -> AgentExecutionError:
+    """Retain the last stable transport provenance when the Run expires."""
+
+    return AgentExecutionError(
+        error.error_code,
+        f"DSH Web {operation} retry budget expired: {error}",
+        retryable=True,
+        attempt=max(error.attempt, attempts),
+        provider_id=error.provider_id or "dsh-web",
+        model=error.model,
+        origin=error.origin,
+        cause_code=error.cause_code or f"dsh_web_{operation}_deadline_elapsed",
+        capability_id=error.capability_id,
+        tool_call_id=error.tool_call_id,
+        deadline_ms=error.deadline_ms,
+    )
 
 
 def _request_hash(request: ResearchSessionRequest) -> str:

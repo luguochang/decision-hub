@@ -20,6 +20,19 @@ Research View/Command。它不绑定 LangGraph 或某个 DSH SDK 版本；Harnes
 实现只通过 `implementation_ref` 和 adapter 接入。大文本、原始网页和原始
 Provider/DSH payload 只保存内容引用与 hash，不进入跨模块状态。
 
+`ResearchSessionRequest.event_watch/event_window_samples` 是 Hub-owned EventWatch 的
+可选只读规划投影。它复用同一 schema 内的 durable Watch/Sample DTO，让 DSH 只对已捕获
+窗口发起查询；`null`/空列表表示不得猜测历史 baseline。Gateway 仍是事件时间、offset 和 PIT
+的唯一校验边界，Prompt 不得自行构造这些时间。
+
+`research_fact.schema.yaml` 是 Provider/Domain 到语义 Gate 的结构化 `FactEnvelope`
+真源；它只描述可审计事实的字段、窗口、来源和 payload lineage，不携带任何具体
+供应商协议。修改后必须重新运行 codegen，禁止手改 generated mirror。
+
+`research_product_view.schema.yaml` 是 PD-04..06 的主动 Inbox、Role/事实准备度、
+成本可观测、Outcome 和研究价值评测投影真源。它只组合 Hub 既有可信资产，不能成为
+第二套状态机或让前端解析数据库、DSH JSONL、LangGraph checkpoint。
+
 R2-R-06 在同一 schema 中增加 `ResearchEvaluationCase`、归档 capability fixture 和
 Outcome label availability 契约；数据集 manifest 继续复用
 `EvaluationDatasetManifest`，不创建第二套 Dataset/Experiment 账本。

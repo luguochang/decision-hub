@@ -11,10 +11,15 @@ from packages.contracts_py.decision_hub_contracts import (
     ErrorProvenance,
     EvidenceCandidate,
     EvidenceRequirement,
+    FactEnvelope,
+    ProviderAttempt,
     ResearchCapabilityManifest,
     ResearchCapabilityQuery,
     ResearchCapabilityResult,
     ResearchSnapshotManifest,
+)
+from packages.kernel.decision_hub_kernel.application.fact_store import (
+    research_fact_payload_hash,
 )
 from packages.kernel.decision_hub_kernel.persistence.db import (
     Database,
@@ -41,6 +46,7 @@ class ResearchCapabilityError(RuntimeError):
         capability_id: str | None = None,
         tool_call_id: str | None = None,
         deadline_ms: int | None = None,
+        provider_attempts: Iterable[ProviderAttempt] = (),
     ) -> None:
         super().__init__(message)
         self.error_code = error_code
@@ -50,6 +56,7 @@ class ResearchCapabilityError(RuntimeError):
         self.capability_id = capability_id
         self.tool_call_id = tool_call_id
         self.deadline_ms = deadline_ms
+        self.provider_attempts = tuple(provider_attempts)
 
     def with_context(
         self,
@@ -67,6 +74,23 @@ class ResearchCapabilityError(RuntimeError):
             capability_id=self.capability_id or capability_id,
             tool_call_id=self.tool_call_id or tool_call_id,
             deadline_ms=self.deadline_ms if self.deadline_ms is not None else deadline_ms,
+            provider_attempts=self.provider_attempts,
+        )
+
+    def with_provider_attempts(
+        self,
+        provider_attempts: Iterable[ProviderAttempt],
+    ) -> ResearchCapabilityError:
+        return ResearchCapabilityError(
+            self.error_code,
+            str(self),
+            retryable=self.retryable,
+            origin=self.origin,
+            cause_code=self.cause_code,
+            capability_id=self.capability_id,
+            tool_call_id=self.tool_call_id,
+            deadline_ms=self.deadline_ms,
+            provider_attempts=provider_attempts,
         )
 
     def provenance(self) -> ErrorProvenance:
@@ -78,6 +102,7 @@ class ResearchCapabilityError(RuntimeError):
             tool_call_id=self.tool_call_id,
             retryable=self.retryable,
             deadline_ms=self.deadline_ms,
+            provider_attempts=list(self.provider_attempts),
         )
 
 
@@ -199,6 +224,7 @@ class ResearchCapabilityGatewayService:
                 "research capability exceeded its audited timeout",
                 retryable=True,
                 origin="transport",
+                cause_code="capability_deadline",
                 capability_id=query.capability_id,
                 tool_call_id=query.request_id,
                 deadline_ms=round(manifest.timeout_seconds * 1000),
@@ -286,6 +312,17 @@ class ResearchCapabilityGatewayService:
                 )
             evidence_ids.add(candidate.evidence_id)
             _validate_candidate(query, candidate, effective_domains)
+        fact_ids: set[str] = set()
+        candidates_by_id = {
+            item.evidence_id: item for item in result.evidence_candidates
+        }
+        for fact in result.facts or []:
+            if fact.fact_id in fact_ids:
+                raise ResearchCapabilityError(
+                    "research_fact_duplicate", "capability returned duplicate fact ids"
+                )
+            fact_ids.add(fact.fact_id)
+            _validate_fact(query, fact, candidates_by_id)
 
 
 class ResearchEvidenceService:
@@ -486,7 +523,9 @@ def _effective_domains(
         )
     ):
         raise ResearchCapabilityError(
-            "research_domain_denied", "requested domains exceed the capability allowlist"
+            "research_domain_denied",
+            "requested domains exceed the capability allowlist",
+            cause_code="requested_domain_not_allowlisted",
         )
     if not requested and not allowed and not broad and manifest.kind != "replay":
         raise ResearchCapabilityError(
@@ -514,7 +553,9 @@ def _validate_target_url(url: str | None, domains: frozenset[str]) -> None:
     host = (urlsplit(url).hostname or "").lower().rstrip(".")
     if not host or (domains and not any(_domain_matches(host, item) for item in domains)):
         raise ResearchCapabilityError(
-            "research_target_domain_denied", "target URL is outside the effective allowlist"
+            "research_target_domain_denied",
+            "target URL is outside the effective allowlist",
+            cause_code="target_domain_not_allowlisted",
         )
 
 
@@ -558,6 +599,67 @@ def _validate_candidate_pit(candidate: EvidenceCandidate, cutoff_at: datetime) -
         )
 
 
+def _validate_fact(
+    query: ResearchCapabilityQuery,
+    fact: FactEnvelope,
+    candidates_by_id: Mapping[str, EvidenceCandidate],
+) -> None:
+    evidence = candidates_by_id.get(fact.evidence_id)
+    if evidence is None:
+        raise ResearchCapabilityError(
+            "research_fact_evidence_not_found",
+            "typed fact does not reference evidence from the same capability result",
+        )
+    if (
+        fact.requirement_id != query.requirement_id
+        or evidence.requirement_id != fact.requirement_id
+        or evidence.source_id != fact.source_id
+    ):
+        raise ResearchCapabilityError(
+            "research_fact_lineage_mismatch",
+            "typed fact lineage does not match its query and evidence",
+        )
+    if fact.published_at is not None and fact.published_at > fact.observed_at:
+        raise ResearchCapabilityError(
+            "research_fact_pit_violation", "fact published_at is after observed_at"
+        )
+    if fact.observed_at > fact.received_at or fact.received_at > query.cutoff_at:
+        raise ResearchCapabilityError(
+            "research_fact_pit_violation", "fact timestamps violate PIT ordering"
+        )
+    if (fact.window_start_at is None) != (fact.window_end_at is None):
+        raise ResearchCapabilityError(
+            "research_fact_window_invalid", "fact window must contain both boundaries"
+        )
+    if fact.window_start_at is not None and fact.window_end_at is not None:
+        if fact.window_start_at > fact.window_end_at or fact.window_end_at > fact.observed_at:
+            raise ResearchCapabilityError(
+                "research_fact_window_invalid", "fact window ordering is invalid"
+            )
+    expected_hash = research_fact_payload_hash(
+        requirement_id=fact.requirement_id,
+        metric_family=fact.metric_family,
+        field=fact.field,
+        instrument=fact.instrument,
+        venue=fact.venue,
+        value=fact.value,
+        unit=fact.unit,
+        window_start_at=fact.window_start_at,
+        window_end_at=fact.window_end_at,
+        event_offset=fact.event_offset,
+        published_at=fact.published_at,
+        source_id=fact.source_id,
+        independence_group=fact.independence_group,
+        delay_class=fact.delay_class,
+        payload_schema_ref=fact.payload_schema_ref,
+        attributes=fact.attributes,
+    )
+    if fact.payload_hash != expected_hash:
+        raise ResearchCapabilityError(
+            "research_fact_hash_mismatch", "typed fact payload hash is invalid"
+        )
+
+
 def _server_time(clock: Callable[[], datetime]) -> datetime:
     value = clock()
     if value.tzinfo is None:
@@ -575,9 +677,12 @@ def _normalize_live_result(
     product-owned observation and receipt timestamps are authoritative for PIT.
     """
 
+    facts = result.facts or []
     if result.completed_at > received_at or any(
         candidate.observed_at > received_at or candidate.received_at > received_at
         for candidate in result.evidence_candidates
+    ) or any(
+        fact.observed_at > received_at or fact.received_at > received_at for fact in facts
     ):
         raise ResearchCapabilityError(
             "research_pit_violation",
@@ -591,8 +696,16 @@ def _normalize_live_result(
         )
         for candidate in result.evidence_candidates
     ]
+    normalized_facts = [
+        fact.model_copy(update={"observed_at": received_at, "received_at": received_at})
+        for fact in facts
+    ]
     return result.model_copy(
-        update={"evidence_candidates": candidates, "completed_at": received_at}
+        update={
+            "evidence_candidates": candidates,
+            "facts": normalized_facts,
+            "completed_at": received_at,
+        }
     )
 
 

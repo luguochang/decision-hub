@@ -2,7 +2,7 @@ manifest_version: contracts.v1
 schemas:
   contracts/events/run_event.schema.yaml: 8a41bfb20cfa552caba9c9af3711269b8b83c6697736c4dcb6c611d28554f2dd
   contracts/policies/gate_policy.schema.yaml: ee9664cdcc93f1619ae3454d953235263ab1bbc0d6432cb57f908c099888321b
-  contracts/schemas/agentic_research.schema.yaml: 4a853f49ffdaae397838ffa2077056a97ff8d85422cfa1dde0962c07dce7512d
+  contracts/schemas/agentic_research.schema.yaml: ac42a80039d2df3331e9be3a9fcc8dbd9bb6d3447fe07ecc44ec2cc406b9e92f
   contracts/schemas/artifact.schema.yaml: 7eb372a42d40aac1ddf3717f23b6786fc4b6803c2097b1412466e006053eb9f1
   contracts/schemas/common.schema.yaml: 2d210425d08c160bbb31861e6ae114efffc0c95aced9f0eab905a90a56a23196
   contracts/schemas/dsh_host_bridge.schema.yaml: a4e6848f02ed983e2298319f8e8256035be944878ff74b810f02f51e62a5a50a
@@ -14,8 +14,10 @@ schemas:
   contracts/schemas/outcome.schema.yaml: b477937b57c50fa07c20802c4b5f2a6cd89bf1127fd6d58a48974615296d5340
   contracts/schemas/pilot_readiness.schema.yaml: caea222e7e8bf7f7e2287d30c128e7edff86bd2fb4ec0f97d68400daf0494448
   contracts/schemas/product_health.schema.yaml: 36deb30beef19c761e25e30f786ffd189e903daf545a82a8ab9938ee407964d8
+  contracts/schemas/research_fact.schema.yaml: a35b47551e3fbbe0db5682b654f447ddaa7eaf2e7a629b294025a50ca997f229
+  contracts/schemas/research_product_view.schema.yaml: 4691ac98d7d50eecb6a36f29d1da1c9269c5f40da2f03d3952cc5e2b13a7a293
   contracts/schemas/run_inspector.schema.yaml: 5fa38f64bd62862f6ff5ab58620fd2b792814c874884a9b9218c54ee31d1342e
   contracts/schemas/source_health.schema.yaml: 388643237427002fea48309b1120055976001ccd4863ee5ad1d3aeab35766549
   contracts/schemas/source_manifest.schema.yaml: 403a01d20e79a49b841101bfab8fc571456f35cc8866c1fc67fa49bc155f71e8
-  contracts/schemas/text_envelope.schema.yaml: 56e5e1948ef05ae2b53ab2f52691b4edbefc333cc604b0576d49c6ebb7deb380
+  contracts/schemas/text_envelope.schema.yaml: ee5346d2dfe019b73ce1938deba27e4f3ab40bc537e844834e4e4b6840455395
   contracts/schemas/workbench_assets.schema.yaml: 4bde0b324883f59af2bb154144ad73dc18aa6e737b48f0b7bb836ee1d358f1f8

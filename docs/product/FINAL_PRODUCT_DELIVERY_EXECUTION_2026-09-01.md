@@ -262,7 +262,9 @@ extensions/dsh/decision-hub/
 ### C4：事实能力准入
 
 - [ ] 六类事实均有 `CapabilityManifest`、输入/输出 schema、权限、域名、authority floor、freshness、PIT、hash、timeout、retry、cost、error codes、fixture 和 healthcheck。
-- [ ] `web.search`、Official、Market 默认 deny-by-default；每个 live canary 单独授权、只读、限时、临时目录。
+- [ ] Hub 的 `web.search.tavily`、Official、Market 默认 deny-by-default；DSH 官方原生 `web_search`
+  只作为 discovery primary，且其结果仍必须经 Hub attestation；每个外部 live canary 单独授权、
+  只读、限时、临时目录。
 - [ ] 低权威、过期、未来时间、未知 authority、schema 错误和 provider failure 都 fail-closed。
 - [ ] canary 记录结果数量、authority、freshness、PIT、latency、cost、错误 provenance；不切 active pointer。
 

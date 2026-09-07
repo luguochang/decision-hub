@@ -26,6 +26,10 @@ class ResearchTraceSink(Protocol):
     async def emit(self, event: ResearchTraceEvent) -> None: ...
 
 
+class ResearchProgressReader(Protocol):
+    def tool_calls_started(self, run_id: str) -> int | None: ...
+
+
 class ResearchHarnessRuntime(Protocol):
     runtime_id: str
     runtime_version: str

@@ -171,7 +171,10 @@ def main() -> int:
             if run.lease_owner is not None or run.lease_expires_at is not None:
                 raise AssertionError("recovered run retained its worker lease")
             first_counts = _counts(database, run_id)
-            if first_counts != {"artifacts": 1, "evidence": 1, "outbox": 0}:
+            # Every committed research Artifact is owner-visible, including a
+            # fail-closed research-only report. Recovery must create exactly one
+            # matching outbox row, and the second worker tick must remain idempotent.
+            if first_counts != {"artifacts": 1, "evidence": 1, "outbox": 1}:
                 raise AssertionError(f"unexpected recovered ledger counts: {first_counts}")
 
             repeated = _run_worker(worker_env)

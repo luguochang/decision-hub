@@ -13,7 +13,9 @@ from mcp_types import CallToolResult
 
 from apps.research_mcp.main import create_server
 
-CAPABILITIES = "official.macro,market.cross_asset,market.crypto_derivatives"
+CAPABILITIES = (
+    "official.macro,market.cross_asset,market.crypto_derivatives,market.crypto_crowding"
+)
 
 
 def _arguments(case_id: str) -> dict[str, object]:
@@ -71,6 +73,17 @@ def _arguments(case_id: str) -> dict[str, object]:
             ],
             "allowed_domains": ["api.coinex.com"],
         },
+        "crypto_crowding": {
+            "capability_id": "market.crypto_crowding",
+            "requirement_id": "crypto.derivatives",
+            "query": "current BTCUSDT order-book imbalance proxy",
+            "target_url": None,
+            "symbols": ["BTC-USDT-SWAP"],
+            "fields": ["crowding_signal", "book_imbalance"],
+            # Exercise the Pack route, including CoinEx fallback when OKX is
+            # rate-limited or unavailable; this is not an OKX-only probe.
+            "allowed_domains": ["okx.com", "api.coinex.com"],
+        },
     }
     return {**common, **cases[case_id]}
 
@@ -90,6 +103,9 @@ async def _execute(server: Any, case_id: str) -> dict[str, object]:
         evidence = payload.get("evidence_candidates")
         if not isinstance(evidence, list) or not evidence:
             raise RuntimeError("capability_returned_no_evidence")
+        facts = payload.get("facts")
+        if not isinstance(facts, list) or not facts:
+            raise RuntimeError("capability_returned_no_facts")
         now = datetime.now(UTC)
         ages: list[float] = []
         domains: set[str] = set()
@@ -104,11 +120,30 @@ async def _execute(server: Any, case_id: str) -> dict[str, object]:
             anchor = item.get("published_at") or item.get("observed_at")
             if isinstance(anchor, str):
                 ages.append(max(0.0, (now - datetime.fromisoformat(anchor)).total_seconds()))
+        metric_families = sorted(
+            {str(item.get("metric_family")) for item in facts if isinstance(item, dict)}
+        )
+        delay_classes = sorted(
+            {str(item.get("delay_class")) for item in facts if isinstance(item, dict)}
+        )
+        event_offsets = sorted(
+            {
+                str(item["event_offset"])
+                for item in facts
+                if isinstance(item, dict) and item.get("event_offset") is not None
+            }
+        )
+        attempts = payload.get("provider_attempts")
         return {
             "case_id": case_id,
             "status": "passed",
             "provider": payload.get("provider"),
             "evidence_count": len(evidence),
+            "fact_count": len(facts),
+            "metric_families": metric_families,
+            "delay_classes": delay_classes,
+            "event_offsets": event_offsets,
+            "provider_attempt_count": len(attempts) if isinstance(attempts, list) else 0,
             "authorities": sorted(authorities),
             "source_domains": sorted(domains),
             "max_age_seconds": round(max(ages), 3) if ages else None,
@@ -122,6 +157,11 @@ async def _execute(server: Any, case_id: str) -> dict[str, object]:
             "status": "failed",
             "provider": None,
             "evidence_count": 0,
+            "fact_count": 0,
+            "metric_families": [],
+            "delay_classes": [],
+            "event_offsets": [],
+            "provider_attempt_count": 0,
             "authorities": [],
             "source_domains": [],
             "max_age_seconds": None,
@@ -156,6 +196,7 @@ async def _run() -> dict[str, object]:
                     "cross_asset",
                     "crypto_spot",
                     "crypto_derivatives",
+                    "crypto_crowding",
                 )
             )
         )
@@ -174,6 +215,15 @@ async def _run() -> dict[str, object]:
         "schema_version": "research-fact-capability-canary.v1",
         "status": "passed" if all(item["status"] == "passed" for item in cases) else "failed",
         "cases": cases,
+        "semantic_scope": "current_snapshot_adapter_health_only",
+        "live_provider_blockers": [
+            "macro.cross_asset_intraday",
+            "macro.expectation_pricing",
+        ],
+        "note": (
+            "A passed public canary proves typed adapter reachability only; empty event_offsets "
+            "do not satisfy event-window requirements."
+        ),
     }
 
 

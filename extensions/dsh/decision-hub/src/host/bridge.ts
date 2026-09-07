@@ -139,6 +139,21 @@ export class DecisionHubHostBridge {
         methods: ['GET', 'HEAD'],
         fetch: request => this.browserReport(request),
       }),
+      this.ctx.connection.fetch.register({
+        path: '/api/decision-hub/inbox',
+        methods: ['GET', 'HEAD'],
+        fetch: request => this.browserInbox(request),
+      }),
+      this.ctx.connection.fetch.register({
+        path: '/api/decision-hub/observability',
+        methods: ['GET', 'HEAD'],
+        fetch: request => this.browserObservability(request),
+      }),
+      this.ctx.connection.fetch.register({
+        path: '/api/decision-hub/value-evaluation',
+        methods: ['GET', 'HEAD'],
+        fetch: request => this.browserValueEvaluation(request),
+      }),
       this.ctx.on('api-session/status', (sessionId, running) => { void this.onStatus(sessionId, running) }),
       this.ctx.on('api-session/error', (sessionId, message) => { this.onError(sessionId, message) }),
       this.ctx.on('session/event', (session, event) => { this.onSessionEvent(session.id, event) }),
@@ -167,14 +182,26 @@ export class DecisionHubHostBridge {
     if (req.method !== 'GET') return this.error(res, new HostRouteError('host_method_not_allowed', 405))
     this.hubReachable = await this.hub.readiness()
     const versionCompatible = this.versionCompatible()
-    const ready = versionCompatible && this.hubReachable
+    const baseReady = versionCompatible && this.hubReachable
       && (!this.config.requireClientPlugin || this.config.clientPlugin)
       && this.config.inboundKey.length > 0 && this.config.callbackKey.length > 0
+    let workspaceError: string | null = null
+    if (baseReady) {
+      try {
+        await this.resolveWorkspace()
+      } catch (error) {
+        workspaceError = error instanceof HostRouteError
+          ? error.code
+          : 'host_workspace_resolution_failed'
+      }
+    }
+    const ready = baseReady && workspaceError === null
     const body: DshHostReadiness = dshHostReadinessSchema.parse({
       schema_version: 'dsh-host-readiness.v1', ready, version_compatible: versionCompatible,
       session_controller: true, client_plugin: this.config.clientPlugin,
       hub_reachable: this.hubReachable, upstream_identity: this.identity(),
-      checked_at: new Date().toISOString(), error_code: ready ? null : this.readinessError(),
+      checked_at: new Date().toISOString(),
+      error_code: ready ? null : workspaceError ?? this.readinessError(),
     })
     this.json(res, ready ? 200 : 503, body)
   }
@@ -276,6 +303,63 @@ export class DecisionHubHostBridge {
       return this.rawBrowserJson(notFound ? 404 : 503, {
         error: {
           code: notFound ? 'host_research_report_not_found' : 'host_research_report_unavailable',
+          retryable: !notFound,
+        },
+      }, request.method)
+    }
+  }
+
+  private async browserInbox(request: Request): Promise<Response> {
+    try {
+      const rawLimit = new URL(request.url).searchParams.get('limit')
+      const limit = rawLimit === null || rawLimit.length === 0 ? 100 : Number(rawLimit)
+      if (!Number.isInteger(limit) || limit < 1 || limit > 500) {
+        return this.rawBrowserJson(400, {
+          error: { code: 'host_inbox_limit_invalid', retryable: false },
+        }, request.method)
+      }
+      const view = await this.hub.researchInbox(limit)
+      return this.rawBrowserJson(200, view, request.method)
+    } catch (error) {
+      const notFound = error instanceof HubClientError && error.code === 'host_hub_http_404'
+      return this.rawBrowserJson(notFound ? 404 : 503, {
+        error: {
+          code: notFound ? 'host_research_inbox_not_found' : 'host_research_inbox_unavailable',
+          retryable: !notFound,
+        },
+      }, request.method)
+    }
+  }
+
+  private async browserObservability(request: Request): Promise<Response> {
+    return this.browserRunProductView(request, 'observability')
+  }
+
+  private async browserValueEvaluation(request: Request): Promise<Response> {
+    return this.browserRunProductView(request, 'value-evaluation')
+  }
+
+  private async browserRunProductView(
+    request: Request,
+    view: 'observability' | 'value-evaluation',
+  ): Promise<Response> {
+    const runId = new URL(request.url).searchParams.get('run_id')
+    if (runId === null || runId.length === 0) {
+      return this.rawBrowserJson(400, {
+        error: { code: 'host_run_id_required', retryable: false },
+      }, request.method)
+    }
+    try {
+      const payload = view === 'observability'
+        ? await this.hub.researchObservability(runId)
+        : await this.hub.researchValueEvaluation(runId)
+      return this.rawBrowserJson(200, payload, request.method)
+    } catch (error) {
+      const notFound = error instanceof HubClientError && error.code === 'host_hub_http_404'
+      const label = view === 'observability' ? 'observability' : 'value_evaluation'
+      return this.rawBrowserJson(notFound ? 404 : 503, {
+        error: {
+          code: notFound ? `host_research_${label}_not_found` : `host_research_${label}_unavailable`,
           retryable: !notFound,
         },
       }, request.method)

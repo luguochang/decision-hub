@@ -38,6 +38,7 @@ class ProviderConfig(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="DECISION_HUB_",
         env_file=None,
+        env_ignore_empty=True,
         extra="forbid",
         frozen=True,
         populate_by_name=True,

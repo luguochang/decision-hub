@@ -23,6 +23,7 @@
             "tasks": [
               {
                 "task_id": "worker-task-1",
+                "requirement_id": "event_identity",
                 "capability_id": "replay.research",
                 "objective": "verify event",
                 "question": "What is the official event?",

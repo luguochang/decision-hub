@@ -45,6 +45,14 @@ PYTHON_GENERATED = {
         / "generated"
         / "workbench_assets.py"
     ),
+    ROOT / "contracts" / "schemas" / "research_fact.schema.yaml": (
+        ROOT
+        / "packages"
+        / "contracts_py"
+        / "decision_hub_contracts"
+        / "generated"
+        / "research_fact.py"
+    ),
     ROOT / "contracts" / "schemas" / "run_inspector.schema.yaml": (
         ROOT
         / "packages"
@@ -52,6 +60,14 @@ PYTHON_GENERATED = {
         / "decision_hub_contracts"
         / "generated"
         / "run_inspector.py"
+    ),
+    ROOT / "contracts" / "schemas" / "research_product_view.schema.yaml": (
+        ROOT
+        / "packages"
+        / "contracts_py"
+        / "decision_hub_contracts"
+        / "generated"
+        / "research_product_view.py"
     ),
 }
 TS_GENERATED = ROOT / "packages" / "contracts_ts" / "src" / "generated" / "r2.ts"
@@ -96,7 +112,16 @@ def _generate_python(source: Path, output: Path) -> None:
         check=True,
     )
     subprocess.run(
-        [sys.executable, "-m", "ruff", "check", "--fix", str(output)],
+        [
+            sys.executable,
+            "-m",
+            "ruff",
+            "check",
+            "--fix",
+            "--ignore",
+            "E501",
+            str(output),
+        ],
         cwd=ROOT,
         check=True,
         capture_output=True,

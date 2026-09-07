@@ -90,6 +90,8 @@ def _to_envelope(
         raw_text=raw_text,
         language="en",
         event_hint=uid,
+        event_family="scheduled_macro_event",
+        scheduled_at=start,
         content_hash=hashlib.sha256(raw_text.encode("utf-8")).hexdigest(),
     )
 

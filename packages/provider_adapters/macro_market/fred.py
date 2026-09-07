@@ -12,8 +12,13 @@ from pydantic import AnyUrl
 
 from packages.contracts_py.decision_hub_contracts import (
     EvidenceCandidate,
+    FactEnvelope,
     ResearchCapabilityQuery,
     ResearchCapabilityResult,
+)
+from packages.kernel.decision_hub_kernel.application.fact_store import (
+    research_fact_instance_id,
+    research_fact_payload_hash,
 )
 from packages.kernel.decision_hub_kernel.application.research_evidence import (
     ResearchCapabilityError,
@@ -58,12 +63,17 @@ class FredSeriesResearchAdapter:
             self._candidate(query, series, url, payload, received_at)
             for series, url, payload in zip(query.symbols, urls, payloads, strict=True)
         ]
+        facts = [
+            _fred_fact(query, candidate, series, received_at)
+            for candidate, series in zip(candidates, query.symbols, strict=True)
+        ]
         return ResearchCapabilityResult(
             schema_version="research-capability-result.v1",
             request_id=query.request_id,
             capability_id=query.capability_id,
             provider="fred-public",
             evidence_candidates=candidates,
+            facts=facts,
             cost_usd=0.0,
             completed_at=received_at,
         )
@@ -133,3 +143,61 @@ class FredSeriesResearchAdapter:
             freshness_status="unknown",
             conflict_group=None,
         )
+
+
+def _fred_fact(
+    query: ResearchCapabilityQuery,
+    candidate: EvidenceCandidate,
+    series: str,
+    received_at: datetime,
+) -> FactEnvelope:
+    payload = json.loads(candidate.excerpt)
+    metric_family = "macro.rates" if series.startswith("DGS") else "macro.usd"
+    unit = "yield_percent" if series.startswith("DGS") else "index"
+    attributes: dict[str, float | str | bool | None] = {"series": series}
+    payload_schema_ref = "fred.series-observation.v1"
+    payload_hash = research_fact_payload_hash(
+        requirement_id=query.requirement_id,
+        metric_family=metric_family,
+        field="level",
+        instrument=series,
+        venue=None,
+        value=str(payload["value"]),
+        unit=unit,
+        window_start_at=None,
+        window_end_at=None,
+        event_offset=None,
+        published_at=candidate.published_at,
+        source_id=candidate.source_id,
+        independence_group=f"fred:{series}",
+        delay_class="delayed",
+        payload_schema_ref=payload_schema_ref,
+        attributes=attributes,
+    )
+    return FactEnvelope(
+        schema_version="fact-envelope.v1",
+        fact_id=research_fact_instance_id(
+            evidence_id=candidate.evidence_id, payload_hash=payload_hash
+        ),
+        evidence_id=candidate.evidence_id,
+        requirement_id=query.requirement_id,
+        metric_family=metric_family,
+        field="level",
+        instrument=series,
+        venue=None,
+        value=str(payload["value"]),
+        unit=unit,
+        window_start_at=None,
+        window_end_at=None,
+        event_offset=None,
+        observed_at=received_at,
+        received_at=received_at,
+        published_at=candidate.published_at,
+        source_id=candidate.source_id,
+        independence_group=f"fred:{series}",
+        quality="candidate",
+        delay_class="delayed",
+        payload_schema_ref=payload_schema_ref,
+        payload_hash=payload_hash,
+        attributes=attributes,
+    )

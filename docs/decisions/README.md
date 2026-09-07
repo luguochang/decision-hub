@@ -27,6 +27,10 @@
 - [ADR-0018 DSH Client 受管 Session 选择边界（accepted）](ADR-0018-dsh-client-session-selection.md)
 - [ADR-0019 耐久工具预算与 Session Prompt 就绪边界（accepted）](ADR-0019-durable-tool-budget-and-session-readiness.md)
 - [ADR-0020 DSH Research Tool 受信运行身份（accepted）](ADR-0020-trusted-dsh-tool-session-context.md)
+- [ADR-0021 DSH 官方 OpenTelemetry 可观测插件接入（accepted）](ADR-0021-dsh-observability-plugin.md)
+- [ADR-0022 DSH 原生 Search 与 Hub Search Provider 的路由边界（accepted）](ADR-0022-search-provider-route-boundary.md)
+- [ADR-0023 同一 DSH_HOME 的单写者启动边界（accepted）](ADR-0023-single-writer-dsh-home.md)
+- [ADR-0024 语义事实与事件窗口边界（accepted）](ADR-0024-semantic-fact-and-event-window-boundary.md)
 
 ## 模板
 

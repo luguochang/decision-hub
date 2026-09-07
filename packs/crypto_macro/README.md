@@ -40,6 +40,14 @@ Extension 与 Kernel 持有。
 
 DSH 精确版本和 restricted profile 已在 R2-R-01 锁定；R2-R-04 已完成
 durable candidate path、自动 discovery、scheduled recheck 和进程恢复。工具仍按
-manifest 默认拒绝；R2-R-06A 只批准了实测 `web.search`，并未修改默认 allowlist。
+manifest 默认拒绝；当前 `web.fetch` 已作为受审计的只读 HTTP 文档 adapter 启用，且只允许
+本文件绑定的官方机构/交易所域名。`web.search` 与 `web.search.tavily` 仍按运行时 allowlist
+显式启用；Search 结果只能作为 locator，不能绕过 Fetch/typed provider 和 Evidence Gateway。
 R2-R-06B 的 12-case 数据集不含未来标签。R2-R-06E 已完成 value gate，但结论为
 `retain_baseline / pending_owner_review`；不声称 candidate 已 active、预测更准或可以盈利。
+
+`evidence/source_manifest.yaml` 同时是内部 dotted requirement 与 canonical requirement 的唯一映射
+来源；Source Registry 只写内部 ID。`official.macro` 只属于 `event_identity` typed ladder，政策
+delta 使用 approved Fetch/Search 收集当前与 baseline 文本但保持 typed gap，直到有经批准的
+baseline-aware adapter。运行时只执行 Pack ladder 与本 Run allowlist 的交集，未启用 fallback
+不会被当作可执行能力。

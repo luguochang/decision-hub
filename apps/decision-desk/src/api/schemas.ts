@@ -24,6 +24,10 @@ export {
   researchRunViewSchema,
   researchTraceEventSchema,
   workbenchOverviewSchema,
+  researchInboxItemSchema,
+  researchInboxViewSchema,
+  researchObservabilityViewSchema,
+  researchValueEvaluationSchema,
 } from '@decision-hub/contracts-ts'
 export type {
   ArtifactView,
@@ -50,4 +54,8 @@ export type {
   ResearchRunView,
   ResearchTraceEvent,
   WorkbenchOverview,
+  ResearchInboxItem,
+  ResearchInboxView,
+  ResearchObservabilityView,
+  ResearchValueEvaluation,
 } from '@decision-hub/contracts-ts'

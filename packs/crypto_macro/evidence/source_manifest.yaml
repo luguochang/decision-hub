@@ -13,60 +13,118 @@ requirements:
     importance: hard
     minimum_fact: true
     source_priority: [official, verified_web]
-    allowed_fallbacks: [web.fetch, web.search]
+    allowed_fallbacks: [web.fetch, web.search, web.search.tavily]
     preferred_capabilities: [official.macro, web.fetch, web.search]
     freshness_seconds: 604800
     minimum_independent_sources: 1
     authority_floor: official
     confidence_cap: 0.45
+    accepted_metric_families: [event.identity]
+    required_metric_families: [event.identity]
+    required_fields: [event_actor, event_time, revision_status]
+    required_event_offsets: [t0]
+    unit_policy: field_map.v1
+    field_units: {event_actor: [text], event_time: [datetime], revision_status: [text]}
+    minimum_venues: 1
+    venue_required: false
+    minimum_independence_groups: 1
+    allowed_delay_classes: [realtime, delayed]
+    semantic_policy_ref: crypto_macro.fact_semantics.v1#event_identity
   - requirement_id: policy.delta
     canonical_requirement_id: policy_or_data_delta
     description: Establish what changed relative to prior wording, prior value or consensus.
     importance: hard
     minimum_fact: true
     source_priority: [official, audited_aggregator, verified_web]
-    allowed_fallbacks: [web.fetch, web.search]
-    preferred_capabilities: [official.macro, web.fetch, web.search]
+    allowed_fallbacks: [web.fetch, web.search, web.search.tavily]
+    preferred_capabilities: [web.fetch, web.search]
     freshness_seconds: 86400
     minimum_independent_sources: 1
     authority_floor: official
     confidence_cap: 0.5
+    accepted_metric_families: [policy.statement_delta, economic.release_delta]
+    required_metric_families: []
+    required_fields: [current, baseline, delta]
+    required_event_offsets: [baseline, t0]
+    unit_policy: field_map.v1
+    field_units: {current: [text, number, percent], baseline: [text, number, percent], delta: [text, number, percentage_point, bps]}
+    minimum_venues: 1
+    venue_required: false
+    minimum_independence_groups: 1
+    allowed_delay_classes: [realtime, delayed]
+    semantic_policy_ref: crypto_macro.fact_semantics.v1#policy_or_data_delta
   - requirement_id: expectation.pricing
     canonical_requirement_id: expectation_pricing
     description: Observe policy expectations, rates repricing or credible positioning evidence.
     importance: hard
     minimum_fact: true
     source_priority: [exchange, audited_aggregator, verified_web]
-    allowed_fallbacks: [web.search]
-    preferred_capabilities: [market.cross_asset, web.search]
+    allowed_fallbacks: [macro.expectation_pricing, market.cross_asset, web.search, web.search.tavily]
+    preferred_capabilities: [macro.expectation_pricing, market.cross_asset, web.search]
     freshness_seconds: 900
     minimum_independent_sources: 1
     authority_floor: exchange
     confidence_cap: 0.55
+    accepted_metric_families: [macro.policy_expectation]
+    required_metric_families: [macro.policy_expectation]
+    required_fields: [level, delta]
+    required_event_offsets: [t-5m, t+1m]
+    unit_policy: field_map.v1
+    field_units: {level: [probability, percent, bps, yield_percent], delta: [percentage_point, bps]}
+    minimum_venues: 1
+    venue_required: false
+    minimum_independence_groups: 1
+    allowed_delay_classes: [realtime]
+    semantic_policy_ref: crypto_macro.fact_semantics.v1#expectation_pricing
   - requirement_id: macro.transmission
     canonical_requirement_id: macro_transmission
     description: Observe the rates and USD transmission path relevant to the event.
     importance: hard
     minimum_fact: true
     source_priority: [official, exchange, audited_aggregator]
-    allowed_fallbacks: [web.search]
-    preferred_capabilities: [market.cross_asset, official.macro, web.search]
-    freshness_seconds: 300
+    allowed_fallbacks: [macro.cross_asset_intraday, market.cross_asset, web.search, web.search.tavily]
+    preferred_capabilities: [macro.cross_asset_intraday, market.cross_asset, web.search]
+    # t-5m and t+1m are six minutes apart. The ten-minute envelope admits the
+    # intended event comparison without allowing an unbounded current snapshot.
+    freshness_seconds: 600
     minimum_independent_sources: 2
     authority_floor: exchange
     confidence_cap: 0.55
+    accepted_metric_families: [macro.rates, macro.usd]
+    required_metric_families: [macro.rates, macro.usd]
+    required_fields: [level, event_return]
+    required_event_offsets: [t-5m, t+1m]
+    unit_policy: field_map.v1
+    field_units: {level: [yield_percent, index], event_return: [bps, percent]}
+    minimum_venues: 1
+    venue_required: false
+    minimum_independence_groups: 2
+    allowed_delay_classes: [realtime]
+    semantic_policy_ref: crypto_macro.fact_semantics.v1#macro_transmission
   - requirement_id: cross_asset.confirmation
     canonical_requirement_id: cross_asset_confirmation
     description: Check at least one independent risk or liquidity-sensitive cross-asset confirmation.
     importance: soft
     minimum_fact: false
     source_priority: [exchange, audited_aggregator, verified_web]
-    allowed_fallbacks: [web.search]
-    preferred_capabilities: [market.cross_asset, web.search]
-    freshness_seconds: 300
+    allowed_fallbacks: [macro.cross_asset_intraday, market.cross_asset, web.search, web.search.tavily]
+    preferred_capabilities: [macro.cross_asset_intraday, market.cross_asset, web.search]
+    # Match the same bounded t-5m -> t+1m event window as macro transmission.
+    freshness_seconds: 600
     minimum_independent_sources: 1
     authority_floor: verified_web
     confidence_cap: 0.65
+    accepted_metric_families: [cross_asset.equity, cross_asset.volatility, cross_asset.commodity, cross_asset.credit]
+    required_metric_families: []
+    required_fields: [level, event_return]
+    required_event_offsets: [t-5m, t+1m]
+    unit_policy: field_map.v1
+    field_units: {level: [price, index, spread_bps], event_return: [percent, bps]}
+    minimum_venues: 1
+    venue_required: false
+    minimum_independence_groups: 1
+    allowed_delay_classes: [realtime]
+    semantic_policy_ref: crypto_macro.fact_semantics.v1#cross_asset_confirmation
   - requirement_id: crypto.spot
     canonical_requirement_id: crypto_spot_confirmation
     description: Observe BTC spot reaction, volume and the event-time comparison window.
@@ -75,31 +133,70 @@ requirements:
     source_priority: [exchange, audited_aggregator]
     allowed_fallbacks: []
     preferred_capabilities: [market.crypto_derivatives]
-    freshness_seconds: 60
+    # The baseline slot is intentionally five minutes before the event and is
+    # evaluated after the t+1m slot. A ten-minute envelope keeps that expected
+    # event-relative sample fresh without allowing an unbounded historical snapshot.
+    freshness_seconds: 600
     minimum_independent_sources: 1
     authority_floor: exchange
     confidence_cap: 0.5
+    accepted_metric_families: [crypto.spot]
+    required_metric_families: [crypto.spot]
+    required_fields: [price, volume, event_return]
+    required_event_offsets: [t-5m, t+1m]
+    unit_policy: field_map.v1
+    field_units: {price: [usd, usdt], volume: [btc, usd, usdt], event_return: [percent]}
+    minimum_venues: 1
+    venue_required: true
+    minimum_independence_groups: 1
+    allowed_delay_classes: [realtime]
+    semantic_policy_ref: crypto_macro.fact_semantics.v1#crypto_spot_confirmation
   - requirement_id: crypto.derivatives
     canonical_requirement_id: derivatives_crowding
     description: Observe funding, open interest, basis and available liquidation or flow evidence.
     importance: hard
     minimum_fact: true
     source_priority: [exchange, audited_aggregator]
-    allowed_fallbacks: []
-    preferred_capabilities: [market.crypto_derivatives]
-    freshness_seconds: 60
+    allowed_fallbacks: [market.crypto_crowding]
+    preferred_capabilities: [market.crypto_derivatives, market.crypto_crowding]
+    # The baseline slot is intentionally five minutes before the event and is
+    # evaluated after the t+1m slot. A ten-minute envelope keeps that expected
+    # event-relative sample fresh without allowing an unbounded historical snapshot.
+    freshness_seconds: 600
     minimum_independent_sources: 1
     authority_floor: exchange
     confidence_cap: 0.5
+    accepted_metric_families: [crypto.derivatives]
+    required_metric_families: [crypto.derivatives]
+    required_fields: [funding_rate, open_interest, open_interest_delta, basis, crowding_signal]
+    required_event_offsets: [t-5m, t+1m]
+    unit_policy: field_map.v1
+    field_units: {funding_rate: [rate], open_interest: [contracts, btc, usd, usdt], open_interest_delta: [percent], basis: [rate, percent], crowding_signal: [contracts, btc, usd, usdt, ratio]}
+    minimum_venues: 1
+    venue_required: true
+    minimum_independence_groups: 1
+    allowed_delay_classes: [realtime]
+    semantic_policy_ref: crypto_macro.fact_semantics.v1#derivatives_crowding
   - requirement_id: counter.thesis
     canonical_requirement_id: counter_thesis
     description: Build the strongest evidence-backed alternative transmission chain.
     importance: soft
     minimum_fact: false
     source_priority: [official, exchange, verified_web]
-    allowed_fallbacks: [web.search]
-    preferred_capabilities: [official.macro, market.cross_asset, web.search]
+    allowed_fallbacks: [web.search, web.search.tavily]
+    preferred_capabilities: [market.cross_asset, web.fetch, web.search]
     freshness_seconds: 86400
     minimum_independent_sources: 1
     authority_floor: verified_web
     confidence_cap: 0.7
+    accepted_metric_families: [research.counter_thesis]
+    required_metric_families: [research.counter_thesis]
+    required_fields: [alternative_chain]
+    required_event_offsets: []
+    unit_policy: field_map.v1
+    field_units: {alternative_chain: [text]}
+    minimum_venues: 1
+    venue_required: false
+    minimum_independence_groups: 1
+    allowed_delay_classes: [realtime, delayed]
+    semantic_policy_ref: crypto_macro.fact_semantics.v1#counter_thesis

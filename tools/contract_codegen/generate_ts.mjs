@@ -14,12 +14,14 @@ const sources = [
   ['contracts/schemas/agentic_research.schema.yaml', null],
   ['contracts/schemas/evolution_job.schema.yaml', null],
   ['contracts/schemas/workbench_assets.schema.yaml', null],
+  ['contracts/schemas/research_fact.schema.yaml', null],
   ['contracts/schemas/run_inspector.schema.yaml', new Set([
     'timeline_item',
     'evidence_lineage',
     'version_lineage',
     'orchestration_lineage',
   ])],
+  ['contracts/schemas/research_product_view.schema.yaml', null],
 ]
 
 const names = {
@@ -42,28 +44,54 @@ function pascal(value) {
   return words(value).map((part) => part[0].toUpperCase() + part.slice(1)).join('')
 }
 
-function resolveLocalRefs(value, rootSchema, seen = new Set()) {
-  if (Array.isArray(value)) return value.map((item) => resolveLocalRefs(item, rootSchema, seen))
+const schemaCache = new Map()
+
+function loadSchema(schemaPath) {
+  const normalized = path.resolve(schemaPath)
+  if (!schemaCache.has(normalized)) {
+    schemaCache.set(normalized, YAML.parse(fs.readFileSync(normalized, 'utf8')))
+  }
+  return schemaCache.get(normalized)
+}
+
+function resolveRefs(value, rootSchema, sourcePath, seen = new Set()) {
+  if (Array.isArray(value)) {
+    return value.map((item) => resolveRefs(item, rootSchema, sourcePath, seen))
+  }
   if (!value || typeof value !== 'object') return value
   if (typeof value.$ref === 'string' && value.$ref.startsWith('#/$defs/')) {
     const key = value.$ref.slice('#/$defs/'.length)
-    if (seen.has(key)) throw new Error(`recursive schema is not supported by R2 codegen: ${key}`)
+    const identity = `${sourcePath}#${key}`
+    if (seen.has(identity)) throw new Error(`recursive schema is not supported by R2 codegen: ${key}`)
     const target = rootSchema.$defs?.[key]
     if (!target) throw new Error(`unresolved local schema reference: ${value.$ref}`)
-    return resolveLocalRefs(target, rootSchema, new Set([...seen, key]))
+    return resolveRefs(target, rootSchema, sourcePath, new Set([...seen, identity]))
+  }
+  if (typeof value.$ref === 'string' && value.$ref.includes('#/$defs/')) {
+    const [relativePath, fragment] = value.$ref.split('#/$defs/')
+    const targetPath = path.resolve(path.dirname(sourcePath), relativePath)
+    const targetSchema = loadSchema(targetPath)
+    const identity = `${targetPath}#${fragment}`
+    if (seen.has(identity)) {
+      throw new Error(`recursive schema is not supported by R2 codegen: ${identity}`)
+    }
+    const target = targetSchema.$defs?.[fragment]
+    if (!target) throw new Error(`unresolved external schema reference: ${value.$ref}`)
+    return resolveRefs(target, targetSchema, targetPath, new Set([...seen, identity]))
   }
   return Object.fromEntries(
-    Object.entries(value).map(([key, item]) => [key, resolveLocalRefs(item, rootSchema, seen)]),
+    Object.entries(value).map(([key, item]) => [key, resolveRefs(item, rootSchema, sourcePath, seen)]),
   )
 }
 
 const blocks = []
 for (const [relativePath, selected] of sources) {
-  const schema = YAML.parse(fs.readFileSync(path.join(root, relativePath), 'utf8'))
+  const sourcePath = path.join(root, relativePath)
+  const schema = loadSchema(sourcePath)
   for (const key of Object.keys(schema.$defs ?? {}).sort()) {
     if (selected && !selected.has(key)) continue
     const [schemaName, typeName] = names[key] ?? [`${camel(key)}Schema`, pascal(key)]
-    blocks.push(jsonSchemaToZod(resolveLocalRefs(schema.$defs[key], schema), {
+    blocks.push(jsonSchemaToZod(resolveRefs(schema.$defs[key], schema, sourcePath), {
       module: 'esm',
       name: schemaName,
       type: typeName,

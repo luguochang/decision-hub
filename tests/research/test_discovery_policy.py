@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -197,6 +197,64 @@ def test_calendar_observation_never_starts_immediate_research() -> None:
     )
 
     assert policy(manifest, envelope) == ("baseline.v1",)
+
+
+def test_calendar_ingestion_creates_watch_and_defers_run_until_event(tmp_path: Path) -> None:
+    scheduled_at = NOW + timedelta(hours=2)
+
+    class FutureCalendarSource:
+        manifest = SourceManifest(
+            source_id="bls-calendar",
+            source_type="official_feed",
+            version="fixture.v1",
+            authority_level="official",
+        )
+
+        async def poll(self, cursor: str | None = None) -> SourcePollResult:
+            text = f"Consumer Price Index (scheduled: {scheduled_at.isoformat()})"
+            return SourcePollResult(
+                source_id=self.manifest.source_id,
+                cursor_before=cursor,
+                cursor_after="future-cpi",
+                envelopes=(
+                    TextEnvelope(
+                        source_id=self.manifest.source_id,
+                        source_type=SourceType.official_feed,
+                        observed_at=NOW,
+                        received_at=NOW,
+                        raw_text=text,
+                        language="en",
+                        event_hint="bls-cpi-future",
+                        event_family="inflation_release",
+                        scheduled_at=scheduled_at,
+                        content_hash=hashlib.sha256(text.encode()).hexdigest(),
+                    ),
+                ),
+                fetched_at=NOW,
+            )
+
+    database = Database(f"sqlite+pysqlite:///{tmp_path / 'future-calendar.sqlite3'}")
+    database.create_all()
+    registry = SourceRegistry()
+    registry.register(FutureCalendarSource())
+    ingestion = SourceIngestionService(
+        database,
+        registry,
+        strategy_selector=CryptoMacroDiscoveryPolicy.from_pack(PACK_ROOT),
+        clock=lambda: NOW,
+    )
+
+    result = asyncio.run(ingestion.poll_once("bls-calendar"))
+
+    assert result.accepted_count == 1
+    assert result.run_targets == ()
+    with database.session() as session:
+        run = session.query(RunRecord).one()
+        assert run.available_at == scheduled_at.replace(tzinfo=None)
+    watches = ingestion.event_watches.advance(now=NOW)
+    assert len(watches) == 1
+    assert watches[0].scheduled_at == scheduled_at
+    assert watches[0].baseline_status == "pending"
 
 
 def test_fresh_official_feed_bootstrap_creates_no_observation_or_run(

@@ -18,6 +18,7 @@ from packages.contracts_py.decision_hub_contracts import (
     DshSessionSubmit,
     DshUpstreamIdentity,
     EvidenceCandidate,
+    FactEnvelope,
     ObservationCreate,
     ResearchCapabilityResult,
 )
@@ -25,6 +26,10 @@ from packages.contracts_py.decision_hub_contracts.models import SourceType
 from packages.kernel.decision_hub_kernel.application.admission import AdmissionService
 from packages.kernel.decision_hub_kernel.application.dsh_sessions import (
     DshSessionLinkService,
+)
+from packages.kernel.decision_hub_kernel.application.fact_store import (
+    research_fact_instance_id,
+    research_fact_payload_hash,
 )
 from packages.kernel.decision_hub_kernel.application.research_evidence import (
     research_evidence_content_hash,
@@ -279,6 +284,7 @@ def _notifications(
         capability_id="replay.research",
         provider="matrix-replay",
         evidence_candidates=[EvidenceCandidate.model_validate(item) for item in candidates],
+        facts=_scenario_facts(candidates) if scenario == "success" else [],
         cost_usd=0.0,
         completed_at=NOW,
     )
@@ -346,6 +352,152 @@ def _notifications(
             ]
         )
     return result
+
+
+def _scenario_facts(candidates: list[dict[str, object]]) -> list[FactEnvelope]:
+    facts: list[FactEnvelope] = []
+    for candidate in candidates:
+        requirement_id = str(candidate["requirement_id"])
+        source_id = str(candidate["source_id"])
+        evidence_id = str(candidate["evidence_id"])
+        for metric_family, field, value, unit, event_offset in _fact_values(
+            requirement_id, source_id
+        ):
+            observed_at = datetime.fromisoformat(str(candidate["observed_at"]))
+            published_at = datetime.fromisoformat(str(candidate["published_at"]))
+            window_start_at = observed_at - timedelta(minutes=5)
+            window_end_at = observed_at
+            independence_group = f"matrix:{source_id}"
+            attributes: dict[str, float | str | bool | None] = {"fixture": True}
+            payload_schema_ref = "matrix-replay-fact.v1"
+            payload_hash = research_fact_payload_hash(
+                requirement_id=requirement_id,
+                metric_family=metric_family,
+                field=field,
+                instrument=_instrument(requirement_id, metric_family),
+                venue=_venue(requirement_id),
+                value=value,
+                unit=unit,
+                window_start_at=window_start_at,
+                window_end_at=window_end_at,
+                event_offset=event_offset,
+                published_at=published_at,
+                source_id=source_id,
+                independence_group=independence_group,
+                delay_class="realtime",
+                payload_schema_ref=payload_schema_ref,
+                attributes=attributes,
+            )
+            facts.append(
+                FactEnvelope(
+                    schema_version="fact-envelope.v1",
+                    fact_id=research_fact_instance_id(
+                        evidence_id=evidence_id, payload_hash=payload_hash
+                    ),
+                    evidence_id=evidence_id,
+                    requirement_id=requirement_id,
+                    metric_family=metric_family,
+                    field=field,
+                    instrument=_instrument(requirement_id, metric_family),
+                    venue=_venue(requirement_id),
+                    value=value,
+                    unit=unit,
+                    window_start_at=window_start_at,
+                    window_end_at=window_end_at,
+                    event_offset=event_offset,
+                    observed_at=observed_at,
+                    received_at=observed_at,
+                    published_at=published_at,
+                    source_id=source_id,
+                    independence_group=independence_group,
+                    quality="candidate",
+                    delay_class="realtime",
+                    payload_schema_ref=payload_schema_ref,
+                    payload_hash=payload_hash,
+                    attributes=attributes,
+                )
+            )
+    return facts
+
+
+def _fact_values(
+    requirement_id: str, source_id: str
+) -> tuple[tuple[str, str, float | str, str, str | None], ...]:
+    if requirement_id == "event_identity":
+        return (
+            ("event.identity", "event_actor", "Federal Reserve Chair", "text", "t0"),
+            ("event.identity", "event_time", NOW.isoformat(), "datetime", "t0"),
+            ("event.identity", "revision_status", "initial", "text", "t0"),
+        )
+    if requirement_id == "policy_or_data_delta":
+        return (
+            ("policy.statement_delta", "current", "restrictive", "text", "t0"),
+            ("policy.statement_delta", "baseline", "neutral", "text", "baseline"),
+            ("policy.statement_delta", "delta", "more restrictive", "text", "t0"),
+        )
+    if requirement_id == "expectation_pricing":
+        return (
+            ("macro.policy_expectation", "level", 0.34, "probability", "t-5m"),
+            ("macro.policy_expectation", "delta", 0.03, "percentage_point", "t+1m"),
+        )
+    if requirement_id == "macro_transmission":
+        if source_id == "exchange-yield":
+            return (
+                ("macro.rates", "level", 4.1, "yield_percent", "t-5m"),
+                ("macro.rates", "event_return", 4.0, "bps", "t+1m"),
+            )
+        return (
+            ("macro.usd", "level", 103.2, "index", "t-5m"),
+            ("macro.usd", "event_return", 0.2, "percent", "t+1m"),
+        )
+    if requirement_id == "cross_asset_confirmation":
+        return (
+            ("cross_asset.equity", "level", 5200.0, "index", "t-5m"),
+            ("cross_asset.equity", "event_return", -0.3, "percent", "t+1m"),
+        )
+    if requirement_id == "crypto_spot_confirmation":
+        return (
+            ("crypto.spot", "price", 60_000.0, "usdt", "t-5m"),
+            ("crypto.spot", "volume", 1_000_000.0, "usdt", "t+1m"),
+            ("crypto.spot", "event_return", -0.5, "percent", "t+1m"),
+        )
+    if requirement_id == "derivatives_crowding":
+        return (
+            ("crypto.derivatives", "funding_rate", 0.0001, "rate", "t-5m"),
+            ("crypto.derivatives", "open_interest", 500_000.0, "usdt", "t-5m"),
+            ("crypto.derivatives", "open_interest_delta", -1.2, "percent", "t+1m"),
+            ("crypto.derivatives", "basis", 0.001, "rate", "t+1m"),
+            ("crypto.derivatives", "crowding_signal", 1.1, "ratio", "t+1m"),
+        )
+    if requirement_id == "counter_thesis":
+        return (
+            (
+                "research.counter_thesis",
+                "alternative_chain",
+                "The policy signal was already priced in.",
+                "text",
+                None,
+            ),
+        )
+    raise AssertionError(f"unknown replay requirement: {requirement_id}")
+
+
+def _instrument(requirement_id: str, metric_family: str) -> str | None:
+    if requirement_id in {"crypto_spot_confirmation", "derivatives_crowding"}:
+        return "BTC-USDT"
+    if metric_family == "macro.rates":
+        return "US10Y"
+    if metric_family == "macro.usd":
+        return "DXY"
+    if metric_family == "cross_asset.equity":
+        return "SPX"
+    return None
+
+
+def _venue(requirement_id: str) -> str | None:
+    if requirement_id in {"crypto_spot_confirmation", "derivatives_crowding"}:
+        return "matrix-exchange"
+    return None
 
 
 def _causal_case(evidence_refs: list[str]) -> dict[str, object]:

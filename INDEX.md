@@ -4,9 +4,11 @@
 
 ## 当前状态
 
-Decision Hub 已完成 R0/R1/R2/R2-L、R2-R-00 至 R2-R-06E、[DSH-NATIVE-CORE](docs/stages/DSH_NATIVE_WEB_PRODUCT_CORE.md) 和 [PRODUCT-CLOSEOUT-01](docs/stages/PRODUCT_CLOSEOUT_01_DSH_NATIVE_TRADER_PILOT.md) 的 E1/E2-R/E2-L 验收。官方 DSH Web 已从真实页面完成两轮主动补证、可信账本、代码 Gate、双前端一致性和后台自动复查；当前可作为单 owner、单机、只读的 `research_only` 试用入口。Fixed 仍 active，DSH 仍是 candidate/shadow；这不代表预测准确、盈利、自动交易或 Promotion。下一阶段只做 E3 前瞻价值观察。
+Decision Hub 已完成 R0/R1/R2/R2-L、R2-R-00 至 R2-R-06E、[DSH-NATIVE-CORE](docs/stages/DSH_NATIVE_WEB_PRODUCT_CORE.md)、[PRODUCT-CLOSEOUT-01](docs/stages/PRODUCT_CLOSEOUT_01_DSH_NATIVE_TRADER_PILOT.md) 和 PD-04..06 runtime closeout 的工程/运行验收。2026-09-03 的 D2 官方 DeepSeek Live 复验已跑通到诚实终态，但 synthesis 安全失败，不能写成方向性分析成功；证据见 [D2 真实验收记录](docs/evaluations/DSH_DEEPSEEK_LIVE_FLOW_ACCEPTANCE_2026-09-03.md)。官方 DSH Web 已从真实页面完成主动补证、可信账本、同一 Session 轨迹和代码 Gate；当前可作为单 owner、单机、只读的 `research_only` 试用入口。Fixed 仍 active，DSH 仍是 candidate/shadow；这不代表预测准确、盈利、自动交易或 Promotion。PD-07 仍需未来事件/事实价值观察，具体见 [PD-07 前瞻价值观察阶段卡](docs/stages/PD_07_PROSPECTIVE_VALUE_OBSERVATION.md)。D2 专属桌面/移动浏览器资产、DOM/console 和最终质量门已收口。
 
-当前唯一执行和收口入口是 [产品交付控制书与最终验收包](docs/product/PRODUCT_DELIVERY_CONTROL_BOOK_2026-09-01.md)，真实证据见 [E2-L 官方 DSH Web 验收记录](docs/evaluations/E2L_LIVE_PRODUCT_ACCEPTANCE_2026-09-01.md)。[Pilot Ready 最终执行与验收书 v2](docs/product/PRODUCT_PILOT_READY_FINAL_EXECUTION_PLAN_2026-09-01.md) 与 [v1 最终产品收口实施任务书](docs/product/PRODUCT_CLOSEOUT_FINAL_IMPLEMENTATION_TASKBOOK_2026-09-01.md) 已完成其实施用途，只保留为历史任务和反例证据，不能再作为新开发入口。
+2026-09-04/05 的 G2-AF 自动事件 Run 和 PD public canary 已证明 DSH 原生 Search、三轮补证、Artifact、通知、复查和 typed adapter 健康链，但历史 83.33% 不能解释为金融语义充分。`PD-00..01` 已完成 requirement lineage、canonical `FactEnvelope`、八类语义 Gate、durable EventWatch 和八个事件窗口；`PD-02A/B` 已完成 stable ProviderRoute/ProviderAttempt、失败 durable lineage，以及 Pack 驱动的 OKX primary/CoinEx fallback Gateway composition；`PD-02C` 已完成 archive、事件窗口 sampler、Run/EventWatch lineage、archive-only route 和 FactStore/Gate 回放闭环；`PD-02D` 已完成 order-book imbalance proxy、Pack route 和衍生品完整窗口语义回放；`PD-02E/F` 已完成宏观/预期定价 provider-neutral seam 与 Pack/profile/composition closure；`PD-02G` public adapter canary 已通过；`PD-03` 已完成 Source Registry、官方 `event.identity` parser 和 live Fed feed canary；`PD-04..06` 已完成主动交付、可观测成本、Outcome/Evaluation 与隔离运行收口。当前唯一产品入口是 `PD-07` 前瞻观察。分钟级正式 Provider、前瞻价值和盈利仍未证明，不把 G2-AF-05/E3 写成产品价值通过。
+
+当前唯一下一阶段入口是 [PD-07 前瞻价值观察与产品停止线](docs/stages/PD_07_PROSPECTIVE_VALUE_OBSERVATION.md)，追加式证据进入 [PD-07 执行日志](docs/evaluations/PD_07_PROSPECTIVE_OBSERVATION_LOG_2026-09.md)。[产品交付控制书与最终验收包](docs/product/PRODUCT_DELIVERY_CONTROL_BOOK_2026-09-01.md)、[Pilot Ready 最终执行与验收书 v2](docs/product/PRODUCT_PILOT_READY_FINAL_EXECUTION_PLAN_2026-09-01.md) 与 [v1 最终产品收口实施任务书](docs/product/PRODUCT_CLOSEOUT_FINAL_IMPLEMENTATION_TASKBOOK_2026-09-01.md) 已完成其实施用途，只保留为历史任务和反例证据，不能再作为新开发入口。
 
 ## 长任务快速恢复
 
@@ -67,6 +69,33 @@ Agent 或新会话先读 [当前状态短上下文](docs/context/CURRENT_STATE.m
 49. [最终产品收口实施任务书 v1](docs/product/PRODUCT_CLOSEOUT_FINAL_IMPLEMENTATION_TASKBOOK_2026-09-01.md)（`superseded for remaining execution`，保留 Search attribution 和安全降级的历史任务证据）
 50. [Pilot Ready 最终执行与验收书 v2](docs/product/PRODUCT_PILOT_READY_FINAL_EXECUTION_PLAN_2026-09-01.md)（`executed / historical taskbook`，保留 live 预算/Session 反例、PR-00..08 和 BDD/TDD 证据，不再作为执行入口）
 51. [E2-L 官方 DSH Web 真实产品验收记录](docs/evaluations/E2L_LIVE_PRODUCT_ACCEPTANCE_2026-09-01.md)（`passed / research-only pilot entry`，Run/Session/能力/错误/后台复查/截图 hash/完整质量门）
+52. [产品现状、架构与交付缺口审计](docs/evaluations/PRODUCT_STATE_ARCHITECTURE_AUDIT_2026-09-02.md)（六项现状回答、DSH/Hub/Loop/调度/自进化、代码冗余与 `.gitignore` 核对；不新增实现授权）
+53. [DSH 可观测插件接入评估与实施建议](docs/evaluations/DSH_OBSERVABILITY_PLUGIN_ASSESSMENT_2026-09-02.md)（文章核对、`@loongsuite/dsh-plugin@0.1.2` 与 LoongSuite Pilot 对比、Trace/Hub 边界、OBS-01 已通过、OBS-02/03 后置）
+54. [D2 官方 DeepSeek Live 主流程计划与验收清单](docs/stages/D2_OFFICIAL_DEEPSEEK_LIVE_FLOW_PLAN.md)（Provider/模型探针、真实 DSH 主流程、页面与账本一致性；已完成到 truthful terminal）
+55. [D2 官方 DeepSeek Live 主流程真实验收记录](docs/evaluations/DSH_DEEPSEEK_LIVE_FLOW_ACCEPTANCE_2026-09-03.md)（真实运行安全终态；synthesis 失败安全降级；桌面/移动截图、DOM、console 和质量门已归档）
+56. [D2 官方 DeepSeek Live 主流程执行清单](docs/stages/D2_OFFICIAL_DEEPSEEK_LIVE_EXECUTION_CHECKLIST_2026-09-03.md)（唯一收口任务卡：桌面/移动页面资产、进程收口、质量门、文档状态同步；完成后进入 E3 价值观察）
+57. [Decision Hub 单机研究试用版使用说明](docs/user-guides/DECISION_HUB_USER_GUIDE_2026-09-03.md)（DSH 唯一入口、研究报告/轨迹/Decision Desk 使用、状态语义、可观测性和限制）
+58. [产品用户交付验收记录](docs/evaluations/PRODUCT_USER_DELIVERY_ACCEPTANCE_2026-09-03.md)（Provider 根因修复、真实 Run、页面/轨迹/报告/后台证据、截图 hash 和交付边界）
+59. [产品用户交付问题记录](docs/evaluations/PRODUCT_USER_DELIVERY_ISSUES_2026-09-03.md)（真实页面验收发现的问题、根因、修复和历史失败样本）
+60. [Agentic 主动研究缺口复盘](docs/evaluations/PRODUCT_AGENTIC_GAP_REVIEW_2026-09-03.md)（为何未自动搜索、交易员/LoongSuite/调度/自进化的真实边界，以及下一阶段主动事实获取门）
+61. [G2-AF 主动事实获取与自主研究阶段方案](docs/stages/G2_AF_ACTIVE_FACT_ACQUISITION_AND_AUTONOMOUS_RESEARCH.md)（`G2-AF-01..04 technical gates passed / G2-AF-05 observation pending`；DSH 同 Session continuation、自动调度、报告/通知/复查已通过，Tavily live fallback 等待旧 key 轮换）
+62. [G2-AF Tavily / DSH Search 核查与执行记录](docs/evaluations/G2_AF_TAVILY_EXECUTION_LOG_2026-09-03.md)（官方 DSH 原生 `web_search` route probe 已通过、Tavily key 安全边界、固定金融来源注册表、每轮记录模板；Tavily 未调用）
+63. [G2-AF 实施执行记录](docs/evaluations/G2_AF_IMPLEMENTATION_EXECUTION_LOG_2026-09-04.md)（最终自动 feed -> DSH 原生 Search/三轮补证 -> 13 条 Evidence/83.33% hard -> Artifact/通知/复查 canary、readiness/timeout 根因修复、浏览器截图和残余价值门）
+64. [ADR-0022 Search Provider 路由边界](docs/decisions/ADR-0022-search-provider-route-boundary.md)（DSH native primary、Tavily 显式 fallback、Search candidate 与 Evidence Gateway 边界）
+65. [产品事实充分度与主动交付修复方案](docs/product/PRODUCT_FACT_SUFFICIENCY_AND_ACTIVE_DELIVERY_PLAN_2026-09-04.md)（`accepted / PD-00..06 completed / PD-07 pending`；WebSearch/typed facts/event-window/semantic Gate/主动交付/成本/自进化的完整代码方案与有限验收门）
+66. [PD 产品事实充分度与主动交付 Stage Charter](docs/stages/PD_PRODUCT_FACT_SUFFICIENCY_AND_ACTIVE_DELIVERY.md)（`accepted / PD-00..03 completed / PD-04..06 runtime closeout completed / PD-07 observation pending`）
+67. [PD-02 Typed Provider Pack 实施与验收方案](docs/stages/PD_02_TYPED_PROVIDER_PACK.md)（stable capability、provider route、fallback、成本与服务等级边界）
+68. [PD-02B Stable Provider Router Composition](docs/stages/PD_02B_PROVIDER_ROUTER_COMPOSITION.md)（Pack 驱动 OKX/CoinEx 路由、Gateway composition 与离线验收；`completed`）
+69. [PD-02C Crypto Event-Window Facts](docs/stages/PD_02C_CRYPTO_EVENT_WINDOW_FACTS.md)（Watch -> capture archive -> DSH tool -> Fact/Gate 的事件窗口闭环；`completed / PD-02D next`）
+70. [PD-02D Crypto Crowding Facts](docs/stages/PD_02D_CRYPTO_CROWDING_FACTS.md)（订单簿 proxy、Pack route 与衍生品窗口语义回放；`completed`）
+71. [PD-02E Intraday Macro / Expectation Pricing](docs/stages/PD_02E_INTRADAY_MACRO_EXPECTATION_PRICING.md)（事件 offset、free/licensed seam、完整语义回放；`engineering completed / live provider blocked`）
+72. [ADR-0024 语义事实与事件窗口边界](docs/decisions/ADR-0024-semantic-fact-and-event-window-boundary.md)（`accepted`）
+73. [PD 实施与自测执行日志](docs/evaluations/PD_IMPLEMENTATION_EXECUTION_LOG_2026-09.md)（逐任务 Red/Green/Run/UI 证据）
+74. [PD-04～06 产品运行收口实施方案](docs/stages/PD_04_06_PRODUCT_RUNTIME_CLOSEOUT.md)（`completed`；当前代码构建、产品契约探针、单实例、DSH/Desk 浏览器验收与有限停止线）
+75. [主动研究交付修复方案](docs/product/PRODUCT_AGENTIC_FACT_SUFFICIENCY_REMEDIATION_2026-09-05.md)（`completed`；Search/typed fact/事件窗口/循环边界、代码落点、BDD/TDD 和 PD-07 退出门）
+76. [PD-07 前瞻价值观察与产品停止线](docs/stages/PD_07_PROSPECTIVE_VALUE_OBSERVATION.md)（当前唯一下一阶段；样本准入、指标、cohort、运行入口与 promote/retain/stop）
+77. [PD-07 前瞻观察执行日志](docs/evaluations/PD_07_PROSPECTIVE_OBSERVATION_LOG_2026-09.md)（追加式样本/运行/人工价值证据；当前未开始，不伪造未来窗口）
+78. [DSH 插件底座、现有插件资产与平台解耦优化方案](docs/product/DSH_PLUGIN_PLATFORM_DECOUPLING_PLAN_2026-09-06.md)（`proposed`；插件清单、自研/官方/LoongSuite 真实边界、金融耦合修复、目标目录、依赖规则与验收门）
 
 `DECISION_HUB_FINAL_ARCHITECTURE.md` 和 `DSH_RESEARCH_DECISION_LOG.md` 是历史研究/审查材料；若与 V1 基线冲突，以 V1、ADR、canonical schema 和受影响模块文档为准。
 

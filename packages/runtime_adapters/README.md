@@ -11,7 +11,7 @@
 
 ## Provider 配置
 
-`langgraph_agent.provider_config.ProviderConfig` 是 Runtime 唯一的 Provider 配置入口。它使用 Pydantic Settings 读取 `DECISION_HUB_PROVIDER_ID`、`OPENAI_BASE_URL`/`SUB2API_BASE_URL`、`DECISION_HUB_MODEL`、`DECISION_HUB_LLM_API_MODE`、timeout、retry、token budget 和 capability 字段，并在构造时拒绝非法协议、预算或不支持的模式。
+`langgraph_agent.provider_config.ProviderConfig` 是 Runtime 唯一的 Provider 配置入口。它使用 Pydantic Settings 读取 `DECISION_HUB_PROVIDER_ID`、`OPENAI_BASE_URL`/`SUB2API_BASE_URL`、`DECISION_HUB_MODEL`、`DECISION_HUB_LLM_API_MODE`、timeout、retry、token budget 和 capability 字段，并在构造时拒绝非法协议、预算或不支持的模式。Compose 为可选 URL 注入空字符串时按“未设置”处理；任何非空非法 URL 仍在启动边界失败。
 
 `ProviderCapabilityManifest` 只保存 provider/model、支持的 API mode、结构化输出能力和 capability version。API key 不属于配置对象或 manifest，只在构建 `ChatOpenAI` 时从当前进程环境读取，不写入日志、账本、manifest 或前端。
 
@@ -33,5 +33,10 @@ R2-R 新增具体 [`dsh_runtime/`](dsh_runtime/README.md)：它使用官方 Pyth
 SDK/bundled runtime、restricted Cordis profile、Session/Tool/Subagent trace
 mapper 和严格 ResearchSession result mapper。旧 `DshAgentRuntime` 保留为历史
 candidate callable seam，不得继续向其中添加 SDK 或业务逻辑。
+
+DSH research profile 只消费 canonical request 投影的 EventWatch/sample 状态。官方正文、
+FRED 背景数据和当前交易所快照必须以非窗口调用执行；只有相同 `event_id/watch_id` 下已
+`captured` 的 offset 才能提示给 Harness。无 Watch、回溯 Watch 或 baseline 不可用时继续
+非窗口检索并保留语义缺口，不能靠模型猜测 event time。
 
 R1 的 Source/Market/Notification adapter 不属于 AgentRuntime；它们通过 `kernel.ports.sources` 的 Protocol 接入，不能把 HTTP、交易所或邮件 SDK 类型泄漏到 Kernel 或 LangGraph。

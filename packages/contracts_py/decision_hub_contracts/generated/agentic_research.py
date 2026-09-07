@@ -15,6 +15,101 @@ class AgenticResearchContracts(BaseModel):
     schema_version: Literal["agentic-research.v1"]
 
 
+type WindowOffset = Annotated[str, Field(max_length=32, min_length=1)]
+
+
+class EventWatch(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["event-watch.v1"]
+    watch_id: Annotated[str, Field(max_length=128, min_length=1)]
+    event_id: Annotated[str, Field(max_length=128, min_length=1)]
+    source_id: Annotated[str, Field(max_length=128, min_length=1)]
+    event_family: Annotated[str, Field(max_length=128, min_length=1)]
+    scheduled_at: AwareDatetime
+    status: Literal["scheduled", "active", "completed", "retrospective_only", "cancelled"]
+    window_offsets: Annotated[list[WindowOffset], Field(min_length=1)]
+    baseline_status: Literal["pending", "ready", "unavailable"]
+    created_at: AwareDatetime
+    updated_at: AwareDatetime
+    next_tick_at: AwareDatetime | None
+
+
+class EventWindowSample(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["event-window-sample.v1"]
+    sample_id: Annotated[str, Field(max_length=160, min_length=1)]
+    watch_id: Annotated[str, Field(max_length=128, min_length=1)]
+    event_id: Annotated[str, Field(max_length=128, min_length=1)]
+    offset: Annotated[str, Field(max_length=32, min_length=1)]
+    target_at: AwareDatetime
+    status: Literal["pending", "due", "captured", "missing", "baseline_unavailable"]
+    observed_at: AwareDatetime | None
+    received_at: AwareDatetime | None
+    provider_id: Annotated[str | None, Field(max_length=128)]
+    payload_ref: Annotated[str | None, Field(max_length=2048)]
+    payload_hash: Annotated[str | None, Field(pattern="^[a-f0-9]{64}$")]
+    error_code: Annotated[str | None, Field(max_length=128)]
+
+
+class EventWindowCapture(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["event-window-capture.v1"]
+    observed_at: AwareDatetime
+    received_at: AwareDatetime
+    provider_id: Annotated[str, Field(max_length=128, min_length=1)]
+    payload_ref: Annotated[str, Field(max_length=2048, min_length=1)]
+    payload_hash: Annotated[str, Field(pattern="^[a-f0-9]{64}$")]
+
+
+class CryptoEventWindowObservation(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    provider_id: Annotated[str, Field(max_length=128, min_length=1)]
+    source_id: Annotated[str, Field(max_length=256, min_length=1)]
+    venue: Annotated[str, Field(max_length=128, min_length=1)]
+    metric_family: Annotated[str, Field(max_length=128, min_length=1)]
+    field: Annotated[str, Field(max_length=128, min_length=1)]
+    value: float | str
+    unit: Annotated[str, Field(max_length=64, min_length=1)]
+    source_url: AnyUrl | None
+    published_at: AwareDatetime | None
+
+
+class CryptoEventWindowFailure(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    provider_id: Annotated[str, Field(max_length=128, min_length=1)]
+    error_code: Annotated[str, Field(max_length=128, min_length=1)]
+    retryable: bool
+
+
+class CryptoEventWindowPayload(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["crypto-event-window-payload.v1"]
+    event_id: Annotated[str, Field(max_length=128, min_length=1)]
+    offset: Annotated[str, Field(max_length=32, min_length=1)]
+    target_at: AwareDatetime
+    captured_at: AwareDatetime
+    observations: Annotated[list[CryptoEventWindowObservation], Field(max_length=100)]
+    failures: Annotated[list[CryptoEventWindowFailure], Field(max_length=20)]
+
+
+type UnitListItem = Annotated[str, Field(min_length=1)]
+
+
+type UnitList = Annotated[list[UnitListItem], Field(min_length=1)]
+
+
 class ExecutionBudget(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -70,6 +165,49 @@ class DomainPackManifest(BaseModel):
     execution_budget: ExecutionBudget
 
 
+type Domain = Annotated[str, Field(min_length=1)]
+
+
+type AllowedPath = Annotated[str, Field(min_length=1)]
+
+
+type RequirementId = Annotated[str, Field(min_length=1)]
+
+
+class ResearchSourcePolicy(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    source_ref: Annotated[str, Field(pattern="^[a-z][a-z0-9_.-]*$")]
+    tier: Literal["P0", "P1", "P2", "P3", "P4"]
+    publisher: Annotated[str, Field(min_length=1)]
+    authority: Literal[
+        "official", "exchange", "audited_aggregator", "verified_web", "search_derived", "unverified"
+    ]
+    independence_group: Annotated[str, Field(min_length=1)]
+    domains: Annotated[list[Domain], Field(min_length=1)]
+    allowed_paths: Annotated[list[AllowedPath], Field(min_length=1)]
+    requirement_ids: Annotated[list[RequirementId], Field(min_length=1)]
+    allow_search: bool
+    allow_fetch: bool
+    allow_evidence: bool
+    parser_ref: str | None
+    license_status: Literal["approved", "review_required", "denied"]
+    retention_policy: Literal["hash_only", "hash_excerpt", "full_text"]
+    audit_status: Literal["approved", "candidate", "denied"]
+    redirect_policy: Literal["deny", "same_source_only"]
+
+
+class ResearchSourceRegistry(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["research-source-registry.v1"]
+    pack_id: Annotated[str, Field(pattern="^[a-z][a-z0-9_.-]*$")]
+    version: Annotated[str, Field(min_length=1)]
+    sources: Annotated[list[ResearchSourcePolicy], Field(max_length=500, min_length=1)]
+
+
 type RequiredCapability = Annotated[str, Field(min_length=1)]
 
 
@@ -91,10 +229,43 @@ class RoleProfile(BaseModel):
     system_instruction_ref: Annotated[str, Field(min_length=1)]
 
 
-type Permission = Annotated[str, Field(min_length=1)]
-
-
 type AllowedDomain = Annotated[str, Field(min_length=1)]
+
+
+class ProviderRoute(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    provider_id: Annotated[str, Field(pattern="^[a-z][a-z0-9_.-]*$")]
+    adapter_ref: Annotated[str, Field(min_length=1)]
+    route_role: Literal["primary", "fallback"]
+    priority: Annotated[int, Field(ge=0, le=10000)]
+    service_tier: Literal["free_proxy", "licensed_live", "replay"]
+    allowed_domains: list[AllowedDomain]
+    timeout_seconds: Annotated[int, Field(ge=1, le=600)]
+    cost_policy_ref: Annotated[str, Field(min_length=1)]
+    license_status: Literal["approved", "review_required", "denied"]
+    audit_status: Literal["approved", "candidate", "denied"]
+    requires_event_window: bool | None = False
+
+
+class ProviderAttempt(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    provider_id: Annotated[str, Field(pattern="^[a-z][a-z0-9_.-]*$")]
+    route_role: Literal["primary", "fallback"]
+    service_tier: Literal["free_proxy", "licensed_live", "replay"]
+    status: Literal["succeeded", "failed", "skipped"]
+    started_at: AwareDatetime
+    finished_at: AwareDatetime
+    latency_ms: Annotated[int, Field(ge=0)]
+    cost_usd: Annotated[float | None, Field(ge=0.0)]
+    error_code: Annotated[str | None, Field(max_length=128)]
+    retryable: bool | None
+
+
+type Permission = Annotated[str, Field(min_length=1)]
 
 
 class ResearchCapabilityManifest(BaseModel):
@@ -117,6 +288,9 @@ class ResearchCapabilityManifest(BaseModel):
     audit_status: Literal["approved", "candidate", "denied"]
     replay_policy: Literal["archive_required", "deterministic", "unavailable"]
     secret_policy: Literal["none", "adapter_only", "local_secret_store"]
+    provider_routes: Annotated[
+        list[ProviderRoute] | None, Field(max_length=20, validate_default=True)
+    ] = []
 
 
 type SourcePriorityItem = Annotated[str, Field(min_length=1)]
@@ -126,6 +300,18 @@ type PreferredCapability = Annotated[str, Field(min_length=1)]
 
 
 type AllowedFallback = Annotated[str, Field(min_length=1)]
+
+
+type AcceptedMetricFamily = Annotated[str, Field(min_length=1)]
+
+
+type RequiredMetricFamily = Annotated[str, Field(min_length=1)]
+
+
+type RequiredField = Annotated[str, Field(min_length=1)]
+
+
+type RequiredEventOffset = Annotated[str, Field(min_length=1)]
 
 
 class EvidenceRequirement(BaseModel):
@@ -144,6 +330,17 @@ class EvidenceRequirement(BaseModel):
     minimum_independent_sources: Annotated[int, Field(ge=1, le=10)]
     allowed_fallbacks: list[AllowedFallback]
     confidence_cap: Annotated[float, Field(ge=0.0, le=1.0)]
+    accepted_metric_families: list[AcceptedMetricFamily] | None = []
+    required_metric_families: list[RequiredMetricFamily] | None = []
+    required_fields: list[RequiredField] | None = []
+    required_event_offsets: list[RequiredEventOffset] | None = []
+    unit_policy: str | None = None
+    field_units: dict[str, UnitList] | None = {}
+    minimum_venues: Annotated[int | None, Field(ge=1, le=20)] = 1
+    venue_required: bool | None = False
+    minimum_independence_groups: Annotated[int | None, Field(ge=1, le=20)] = 1
+    allowed_delay_classes: list[Literal["realtime", "delayed", "historical", "unknown"]] | None = []
+    semantic_policy_ref: str | None = None
 
 
 class EvidenceCandidate(BaseModel):
@@ -178,6 +375,9 @@ type Symbol = Annotated[str, Field(min_length=1)]
 type FieldModel = Annotated[str, Field(min_length=1)]
 
 
+type RequestedEventOffset = Annotated[str, Field(max_length=32, min_length=1)]
+
+
 class ResearchCapabilityQuery(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -199,19 +399,40 @@ class ResearchCapabilityQuery(BaseModel):
     observed_at: AwareDatetime
     requested_observed_at: AwareDatetime | None = None
     cutoff_at: AwareDatetime
+    event_id: Annotated[str | None, Field(max_length=128)] = None
+    event_at: AwareDatetime | None = None
+    window_start_at: AwareDatetime | None = None
+    window_end_at: AwareDatetime | None = None
+    requested_event_offsets: Annotated[list[RequestedEventOffset] | None, Field(max_length=20)] = []
 
 
-class ResearchCapabilityResult(BaseModel):
+class FactEnvelope(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    schema_version: Literal["research-capability-result.v1"]
-    request_id: Annotated[str, Field(min_length=1)]
-    capability_id: Annotated[str, Field(min_length=1)]
-    provider: Annotated[str, Field(min_length=1)]
-    evidence_candidates: Annotated[list[EvidenceCandidate], Field(max_length=20)]
-    cost_usd: Annotated[float | None, Field(ge=0.0)]
-    completed_at: AwareDatetime
+    schema_version: Literal["fact-envelope.v1"]
+    fact_id: Annotated[str, Field(min_length=1)]
+    evidence_id: Annotated[str, Field(min_length=1)]
+    requirement_id: Annotated[str, Field(min_length=1)]
+    metric_family: Annotated[str, Field(min_length=1)]
+    field: Annotated[str, Field(min_length=1)]
+    instrument: str | None
+    venue: str | None
+    value: float | str | None
+    unit: Annotated[str, Field(min_length=1)]
+    window_start_at: AwareDatetime | None
+    window_end_at: AwareDatetime | None
+    event_offset: str | None
+    observed_at: AwareDatetime
+    received_at: AwareDatetime
+    published_at: AwareDatetime | None
+    source_id: Annotated[str, Field(min_length=1)]
+    independence_group: Annotated[str, Field(min_length=1)]
+    quality: Literal["candidate", "accepted", "rejected", "stale", "conflicted"]
+    delay_class: Literal["realtime", "delayed", "historical", "unknown"]
+    payload_schema_ref: Annotated[str, Field(min_length=1)]
+    payload_hash: Annotated[str, Field(pattern="^[a-f0-9]{64}$")]
+    attributes: dict[str, float | str | bool | None]
 
 
 class ResearchRunQueued(BaseModel):
@@ -310,7 +531,15 @@ class EvidenceGap(BaseModel):
     requirement_id: Annotated[str, Field(min_length=1)]
     importance: Literal["hard", "soft"]
     reason_code: Literal[
-        "missing", "stale", "low_authority", "insufficient_sources", "conflict", "tool_unavailable"
+        "missing",
+        "stale",
+        "low_authority",
+        "insufficient_sources",
+        "conflict",
+        "tool_unavailable",
+        "semantic_mismatch",
+        "no_baseline",
+        "window_missing",
     ]
     query_hint: Annotated[str, Field(min_length=1)]
     attempted_capabilities: list[AttemptedCapability]
@@ -356,6 +585,7 @@ class ResearchTask(BaseModel):
         extra="forbid",
     )
     task_id: Annotated[str, Field(min_length=1)]
+    requirement_id: Annotated[str, Field(min_length=1)]
     capability_id: Annotated[str, Field(min_length=1)]
     objective: Annotated[str, Field(min_length=1)]
     question: Annotated[str, Field(min_length=1)]
@@ -388,6 +618,9 @@ class ErrorProvenance(BaseModel):
     tool_call_id: str | None
     retryable: bool
     deadline_ms: Annotated[int | None, Field(ge=0)]
+    provider_attempts: Annotated[
+        list[ProviderAttempt] | None, Field(max_length=20, validate_default=True)
+    ] = []
 
 
 type NewEvidenceRef = Annotated[str, Field(min_length=1)]
@@ -503,6 +736,10 @@ class ResearchSessionRequest(BaseModel):
     input_evidence: Annotated[list[ResearchInputEvidence], Field(max_length=50, min_length=1)]
     evidence_requirements: Annotated[list[EvidenceRequirement], Field(min_length=1)]
     target_gaps: Annotated[list[EvidenceGap], Field(max_length=50)]
+    event_watch: EventWatch | None = None
+    event_window_samples: Annotated[
+        list[EventWindowSample] | None, Field(max_length=32, validate_default=True)
+    ] = []
     allowed_capabilities: Annotated[list[AllowedCapability], Field(min_length=1)]
     execution_budget: ExecutionBudget
     deadline_at: AwareDatetime
@@ -628,6 +865,23 @@ class ResearchRunCommandResult(BaseModel):
     created_at: AwareDatetime
 
 
+class ResearchCapabilityResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["research-capability-result.v1"]
+    request_id: Annotated[str, Field(min_length=1)]
+    capability_id: Annotated[str, Field(min_length=1)]
+    provider: Annotated[str, Field(min_length=1)]
+    evidence_candidates: Annotated[list[EvidenceCandidate], Field(max_length=20)]
+    facts: Annotated[list[FactEnvelope] | None, Field(max_length=200, validate_default=True)] = []
+    cost_usd: Annotated[float | None, Field(ge=0.0)]
+    completed_at: AwareDatetime
+    provider_attempts: Annotated[
+        list[ProviderAttempt] | None, Field(max_length=20, validate_default=True)
+    ] = []
+
+
 class ResearchEvaluationCase(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -716,6 +970,7 @@ class ResearchSessionResult(BaseModel):
     status: Literal["completed", "degraded", "failed", "cancelled"]
     rounds: Annotated[list[ResearchRound], Field(min_length=1)]
     evidence_candidates: list[EvidenceCandidate]
+    facts: Annotated[list[FactEnvelope] | None, Field(max_length=1000, validate_default=True)] = []
     final_coverage: CoverageAssessment
     causal_case: CausalCase | None
     horizons: Annotated[list[HorizonDecision], Field(max_length=3)]

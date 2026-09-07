@@ -63,6 +63,13 @@ class ResearchObservabilityService:
     async def emit(self, event: ResearchTraceEvent) -> None:
         self.append_trace(event)
 
+    def tool_calls_started(self, run_id: str) -> int | None:
+        """Return the durable audited call count for a research Run."""
+
+        with self.database.session() as session:
+            link = session.get(DshSessionLinkRecord, run_id)
+            return None if link is None else link.tool_calls_started
+
     def reserve_tool_call(
         self,
         *,

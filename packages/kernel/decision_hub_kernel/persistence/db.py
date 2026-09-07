@@ -82,6 +82,7 @@ class ObservationRecord(Base):
     content_hash: Mapped[str] = mapped_column(String(64), unique=True)
     source_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
     event_hint: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    scheduled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     revision_of: Mapped[str | None] = mapped_column(String(128), nullable=True)
 
 
@@ -98,6 +99,49 @@ class SnapshotRecord(Base):
     parent_snapshot_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
     generation: Mapped[int] = mapped_column(Integer, default=1)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class EventWatchRecord(Base):
+    """Durable schedule for a known future event and its comparison window."""
+
+    __tablename__ = "event_watches"
+    __table_args__ = (UniqueConstraint("event_id", name="uq_event_watches_event_id"),)
+
+    watch_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    event_id: Mapped[str] = mapped_column(String(128), index=True)
+    source_id: Mapped[str] = mapped_column(String(128), index=True)
+    event_family: Mapped[str] = mapped_column(String(128))
+    scheduled_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    status: Mapped[str] = mapped_column(String(32), default="scheduled", index=True)
+    window_offsets_json: Mapped[str] = mapped_column(Text)
+    baseline_status: Mapped[str] = mapped_column(String(32), default="pending")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    next_tick_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, index=True
+    )
+
+
+class EventWindowSampleRecord(Base):
+    """One idempotent sample slot; payloads stay outside the Kernel ledger."""
+
+    __tablename__ = "event_window_samples"
+    __table_args__ = (
+        UniqueConstraint("watch_id", "offset", name="uq_event_window_samples_offset"),
+    )
+
+    sample_id: Mapped[str] = mapped_column(String(160), primary_key=True)
+    watch_id: Mapped[str] = mapped_column(String(128), index=True)
+    event_id: Mapped[str] = mapped_column(String(128), index=True)
+    offset: Mapped[str] = mapped_column(String(32))
+    target_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    status: Mapped[str] = mapped_column(String(32), default="pending", index=True)
+    observed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    received_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    provider_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    payload_ref: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    payload_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
 
 
 class ResearchEvidenceRecord(Base):
@@ -122,6 +166,43 @@ class ResearchEvidenceRecord(Base):
     quality: Mapped[str] = mapped_column(String(32))
     freshness_status: Mapped[str] = mapped_column(String(32))
     conflict_group: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    accepted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ResearchFactRecord(Base):
+    """Canonical typed fact linked to one immutable EvidenceCandidate."""
+
+    __tablename__ = "research_facts"
+    fact_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    run_id: Mapped[str] = mapped_column(String(128), index=True)
+    capability_id: Mapped[str] = mapped_column(String(128), index=True)
+    evidence_id: Mapped[str] = mapped_column(String(128), index=True)
+    requirement_id: Mapped[str] = mapped_column(String(128), index=True)
+    metric_family: Mapped[str] = mapped_column(String(128), index=True)
+    field: Mapped[str] = mapped_column(String(128), index=True)
+    instrument: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    venue: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    value_json: Mapped[str] = mapped_column(Text)
+    unit: Mapped[str] = mapped_column(String(64))
+    window_start_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    window_end_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    event_offset: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    published_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    source_id: Mapped[str] = mapped_column(String(256), index=True)
+    independence_group: Mapped[str] = mapped_column(String(256), index=True)
+    quality: Mapped[str] = mapped_column(String(32))
+    delay_class: Mapped[str] = mapped_column(String(32))
+    payload_schema_ref: Mapped[str] = mapped_column(String(256))
+    payload_hash: Mapped[str] = mapped_column(String(64), index=True)
+    attributes_json: Mapped[str] = mapped_column(Text)
     accepted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
@@ -373,6 +454,27 @@ class EvaluationRecord(Base):
     direction_correct: Mapped[bool] = mapped_column(default=False)
     label_status: Mapped[str] = mapped_column(String(32))
     evaluated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ResearchValueEvaluationRecord(Base):
+    """Append-only run-level value evaluation; directional labels stay separate."""
+
+    __tablename__ = "research_value_evaluations"
+    __table_args__ = (
+        UniqueConstraint(
+            "run_id",
+            "evaluation_version",
+            name="uq_research_value_evaluation_version",
+        ),
+    )
+
+    evaluation_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    run_id: Mapped[str] = mapped_column(String(128), index=True)
+    artifact_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    evaluation_version: Mapped[str] = mapped_column(String(128))
+    payload_json: Mapped[str] = mapped_column(Text)
+    payload_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    evaluated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
 
 
 class OutboxRecord(Base):

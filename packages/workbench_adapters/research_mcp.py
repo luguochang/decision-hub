@@ -69,6 +69,11 @@ def build_research_mcp_server(
         allowed_domains: list[str] | None = None,
         max_results: int = 10,
         max_cost_usd: float | None = None,
+        event_id: str | None = None,
+        event_at: str | None = None,
+        window_start_at: str | None = None,
+        window_end_at: str | None = None,
+        requested_event_offsets: list[str] | None = None,
     ) -> ResearchCapabilityResult:
         try:
             request = ResearchCapabilityQuery.model_validate(
@@ -89,6 +94,11 @@ def build_research_mcp_server(
                     "mode": mode,
                     "observed_at": observed_at,
                     "cutoff_at": cutoff_at,
+                    "event_id": event_id,
+                    "event_at": event_at,
+                    "window_start_at": window_start_at,
+                    "window_end_at": window_end_at,
+                    "requested_event_offsets": requested_event_offsets or [],
                 }
             )
             return await gateway.execute(request)

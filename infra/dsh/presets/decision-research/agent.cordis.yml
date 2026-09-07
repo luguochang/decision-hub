@@ -2,8 +2,9 @@
 #
 # This is an Agent-plane composition. The official Web/base composition owns
 # the model route, Session/JSONL persistence, permissions, Web transport,
-# registries and Agent Loop. No shell, filesystem, arbitrary web search or
-# plugin installer is exposed by this preset.
+# registries and Agent Loop. No shell, filesystem or plugin installer is
+# exposed; official DSH web_search/web_fetch are enabled below as bounded,
+# discovery-only tools whose raw output cannot enter the Hub Evidence Ledger.
 
 - id: persona
   name: '@deepseek-ai/dsh-persona'
@@ -31,6 +32,28 @@
     # Gateway capability deadline is 20s; the native wrapper needs grace to
     # receive and preserve the Gateway's typed failure provenance.
     timeoutMs: !!js Number(process.env.DECISION_HUB_RESEARCH_TOOL_TIMEOUT_MS ?? 25000)
+
+# Capture the final synthesis through DSH's validated Tool boundary. The Tool
+# reuses the codegen contract and writes no Hub state; Evidence attestation and
+# publication remain deterministic Hub responsibilities.
+- id: decision-hub-synthesis-tool
+  name: '@decision-hub/dsh-plugin/synthesis-tool'
+
+# Re-enable the official DSH web tools for this product preset. The base DSH
+# bundle already owns the provider, timeout policy, and JSONL trajectory; this
+# overlay only changes model-facing enablement. `web_search` is discovery, while
+# `decision_hub_research` remains the only path that can put fetched/typed facts
+# into the Hub Evidence Ledger.
+- id: tool-web
+  name: '@deepseek-ai/dsh-tool-web'
+  config:
+    search: true
+    fetch: true
+    searchMaxQueries: 4
+    searchMaxResults: 8
+    searchTimeoutMs: 60000
+    fetchTimeoutMs: 30000
+    fetchMaxOutputChars: 120000
 
 # Delegation remains inside the official DSH Agent Loop. These rows expose
 # only bounded subagent controls and do not create a second Hub supervisor.

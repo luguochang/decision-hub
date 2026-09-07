@@ -120,6 +120,7 @@ class FixedResearchRuntime:
             tasks=[
                 ResearchTask(
                     task_id="fixed-workflow",
+                    requirement_id="fixed.workflow",
                     capability_id="fixed.workflow",
                     objective="Produce the legacy fixed decision artifact.",
                     question="What conditional decision follows from the input text?",

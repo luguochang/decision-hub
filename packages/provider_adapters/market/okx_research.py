@@ -10,8 +10,13 @@ from pydantic import AnyUrl
 
 from packages.contracts_py.decision_hub_contracts import (
     EvidenceCandidate,
+    FactEnvelope,
     ResearchCapabilityQuery,
     ResearchCapabilityResult,
+)
+from packages.kernel.decision_hub_kernel.application.fact_store import (
+    research_fact_instance_id,
+    research_fact_payload_hash,
 )
 from packages.kernel.decision_hub_kernel.application.research_evidence import (
     ResearchCapabilityError,
@@ -35,6 +40,7 @@ async def _fetch_json(url: str) -> Mapping[str, object]:
 class OKXDerivativesResearchAdapter:
     capability_id = "market.crypto_derivatives"
     supported_modes = frozenset({"live"})
+    supported_fields = frozenset({"ticker", "funding_rate", "open_interest", "mark_price"})
     _supported_fields = frozenset({"ticker", "funding_rate", "open_interest", "mark_price"})
 
     def __init__(
@@ -64,6 +70,7 @@ class OKXDerivativesResearchAdapter:
         payloads = await asyncio.gather(*(self.fetcher(url) for _, _, url in jobs))
         received_at = datetime.now(UTC)
         candidates: list[EvidenceCandidate] = []
+        facts: list[FactEnvelope] = []
         for (symbol, field, url), payload in zip(jobs, payloads, strict=True):
             row = _first_okx_row(payload)
             published_at = _okx_timestamp(row)
@@ -83,37 +90,47 @@ class OKXDerivativesResearchAdapter:
                 excerpt=excerpt,
                 structured_payload_ref=None,
             )
-            candidates.append(
-                EvidenceCandidate(
-                    evidence_id=research_evidence_instance_id(
-                        content_hash=content_hash,
-                        research_session_id=query.research_session_id,
-                    ),
-                    requirement_id=query.requirement_id,
-                    kind="market",
-                    authority="exchange",
-                    source_id="okx-public",
-                    source_url=AnyUrl(url),
-                    published_at=published_at,
-                    observed_at=received_at,
-                    received_at=received_at,
+            candidate = EvidenceCandidate(
+                evidence_id=research_evidence_instance_id(
                     content_hash=content_hash,
-                    excerpt=excerpt,
-                    structured_payload_ref=None,
-                    tool_call_id=query.request_id,
                     research_session_id=query.research_session_id,
-                    round=query.round,
-                    quality="candidate",
-                    freshness_status="unknown",
-                    conflict_group=None,
-                )
+                ),
+                requirement_id=query.requirement_id,
+                kind="market",
+                authority="exchange",
+                source_id="okx-public",
+                source_url=AnyUrl(url),
+                published_at=published_at,
+                observed_at=received_at,
+                received_at=received_at,
+                content_hash=content_hash,
+                excerpt=excerpt,
+                structured_payload_ref=None,
+                tool_call_id=query.request_id,
+                research_session_id=query.research_session_id,
+                round=query.round,
+                quality="candidate",
+                freshness_status="unknown",
+                conflict_group=None,
             )
+            candidates.append(candidate)
+            fact = _okx_fact(
+                query=query,
+                candidate=candidate,
+                symbol=symbol,
+                provider_field=field,
+                row=row,
+                received_at=received_at,
+            )
+            if fact is not None:
+                facts.append(fact)
         return ResearchCapabilityResult(
             schema_version="research-capability-result.v1",
             request_id=query.request_id,
             capability_id=query.capability_id,
             provider="okx-public",
             evidence_candidates=candidates,
+            facts=facts,
             cost_usd=0.0,
             completed_at=received_at,
         )
@@ -147,3 +164,72 @@ def _okx_timestamp(row: Mapping[str, object]) -> datetime | None:
         return datetime.fromtimestamp(int(str(raw)) / 1000, tz=UTC)
     except (TypeError, ValueError, OSError):
         return None
+
+
+def _okx_fact(
+    *,
+    query: ResearchCapabilityQuery,
+    candidate: EvidenceCandidate,
+    symbol: str,
+    provider_field: str,
+    row: Mapping[str, object],
+    received_at: datetime,
+) -> FactEnvelope | None:
+    mappings = {
+        "ticker": ("price", "last", "usdt"),
+        "funding_rate": ("funding_rate", "fundingRate", "rate"),
+        "open_interest": ("open_interest", "oiCcy", "btc"),
+        "mark_price": ("mark_price", "markPx", "usdt"),
+    }
+    field, row_key, unit = mappings[provider_field]
+    value = row.get(row_key)
+    if value in {None, ""}:
+        return None
+    published_at = _okx_timestamp(row)
+    attributes: dict[str, float | str | bool | None] = {"provider_field": provider_field}
+    payload_schema_ref = "okx.public-api.v5"
+    payload_hash = research_fact_payload_hash(
+        requirement_id=query.requirement_id,
+        metric_family="crypto.derivatives",
+        field=field,
+        instrument=symbol,
+        venue="okx",
+        value=str(value),
+        unit=unit,
+        window_start_at=None,
+        window_end_at=None,
+        event_offset=None,
+        published_at=published_at,
+        source_id=candidate.source_id,
+        independence_group="okx",
+        delay_class="realtime",
+        payload_schema_ref=payload_schema_ref,
+        attributes=attributes,
+    )
+    return FactEnvelope(
+        schema_version="fact-envelope.v1",
+        fact_id=research_fact_instance_id(
+            evidence_id=candidate.evidence_id, payload_hash=payload_hash
+        ),
+        evidence_id=candidate.evidence_id,
+        requirement_id=query.requirement_id,
+        metric_family="crypto.derivatives",
+        field=field,
+        instrument=symbol,
+        venue="okx",
+        value=str(value),
+        unit=unit,
+        window_start_at=None,
+        window_end_at=None,
+        event_offset=None,
+        observed_at=received_at,
+        received_at=received_at,
+        published_at=published_at,
+        source_id=candidate.source_id,
+        independence_group="okx",
+        quality="candidate",
+        delay_class="realtime",
+        payload_schema_ref=payload_schema_ref,
+        payload_hash=payload_hash,
+        attributes=attributes,
+    )

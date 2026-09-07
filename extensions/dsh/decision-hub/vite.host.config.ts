@@ -6,6 +6,7 @@ export default defineConfig({
       entry: {
         index: 'src/index.ts',
         'research-tool': 'src/research-tool.ts',
+        'synthesis-tool': 'src/synthesis-tool.ts',
       },
       formats: ['es'],
       fileName: (_format, entryName) => `${entryName}.js`,

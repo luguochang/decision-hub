@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -59,6 +60,7 @@ def test_official_calendar_fixture_becomes_text_envelope() -> None:
     result = asyncio.run(source.poll())
     assert result.envelopes[0].event_hint == "bls-cpi-2026-09"
     assert "Consumer Price Index" in result.envelopes[0].raw_text
+    assert result.envelopes[0].scheduled_at == datetime(2026, 9, 10, 12, 30, tzinfo=UTC)
     assert result.envelopes[0].observed_at <= result.envelopes[0].received_at
 
 

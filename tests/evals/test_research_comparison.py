@@ -83,6 +83,7 @@ class CandidateRuntimeFixture:
             tasks=[
                 ResearchTask(
                     task_id="task:event-identity",
+                    requirement_id="event_identity",
                     capability_id="replay.research",
                     objective="Verify event identity.",
                     question="What is the event identity?",

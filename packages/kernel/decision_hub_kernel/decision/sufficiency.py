@@ -11,6 +11,7 @@ from packages.contracts_py.decision_hub_contracts import (
     EvidenceCandidate,
     EvidenceGap,
     EvidenceRequirement,
+    FactEnvelope,
 )
 
 
@@ -19,7 +20,14 @@ class EvidenceSufficiencyError(ValueError):
 
 
 GapReason = Literal[
-    "missing", "stale", "low_authority", "insufficient_sources", "conflict"
+    "missing",
+    "stale",
+    "low_authority",
+    "insufficient_sources",
+    "conflict",
+    "semantic_mismatch",
+    "no_baseline",
+    "window_missing",
 ]
 
 AUTHORITY_RANK = {
@@ -38,6 +46,7 @@ def assess_evidence_sufficiency(
     *,
     cutoff_at: datetime,
     assessed_at: datetime | None = None,
+    facts: Iterable[FactEnvelope] = (),
 ) -> CoverageAssessment:
     """Evaluate freshness, authority, independence and conflicts deterministically.
 
@@ -52,6 +61,9 @@ def assess_evidence_sufficiency(
     by_requirement: dict[str, list[EvidenceCandidate]] = defaultdict(list)
     for item in evidence:
         by_requirement[item.requirement_id].append(item)
+    facts_by_requirement: dict[str, list[FactEnvelope]] = defaultdict(list)
+    for item in facts:
+        facts_by_requirement[item.requirement_id].append(item)
 
     covered: list[str] = []
     gaps: list[EvidenceGap] = []
@@ -73,11 +85,20 @@ def assess_evidence_sufficiency(
             and _is_before_cutoff(item, cutoff)
             and _authority_matches(item, requirement)
         ]
+        semantic_reason, semantic_evidence_ids, _semantic_groups = _semantic_assessment(
+            requirement,
+            usable,
+            facts_by_requirement.get(requirement.requirement_id, []),
+            cutoff,
+        )
+        if _has_semantic_policy(requirement):
+            usable = [item for item in usable if item.evidence_id in semantic_evidence_ids]
         independent_sources = {item.source_id for item in usable}
         has_conflict = any(item.severity == "hard" for item in conflict_items)
         is_covered = (
             len(independent_sources) >= requirement.minimum_independent_sources
             and not has_conflict
+            and semantic_reason is None
         )
         if is_covered:
             covered.append(requirement.requirement_id)
@@ -87,7 +108,14 @@ def assess_evidence_sufficiency(
                 soft_covered += 1
             continue
 
-        reason = _gap_reason(requirement, candidates, usable, has_conflict, cutoff)
+        reason = _gap_reason(
+            requirement,
+            candidates,
+            usable,
+            has_conflict,
+            cutoff,
+            semantic_reason=semantic_reason,
+        )
         gaps.append(
             EvidenceGap(
                 requirement_id=requirement.requirement_id,
@@ -166,6 +194,8 @@ def _gap_reason(
     usable: list[EvidenceCandidate],
     has_conflict: bool,
     cutoff: datetime,
+    *,
+    semantic_reason: GapReason | None = None,
 ) -> GapReason:
     if has_conflict:
         return "conflict"
@@ -176,6 +206,8 @@ def _gap_reason(
             return "stale"
         if any(not _authority_matches(item, requirement) for item in candidates):
             return "low_authority"
+    if semantic_reason is not None:
+        return semantic_reason
     if len({item.source_id for item in usable}) < requirement.minimum_independent_sources:
         return "insufficient_sources"
     return "missing"
@@ -187,6 +219,95 @@ def _query_hint(requirement: EvidenceRequirement, reason: GapReason) -> str:
         "conflict": "Resolve the conflicting sources with an authoritative source.",
         "low_authority": "Prefer the highest-priority source listed by the pack.",
         "insufficient_sources": "Find an independent source for the same requirement.",
+        "semantic_mismatch": (
+            "Acquire typed facts with the required metric family, fields and units."
+        ),
+        "no_baseline": "Acquire an event-relative baseline before claiming a delta.",
+        "window_missing": "Acquire all required event-window offsets before claiming transmission.",
         "missing": "Acquire evidence for this requirement.",
     }[reason]
     return f"{requirement.description} {suffix}"
+
+
+def _has_semantic_policy(requirement: EvidenceRequirement) -> bool:
+    return bool(
+        (requirement.accepted_metric_families or [])
+        or (requirement.required_metric_families or [])
+        or (requirement.required_fields or [])
+        or (requirement.required_event_offsets or [])
+        or (requirement.field_units or {})
+        or (requirement.allowed_delay_classes or [])
+        or bool(requirement.venue_required)
+        or requirement.semantic_policy_ref
+    )
+
+
+def _semantic_assessment(
+    requirement: EvidenceRequirement,
+    usable_evidence: list[EvidenceCandidate],
+    facts: list[FactEnvelope],
+    cutoff: datetime,
+) -> tuple[GapReason | None, set[str], set[str]]:
+    if not _has_semantic_policy(requirement):
+        return None, {item.evidence_id for item in usable_evidence}, {
+            item.source_id for item in usable_evidence
+        }
+
+    evidence_ids = {item.evidence_id for item in usable_evidence}
+    valid: list[FactEnvelope] = []
+    for fact in facts:
+        if (
+            fact.quality != "accepted"
+            or fact.evidence_id not in evidence_ids
+            or fact.observed_at > cutoff
+            or fact.received_at > cutoff
+        ):
+            continue
+        if (
+            (requirement.accepted_metric_families or [])
+            and fact.metric_family not in (requirement.accepted_metric_families or [])
+        ):
+            continue
+        if (
+            (requirement.allowed_delay_classes or [])
+            and fact.delay_class not in (requirement.allowed_delay_classes or [])
+        ):
+            continue
+        allowed_units = (requirement.field_units or {}).get(fact.field)
+        if allowed_units and fact.unit not in allowed_units:
+            continue
+        valid.append(fact)
+
+    if not valid:
+        return "semantic_mismatch", set(), set()
+
+    metric_families = {item.metric_family for item in valid}
+    if not set(requirement.required_metric_families or []) <= metric_families:
+        return "semantic_mismatch", {item.evidence_id for item in valid}, {
+            item.independence_group for item in valid
+        }
+    fields = {item.field for item in valid}
+    if not set(requirement.required_fields or []) <= fields:
+        return "semantic_mismatch", {item.evidence_id for item in valid}, {
+            item.independence_group for item in valid
+        }
+    offsets = {item.event_offset for item in valid if item.event_offset is not None}
+    missing_offsets = set(requirement.required_event_offsets or []) - offsets
+    if missing_offsets:
+        reason: GapReason = (
+            "no_baseline"
+            if any(item.startswith("t-") or item == "baseline" for item in missing_offsets)
+            else "window_missing"
+        )
+        return reason, {item.evidence_id for item in valid}, {
+            item.independence_group for item in valid
+        }
+    venues = {item.venue for item in valid if item.venue}
+    if requirement.venue_required and len(venues) < (requirement.minimum_venues or 1):
+        return "semantic_mismatch", {item.evidence_id for item in valid}, {
+            item.independence_group for item in valid
+        }
+    groups = {item.independence_group for item in valid}
+    if len(groups) < (requirement.minimum_independence_groups or 1):
+        return "insufficient_sources", {item.evidence_id for item in valid}, groups
+    return None, {item.evidence_id for item in valid}, groups

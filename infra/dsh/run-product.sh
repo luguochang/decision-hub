@@ -58,7 +58,7 @@ export DECISION_HUB_API_URL="${DECISION_HUB_API_URL:-http://127.0.0.1:$api_port}
 export DECISION_HUB_DESK_URL="${DECISION_HUB_DESK_URL:-$DECISION_HUB_API_URL}"
 export DECISION_HUB_RESEARCH_RUNTIME=dsh-web
 export DECISION_HUB_RESEARCH_EXECUTION_MODE=live
-research_capabilities="${DECISION_HUB_RESEARCH_CAPABILITIES:-official.macro,market.cross_asset,market.crypto_derivatives}"
+research_capabilities="${DECISION_HUB_RESEARCH_CAPABILITIES:-official.macro,market.cross_asset,market.crypto_derivatives,web.fetch}"
 research_capabilities="${research_capabilities//[[:space:]]/}"
 if [[ -z "$research_capabilities" ]]; then
   echo "live product requires at least one approved research capability" >&2
@@ -82,8 +82,14 @@ if [[ -z "${DEEPSEEK_API_KEY:-}" && -z "${OPENAI_API_KEY:-}" && ! -f "$credentia
   exit 78
 fi
 
-echo "Starting Decision Hub control plane (API, workers, research gateway)..." >&2
-"${compose_cmd[@]}" up -d --force-recreate hub-api hub-realtime-worker hub-evolution-worker research-mcp hub-research-worker >&2
+echo "Building Decision Hub product images from the current worktree..." >&2
+"${compose_cmd[@]}" build hub-api hub-realtime-worker hub-evolution-worker research-mcp hub-research-worker >&2
+
+echo "Starting Decision Hub control plane (API, event/evolution workers, research gateway)..." >&2
+# Research execution is deliberately held behind the DSH Host readiness
+# barrier below. Realtime admission may durably queue Runs while the official
+# Web boots, but no Run can be claimed before DSH can call back into this Hub.
+"${compose_cmd[@]}" up -d --no-build --force-recreate hub-api hub-realtime-worker hub-evolution-worker research-mcp >&2
 
 cleanup() {
   status=$?
@@ -106,6 +112,16 @@ for _ in {1..30}; do
 done
 if ! curl --fail --silent "$DECISION_HUB_API_URL/health/ready" >/dev/null; then
   echo "Decision Hub API did not become ready" >&2
+  exit 1
+fi
+
+# A generic health response is insufficient: an old image can answer 200 while
+# lacking the product routes used by the current DSH extension. Verify the
+# canonical Inbox projection before starting the only user-facing Web.
+product_inbox_url="$DECISION_HUB_API_URL/v1/research/inbox?limit=1"
+product_inbox_payload="$(curl --fail --silent --show-error "$product_inbox_url" || true)"
+if ! printf '%s' "$product_inbox_payload" | python3 -c 'import json,sys; payload=json.load(sys.stdin); raise SystemExit(0 if payload.get("schema_version") == "research-inbox-view.v1" else 1)' 2>/dev/null; then
+  echo "product API contract did not become ready (expected research-inbox-view.v1)" >&2
   exit 1
 fi
 
@@ -187,6 +203,22 @@ if ! printf '%s' "$(curl --fail --silent --show-error \
   -H "X-Decision-Hub-Host-Key: $host_key" "$host_readiness_url")" | \
   python3 -c 'import json,sys; payload=json.load(sys.stdin); raise SystemExit(0 if payload.get("ready") is True else 1)'; then
   echo "Decision Hub DSH Host did not become ready" >&2
+  exit 1
+fi
+
+echo "Starting research worker after the DSH Host readiness barrier..." >&2
+"${compose_cmd[@]}" up -d --no-deps --no-build --force-recreate hub-research-worker >&2
+research_worker_running=false
+for _ in {1..30}; do
+  if "${compose_cmd[@]}" ps --status running --services | grep -Fxq "hub-research-worker"; then
+    research_worker_running=true
+    break
+  fi
+  sleep 1
+done
+if [[ "$research_worker_running" != true ]]; then
+  echo "research worker did not enter running state" >&2
+  "${compose_cmd[@]}" logs --tail=120 hub-research-worker >&2 || true
   exit 1
 fi
 

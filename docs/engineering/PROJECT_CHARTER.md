@@ -9,7 +9,9 @@ Decision Hub 持续把有时间边界的文本和事件证据，转换为可证�
 
 ## 当前大阶段
 
-**PRODUCT-CLOSEOUT-01 DSH Native Trader Pilot（implementation in progress）**
+**PD Product Fact Sufficiency and Active Delivery（implementation in progress）**
+
+Owner 于 2026-09-04 接受 [产品事实充分度与主动交付修复方案](../product/PRODUCT_FACT_SUFFICIENCY_AND_ACTIVE_DELIVERY_PLAN_2026-09-04.md) 和 [PD Stage Charter](../stages/PD_PRODUCT_FACT_SUFFICIENCY_AND_ACTIVE_DELIVERY.md)，授权按 `PD-00..06` 完成事实语义、事件窗口、typed provider、主动交付、可观测成本和受控评测闭环，并为 `PD-07` 建立真实前瞻观察入口。不得把 14 天/20 个事件的时间窗伪造为本轮代码完成，也不得在 PD-00 正确性门前先放宽 Gate 或扩大产品承诺。
 
 R0/R1/R2/R2-L 工程底座退出门已经完成。Owner 已接受 [R2-R Stage Charter](../stages/R2_R_AGENTIC_RESEARCH_RUNTIME.md) 与 [ADR-0008](../decisions/ADR-0008-agentic-research-runtime.md)，并授权 R2-R-00 至 R2-R-06；R2-R-00 至 R2-R-06E 已完成，Runtime 决策为 `retain_baseline / pending_owner_review`。Fixed 继续 active，DSH 保持 candidate/shadow。R2-R-07 的 G1-A/B/C/D 与 G2-A/B 已完成离线实现，G2-C live canary 与 G2-D 事实充分度验收仍需独立确认，不进入 R3。所有更长期工作以[产品收口与后续总计划](../product/PRODUCT_COMPLETION_AND_FUTURE_PLAN.md)的 G1-G6 为准，不再按临时问题无限扩展。
 

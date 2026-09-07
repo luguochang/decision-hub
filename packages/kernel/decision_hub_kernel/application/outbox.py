@@ -119,7 +119,7 @@ class NotificationDispatcher:
                 channel=channel,
                 dedupe_key=dedupe_key,
                 subject=artifact.headline,
-                body=artifact.summary,
+                body=f"Gate: {artifact.gate_status.value}\n\n{artifact.summary}",
                 created_at=artifact.created_at,
             )
             try:

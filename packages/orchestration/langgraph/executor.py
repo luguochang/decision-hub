@@ -90,6 +90,7 @@ class LangGraphResearchExecutor:
                 self.runtime,
                 ResearchEvidenceService(self.database),
                 trace_sink=self.trace_sink,
+                progress_reader=self.trace_sink,
             )
             return await graph.ainvoke(state, config=config)
         async with CheckpointStore(self.checkpoint_path).open() as saver:
@@ -98,6 +99,7 @@ class LangGraphResearchExecutor:
                 ResearchEvidenceService(self.database),
                 checkpointer=saver,
                 trace_sink=self.trace_sink,
+                progress_reader=self.trace_sink,
             )
             return await graph.ainvoke(state, config=config)
 
@@ -110,6 +112,7 @@ class LangGraphResearchExecutor:
                 ResearchEvidenceService(self.database),
                 checkpointer=saver,
                 trace_sink=self.trace_sink,
+                progress_reader=self.trace_sink,
             )
             return await graph.ainvoke(None, config={"configurable": {"thread_id": run_id}})
 

@@ -1,16 +1,121 @@
 # 当前状态短上下文
 
-更新时间：2026-09-01（Asia/Shanghai）
+更新时间：2026-09-05（Asia/Shanghai）
 用途：Agent 恢复任务时的第一读入口。本文只投影已验证事实，不替代 ADR、Stage Charter、schema 或实现。
 
-## 当前状态：E2-L 已通过，进入 E3 观察
+## 2026-09-05 PD 当前执行状态
 
+- PD-04..06 runtime closeout 已完成：官方 DSH Web、同一 Session 多轮补证、Report/Trace/Inbox/
+  Decision Desk 和 Hub durable ledger 已在隔离实例复验；当前仍为 `research_only`，不代表金融事实
+  充分、预测准确、盈利或自动交易。
+
+- `PD-00` 已完成：显式 `ResearchTask.requirement_id`、canonical `FactEnvelope`、migration
+  `0028`、Fact Store、八类 crypto-macro 语义真值表、Gateway/DSH/LangGraph/Query View lineage
+  和 semantic-substitution Gate 已接通；历史 Evidence/Run 不回写。
+- 错误 metric family、字段、单位、窗口、venue、delay class 或 independence group 现在
+  fail-closed；Web locator、BTC derivatives 和当前 snapshot 不能替代 Fed pricing 或事件窗口。
+- success replay 已使用语义完整 Facts 恢复为同一 DSH Session 两轮充分；partial failure、stale
+  和 `no_baseline/window_missing` 继续保守终止。
+- `PD-01` 已完成：未来日历事件创建 durable EventWatch，窗口固定为 `T-30m/T-5m/T0/T+1m/
+  T+5m/T+30m/T+24h/T+72h`；迟到事件明确为 `retrospective_only`，采样失败和五分钟宽限过期
+  保留独立错误，服务重建和重复 tick 不重复 capture。
+- 最新已复跑质量门：Python `552 passed`；Ruff、Pyright、canonical codegen、module docs、前端
+  test/build 和 `git diff --check` 均通过。DSH Plugin `69 passed + build`、Decision Desk `10 passed + build`。
+- 运行收口后的 `host_hub_unreachable` 已由 Docker event 定位为旧测试栈挤压 Docker VM 后的 Hub
+  OOM/`exitCode=137`；旧栈已停止且未删除历史数据。产品启动器现为单次 build，并在 Hub/Inbox/MCP、
+  DSH Host 双向 readiness 后才启动 research worker。失败 Run 通过既有 owner retry 建立 child
+  `run_2c06947df692424e326161d83f488368`，DSH/Decision Desk 同链复验通过；终态仍诚实为
+  `research_only/provider_timeout`，不是 PD-07 样本。
+- `PD-02A` 已完成 canonical ProviderRoute/ProviderAttempt、事件窗口 query 与失败 attempt 的
+  durable `ErrorProvenance` 投影；`PD-02B` 已完成 Pack 驱动的 stable derivatives Router，OKX
+  primary/CoinEx fallback、域/字段筛选、retryable-only fallback 和 Gateway composition 已通过。
+  `PD-02C` 已完成 EventWatch/Sampler、内容寻址 archive、Run/EventWatch lineage、archive-only
+  event routing、event return/OI delta 以及 FactStore/Gate 回放闭环；`PD-02D` 已完成订单簿
+  imbalance proxy、Pack route 和衍生品完整窗口语义回放；`PD-02E`、`PD-02F` 的
+  provider-neutral seam 与 Pack/profile/composition closure 已完成；`PD-02G` public adapter
+  canary 已通过；`PD-03` 已完成 Source Registry、官方 `event.identity` parser 与 live Fed feed
+  canary；PD-04..06 runtime closeout 已完成并有真实页面证据。真实分钟级 Provider 仍 blocked，
+  下一阶段只能是 PD-07 前瞻观察或明确 Provider bake-off，不创建第二套 Provider DTO、Agent Loop
+  或账本。
+
+## 2026-09-04 交付阻断历史复核
+
+- G2-AF 自动事件 Run `run_b89cb225177145cd9a0e7cd0b038e31c` 已证明 DSH 原生 Search、三轮补证、20/24 audited calls、13 条 Evidence、Artifact、通知和 child recheck 技术链；终态仍为 `degraded/research_only/round_budget`。
+- WebSearch 已真实集成。证据不足并非 DSH 没有 loop，而是 Search locator 不能替代分钟级利率/美元/波动率、事件窗口、Fed 定价和多 venue 衍生品 typed facts。
+- 当时通用 Sufficiency Gate 只校验 quality/freshness/PIT/authority/source count/conflict，尚未校验 requirement 所需的 metric family、字段、单位和事件窗口；该缺口现已由 PD-00 修复，历史 83.33% 仍不可追认成金融语义充分。
+- 当时 `research_task` 没有显式 `requirement_id`；该结构性风险现已由 PD-00 修复。
+- 当前只能称为单 owner `research_only` 工程试点，不能称为可交付的 30m/24h/72h 主动交易研究产品。G2-AF-05/E3 前瞻观察在事实语义和事件窗口完成前不能证明产品价值。
+- Owner 已接受[产品事实充分度与主动交付修复方案](../product/PRODUCT_FACT_SUFFICIENCY_AND_ACTIVE_DELIVERY_PLAN_2026-09-04.md)和[PD Stage Charter](../stages/PD_PRODUCT_FACT_SUFFICIENCY_AND_ACTIVE_DELIVERY.md)；PD-00..06 runtime closeout 已完成，当前进入 PD-07 前瞻观察准备。
+- 当时全量 Python 为 `445 passed, 1 failed`，唯一失败是 submit 前 deadline 的旧 cancel 断言；该问题已按 accepted-before-cancel BDD 修复。此处数字属于历史复核，不是当前质量门；当前全量结果见本文件顶部 `552 passed`。
+
+## 最新审计入口
+
+六项产品现状、DSH/Hub/Loop、调度、自进化、代码冗余和 `.gitignore` 的独立回答见
+[产品现状、架构与交付缺口审计](../evaluations/PRODUCT_STATE_ARCHITECTURE_AUDIT_2026-09-02.md)。
+本次对“为何没有自动搜索、交易员角色/LoongSuite 是否进入主链、调度和自进化是否真实运行”的
+根因复核见 [Agentic 主动研究缺口复盘](../evaluations/PRODUCT_AGENTIC_GAP_REVIEW_2026-09-03.md)。
+该审计不新增实现授权；当前仍保持 `research_only`、Fixed active、DSH candidate/shadow。
+Owner 于 2026-09-02 额外授权 [D2 官方 DeepSeek Live 主流程复验](../stages/D2_OFFICIAL_DEEPSEEK_LIVE_FLOW_PLAN.md)：
+它只修复交付前暴露的 Provider/模型路由阻断并复验现有主线，不新增功能、不切 active pointer；
+D2 完成后恢复 E3 前瞻价值观察。
+
+2026-09-03 D2 真实验收已完成到诚实终态：官方 `deepseek-v4-flash` 探针通过；DSH Web 在
+隔离 Compose 内真实建立受管 Session，完成 3 轮、12 次 capability 调用和 12 条 Evidence；
+Run `run_6ea4b5b7c20140e2b4c0109d36b0179a` 最终因 FRED stale/事件窗口缺失和
+`structured_output_invalid` 进入 `degraded/reject`。Evidence-only 降级、Coverage、失败
+provenance 和审计入口保留，causal/horizon 方向语义为空。本次运行专属浏览器截图/console
+归档和最终质量门复跑已完成：新 bundle 桌面/移动页面只有一个报告区域，移动视口无横向溢出，
+console error 为 0；插件 57、Decision Desk 10、Python 395 项测试及静态/契约/文档门通过。
+D2 因此完成到 `truthful terminal`，但不能写成方向分析成功或产品正式可用。完整证据见
+[D2 官方 DeepSeek Live 主流程真实验收记录](../evaluations/DSH_DEEPSEEK_LIVE_FLOW_ACCEPTANCE_2026-09-03.md)。
+
+关于微信文章所述 LoongSuite DSH 可观测插件、Pilot、多层 Trace 所有权和 OBS-01..03
+提案，见 [DSH 可观测插件接入评估与实施建议](../evaluations/DSH_OBSERVABILITY_PLUGIN_ASSESSMENT_2026-09-02.md)。
+OBS-01 已在隔离 profile 通过 exact-version canary；普通 active product profile 仍默认不安装，
+OBS-02/OBS-03 不得越过新的 owner gate。
+
+本轮针对“hard gap 出现后没有继续搜索、产品像问答助手”的方案已单独记录在
+[G2-AF 主动事实获取与自主研究阶段方案](../stages/G2_AF_ACTIVE_FACT_ACQUISITION_AND_AUTONOMOUS_RESEARCH.md)。
+当前状态为 `G2-AF-01..04 technical gates passed / G2-AF-05 observation pending`：DSH 原生
+`web_search` 作为 discovery primary，Tavily（Search/Extract/官方 MCP）作为按需 fallback 和独立
+交叉索引，Brave 作为后续独立索引回退，SearXNG 仅作可选自建灾备；DSH 继续负责内层 Supervisor
+loop，LangGraph 只负责产品生命周期，Hub 负责 Catalog、PIT、Evidence、Gate、调度、通知和资产。
+DSH 原生结果和 Tavily 结果都必须先经 Hub attestation，不能直接入账。最终隔离 canary 已由
+官方 feed 自动触发，Run `run_b89cb225177145cd9a0e7cd0b038e31c` 在同一个 DSH Session
+完成 3 轮、20/24 calls、13 条 Evidence、83.33% hard coverage、Artifact、Outbox 单次通知和
+child recheck；终态为 `degraded/research_only/round_budget`。不切 active pointer。
+
+2026-09-03/04 Search 能力核查补充：官方 DSH 上游锁定源码确实包含
+`dsh-web-search-deepseek`、`dsh-tool-web` 和原生 `web_search`。它复用 `DEEPSEEK_API_KEY`，但默认
+走独立的 Anthropic-compatible `/anthropic/v1/messages` Search route，不等于聊天
+`DEEPSEEK_BASE_URL` 自动具备搜索。当前 Decision Hub `decision-research` preset 已开启官方
+`tool-web` 的 `web_search`/`web_fetch`；为了保证所有业务证据进入 Hub Gateway，原生 Search 结果
+只能作为 discovery candidate，不能绕过 `decision-hub-research-tool` 直接入账。
+本轮已收到 Tavily key，但没有读取、持久化或联网调用；key 已出现在聊天内容，正式使用前应轮换，
+只允许进入 gitignored `data/dsh-live/.env` 或 Secret Manager。完整核查和固定 27 条金融来源注册表
+设计见 [G2-AF Tavily / DSH Search 执行记录](../evaluations/G2_AF_TAVILY_EXECUTION_LOG_2026-09-03.md)
+和 [G2-AF 阶段方案第 3 节](../stages/G2_AF_ACTIVE_FACT_ACQUISITION_AND_AUTONOMOUS_RESEARCH.md)。
+当前仍不运行 Tavily、不扩大默认 allowlist；DSH native route、原生 locator -> Hub Gateway ->
+Fetch/Official attestation、官方 DSH Web 同 Session continuation、结构化 synthesis 和自动事件链
+均已通过。一次额外暴露 Hub `web.search` 的实验产生重复 native Search timeout，已固定为默认禁用；
+详见 [ADR-0022](../decisions/ADR-0022-search-provider-route-boundary.md) 和
+[G2-AF 实施执行记录](../evaluations/G2_AF_IMPLEMENTATION_EXECUTION_LOG_2026-09-04.md)。
+下一步只按 [PD-07 前瞻价值观察阶段卡](../stages/PD_07_PROSPECTIVE_VALUE_OBSERVATION.md)
+冻结 cohort，并以第一条合格未来 EventWatch 开始 14 天/20 事件观察。轮换旧 Tavily key 后的独立
+fallback canary 不是启动观察的默认前置条件；只有真实主路事实发现失败且成本/授权获批时才按需执行。
+不得以继续增加框架或页面替代价值验证。
+
+## 历史状态：E2-L 已通过，进入 E3 观察（已由 PD runtime closeout 更新）
+
+- G2-AF-01..04 已进一步证明主动搜索、同 Session 多轮补证、自动 feed admission、Artifact、通知和
+  复查技术链；当前仍是 `research_only`，分钟级 macro transmission、Provider 模型费用归集和
+  prospective Outcome/usefulness 尚未闭合。
 - 唯一执行事实源是 [产品交付控制书与最终验收包](../product/PRODUCT_DELIVERY_CONTROL_BOOK_2026-09-01.md)，最终证据是 [E2-L 官方 DSH Web 真实产品验收记录](../evaluations/E2L_LIVE_PRODUCT_ACCEPTANCE_2026-09-01.md)。旧 Pilot Ready v2、E2L-01/02/03 和 C1-C7 任务书只保留历史证据，不能重新成为执行入口。
 - 正式 Run `run_04dc1a46fd1e4c3b988750e18b0e9581` 从官方 DSH Web 建立，在同一受管 Session 完成 2 轮、12/12 durable Tool Call、15 条 Evidence、66.7% hard coverage，按代码 Gate 收敛为 `research_only / tool_budget`；DSH 与 Decision Desk 终态一致。
 - 后台 scheduler/worker 自动创建 child Run `run_7df306876d114e09b8e83507d06f3ef0` 并再次完成 2 轮、12/12 Tool Call，证明持续复查不依赖 owner 再次输入。
 - 两次 `web.search` timeout、FRED stale 和 unknown cost 被如实保留；不发布方向性交易结论，不把失败改写为成功或 `no_trade`。
-- 当前产品状态：`pilot_ready=true / pilot_usable=research_only / automatic_trading=false / Fixed active / DSH candidate-shadow`。这只允许开始至少 14 天或 20 个高影响事件的 E3 前瞻观察，不等于预测、盈利或 Promotion 已证明。
-- 最新完整质量门：Python `390 passed`、DSH Plugin `53 passed + build`、Decision Desk `10 passed + build`、Ruff、Pyright、codegen、module docs、Compose、fresh migration、recovery、三类 replay、callback/Web restart 和 rollback 均通过；桌面/窄屏截图与 SHA-256 已归档。
+- 当前产品状态：`pilot_ready=true / pilot_usable=research_only / automatic_trading=false / Fixed active / DSH candidate-shadow`。E2-L 原结论允许开始至少 14 天或 20 个高影响事件的 E3 观察；2026-09-04 交付阻断复核已提议在事实语义和事件窗口补齐前暂停把该观察解释为产品价值验收，等待 owner 决策。这不等于预测、盈利或 Promotion 已证明。
+- 2026-09-04 历史质量复核：Python `445 passed, 1 failed`；DSH Plugin `60 passed + build`、Decision Desk `10 passed + build`、Ruff、Pyright、codegen、module docs 和 `git diff --check` 通过。该数字属于历史复核；2026-09-05 当前全量结果为 Python `552 passed`、DSH Plugin `69 passed + build`、Decision Desk `10 passed + build`，详见顶部和 PD 执行日志。此前 E2-L/D2/G2-AF 记录中的 `390/395/397/404/416/446` 是对应历史时点的验收数字，保留作历史证据，不与本次复跑混用。Compose、fresh migration、recovery、三类 replay、callback/Web restart 和 rollback 的专项证据仍以各自验收记录为准；G2-AF 最终 Desk/DSH 报告/轨迹截图已归档。
 
 ## 2026-09-01 E2L-03 历史收口复核
 
@@ -40,12 +145,12 @@
 - 当前账本、PIT、Gate、Forecast/Outcome、Evaluation、MCP、Capability、Evolution、Promotion 和 Decision Desk 可保留。
 - 当前 Kernel/前端仍包含 `crypto_macro.v1`、Forecast 和 30m/24h/72h 等金融默认值；通用平台隔离尚未被第二领域证明。
 - `crypto-macro-decision` Skill 中的根因链、事实门、来源回退、反方审查和鲜度规则已在 R2-R-00 拆成正式 `crypto_macro.v1` Domain Pack；Web/Official/Market capability、Evidence lineage 和双 Snapshot 已在 R2-R-02 以 deny-by-default/replay 方式实现。
-- `research-mcp` 与 `hub-research-worker` 已加入 Compose；replay profile 默认只包含 `replay.research`，live profile 由显式配置选择，当前隔离产品实例只允许已审计的 `web.search`，不混入 `replay.research`。
+- `research-mcp` 与 `hub-research-worker` 已加入 Compose；replay profile 默认只包含 `replay.research`，live profile 由显式配置选择，当前隔离产品实例允许官方 DSH native `web_search` discovery 和已审计的 Hub typed capabilities（含 `web.fetch`），不混入 `replay.research`；Hub `web.search` 默认禁用。
 - R2-R-06C 前三次真实 PIT Canary 均作为失败证据保留；第四次 `r2-r-06c-20260830-low-profile-canary` 已在 56.5 秒内完成，取得 2 条 attested Evidence，PIT/unattested 均为 0，三个 Horizon distinct。随后完成 `r2-r-06c-20260830-repair-full-12case`：Fixed 12/12，DSH 9/12；DSH 失败为 `dsh_evidence_unattested`、`dsh_session_incomplete`、`provider_timeout`，PIT violations 为 0 但 unattested 为 1。ADR-0010 已将可信 Result 收回 adapter/确定性代码；replay Horizon 已相对 PIT cutoff 校验，Round 工具轨迹已从 canonical Trace/MCP Result 投影。当前低推理 candidate profile 为 `decision-research.v1:faf1b3115f7d339c`，12-case 门禁已放行但尚不能 Promotion。
 - R2-R-06D 已完成：Warsh Jackson Hole 真实事件 Run `run_27acb7c425914bc7a69060637ea1feb3` 使用 DSH `gpt-5.5` 尝试 `web.search`，Search 在 20 秒 capability deadline 内失败；产品仍保留 Trace、双 Snapshot、Result 和 reject Artifact，Evidence 为 0，active pointer 未改变。另修复了长官方文本超过 4000 字符时 Request Factory 构造失败的输入投影缺口，原文和 hash 仍保留。
 - R2-R-06E 已生成 Runtime 决策包，结论为 `retain_baseline / pending_owner_review`；DSH 继续 candidate/shadow。Owner usefulness 表单尚未填写，下一候选只能在新的 owner gate 下聚焦 Search reliability/error provenance。
 - R2-R-06E 后的真实隔离 Run `run_488b389ad8674dcfb632d12ea7b2399c` 暴露了具体缺口：模型可自由填写 `observed_at`，晚到结果被正确 PIT 拒绝但被上层粗略归类为 `provider_timeout`；首个并行 MCP 失败会 abort 其余调用，失败 Run 的 stop/error 状态未完整投影到前端。G1-A/B/C/D 已修复这些边界；不得用手工时间戳或更多 Prompt 规避。
-- 所有已知后续工作已汇总到 [产品收口与后续总计划](../product/PRODUCT_COMPLETION_AND_FUTURE_PLAN.md)：G1 可靠性、G2 来源覆盖、G3 单机 prospective 价值验收、G4 ASR、G5 第二领域、G6 规模化部署；未通过对应 Gate 不自动开下一阶段。
+- 所有已知后续工作已汇总到 [产品收口与后续总计划](../product/PRODUCT_COMPLETION_AND_FUTURE_PLAN.md)：G1 可靠性、G2 来源覆盖、G3 单机 prospective 价值验收、G4 ASR、G5 第二领域、G6 规模化部署；主动事实获取的独立 G3 阶段方案目前仍为 proposed，未通过对应 Gate 不自动开下一阶段。
 - Owner 已授权 G1/G2；G1-A/B/C/D 与 G2-A/B 已完成实现和离线验证，详细契约投影和退出门见 [G1/G2 实施方案](../stages/R2_R_G1_G2_EXECUTION_PLAN.md)。G2-C 真实 Search canary 已在 owner 授权的隔离、只读、限时边界内执行，但因 `research_capability_timeout` 失败安全；G2-D 事实充分度验收仍 pending。
 - Research Command Center 已成为默认工作区；durable Run 列表、Plan/Tool/Evidence/Sufficiency、主/反根因链、独立 Horizon、停止原因、规范化 Trace、SSE 和 owner command 已完成。默认不展示 DSH raw JSON 或 Provider payload。
 - 2026-08-30 隔离浏览器 smoke 已完成：API `8030`、replay research worker、Vite `5175` 共享临时目录；页面提交 -> `202 accepted` -> durable worker -> `research_only`/16.7% hard coverage/5 个 hard gap，12 条 SSE trace，终态关闭；截图和脱敏证据见 [前端运行链记录](../evaluations/G1_G2_FRONTEND_RUNTIME_SMOKE_2026-08-30.md)。这证明本机离线链路，不证明实时网络检索。
@@ -88,10 +193,14 @@
 
 ## 当前唯一目标
 
-当前唯一目标是 `E3-PROSPECTIVE-OBSERVATION`：停止新增产品功能，在至少 14 天或 20 个
-高影响事件中运行同一 DSH-first `research_only` 主线，记录事实覆盖、延迟、失败率、成本、
-人工复核时间、usefulness、30m/24h/72h Outcome、Brier、方向准确率和净收益。窗口结束只
-允许 `promote / retain_baseline / stop`；Fixed 保持 active，DSH 保持 candidate/shadow。
+当前唯一执行目标 `D2-OFFICIAL-DEEPSEEK-LIVE` 已完成真实主流程复验到诚实终态：官方
+`deepseek-v4-flash` 探针通过，DSH Web 在隔离 Compose 中完成 3 轮、12 次 capability
+调用和 12 条 Evidence；Run `run_6ea4b5b7c20140e2b4c0109d36b0179a` 因 stale/缺失事件窗口
+数据及 `structured_output_invalid` 进入 `degraded/reject`，Evidence-only 降级保留可信事实，
+不发布 causal/horizon 方向语义。完整证据见 [D2 真实验收记录](../evaluations/DSH_DEEPSEEK_LIVE_FLOW_ACCEPTANCE_2026-09-03.md)。
+本次运行专属浏览器资产和最终质量门复跑已完成；D2 不改变 `research_only`、Fixed active、
+DSH candidate/shadow。下一阶段只能另立 `E3-PROSPECTIVE-OBSERVATION`，观察至少 14 天或 20 个
+高影响事件，不能由 D2 自动 Promotion。
 
 ## 当前不做
 

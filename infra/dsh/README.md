@@ -21,21 +21,27 @@
 ./infra/dsh/acceptance.sh
 ```
 
-`run-product.sh` 是产品启动入口：它启动 Hub API、realtime/evolution/research
-worker 和 research MCP，然后在宿主机启动官方 DSH Web，并只输出一个用户入口。
+`run-product.sh` 是产品启动入口：它先用 `--build --force-recreate` 从当前工作树构建并启动
+Hub API、realtime/evolution worker 和 research MCP，然后在宿主机启动官方 DSH Web。只有
+包含 `hub_reachable` 与 build identity 的 Host readiness 通过后，启动器才单独构建并启动
+research worker。事件可以提前进入 durable 队列，但不会在 Agent Harness 尚未双向就绪时被消费。
+启动器最后只输出一个用户入口。通用 `/health/ready` 通过后还必须验证 canonical
+`research-inbox-view.v1`；旧镜像即使健康也不能冒充当前产品版本。
 `stop-product.sh` 只停止同一 Compose 项目的服务，保留 SQLite、DSH Session 和
 通知 outbox 数据卷。
 
 启动器按 `DECISION_HUB_API_PORT` 生成稳定的 Compose 项目名
-`decision-hub-product-<port>`，并在每次启动时用当前环境强制重建五个服务。这样不会把
+`decision-hub-product-<port>`，并在每次启动时用当前环境强制重建五个服务；research worker
+位于 DSH readiness 消费屏障之后。这样不会把
 旧的 DSH Host URL、旧 Provider 或旧 capability allowlist 留在容器里。启动日志中的
 `DSH_URL` 是唯一用户入口；旧端口或不带 `?token=...` 的裸 URL 不属于当前产品实例。
 需要并行隔离实例时显式设置 `DECISION_HUB_COMPOSE_PROJECT`，并同时设置独立的 API、MCP
 和 DSH 端口，禁止复用另一个实例的项目名。
 
-产品 live 启动默认只允许已经通过独立 contract/replay/live canary 的最小 typed
-capability：`official.macro`、`market.cross_asset`、`market.crypto_derivatives`，并明确
-拒绝 `replay.research`；`web.search` 只有在显式加入 allowlist 时启用，失败仍按稳定错误
+产品 live 启动默认启用已经通过独立 contract/replay/live canary 的只读 capability：
+`official.macro`、`market.cross_asset`、`market.crypto_derivatives`、`web.fetch` 和
+`web.search`（DSH native discovery）；明确拒绝 `replay.research`。`web.search.tavily`
+仍只在显式加入 allowlist 且配置新 secret 后作为按需 fallback 启用。失败仍按稳定错误
 进入 provenance，不能替代 typed source。回放只能通过隔离验收命令启动。若存在 gitignored 的
 `data/dsh-live/.env`，启动器通过 Compose 官方 `--env-file` 参数把同一份 Provider
 配置注入 Research MCP，不执行该文件、不打印密钥。任何新增 capability 仍须逐项通过

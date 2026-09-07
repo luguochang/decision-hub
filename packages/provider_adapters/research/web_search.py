@@ -16,11 +16,11 @@ from packages.kernel.decision_hub_kernel.ports.search import SearchCapabilityPor
 
 
 class WebSearchResearchAdapter:
-    capability_id = "web.search"
     supported_modes = frozenset({"live"})
 
-    def __init__(self, search: SearchCapabilityPort) -> None:
+    def __init__(self, search: SearchCapabilityPort, *, capability_id: str = "web.search") -> None:
         self.search = search
+        self.capability_id = capability_id
 
     async def execute(self, query: ResearchCapabilityQuery) -> ResearchCapabilityResult:
         result = await self.search.search(
@@ -35,6 +35,7 @@ class WebSearchResearchAdapter:
             )
         )
         candidates: list[EvidenceCandidate] = []
+        seen_content_hashes: set[str] = set()
         for item in result.evidence:
             source_url = str(item.source_url)
             source_id = _publisher_source_id(source_url, result.provider)
@@ -48,6 +49,16 @@ class WebSearchResearchAdapter:
                 excerpt=item.snippet,
                 structured_payload_ref=None,
             )
+            # Search vendors can repeat an identical result in one response
+            # (for example, once as a news hit and once as a web hit). The
+            # canonical evidence identity is content-based, so forwarding both
+            # rows would make the Gateway reject the whole batch as a duplicate
+            # and discard otherwise usable locators. Keep the first occurrence
+            # deterministic and leave provider-level deduplication to this
+            # shared adapter rather than each transport.
+            if content_hash in seen_content_hashes:
+                continue
+            seen_content_hashes.add(content_hash)
             candidates.append(
                 EvidenceCandidate(
                     evidence_id=research_evidence_instance_id(

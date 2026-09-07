@@ -7,6 +7,108 @@ required: [schema_version]
 properties:
   schema_version: {type: string, const: agentic-research.v1}
 $defs:
+  event_watch:
+    type: object
+    additionalProperties: false
+    required: [schema_version, watch_id, event_id, source_id, event_family, scheduled_at, status, window_offsets, baseline_status, created_at, updated_at, next_tick_at]
+    properties:
+      schema_version: {type: string, const: event-watch.v1}
+      watch_id: {type: string, minLength: 1, maxLength: 128}
+      event_id: {type: string, minLength: 1, maxLength: 128}
+      source_id: {type: string, minLength: 1, maxLength: 128}
+      event_family: {type: string, minLength: 1, maxLength: 128}
+      scheduled_at: {type: string, format: date-time}
+      status: {type: string, enum: [scheduled, active, completed, retrospective_only, cancelled]}
+      window_offsets:
+        type: array
+        items: {type: string, minLength: 1, maxLength: 32}
+        minItems: 1
+        uniqueItems: true
+      baseline_status: {type: string, enum: [pending, ready, unavailable]}
+      created_at: {type: string, format: date-time}
+      updated_at: {type: string, format: date-time}
+      next_tick_at: {type: [string, 'null'], format: date-time}
+
+  event_window_sample:
+    type: object
+    additionalProperties: false
+    required: [schema_version, sample_id, watch_id, event_id, offset, target_at, status, observed_at, received_at, provider_id, payload_ref, payload_hash, error_code]
+    properties:
+      schema_version: {type: string, const: event-window-sample.v1}
+      sample_id: {type: string, minLength: 1, maxLength: 160}
+      watch_id: {type: string, minLength: 1, maxLength: 128}
+      event_id: {type: string, minLength: 1, maxLength: 128}
+      offset: {type: string, minLength: 1, maxLength: 32}
+      target_at: {type: string, format: date-time}
+      status: {type: string, enum: [pending, due, captured, missing, baseline_unavailable]}
+      observed_at: {type: [string, 'null'], format: date-time}
+      received_at: {type: [string, 'null'], format: date-time}
+      provider_id: {type: [string, 'null'], maxLength: 128}
+      payload_ref: {type: [string, 'null'], maxLength: 2048}
+      payload_hash: {type: [string, 'null'], pattern: '^[a-f0-9]{64}$'}
+      error_code: {type: [string, 'null'], maxLength: 128}
+
+  event_window_capture:
+    type: object
+    additionalProperties: false
+    required: [schema_version, observed_at, received_at, provider_id, payload_ref, payload_hash]
+    properties:
+      schema_version: {type: string, const: event-window-capture.v1}
+      observed_at: {type: string, format: date-time}
+      received_at: {type: string, format: date-time}
+      provider_id: {type: string, minLength: 1, maxLength: 128}
+      payload_ref: {type: string, minLength: 1, maxLength: 2048}
+      payload_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+
+  crypto_event_window_observation:
+    type: object
+    additionalProperties: false
+    required: [provider_id, source_id, venue, metric_family, field, value, unit, source_url, published_at]
+    properties:
+      provider_id: {type: string, minLength: 1, maxLength: 128}
+      source_id: {type: string, minLength: 1, maxLength: 256}
+      venue: {type: string, minLength: 1, maxLength: 128}
+      metric_family: {type: string, minLength: 1, maxLength: 128}
+      field: {type: string, minLength: 1, maxLength: 128}
+      value: {type: [number, string]}
+      unit: {type: string, minLength: 1, maxLength: 64}
+      source_url: {type: [string, 'null'], format: uri, maxLength: 2048}
+      published_at: {type: [string, 'null'], format: date-time}
+
+  crypto_event_window_failure:
+    type: object
+    additionalProperties: false
+    required: [provider_id, error_code, retryable]
+    properties:
+      provider_id: {type: string, minLength: 1, maxLength: 128}
+      error_code: {type: string, minLength: 1, maxLength: 128}
+      retryable: {type: boolean}
+
+  crypto_event_window_payload:
+    type: object
+    additionalProperties: false
+    required: [schema_version, event_id, offset, target_at, captured_at, observations, failures]
+    properties:
+      schema_version: {type: string, const: crypto-event-window-payload.v1}
+      event_id: {type: string, minLength: 1, maxLength: 128}
+      offset: {type: string, minLength: 1, maxLength: 32}
+      target_at: {type: string, format: date-time}
+      captured_at: {type: string, format: date-time}
+      observations:
+        type: array
+        items: {$ref: '#/$defs/crypto_event_window_observation'}
+        maxItems: 100
+      failures:
+        type: array
+        items: {$ref: '#/$defs/crypto_event_window_failure'}
+        maxItems: 20
+
+  unit_list:
+    type: array
+    items: {type: string, minLength: 1}
+    minItems: 1
+    uniqueItems: true
+
   execution_budget:
     type: object
     additionalProperties: false
@@ -58,6 +160,42 @@ $defs:
         uniqueItems: true
       execution_budget: {$ref: '#/$defs/execution_budget'}
 
+  research_source_policy:
+    type: object
+    additionalProperties: false
+    required: [source_ref, tier, publisher, authority, independence_group, domains, allowed_paths, requirement_ids, allow_search, allow_fetch, allow_evidence, parser_ref, license_status, retention_policy, audit_status, redirect_policy]
+    properties:
+      source_ref: {type: string, pattern: '^[a-z][a-z0-9_.-]*$'}
+      tier: {type: string, enum: [P0, P1, P2, P3, P4]}
+      publisher: {type: string, minLength: 1}
+      authority: {type: string, enum: [official, exchange, audited_aggregator, verified_web, search_derived, unverified]}
+      independence_group: {type: string, minLength: 1}
+      domains: {type: array, items: {type: string, minLength: 1}, minItems: 1, uniqueItems: true}
+      allowed_paths: {type: array, items: {type: string, minLength: 1}, minItems: 1, uniqueItems: true}
+      requirement_ids: {type: array, items: {type: string, minLength: 1}, minItems: 1, uniqueItems: true}
+      allow_search: {type: boolean}
+      allow_fetch: {type: boolean}
+      allow_evidence: {type: boolean}
+      parser_ref: {type: [string, 'null']}
+      license_status: {type: string, enum: [approved, review_required, denied]}
+      retention_policy: {type: string, enum: [hash_only, hash_excerpt, full_text]}
+      audit_status: {type: string, enum: [approved, candidate, denied]}
+      redirect_policy: {type: string, enum: [deny, same_source_only]}
+
+  research_source_registry:
+    type: object
+    additionalProperties: false
+    required: [schema_version, pack_id, version, sources]
+    properties:
+      schema_version: {type: string, const: research-source-registry.v1}
+      pack_id: {type: string, pattern: '^[a-z][a-z0-9_.-]*$'}
+      version: {type: string, minLength: 1}
+      sources:
+        type: array
+        items: {$ref: '#/$defs/research_source_policy'}
+        minItems: 1
+        maxItems: 500
+
   role_profile:
     type: object
     additionalProperties: false
@@ -72,6 +210,39 @@ $defs:
       output_schema_ref: {type: string, minLength: 1}
       evaluation_policy_ref: {type: string, minLength: 1}
       system_instruction_ref: {type: string, minLength: 1}
+
+  provider_route:
+    type: object
+    additionalProperties: false
+    required: [provider_id, adapter_ref, route_role, priority, service_tier, allowed_domains, timeout_seconds, cost_policy_ref, license_status, audit_status]
+    properties:
+      provider_id: {type: string, pattern: '^[a-z][a-z0-9_.-]*$'}
+      adapter_ref: {type: string, minLength: 1}
+      route_role: {type: string, enum: [primary, fallback]}
+      priority: {type: integer, minimum: 0, maximum: 10000}
+      service_tier: {type: string, enum: [free_proxy, licensed_live, replay]}
+      allowed_domains: {type: array, items: {type: string, minLength: 1}, uniqueItems: true}
+      timeout_seconds: {type: integer, minimum: 1, maximum: 600}
+      cost_policy_ref: {type: string, minLength: 1}
+      license_status: {type: string, enum: [approved, review_required, denied]}
+      audit_status: {type: string, enum: [approved, candidate, denied]}
+      requires_event_window: {type: boolean, default: false}
+
+  provider_attempt:
+    type: object
+    additionalProperties: false
+    required: [provider_id, route_role, service_tier, status, started_at, finished_at, latency_ms, cost_usd, error_code, retryable]
+    properties:
+      provider_id: {type: string, pattern: '^[a-z][a-z0-9_.-]*$'}
+      route_role: {type: string, enum: [primary, fallback]}
+      service_tier: {type: string, enum: [free_proxy, licensed_live, replay]}
+      status: {type: string, enum: [succeeded, failed, skipped]}
+      started_at: {type: string, format: date-time}
+      finished_at: {type: string, format: date-time}
+      latency_ms: {type: integer, minimum: 0}
+      cost_usd: {type: [number, 'null'], minimum: 0}
+      error_code: {type: [string, 'null'], maxLength: 128}
+      retryable: {type: [boolean, 'null']}
 
   research_capability_manifest:
     type: object
@@ -94,6 +265,11 @@ $defs:
       audit_status: {type: string, enum: [approved, candidate, denied]}
       replay_policy: {type: string, enum: [archive_required, deterministic, unavailable]}
       secret_policy: {type: string, enum: [none, adapter_only, local_secret_store]}
+      provider_routes:
+        type: array
+        items: {$ref: '#/$defs/provider_route'}
+        maxItems: 20
+        default: []
 
   evidence_requirement:
     type: object
@@ -110,6 +286,25 @@ $defs:
       minimum_independent_sources: {type: integer, minimum: 1, maximum: 10}
       allowed_fallbacks: {type: array, items: {type: string, minLength: 1}, uniqueItems: true}
       confidence_cap: {type: number, minimum: 0, maximum: 1}
+      # Optional semantic declarations preserve research-session.v1 compatibility.
+      accepted_metric_families: {type: array, items: {type: string, minLength: 1}, uniqueItems: true, default: []}
+      required_metric_families: {type: array, items: {type: string, minLength: 1}, uniqueItems: true, default: []}
+      required_fields: {type: array, items: {type: string, minLength: 1}, uniqueItems: true, default: []}
+      required_event_offsets: {type: array, items: {type: string, minLength: 1}, uniqueItems: true, default: []}
+      unit_policy: {type: [string, 'null'], default: null}
+      field_units:
+        type: object
+        additionalProperties: {$ref: '#/$defs/unit_list'}
+        default: {}
+      minimum_venues: {type: integer, minimum: 1, maximum: 20, default: 1}
+      venue_required: {type: boolean, default: false}
+      minimum_independence_groups: {type: integer, minimum: 1, maximum: 20, default: 1}
+      allowed_delay_classes:
+        type: array
+        items: {type: string, enum: [realtime, delayed, historical, unknown]}
+        uniqueItems: true
+        default: []
+      semantic_policy_ref: {type: [string, 'null'], default: null}
 
   evidence_candidate:
     type: object
@@ -157,6 +352,16 @@ $defs:
       observed_at: {type: string, format: date-time}
       requested_observed_at: {type: [string, 'null'], format: date-time}
       cutoff_at: {type: string, format: date-time}
+      event_id: {type: [string, 'null'], maxLength: 128, default: null}
+      event_at: {type: [string, 'null'], format: date-time, default: null}
+      window_start_at: {type: [string, 'null'], format: date-time, default: null}
+      window_end_at: {type: [string, 'null'], format: date-time, default: null}
+      requested_event_offsets:
+        type: array
+        items: {type: string, minLength: 1, maxLength: 32}
+        maxItems: 20
+        uniqueItems: true
+        default: []
 
   research_capability_result:
     type: object
@@ -168,8 +373,19 @@ $defs:
       capability_id: {type: string, minLength: 1}
       provider: {type: string, minLength: 1}
       evidence_candidates: {type: array, items: {$ref: '#/$defs/evidence_candidate'}, maxItems: 20}
+      # Additive for v1 compatibility: legacy providers return no typed facts.
+      facts:
+        type: array
+        items: {$ref: 'research_fact.schema.yaml#/$defs/fact_envelope'}
+        maxItems: 200
+        default: []
       cost_usd: {type: [number, 'null'], minimum: 0}
       completed_at: {type: string, format: date-time}
+      provider_attempts:
+        type: array
+        items: {$ref: '#/$defs/provider_attempt'}
+        maxItems: 20
+        default: []
 
   research_run_queued:
     type: object
@@ -345,7 +561,7 @@ $defs:
     properties:
       requirement_id: {type: string, minLength: 1}
       importance: {type: string, enum: [hard, soft]}
-      reason_code: {type: string, enum: [missing, stale, low_authority, insufficient_sources, conflict, tool_unavailable]}
+      reason_code: {type: string, enum: [missing, stale, low_authority, insufficient_sources, conflict, tool_unavailable, semantic_mismatch, no_baseline, window_missing]}
       query_hint: {type: string, minLength: 1}
       attempted_capabilities: {type: array, items: {type: string, minLength: 1}, uniqueItems: true}
       blocks_directional_output: {type: boolean}
@@ -378,9 +594,10 @@ $defs:
   research_task:
     type: object
     additionalProperties: false
-    required: [task_id, capability_id, objective, question, input_evidence_refs, output_schema_ref, depends_on, success_condition, priority]
+    required: [task_id, requirement_id, capability_id, objective, question, input_evidence_refs, output_schema_ref, depends_on, success_condition, priority]
     properties:
       task_id: {type: string, minLength: 1}
+      requirement_id: {type: string, minLength: 1}
       capability_id: {type: string, minLength: 1}
       objective: {type: string, minLength: 1}
       question: {type: string, minLength: 1}
@@ -446,6 +663,13 @@ $defs:
       tool_call_id: {type: [string, 'null']}
       retryable: {type: boolean}
       deadline_ms: {type: [integer, 'null'], minimum: 0}
+      # Additive route lineage: a failed stable capability may have tried
+      # multiple approved providers before the durable error was recorded.
+      provider_attempts:
+        type: array
+        items: {$ref: '#/$defs/provider_attempt'}
+        maxItems: 20
+        default: []
 
   research_round:
     type: object
@@ -552,6 +776,16 @@ $defs:
       input_evidence: {type: array, items: {$ref: '#/$defs/research_input_evidence'}, minItems: 1, maxItems: 50}
       evidence_requirements: {type: array, items: {$ref: '#/$defs/evidence_requirement'}, minItems: 1}
       target_gaps: {type: array, items: {$ref: '#/$defs/evidence_gap'}, maxItems: 50}
+      # Optional planning projection from the Hub-owned durable EventWatch.
+      # Older request producers remain valid; null means no trusted watch exists.
+      event_watch:
+        anyOf: [{$ref: '#/$defs/event_watch'}, {type: 'null'}]
+        default: null
+      event_window_samples:
+        type: array
+        items: {$ref: '#/$defs/event_window_sample'}
+        maxItems: 32
+        default: []
       allowed_capabilities: {type: array, items: {type: string, minLength: 1}, minItems: 1, uniqueItems: true}
       execution_budget: {$ref: '#/$defs/execution_budget'}
       deadline_at: {type: string, format: date-time}
@@ -584,6 +818,13 @@ $defs:
       status: {type: string, enum: [completed, degraded, failed, cancelled]}
       rounds: {type: array, items: {$ref: '#/$defs/research_round'}, minItems: 1}
       evidence_candidates: {type: array, items: {$ref: '#/$defs/evidence_candidate'}}
+      # Additive for v1 compatibility. The Hub persists these independently,
+      # while the runtime result carries the exact attested projection.
+      facts:
+        type: array
+        items: {$ref: 'research_fact.schema.yaml#/$defs/fact_envelope'}
+        maxItems: 1000
+        default: []
       final_coverage: {$ref: '#/$defs/coverage_assessment'}
       causal_case: {anyOf: [{$ref: '#/$defs/causal_case'}, {type: 'null'}]}
       horizons: {type: array, items: {$ref: '#/$defs/horizon_decision'}, maxItems: 3}

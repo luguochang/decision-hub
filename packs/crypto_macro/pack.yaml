@@ -12,15 +12,19 @@ role_profile_refs:
   - profiles/data-quality.yaml
 capability_refs:
   - web.search
+  - web.search.tavily
   - web.fetch
   - official.macro
   - market.crypto_derivatives
+  - market.crypto_crowding
   - market.cross_asset
+  - macro.cross_asset_intraday
+  - macro.expectation_pricing
   - replay.research
 horizons: [30m, 24h, 72h]
 execution_budget:
   max_evidence_rounds: 3
-  max_tool_calls: 12
+  max_tool_calls: 24
   max_subagents: 6
   total_deadline_seconds: 480
   per_tool_timeout_seconds: 20

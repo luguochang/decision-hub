@@ -555,8 +555,11 @@ async def test_web_runtime_timeout_cancels_and_fails_closed(tmp_path: Path) -> N
         poll_interval_seconds=0.001,
     )
 
+    # The timeout is deliberately short, but long enough for the fake Host
+    # submit to be accepted. This scenario verifies accepted-session cleanup;
+    # submit-before-deadline exhaustion is covered separately below.
     with pytest.raises(AgentExecutionError) as raised:
-        await runtime.execute(_request(run_id, deadline_seconds=0.01))
+        await runtime.execute(_request(run_id, deadline_seconds=0.05))
 
     assert raised.value.error_code == "provider_timeout"
     assert host.cancelled == [run_id]
@@ -564,8 +567,31 @@ async def test_web_runtime_timeout_cancels_and_fails_closed(tmp_path: Path) -> N
     assert link is not None and link.state in {"running", "cancelled"}
 
 
-async def test_web_runtime_recovers_when_host_exits_after_acceptance(tmp_path: Path) -> None:
-    """A durable admitted link is enough to resume after a Host process exit."""
+async def test_web_runtime_readiness_timeout_before_acceptance_does_not_cancel_remote_run(
+    tmp_path: Path,
+) -> None:
+    db = _database(tmp_path / "web-runtime-submit-timeout.sqlite3")
+    run_id, _ = RunService(db).create("event-web-submit-timeout")
+    host = FakeHostClient()
+    runtime = DshWebResearchRuntime(
+        DshSessionLinkService(db),
+        host,
+        poll_interval_seconds=0.001,
+    )
+
+    with pytest.raises(AgentExecutionError) as raised:
+        await runtime.execute(_request(run_id, deadline_seconds=0.000001))
+
+    assert raised.value.error_code == "provider_timeout"
+    assert raised.value.cause_code == "dsh_web_readiness_deadline_elapsed"
+    assert host.submit_calls == []
+    assert host.cancelled == []
+
+
+async def test_web_runtime_recovers_when_host_transiently_exits_after_acceptance(
+    tmp_path: Path,
+) -> None:
+    """A transient Host exit must not fail a session that later completes."""
     db = _database(tmp_path / "web-runtime-host-restart.sqlite3")
     run_id, _ = RunService(db).create("event-web-host-restart")
     host = FakeHostClient()
@@ -590,18 +616,18 @@ async def test_web_runtime_recovers_when_host_exits_after_acceptance(tmp_path: P
     runtime = DshWebResearchRuntime(
         DshSessionLinkService(db), host, poll_interval_seconds=0.001
     )
-    with pytest.raises(AgentExecutionError, match="process exit"):
-        await runtime.execute(_request(run_id))
+    result = await runtime.execute(_request(run_id))
+    assert result.research_session_id == host.submit_calls[0].deterministic_session_id
 
-    admitted = DshSessionLinkService(db).get(run_id)
-    assert admitted is not None and admitted.state == "admitted"
+    completed = DshSessionLinkService(db).get(run_id)
+    assert completed is not None and completed.state == "completed"
 
-    # A replacement runtime reuses the persisted deterministic session link.
+    # A replacement runtime still reuses the persisted deterministic session link.
     recovered = DshWebResearchRuntime(
         DshSessionLinkService(db), host, poll_interval_seconds=0.001
     )
-    result = await recovered.execute(_request(run_id))
-    assert result.research_session_id == host.submit_calls[0].deterministic_session_id
+    recovered_result = await recovered.execute(_request(run_id))
+    assert recovered_result.research_session_id == result.research_session_id
     link = DshSessionLinkService(db).get(run_id)
     assert link is not None and link.state == "completed"
     assert len({item.deterministic_session_id for item in host.submit_calls}) == 1

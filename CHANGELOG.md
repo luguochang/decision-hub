@@ -1,6 +1,125 @@
 # Changelog
 
+## 2026-09-05 - PD runtime closeout and bounded replay continuation
+
+- 修复 DSH 官方 Web slot props 通过对象展开丢失非 enumerable `sessionId` 的会话关联缺陷；报告、Inbox
+  和 Intake 包装器现在显式投影同一官方 Session，不新增第二份会话映射。
+- 修复 replay/fake harness 在只有聚合 `replay.research` 能力时被过早终止的 continuation 回归；仅
+  `execution_mode=replay`、首轮有证据进展且能力集合严格为 `{"replay.research"}` 时允许下一代，live
+  运行仍只能通过声明的未尝试/可重试路由继续。
+- 新增 [主动研究交付修复方案](docs/product/PRODUCT_AGENTIC_FACT_SUFFICIENCY_REMEDIATION_2026-09-05.md)，
+  固化 Search locator、typed facts、事件窗口、语义 Gate、主动调度、前端视图、资产和 PD-07 交付边界。
+- 修复运行收口后的基础设施故障：Docker event 证明 `host_hub_unreachable` 的直接根因是 Hub API
+  OOM/`exitCode=137`，不是 DSH/Cordis 永久失效。停止 12 套旧测试 Compose 栈和 3 个旧 launcher，
+  未删除 volume、数据库、Session 或历史 Run；运行容器由 68 个降至 8 个。
+- `run-product.sh` 改为当前工作树镜像只构建一次；Hub/Inbox/MCP 和 DSH Host 双向 readiness 通过后，
+  才以 `--no-deps --no-build` 启动 research worker，防止未就绪消费和二次构建导致的资源竞争。
+- 通过既有 owner retry 创建 `run_2c06947df692424e326161d83f488368`，官方 DSH 与 Decision Desk
+  浏览器复验同一 Session/Run/Artifact、3 轮/16 次工具调用/102 条归一化事件及诚实的
+  `research_only/provider_timeout` 终态；该运行不是 PD-07 前瞻样本。
+- 质量门：Python `552 passed`、launcher/recovery 聚焦 `14 passed`、DSH Plugin
+  `69 passed + build`、Decision Desk `10 passed + build`、
+  Pyright/Ruff/canonical codegen/module docs/diff check 全部通过。当前仍是 `research_only`，不宣称实时
+  金融数据充分、预测准确、盈利或自动交易。
+
+## 2026-09-04 - PD-02E intraday macro and expectation seam
+
+- Added the independent PD-02E stage card and locked event-relative macro/expectation behavior before
+  implementation. DSH remains the only Agent Harness; no second loop, DTO or ledger was introduced.
+- Intraday macro adapters now preserve provider source identity, independence group, event offsets and
+  event-aware query context. Missing offsets never fall back to a current snapshot.
+- Expectation pricing now shares the canonical event query builder and supports explicit estimated-cost
+  injection; absent cost remains `null`/unknown rather than a false zero.
+- Production macro capabilities are explicitly `candidate/review_required` until a real endpoint,
+  domain allowlist, license and canary exist. Delayed/free fixtures and BTC metrics cannot satisfy
+  realtime macro or expectation requirements.
+- Added adapter -> Router -> Gateway -> FactStore -> Semantic Gate replay coverage for realtime,
+  delayed, missing-baseline, wrong-metric-family and pre-adapter approval rejection scenarios.
+- Quality gates: Python `518 passed`, Ruff passed, Pyright `0 errors / 0 warnings`, codegen/docs/diff
+  checks passed. No live provider was called; live-provider exit remains blocked.
+
+## 2026-09-04 - PD-02D crypto crowding facts
+
+- Added a Pack-routed OKX/CoinEx order-book adapter for typed
+  `crowding_signal`/`book_imbalance` facts, with explicit
+  `orderbook_imbalance` proxy provenance and bounded provider fallback.
+- Extended event-window capture and added an archive -> Router -> Gateway -> FactStore -> semantic
+  Gate replay proving that funding/OI/OI delta/basis/crowding are jointly required.
+- Corrected crypto event-window freshness from a current-snapshot 60-second assumption to a
+  documented 600-second envelope for the canonical `t-5m -> t+1m` comparison; current snapshots
+  still cannot substitute for event offsets.
+- Decision Desk now renders an unknown selected-run cost as unknown instead of a false `$0.0000`.
+- Added the PD-02D stage card and synchronized the PD execution/status indexes; live provider
+  canary, macro/expectation coverage and product value remain pending.
+
+## Unreleased - 2026-09-04 product fact sufficiency audit
+
+- 2026-09-04 完成 `PD-02C` Crypto Event-Window Facts：EventWatch 窗口通过可插拔 sampler 复用
+  OKX/CoinEx typed adapter，写入 SHA-256 content-addressed archive，并由 DSH/MCP event query、
+  Durable Gateway lineage、stable archive-only Router 投影到 Evidence/FactStore 和语义 Gate。
+  普通 current snapshot 不再命中 archive，archive 非可重试失败不能回退；`event_return` 与 OI
+  delta 缺失 baseline 时保持缺口。新增端到端离线回放；当前全量质量门为 `503 passed`，未触网，不宣称
+  crowding、宏观/expectation、真实 Provider 稳定性或交易可用性；下一任务为 `PD-02D`。
+- 2026-09-04 完成 `PD-02B` stable Provider Router composition：`crypto_macro` Pack 现在声明
+  OKX public primary 与 CoinEx public fallback，`research_mcp` 对 Gateway 只注册一个 stable
+  `market.crypto_derivatives` Router，并删除环境变量二选一。route 会按请求域和明确字段能力收窄，
+  只有 retryable transport/429/5xx 才 fallback；未知 ref、重复 ID 和 capability mismatch 均
+  fail-closed。最终 Python `486 passed`、Pyright、Ruff、codegen、module docs、diff check 通过；
+  未触网，current snapshot 仍不能替代事件窗口/OI delta，下一任务为 `PD-02C`。
+- 2026-09-04 完成 `PD-02A` Provider 契约与失败审计：canonical schema 增加 stable
+  `ProviderRoute`/`ProviderAttempt`、事件窗口 query 和 `ErrorProvenance.provider_attempts`；
+  primary/fallback 的失败 route lineage 现在随既有 durable reservation 的 canonical `error_json`
+  保存并在 idempotent recovery 中恢复，不新建第二账本。新增 HTTP timeout/429/5xx/4xx/transport
+  分类与 recovery BDD；最终 Python `473 passed`、Pyright、Ruff、codegen、module docs、diff
+  check 通过。仅进入 `PD-02B` composition，未新增 real provider/live canary，不宣称事实充分。
+- 2026-09-04 完成 `PD-01` durable EventWatch 与事件窗口：canonical 契约和 migration `0029`
+  保存 watch/sample，官方日历显式传递 `scheduled_at`，既有 realtime scheduler 负责推进并通过
+  可插拔 `EventWindowSamplerPort` capture；迟到事件保持 `retrospective_only`，缺少事件前样本不
+  回填，Provider 失败和宽限过期保留明确状态。新增八个窗口跨服务重建、重复 tick 幂等的完整
+  离线生命周期测试；最终门为 Python `463 passed`、Pyright、Ruff、canonical codegen 和 diff
+  check 通过。结论为 `continue PD-02`，不宣称已具备正式分钟级 Provider 或交易可用性。
+- 2026-09-04 完成 `PD-00` 事实语义边界：新增 canonical `FactEnvelope`、migration `0028`、
+  Fact Store、显式 task/requirement lineage 和 crypto-macro 八类字段/单位/窗口/来源真值表；
+  Gateway、DSH mapper、LangGraph checkpoint 和 Query View 均消费账本中的 attested Facts。
+  Web locator、BTC 衍生品、错误单位和当前 snapshot 不再能替代 Fed pricing 或事件窗口；历史
+  Evidence/Run 保持可读不回写。
+- 2026-09-04 修复 DSH replay 成功夹具，使其携带可验证 hash、PIT、字段、单位、事件偏移、venue
+  与独立来源的 typed facts；成功场景在同一 Session 两轮充分，partial/stale 场景继续 fail-closed。
+  submit 前 deadline 与 Host accepted 后 timeout 的 cancel 语义已拆分。最终门：Python
+  `454 passed`、Pyright `0 errors / 0 warnings`、Ruff、canonical codegen 和 diff check 通过；
+  结论为 `continue PD-01`，不宣称真实分钟级数据或产品价值已通过。
+
+- 当前质量门如实修正为 Python `445 passed, 1 failed`；唯一失败是 DSH Web `10ms` 超时用例在 Host submit 前截止而旧断言仍要求 cancel。该红灯与 WebSearch 事实不足相互独立，进入 PD 实现前必须按 accepted-before-cancel 语义收口。
+
+- 2026-09-04 新增 proposed [产品事实充分度与主动交付修复方案](docs/product/PRODUCT_FACT_SUFFICIENCY_AND_ACTIVE_DELIVERY_PLAN_2026-09-04.md)：基于真实 Run `run_b89cb225177145cd9a0e7cd0b038e31c` 和当前代码确认 WebSearch/三轮 DSH loop 已运行，页面仍证据不足的主因是分钟级结构化宏观/衍生品事实、事件前窗口和 requirement 字段语义校验未完成；同时识别当前覆盖 Gate 可能允许指标族替代、task/gap 仍按序号推断的问题。方案锁定 DSH-first 边界、FactEnvelope、typed provider、主动调度/报告、Role/前端、LoongSuite 引用、成本、自进化和 PD-00..07 有限验收门。仅修改文档与状态索引，owner 确认前不开始 PD-00 代码、不扩大 Provider/域名、不把 E3 观察当产品价值通过。
+- 2026-09-04 G2-AF-01..04 技术闭环通过：修复 Host 工作区未注册却误报 ready、原生 Search capability ID 不统一、后续 retryable timeout 丢弃已成功 Evidence，以及 24-call Domain Pack 预算测试漂移；最终隔离 Run `run_b89cb225177145cd9a0e7cd0b038e31c` 由官方 feed 自动触发，在官方 DSH 同一 Session 完成 3 轮、20/24 次调用、13 条 Evidence、83.33% hard coverage、attested synthesis、Artifact、Outbox 单次通知和 child recheck，终态为 `degraded/research_only/round_budget`。DSH/Desk 页面和控制台验收通过；分钟级 macro 数据、Provider 费用归集、Tavily 轮换 key live canary 和 G2-AF-05 前瞻价值观察仍未完成，不宣称预测准确、盈利或自动交易。
+- 2026-09-04 完成 G2-AF 本轮真实闭环复验与文档收口：记录三次真实 Run（旧配置失败、typed capability `research_only`、重复暴露 Hub `web.search` 超时），确认 DSH 原生 `web_search` 可连续补证但 Search locator 仍必须经过 Hub attestation/Fetch 才能入账；新增 ADR-0022 固定 DSH native primary、Tavily 显式 fallback、Hub `web.search` 默认禁用的路由边界。修复文档抓取 HTTP/timeout/connection 错误 provenance、发布者 source identity 和 deadline/domain cause code；当前质量门为 Python 416、DSH Plugin 57、Decision Desk 10，全部测试/静态/build/diff 检查通过。G2-AF-02/03 仍为 partial，未切 active、未启用 Tavily、未宣称金融事实充分或预测成功。
+- 2026-09-04 owner 授权启动 G2-AF 实施：新增 typed Capability Catalog、未尝试 capability ladder 和 gap-driven continuation 状态；DSH native Search 与 Tavily fallback adapter 均接入同一 Search/Gateway 端口。离线 Red tests 先行通过；真实 canary 仍受只读、PIT、预算和 secret 门约束，未写入或使用聊天中的 Tavily key。
+- 2026-09-04 修复 G2-AF 的真实配置根因：官方 DSH `tool-web` 在 `decision-research` preset 中重新启用 `web_search`/`web_fetch`，提示词要求 hard gap 继续“搜索发现 -> Hub Fetch/typed provider -> Coverage”而不是立即停止；`web.fetch` 改为受审计的金融域名只读 adapter，并按发布者域名保留独立来源；`run-product.sh` 默认纳入 `web.fetch`。真实 Session attestation、Tavily canary 和金融事实充分度仍保持 pending。
+
 ## Unreleased
+
+- G2-AF-02：新增受临时 SQLite、显式环境开关和脱敏输出保护的 `tools/canary/run_g2af_search_attestation_canary.py`，真实验证 DSH native Search locator 经 Hub durable Gateway、`web.fetch` 与 `official.macro` 进入 Evidence/Trace；event identity 通过，其他金融 hard facts 仍明确缺失。修复统一 Web Search 适配器对重复供应商结果的确定性去重，避免单个重复 URL 触发整批 evidence identity 冲突。该 canary 不改变正式数据库、active pointer 或 Tavily allowlist。
+
+- 2026-09-03 核实官方 DSH 上游确实提供原生 `web_search`（`dsh-web-search-deepseek` + `dsh-tool-web`），并修正文档中将 DeepSeek 聊天 API 与 DSH Search 混为一谈的描述：原生 Search 复用 `DEEPSEEK_API_KEY`，但走独立 Anthropic-compatible `/messages` 路由；当前 Decision Hub `decision-research` preset 为 Evidence attestation 有意只暴露 Hub research tool。新增 [G2-AF Tavily / DSH Search 核查与执行记录](docs/evaluations/G2_AF_TAVILY_EXECUTION_LOG_2026-09-03.md)，登记 owner 提供的 Tavily key 未读取/未持久化，冻结 27 条金融来源注册表设计、来源权重/历史数据规则和每轮记录模板；未新增代码、未启用 Tavily、未产生 Tavily 费用。
+- 2026-09-03 在 owner 授权下完成官方 DSH 原生 `web_search` route 最小探针：HTTP 200，返回结构化 `web_search_tool_result` 和 10 个来源；结果尚未进入 Hub Evidence 主链。provider 顺序收口为 DSH native discovery primary、Tavily 免费额度按需 fallback/独立交叉索引；Tavily key 未读取、未调用、未产生 credit，正式使用前需轮换聊天中暴露的 key。文档同步了预算、allowlist、attestation 和 G2-AF-01 先行门，未新增运行时代码。
+- 2026-09-03 新增 [G2-AF 主动事实获取与自主研究阶段方案](docs/stages/G2_AF_ACTIVE_FACT_ACQUISITION_AND_AUTONOMOUS_RESEARCH.md)：针对真实报告在 hard gap 处过早停止的问题，明确 DSH 继续作为主要 Harness、LangGraph 只负责产品生命周期、Hub Capability Catalog 与 Search/Fetch/Typed Provider 回退梯度；核查官方 DSH 原生 Search、Tavily、Brave、Exa、Serper、SearXNG 和 Responses web_search。方案包含成本/授权、PIT/authority、主动调度、报告/通知、Role Profile、LoongSuite Trace、自进化、SDD/BDD/TDD/ADR、代码落点和 G2-AF-01..05 验收门；状态为 `proposed / native route probe passed / implementation gate pending`，provider 顺序为 DSH native primary、Tavily 按需 fallback，未授权新增代码、Search key 或 live allowlist。
+- 2026-09-03 修正状态投影：`IMPLEMENTATION_STATUS.md` 中旧 G2-C 已执行的 Search canary 统一标为 `failed safely`；新的 DSH 原生/Tavily 隔离 canary 单独归入 G2-AF-02，仍需 owner 确认和独立授权，避免把历史失败误读为尚未执行或把新 provider 误认为已启用。
+
+- 2026-09-03 新增 [Agentic 主动研究缺口复盘](docs/evaluations/PRODUCT_AGENTIC_GAP_REVIEW_2026-09-03.md)：如实确认本次 live Run 未启用 `web.search`、DeepSeek 文本模型不自带联网能力、交易员 Role Profile 尚未成为可选择的 DSH Native Plugin、LoongSuite 只完成隔离技术 Trace canary、调度与自进化仍是有界骨架；提出下一阶段主动事实获取与自动事件闭环的硬问题，未授权新增代码或 capability。
+
+- 2026-09-03 完成一次真实单机用户交付验收：修复 `run-live-web.sh` 的 `OPENAI_*`/`DEEPSEEK_*` 凭据串线，新增回归测试；官方 DSH Web 在 `52780` 创建真实 Run，完成 2 轮、12 次工具调用、15 条 Evidence 和 87 条 Trace，并在 DSH 轨迹、研究报告和 Decision Desk 中可见。新增[用户使用说明](docs/user-guides/DECISION_HUB_USER_GUIDE_2026-09-03.md)和[产品交付验收记录](docs/evaluations/PRODUCT_USER_DELIVERY_ACCEPTANCE_2026-09-03.md)。终态为 `research_only/no_trade`，不代表预测或交易可用。
+
+- 2026-09-03 新建 [D2 官方 DeepSeek Live 主流程执行清单](docs/stages/D2_OFFICIAL_DEEPSEEK_LIVE_EXECUTION_CHECKLIST_2026-09-03.md)：将真实 DSH 主流程收口拆为 F1-F5，固化 SDD/BDD/TDD、浏览器桌面/移动/console 证据、进程与凭据清理、质量门和停止条件。D2 的完成含义仍是到达诚实终态；synthesis 失败、research_only、Fixed active 和 DSH candidate/shadow 不变，完成后才可另立 E3 价值观察。
+- 2026-09-03 完成 D2 官方 DeepSeek Live 主流程真实验收：`deepseek-v4-flash` Provider 探针通过，
+  官方 DSH Web 在隔离 Compose 中真实完成 3 轮、12 次 capability 调用和 12 条 Evidence；
+  synthesis 因 `structured_output_invalid` 安全降级为 evidence-only，Gate `reject`，不发布
+  方向性 causal/horizon。D2 详细证据见 [真实验收记录](docs/evaluations/DSH_DEEPSEEK_LIVE_FLOW_ACCEPTANCE_2026-09-03.md)。
+  随后已完成本次专属桌面/移动浏览器资产、DOM/console 和最终质量门收口；仍不能宣称产品方向预测或正式可用。
+- 新增 [D2 官方 DeepSeek Live 主流程计划与验收清单](docs/stages/D2_OFFICIAL_DEEPSEEK_LIVE_FLOW_PLAN.md)：锁定本机 ignored 凭据、Provider/模型探针、DSH Agent Loop、Tool/Evidence/PIT/Gate、页面终态和完整质量门；D2 是交付阻断复验，不新增第二套 Loop、不修改 Gate/历史账本或 active pointer，完成后恢复 E3 观察。
+- 新增 [产品现状、架构与交付缺口审计](docs/evaluations/PRODUCT_STATE_ARCHITECTURE_AUDIT_2026-09-02.md)：独立回答初始设计、当前交付边界、DSH WebSearch/补证 loop、自进化、调度/主动报告、代码冗余与 `.gitignore` 远程树核对；明确当前只能作为 `research_only` 试点进入 E3，不新增第二套 Agent Loop 或未知插件。
+- 新增 [DSH 可观测插件接入评估与实施建议](docs/evaluations/DSH_OBSERVABILITY_PLUGIN_ASSESSMENT_2026-09-02.md)：核对微信文章、`@loongsuite/dsh-plugin@0.1.2`、LoongSuite Pilot 与现有 DSH/Hub 轨迹边界；原提案已按 OBS-01 隔离 canary 执行，Pilot 仍仅在第二个真实 Agent 出现后评估。
+- 完成 `OBS-01`：通过 DSH 官方 profile seam 接入锁定的 `@loongsuite/dsh-plugin@0.1.2`，新增 integrity lock、隔离 canary、OTLP metadata receiver 和可选 Jaeger Compose；partial-failure Trace/Span 结构与 exporter fail-open 已通过，OBS-02/OBS-03 继续独立 gate。
 
 - 2026-09-01 `PRODUCT-CLOSEOUT-01 / E2-L` 通过真实官方 DSH Web 产品验收：Run
   `run_04dc1a46fd1e4c3b988750e18b0e9581` 在受管 Session 内完成 2 轮、12/12 durable Tool
@@ -306,3 +425,8 @@
 - 收口 E2L-02 durable progress：Research Query/View 在最终 Result 尚未生成时仍投影已保留 Evidence、工具调用、研究轮次和逐 capability ErrorProvenance；失败和取消保持 fail-closed，不伪装成空结果或 `no_trade`。
 - DSH Host watchdog/terminal callback 增加并发互斥和失败后可重放语义；Decision Desk ToolActivity 展示 canonical error code、来源、cause 和 retryability。
 - 验证：离线 Python `361 passed`、DSH plugin `39 passed`、Decision Desk `9 passed`，Ruff/Pyright/codegen/module docs、前端 test/build 和 `git diff --check` 通过。真实 Search timeout 和价值观察仍 pending。
+## 2026-09-03
+
+- 收口单机 DSH 用户交付验收：记录真实 live Run、报告/轨迹/Decision Desk 截图和可评测/可观测边界。
+- 修复 DSH client 生成器空行 trailing whitespace，补齐空 Session、终态详情暂不可用和历史失败的诚实展示。
+- 新增[产品用户交付问题记录](docs/evaluations/PRODUCT_USER_DELIVERY_ISSUES_2026-09-03.md)，保留 `dsh_host_unavailable` 历史失败样本与用户处理方式。

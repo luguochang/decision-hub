@@ -133,6 +133,7 @@ interface FetchState {
   commandBodies: unknown[]
   commandHeaders: Array<{ idempotencyKey: string | null; ownerId: string | null }>
   detail: ReturnType<typeof researchDetailPayload>
+  productViewStatusCode: number
 }
 
 function submitPayload(runId = 'run-1', hash = 'a'.repeat(64), deadline = new Date(Date.now() + 60_000).toISOString(), generation = 1, modelStepTimeoutMs = 60_000) {
@@ -179,6 +180,70 @@ function researchDetailPayload(runId = 'run-1') {
   }
 }
 
+function researchInboxPayload() {
+  return {
+    schema_version: 'research-inbox-view.v1',
+    items: [],
+    generated_at: new Date().toISOString(),
+  }
+}
+
+function researchObservabilityPayload(runId = 'run-1') {
+  return {
+    schema_version: 'research-observability-view.v1',
+    run_id: runId,
+    versions: {
+      domain_pack_ref: 'crypto_macro.v1',
+      domain_pack_version: '1.0.0',
+      role_profile_ref: 'crypto_macro.manager.v1',
+      runtime_id: 'dsh',
+      runtime_version: 'test',
+      capability_versions: ['market.crypto_derivatives@1'],
+      gate_policy_ref: 'crypto_macro.gate.v1',
+      source_registry_ref: 'crypto_macro.sources@1.0.0',
+    },
+    readiness: [],
+    source_attempts: [],
+    cost: {
+      status: 'unknown',
+      known_subtotal_usd: null,
+      total_usd: null,
+      currency: 'USD',
+      unknown_components: ['subscription'],
+      components: [],
+    },
+    trajectory_ref: null,
+    telemetry_ref: null,
+    ledger_ref: `decision-hub://runs/${runId}`,
+    generated_at: new Date().toISOString(),
+  }
+}
+
+function researchValueEvaluationPayload(runId = 'run-1') {
+  return {
+    schema_version: 'research-value-evaluation.v1',
+    evaluation_id: `evaluation-${runId}`,
+    run_id: runId,
+    artifact_id: null,
+    evaluation_version: 'v1',
+    mode: 'research_only',
+    hard_coverage_ratio: 0,
+    soft_coverage_ratio: 0,
+    accepted_evidence_count: 0,
+    rejected_evidence_count: 0,
+    typed_fact_count: 0,
+    baseline_status: 'unavailable',
+    latency_ms: null,
+    cost_status: 'unknown',
+    known_cost_usd: null,
+    citation_traceability: 0,
+    usefulness: 'unlabeled',
+    terminal_reason: 'provider_blocked',
+    outcomes: [],
+    evaluated_at: new Date().toISOString(),
+  }
+}
+
 function fetchDouble(state: FetchState): typeof fetch {
   return vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
     const url = new URL(input instanceof Request ? input.url : input.toString())
@@ -195,6 +260,27 @@ function fetchDouble(state: FetchState): typeof fetch {
         event_id: 'event-intake-1', run_id: 'run-intake-1', status: 'queued',
         status_url: '/v1/runs/run-intake-1',
       }, { status: 202 })
+    }
+    if (url.pathname === '/v1/research/inbox') {
+      if (state.productViewStatusCode !== 200) {
+        return Response.json(
+          { detail: 'product view unavailable' },
+          { status: state.productViewStatusCode },
+        )
+      }
+      return Response.json(researchInboxPayload())
+    }
+    if (/^\/v1\/research\/runs\/[^/]+\/(observability|value-evaluation)$/.test(url.pathname)) {
+      if (state.productViewStatusCode !== 200) {
+        return Response.json(
+          { detail: 'product view unavailable' },
+          { status: state.productViewStatusCode },
+        )
+      }
+      const runId = url.pathname.split('/')[4]!
+      return url.pathname.endsWith('/observability')
+        ? Response.json(researchObservabilityPayload(runId))
+        : Response.json(researchValueEvaluationPayload(runId))
     }
     if (url.pathname === '/v1/research/runs/run-failed-1/commands') {
       state.commandBodies.push(JSON.parse(String(init?.body)))
@@ -265,7 +351,7 @@ function harness(
     terminalFailuresRemaining: 0, terminalGate: null, terminalRelease: null,
     callbackHeaders: [], link: null, business: null, businessStatusCode: 200,
     intakeBodies: [], intakeKeys: [], commandBodies: [], commandHeaders: [],
-    detail: researchDetailPayload(),
+    detail: researchDetailPayload(), productViewStatusCode: 200,
   }
   const ctx: HostContextPublic = {
     webServer, connection, sessionController: sessions, workspaceRegistry,
@@ -307,7 +393,28 @@ function harness(
     const suffix = runId === undefined ? '' : `?run_id=${encodeURIComponent(runId)}`
     return connection.route('/api/decision-hub/report').fetch(new Request(`http://dsh.local/api/decision-hub/report${suffix}`, { method }))
   }
-  return { call, browserStatus, browserRunStatus, browserReport, sessions, workspaceRegistry, state, logs, emit }
+  const browserInbox = async (limit?: number, method = 'GET') => {
+    const suffix = limit === undefined ? '' : `?limit=${encodeURIComponent(limit)}`
+    return connection.route('/api/decision-hub/inbox').fetch(
+      new Request(`http://dsh.local/api/decision-hub/inbox${suffix}`, { method }),
+    )
+  }
+  const browserObservability = async (runId?: string, method = 'GET') => {
+    const suffix = runId === undefined ? '' : `?run_id=${encodeURIComponent(runId)}`
+    return connection.route('/api/decision-hub/observability').fetch(
+      new Request(`http://dsh.local/api/decision-hub/observability${suffix}`, { method }),
+    )
+  }
+  const browserValueEvaluation = async (runId?: string, method = 'GET') => {
+    const suffix = runId === undefined ? '' : `?run_id=${encodeURIComponent(runId)}`
+    return connection.route('/api/decision-hub/value-evaluation').fetch(
+      new Request(`http://dsh.local/api/decision-hub/value-evaluation${suffix}`, { method }),
+    )
+  }
+  return {
+    call, browserStatus, browserRunStatus, browserReport, browserInbox, browserObservability,
+    browserValueEvaluation, sessions, workspaceRegistry, state, logs, emit,
+  }
 }
 
 describe('Decision Hub DSH Host bridge', () => {
@@ -328,6 +435,21 @@ describe('Decision Hub DSH Host bridge', () => {
     const incompatible = await mismatched.call(request('GET', '/decision-hub/v1/readiness', undefined, { authorized: false }))
     expect(incompatible.status).toBe(503)
     expect(incompatible.json).toMatchObject({ version_compatible: false, error_code: 'host_version_incompatible' })
+  })
+
+  it('reports not ready until the configured product workspace is registered', async () => {
+    const app = harness({}, { workspaceRegistered: false })
+
+    const response = await app.call(request('GET', '/decision-hub/v1/readiness', undefined, { authorized: false }))
+
+    expect(response.status).toBe(503)
+    expect(response.json).toMatchObject({
+      ready: false,
+      hub_reachable: true,
+      error_code: 'host_workspace_not_registered',
+    })
+    expect(app.sessions.create).not.toHaveBeenCalled()
+    expect(app.sessions.prompt).not.toHaveBeenCalled()
   })
 
   it('rejects Run routes before Session creation when the upstream identity is incompatible', async () => {
@@ -411,6 +533,81 @@ describe('Decision Hub DSH Host bridge', () => {
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual({
       error: { code: 'host_run_id_required', retryable: false },
+    })
+  })
+
+  it('proxies canonical Inbox, observability and value evaluation views', async () => {
+    const app = harness()
+
+    const inbox = await app.browserInbox()
+    expect(inbox.status).toBe(200)
+    expect(await inbox.json()).toMatchObject({
+      schema_version: 'research-inbox-view.v1', items: [],
+    })
+
+    const observability = await app.browserObservability('run-1')
+    expect(observability.status).toBe(200)
+    expect(await observability.json()).toMatchObject({
+      schema_version: 'research-observability-view.v1',
+      run_id: 'run-1',
+      cost: { status: 'unknown', total_usd: null },
+    })
+
+    const evaluation = await app.browserValueEvaluation('run-1')
+    expect(evaluation.status).toBe(200)
+    expect(await evaluation.json()).toMatchObject({
+      schema_version: 'research-value-evaluation.v1',
+      run_id: 'run-1',
+      mode: 'research_only',
+    })
+
+    const head = await app.browserInbox(undefined, 'HEAD')
+    expect(head.status).toBe(200)
+    expect(await head.text()).toBe('')
+  })
+
+  it('rejects invalid Inbox limits and missing product-view Run ids', async () => {
+    const app = harness()
+
+    const invalid = await app.browserInbox(0)
+    expect(invalid.status).toBe(400)
+    expect(await invalid.json()).toEqual({
+      error: { code: 'host_inbox_limit_invalid', retryable: false },
+    })
+
+    const observability = await app.browserObservability()
+    expect(observability.status).toBe(400)
+    expect(await observability.json()).toEqual({
+      error: { code: 'host_run_id_required', retryable: false },
+    })
+
+    const evaluation = await app.browserValueEvaluation()
+    expect(evaluation.status).toBe(400)
+    expect(await evaluation.json()).toEqual({
+      error: { code: 'host_run_id_required', retryable: false },
+    })
+  })
+
+  it('keeps product-view upstream failures explicit and retryable', async () => {
+    const app = harness()
+    app.state.productViewStatusCode = 503
+
+    const inbox = await app.browserInbox()
+    expect(inbox.status).toBe(503)
+    expect(await inbox.json()).toEqual({
+      error: { code: 'host_research_inbox_unavailable', retryable: true },
+    })
+
+    const observability = await app.browserObservability('run-1')
+    expect(observability.status).toBe(503)
+    expect(await observability.json()).toEqual({
+      error: { code: 'host_research_observability_unavailable', retryable: true },
+    })
+
+    const evaluation = await app.browserValueEvaluation('run-1')
+    expect(evaluation.status).toBe(503)
+    expect(await evaluation.json()).toEqual({
+      error: { code: 'host_research_value_evaluation_unavailable', retryable: true },
     })
   })
 

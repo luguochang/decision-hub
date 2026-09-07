@@ -12,6 +12,8 @@ import pytest
 from pydantic import ValidationError
 
 from packages.contracts_py.decision_hub_contracts import (
+    EventWatch,
+    EventWindowSample,
     EvidenceCandidate,
     EvidenceRequirement,
     ExecutionBudget,
@@ -204,13 +206,58 @@ def _notification(
     data: Mapping[str, object] | None = None,
     *,
     timestamp: str = "2026-08-29T12:00:00Z",
+    session_id: str = "dsh-session-1",
 ) -> DshSdkNotification:
     return DshSdkNotification(
         method="session.event",
         payload={
-            "sessionId": "dsh-session-1",
+            "sessionId": session_id,
             "event": {"type": event_type, "data": dict(data or {}), "timestamp": timestamp},
         },
+    )
+
+
+def _synthesis_capture_notifications(
+    payload: Mapping[str, object],
+    *,
+    call_id: str = "capture-1",
+    tool_name: str = "decision_hub_synthesis_submit",
+    failed: bool = False,
+    session_id: str = "dsh-session-1",
+) -> tuple[DshSdkNotification, DshSdkNotification]:
+    return (
+        _notification(
+            "tool/call",
+            {
+                "message": {
+                    "content": [
+                        {
+                            "type": "tool-call",
+                            "toolCallId": call_id,
+                            "toolName": tool_name,
+                        }
+                    ]
+                }
+            },
+            session_id=session_id,
+        ),
+        _notification(
+            "tool/result",
+            {
+                "message": {
+                    "content": [
+                        {
+                            "type": "tool-result",
+                            "toolCallId": call_id,
+                            "structuredContent": dict(payload),
+                            "content": [],
+                            "isError": failed,
+                        }
+                    ]
+                }
+            },
+            session_id=session_id,
+        ),
     )
 
 
@@ -281,6 +328,8 @@ def test_research_prompt_carries_contract_and_no_provider_secret(
     assert "allowed_domains=[]" in prompt
     assert "<event_id>:<requirement_id>" in prompt
     assert "Do not call todo_write" in prompt
+    assert "decision_hub_synthesis_submit" not in prompt
+    assert "Return exactly one JSON object" in prompt
     assert "secret-must-not-enter-prompt" not in prompt
 
 
@@ -302,6 +351,133 @@ def test_live_research_prompt_carries_audited_capability_invocation_playbook() -
     assert 'symbols=["DGS2","DGS10","DTWEXBGS"]' in prompt
     assert 'fields=["spot_price","spot_volume"]' in prompt
     assert '"funding_rate","open_interest","mark_price","index_price","basis"' in prompt
+    assert "Event-window eligibility: unavailable" in prompt
+    assert "do not submit requested_event_offsets" in prompt.lower()
+
+
+def test_live_research_prompt_only_exposes_captured_event_window_offsets() -> None:
+    request = _request(
+        execution_mode="live",
+        allowed_capabilities=["market.crypto_derivatives"],
+    ).model_copy(
+        update={
+            "event_watch": EventWatch(
+                schema_version="event-watch.v1",
+                watch_id="watch-1",
+                event_id="event-warsh",
+                source_id="fed-calendar",
+                event_family="central_bank_speech",
+                scheduled_at=NOW,
+                status="active",
+                window_offsets=["t-5m", "t+1m", "t+30m"],
+                baseline_status="ready",
+                created_at=NOW - timedelta(hours=1),
+                updated_at=NOW,
+                next_tick_at=NOW + timedelta(minutes=30),
+            ),
+            "event_window_samples": [
+                EventWindowSample(
+                    schema_version="event-window-sample.v1",
+                    sample_id="watch-1:t-5m",
+                    watch_id="watch-1",
+                    event_id="event-warsh",
+                    offset="t-5m",
+                    target_at=NOW - timedelta(minutes=5),
+                    status="captured",
+                    observed_at=NOW - timedelta(minutes=5),
+                    received_at=NOW - timedelta(minutes=5),
+                    provider_id="crypto-window",
+                    payload_ref="hub://event-window/watch-1/t-5m",
+                    payload_hash="1" * 64,
+                    error_code=None,
+                ),
+                EventWindowSample(
+                    schema_version="event-window-sample.v1",
+                    sample_id="watch-1:t+1m",
+                    watch_id="watch-1",
+                    event_id="event-warsh",
+                    offset="t+1m",
+                    target_at=NOW + timedelta(minutes=1),
+                    status="captured",
+                    observed_at=NOW + timedelta(minutes=1),
+                    received_at=NOW + timedelta(minutes=1),
+                    provider_id="crypto-window",
+                    payload_ref="hub://event-window/watch-1/t+1m",
+                    payload_hash="2" * 64,
+                    error_code=None,
+                ),
+                EventWindowSample(
+                    schema_version="event-window-sample.v1",
+                    sample_id="watch-1:t+30m",
+                    watch_id="watch-1",
+                    event_id="event-warsh",
+                    offset="t+30m",
+                    target_at=NOW + timedelta(minutes=30),
+                    status="pending",
+                    observed_at=None,
+                    received_at=None,
+                    provider_id=None,
+                    payload_ref=None,
+                    payload_hash=None,
+                    error_code=None,
+                ),
+            ],
+        }
+    )
+
+    prompt = build_research_prompt(request, "dsh-window-session")
+
+    assert 'Event-window eligibility: captured offsets ["t-5m","t+1m"]' in prompt
+    assert 'requested_event_offsets=["t-5m","t+1m"]' in prompt
+    assert 'requested_event_offsets=["t+30m"]' not in prompt
+
+
+def test_live_research_prompt_marks_retrospective_watch_without_baseline() -> None:
+    request = _request(
+        execution_mode="live",
+        allowed_capabilities=["market.crypto_derivatives"],
+    ).model_copy(
+        update={
+            "event_watch": EventWatch(
+                schema_version="event-watch.v1",
+                watch_id="watch-retrospective",
+                event_id="event-warsh",
+                source_id="manual-text",
+                event_family="central_bank_speech",
+                scheduled_at=NOW - timedelta(days=1),
+                status="retrospective_only",
+                window_offsets=["t-5m", "t+1m"],
+                baseline_status="unavailable",
+                created_at=NOW,
+                updated_at=NOW,
+                next_tick_at=None,
+            ),
+            "event_window_samples": [],
+        }
+    )
+
+    prompt = build_research_prompt(request, "dsh-retrospective-session")
+
+    assert "Event-window eligibility: retrospective_only/baseline_unavailable" in prompt
+    assert "do not submit requested_event_offsets" in prompt.lower()
+
+
+def test_live_web_prompt_requires_active_search_fetch_loop_before_bounded_stop() -> None:
+    prompt = build_trusted_web_research_prompt(
+        _request(execution_mode="live", allowed_capabilities=["official.macro", "web.fetch"])
+    )
+
+    assert "do not stop after the first failed or thin source" in prompt
+    assert "official DSH web_search tool" in prompt
+    assert "allowed_capabilities list governs only calls through" in prompt
+    assert "does not disable the separately exposed official DSH web_search/web_fetch" in prompt
+    assert "call the official DSH web_search tool at least once" in prompt
+    assert "web.fetch for each relevant locator" in prompt
+    assert "Only EvidenceCandidate records returned by decision_hub_research" in prompt
+    assert "never fill a gap from model memory or a search snippet" in prompt
+    assert "call decision_hub_synthesis_submit exactly once" in prompt
+    assert "correct only the candidate and retry inside this same DSH Agent Loop" in prompt
+    assert "final prose is ignored by the product runtime" in prompt
 
 
 def test_web_research_prompt_uses_native_tool_without_model_session_identity() -> None:
@@ -318,6 +494,115 @@ def test_web_research_prompt_uses_native_tool_without_model_session_identity() -
     assert "research_session_id" in prompt
     assert "Never include, infer or copy" in prompt
     assert "dsh-live-session" not in prompt
+
+
+def test_web_research_prompt_uses_topic_title_and_preserves_input_language() -> None:
+    request = _request(execution_mode="live", allowed_capabilities=["official.macro"])
+    request.input_evidence[0].excerpt = "研究最新央行讲话对 BTC 的影响。"
+
+    prompt = build_trusted_web_research_prompt(request)
+
+    assert prompt.splitlines()[0] == "研究任务：研究最新央行讲话对 BTC 的影响。"
+    assert "人类可读的结论、因果链、触发条件、失效条件和缺失事实必须使用中文" in prompt
+    assert "schema 字段名、枚举值、Evidence ID、错误码和来源原文保持原样" in prompt
+
+
+def test_web_research_prompt_uses_only_first_evidence_line_as_session_title() -> None:
+    request = _request(execution_mode="live", allowed_capabilities=["official.macro"])
+    request.input_evidence[0].excerpt = (
+        "Waller, The Economic Outlook and Some Comments on My Policy Communication\n"
+        "Skip to main content\nThe full speech body follows."
+    )
+
+    prompt = build_trusted_web_research_prompt(request)
+
+    assert prompt.splitlines()[0] == (
+        "Research task: Waller, The Economic Outlook and Some Comments on My Policy Communication"
+    )
+
+
+def test_web_profile_projects_native_search_as_discovery_only_plan_capability() -> None:
+    request = _request(execution_mode="live", allowed_capabilities=["market.cross_asset"])
+    requirement = request.evidence_requirements[0].model_copy(
+        update={"preferred_capabilities": ["web.search"]}
+    )
+    request = request.model_copy(update={"evidence_requirements": [requirement]})
+
+    result = map_session_result(
+        _run(),
+        request,
+        [],
+        runtime_version="dsh-web-test",
+        profile_ref="decision-research.web.v1",
+        started_at=NOW,
+        finished_at=NOW + timedelta(seconds=1),
+    )
+
+    assert result.rounds[0].plan.tasks[0].capability_id == "dsh.native.web_search"
+    assert result.rounds[0].plan.required_capabilities == ["dsh.native.web_search"]
+
+
+def test_web_profile_projects_executed_native_search_with_canonical_capability_id() -> None:
+    notifications = (
+        _notification(
+            "tool/call",
+            {"toolCallId": "call-search-1", "toolName": "web_search"},
+        ),
+        _notification(
+            "tool/result",
+            {"toolCallId": "call-search-1", "toolName": "web_search"},
+        ),
+    )
+    request = _request(execution_mode="live", allowed_capabilities=["market.cross_asset"])
+    request = request.model_copy(
+        update={
+            "evidence_requirements": [
+                request.evidence_requirements[0].model_copy(
+                    update={"preferred_capabilities": ["web.search"]}
+                )
+            ]
+        }
+    )
+
+    result = map_session_result(
+        _run(notifications=notifications),
+        request,
+        map_notifications(
+            notifications,
+            run_id=request.run_id,
+            research_session_id="dsh-session-1",
+            received_at=NOW,
+        ),
+        runtime_version="dsh-web-test",
+        profile_ref="decision-research.web.v1",
+        started_at=NOW,
+        finished_at=NOW + timedelta(seconds=1),
+    )
+
+    invocation = result.rounds[0].tool_invocations[0]
+    assert invocation.capability_id == "dsh.native.web_search"
+    assert invocation.status == "succeeded"
+
+
+def test_non_web_profile_keeps_unavailable_capability_fail_closed() -> None:
+    request = _request(execution_mode="live", allowed_capabilities=["market.cross_asset"])
+    requirement = request.evidence_requirements[0].model_copy(
+        update={"preferred_capabilities": ["web.search"]}
+    )
+    request = request.model_copy(update={"evidence_requirements": [requirement]})
+
+    with pytest.raises(AgentExecutionError) as raised:
+        map_session_result(
+            _run(),
+            request,
+            [],
+            runtime_version="dsh-sdk-test",
+            profile_ref="decision-research.v1",
+            started_at=NOW,
+            finished_at=NOW + timedelta(seconds=1),
+        )
+
+    assert raised.value.error_code == "research_capability_unavailable"
 
 
 def test_profile_rejects_unattended_high_reasoning(tmp_path: Path) -> None:
@@ -356,6 +641,31 @@ def test_runtime_config_is_bounded_strict_and_does_not_store_secret(
         DshRuntimeConfig(max_tokens=255)
     with pytest.raises(ValidationError, match="greater_than"):
         DshRuntimeConfig(request_timeout_seconds=0)
+
+
+def test_runtime_config_does_not_cross_route_openai_endpoint_into_deepseek(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("DECISION_HUB_DSH_BASE_URL", raising=False)
+    monkeypatch.delenv("DEEPSEEK_BASE_URL", raising=False)
+    monkeypatch.delenv("SUB2API_BASE_URL", raising=False)
+    monkeypatch.setenv("OPENAI_BASE_URL", "https://codexai.club/v1")
+
+    config = DshRuntimeConfig.from_env()
+
+    assert config.provider == "deepseek-official"
+    assert config.base_url is None
+
+
+def test_runtime_config_uses_openai_endpoint_only_for_non_deepseek_provider(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("DECISION_HUB_DSH_PROVIDER", "codexai-gpt55")
+    monkeypatch.setenv("OPENAI_BASE_URL", "https://codexai.club/v1")
+
+    config = DshRuntimeConfig.from_env()
+
+    assert str(config.base_url) == "https://codexai.club/v1"
 
 
 @dataclass
@@ -611,6 +921,134 @@ def test_result_mapper_builds_runtime_ledger_from_trusted_trace() -> None:
     assert result.estimated_cost_usd is None
     assert result.trace_ref.startswith("dsh://session/dsh-session-1/trace/")
     assert len(result.trace_hash) == 64
+
+
+def test_result_mapper_prefers_attested_synthesis_tool_over_final_prose() -> None:
+    notifications = _synthesis_capture_notifications(_result_payload())
+
+    result = map_session_result(
+        _run(
+            notifications=notifications,
+            final_response="Research complete. The validated result was submitted through Tool.",
+        ),
+        _request(),
+        map_notifications(
+            notifications,
+            run_id="run-r2-r01",
+            research_session_id="dsh-session-1",
+            received_at=NOW,
+        ),
+        runtime_version="dsh-web-test",
+        profile_ref="decision-research.web.v1",
+        started_at=NOW,
+        finished_at=NOW + timedelta(seconds=2),
+    )
+
+    assert result.causal_case is None
+    assert result.horizons == []
+    assert result.synthesis_failure_code is None
+
+
+def test_attested_synthesis_tool_cannot_bypass_evidence_whitelist() -> None:
+    payload = _result_payload()
+    payload["horizons"] = [_horizon_payload("ev-not-attested")]
+    notifications = _synthesis_capture_notifications(payload)
+
+    with pytest.raises(AgentExecutionError) as raised:
+        map_session_result(
+            _run(notifications=notifications, final_response="Submitted."),
+            _request(),
+            map_notifications(
+                notifications,
+                run_id="run-r2-r01",
+                research_session_id="dsh-session-1",
+                received_at=NOW,
+            ),
+            runtime_version="dsh-web-test",
+            profile_ref="decision-research.web.v1",
+            started_at=NOW,
+            finished_at=NOW + timedelta(seconds=2),
+        )
+
+    assert raised.value.error_code == "dsh_evidence_unattested"
+    assert raised.value.cause_code == "synthesis_attestation"
+
+
+@pytest.mark.parametrize(
+    ("notifications", "reason"),
+    [
+        (
+            _synthesis_capture_notifications(_result_payload(), failed=True),
+            "failed result",
+        ),
+        (
+            _synthesis_capture_notifications(
+                {
+                    "wrapper": {
+                        "name": "decision_hub_synthesis_submit",
+                        "candidate": _result_payload(),
+                    }
+                },
+                tool_name="todo_write",
+            ),
+            "payload name spoof",
+        ),
+        (
+            _synthesis_capture_notifications(
+                _result_payload(),
+                session_id="another-dsh-session",
+            ),
+            "cross-session result",
+        ),
+    ],
+)
+def test_result_mapper_rejects_unattested_synthesis_capture(
+    notifications: tuple[DshSdkNotification, DshSdkNotification],
+    reason: str,
+) -> None:
+    with pytest.raises(AgentExecutionError) as raised:
+        map_session_result(
+            _run(notifications=notifications, final_response=f"Ignored {reason}."),
+            _request(),
+            map_notifications(
+                notifications,
+                run_id="run-r2-r01",
+                research_session_id="dsh-session-1",
+                received_at=NOW,
+            ),
+            runtime_version="dsh-web-test",
+            profile_ref="decision-research.web.v1",
+            started_at=NOW,
+            finished_at=NOW + timedelta(seconds=2),
+        )
+
+    assert raised.value.error_code == "structured_output_invalid"
+
+
+def test_result_mapper_uses_last_successful_synthesis_capture() -> None:
+    first = _synthesis_capture_notifications(
+        _result_payload(request_id="stale-request"),
+        call_id="capture-1",
+    )
+    second = _synthesis_capture_notifications(_result_payload(), call_id="capture-2")
+    notifications = (*first, *second)
+
+    result = map_session_result(
+        _run(notifications=notifications, final_response="Submitted."),
+        _request(),
+        map_notifications(
+            notifications,
+            run_id="run-r2-r01",
+            research_session_id="dsh-session-1",
+            received_at=NOW,
+        ),
+        runtime_version="dsh-web-test",
+        profile_ref="decision-research.web.v1",
+        started_at=NOW,
+        finished_at=NOW + timedelta(seconds=2),
+    )
+
+    assert result.request_id == "request-r2-r01"
 
 
 def test_result_mapper_accepts_only_exact_mcp_tool_result_evidence() -> None:

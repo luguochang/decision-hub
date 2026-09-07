@@ -1,4 +1,4 @@
-import { artifactViewSchema, deskSummarySchema, evolutionJobSchema, evolutionOverviewSchema, operationsOverviewSchema, productHealthSchema, promotionDecisionResultSchema, promotionReviewSchema, researchMemoSchema, researchRunCommandResultSchema, researchRunDetailViewSchema, researchRunViewSchema, runInspectorSchema, runViewSchema, type ArtifactView, type EvolutionJob, type EvolutionOverview, type OperationsOverview, type PromotionDecisionCommand, type PromotionReview, type PromotionReviewRequest, type ResearchMemo, type ResearchRunCommand, type ResearchRunCommandResult, type ResearchRunDetailView, type ResearchRunView, type RunInspector, type RunView } from './schemas'
+import { artifactViewSchema, deskSummarySchema, evolutionJobSchema, evolutionOverviewSchema, operationsOverviewSchema, productHealthSchema, promotionDecisionResultSchema, promotionReviewSchema, researchInboxViewSchema, researchMemoSchema, researchObservabilityViewSchema, researchRunCommandResultSchema, researchRunDetailViewSchema, researchRunViewSchema, researchValueEvaluationSchema, runInspectorSchema, runViewSchema, type ArtifactView, type EvolutionJob, type EvolutionOverview, type OperationsOverview, type PromotionDecisionCommand, type PromotionReview, type PromotionReviewRequest, type ResearchInboxView, type ResearchMemo, type ResearchObservabilityView, type ResearchRunCommand, type ResearchRunCommandResult, type ResearchRunDetailView, type ResearchRunView, type ResearchValueEvaluation, type RunInspector, type RunView } from './schemas'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL?.trim() || '').replace(/\/+$/, '')
 
@@ -33,6 +33,12 @@ export const api = {
   evolutionJobs: async (): Promise<EvolutionJob[]> => evolutionJobSchema.array().parse(await request<unknown>('/v1/evolution/jobs')),
   operations: async (): Promise<OperationsOverview> => operationsOverviewSchema.parse(await request<unknown>('/v1/operations')),
   researchRuns: async (): Promise<ResearchRunView[]> => researchRunViewSchema.array().parse(await request<unknown>('/v1/research/runs')),
+  researchInbox: async (): Promise<ResearchInboxView> => researchInboxViewSchema.parse(await request<unknown>('/v1/research/inbox?limit=100')),
+  researchObservability: async (id: string): Promise<ResearchObservabilityView> => researchObservabilityViewSchema.parse(await request<unknown>('/v1/research/runs/' + encodeURIComponent(id) + '/observability')),
+  researchValueEvaluation: async (id: string): Promise<ResearchValueEvaluation | null> => {
+    const value = await request<unknown>('/v1/research/runs/' + encodeURIComponent(id) + '/value-evaluation')
+    return value === null ? null : researchValueEvaluationSchema.parse(value)
+  },
   researchRun: async (id: string): Promise<ResearchRunDetailView> => researchRunDetailViewSchema.parse(await request<unknown>(`/v1/research/runs/${encodeURIComponent(id)}`)),
   researchCommand: async (id: string, payload: ResearchRunCommand, owner: string): Promise<ResearchRunCommandResult> => researchRunCommandResultSchema.parse(await request<unknown>(`/v1/research/runs/${encodeURIComponent(id)}/commands`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': payload.request_id, 'X-Owner-Id': owner }, body: JSON.stringify(payload) })),
   submitObservation: async (text: string): Promise<{ event_id: string; run_id: string; status_url: string }> => request('/v1/observations', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': crypto.randomUUID() }, body: JSON.stringify({ text, source_id: 'decision-desk', language: 'zh' }) }),

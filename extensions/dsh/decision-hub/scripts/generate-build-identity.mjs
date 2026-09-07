@@ -24,6 +24,7 @@ const inputs = [
   ...(await filesUnder(resolve(packageRoot, 'src/host'))),
   resolve(packageRoot, 'src/index.ts'),
   resolve(packageRoot, 'src/research-tool.ts'),
+  resolve(packageRoot, 'src/synthesis-tool.ts'),
   resolve(packageRoot, 'src/client/index.js'),
   resolve(packageRoot, 'package.json'),
   resolve(packageRoot, 'cordis.patch.yml'),

@@ -37,3 +37,17 @@ R2-R-05 在 executor 边界把产品生命周期事件和 DSH tool/subagent/mode
 checkpoint 恢复、Result/Artifact 原子提交和 Trace 幂等由 Kernel/worker 测试覆盖。
 
 R2-L Evolution executor 每次建立评测计划时动态读取当前 active candidate：release baseline 使用内置 baseline runtime，已由 owner 晋级且具有 immutable artifact 的 candidate 从 artifact store 恢复配置。Candidate/Experiment/Result/raw report 已存在时按 job/stage/input hash 复用，worker 重启不会重新注册资产，也不会自动 Promotion。
+
+G2-AF 在 `AgenticResearchState` 中记录每个 hard gap 的已尝试 capability 和 retryable failure。
+`route_after_round` 只有在 sufficient、预算耗尽或所有可执行能力均已尝试时才停止；无新增证据
+但存在未尝试 fallback 时继续。每轮 capability ladder 是 Pack 声明与当前 Run
+`allowed_capabilities` 的交集：优先尚未尝试 route；只有本轮新增了可信 Evidence、需要再次综合时，
+才在总预算内复用已启用 route。Pack 中存在但部署未启用的 fallback 不会进入 DSH 计划，也不能在
+结果映射阶段把已成功提交 synthesis 的回合推翻为 Worker failure。无剩余可执行 route 时进入确定性
+bounded finalize。该逻辑仍不执行 provider，所有调用经 DSH runtime 和 Hub Gateway。
+
+如果至少一个完整可信 round 已落账，而后续 round 因 retryable Provider/transport timeout 失败，
+图会保留上一轮 attested synthesis 和当前已持久化 Evidence，把失败 provenance 写入状态，并强制
+以 `degraded/research_only` 进入 Artifact、Outbox 和复查链。首轮失败、schema/PIT/权限或代码错误
+仍 hard fail；禁止为了生成报告吞掉这些错误。真实工具计数从 Hub durable reservation 读取，
+`crypto_macro` 当前总预算为 24 次且跨 generation 不重置。

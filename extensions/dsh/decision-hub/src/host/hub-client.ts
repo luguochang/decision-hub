@@ -10,6 +10,9 @@ import type {
   ResearchRunCommandResult,
   ResearchRunDetailView,
   ResearchRunQueued,
+  ResearchInboxView,
+  ResearchObservabilityView,
+  ResearchValueEvaluation,
 } from '@decision-hub/contracts-ts'
 import {
   dshBusinessStatusSchema,
@@ -18,6 +21,9 @@ import {
   researchRunCommandResultSchema,
   researchRunDetailViewSchema,
   researchRunQueuedSchema,
+  researchInboxViewSchema,
+  researchObservabilityViewSchema,
+  researchValueEvaluationSchema,
 } from '@decision-hub/contracts-ts'
 import { safeErrorMessage } from './redaction.js'
 
@@ -74,6 +80,28 @@ export class HubClient {
   async researchDetail(runId: string): Promise<ResearchRunDetailView> {
     const response = await this.request(`/v1/research/runs/${encodeURIComponent(runId)}`, { method: 'GET' })
     return researchRunDetailViewSchema.parse(await this.json(response))
+  }
+
+  async researchInbox(limit = 100): Promise<ResearchInboxView> {
+    const bounded = Math.max(1, Math.min(500, Math.trunc(limit)))
+    const response = await this.request(`/v1/research/inbox?limit=${bounded}`, { method: 'GET' })
+    return researchInboxViewSchema.parse(await this.json(response))
+  }
+
+  async researchObservability(runId: string): Promise<ResearchObservabilityView> {
+    const response = await this.request(
+      `/v1/research/runs/${encodeURIComponent(runId)}/observability`,
+      { method: 'GET' },
+    )
+    return researchObservabilityViewSchema.parse(await this.json(response))
+  }
+
+  async researchValueEvaluation(runId: string): Promise<ResearchValueEvaluation> {
+    const response = await this.request(
+      `/v1/research/runs/${encodeURIComponent(runId)}/value-evaluation`,
+      { method: 'GET' },
+    )
+    return researchValueEvaluationSchema.parse(await this.json(response))
   }
 
   async accepted(payload: DshSessionAccepted): Promise<void> {

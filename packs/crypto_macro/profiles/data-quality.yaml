@@ -11,6 +11,8 @@ allowed_tools:
   - official.macro
   - market.crypto_derivatives
   - market.cross_asset
+  - macro.cross_asset_intraday
+  - macro.expectation_pricing
   - replay.research
 output_schema_ref: agentic_research.schema.yaml#/$defs/coverage_assessment
 evaluation_policy_ref: ../evaluations/rubric.yaml

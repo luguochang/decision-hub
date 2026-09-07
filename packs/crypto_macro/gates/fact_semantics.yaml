@@ -1,0 +1,8 @@
+schema_version: crypto-macro-fact-semantics.v1
+pack_id: crypto_macro.v1
+policy_ref: crypto_macro.fact_semantics.v1
+source_of_truth: ../evidence/source_manifest.yaml
+notes:
+  - Generic validation is executed from the canonical EvidenceRequirement declarations.
+  - This file names the policy and documents ownership; it does not duplicate the rule table.
+  - Search locators and untyped excerpts cannot satisfy a semantic requirement.

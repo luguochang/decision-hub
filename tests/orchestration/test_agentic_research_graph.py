@@ -21,8 +21,13 @@ from packages.kernel.decision_hub_kernel.application.research_evidence import (
     ResearchEvidenceService,
     research_evidence_content_hash,
 )
+from packages.kernel.decision_hub_kernel.application.research_observability import (
+    ResearchObservabilityService,
+)
 from packages.kernel.decision_hub_kernel.persistence.db import Database, RunRecord, SnapshotRecord
+from packages.kernel.decision_hub_kernel.ports.runtime import AgentExecutionError
 from packages.orchestration.langgraph.graphs.agentic_research_graph import (
+    attempts_from_result,
     build_agentic_research_graph,
     initial_research_state,
 )
@@ -194,6 +199,7 @@ def _result(
                     "tasks": [
                         {
                             "task_id": "task-1",
+                            "requirement_id": "event_identity",
                             "capability_id": "replay.research",
                             "objective": "verify",
                             "question": "verify",
@@ -281,6 +287,41 @@ def _candidate(
     }
 
 
+def test_attempt_lineage_uses_requirement_id_after_task_reordering() -> None:
+    request = _request().model_copy(
+        update={
+            "evidence_requirements": [
+                _request().evidence_requirements[0],
+                _request().evidence_requirements[0].model_copy(
+                    update={"requirement_id": "macro_transmission"}
+                ),
+            ]
+        }
+    )
+    payload = _result(request, candidates=[], horizons=[])
+    tasks = payload["rounds"][0]["plan"]["tasks"]
+    tasks[:] = [
+        {
+            **tasks[0],
+            "task_id": "macro",
+            "requirement_id": "macro_transmission",
+            "capability_id": "market.cross_asset",
+        },
+        {
+            **tasks[0],
+            "task_id": "event",
+            "requirement_id": "event_identity",
+            "capability_id": "official.macro",
+        },
+    ]
+    result = ResearchSessionResult.model_validate(payload)
+
+    assert attempts_from_result(result, request) == {
+        "macro_transmission": ["market.cross_asset"],
+        "event_identity": ["official.macro"],
+    }
+
+
 @pytest.mark.asyncio
 async def test_graph_continues_after_missing_hard_evidence_and_freezes_snapshot(
     tmp_path: Path,
@@ -352,6 +393,70 @@ async def test_next_generation_receives_only_the_remaining_tool_budget(
     assert harness.requests[0].execution_budget.max_tool_calls == 4
     assert harness.requests[1].execution_budget.max_tool_calls == 1
     assert result["total_tool_calls"] == 4
+
+
+@pytest.mark.asyncio
+async def test_retryable_continuation_failure_keeps_last_attested_round_as_degraded_report(
+    tmp_path: Path,
+) -> None:
+    database = _database(tmp_path)
+    request = _request()
+    request = request.model_copy(
+        update={
+            "evidence_requirements": [
+                request.evidence_requirements[0].model_copy(
+                    update={"minimum_independent_sources": 2}
+                )
+            ]
+        }
+    )
+
+    def first_round_then_timeout(
+        round_request: ResearchSessionRequest, count: int
+    ) -> ResearchSessionResult:
+        if count == 1:
+            return ResearchSessionResult.model_validate(
+                _result(round_request, candidates=[_candidate()], horizons=[])
+            )
+        raise AgentExecutionError(
+            "provider_timeout",
+            "the continuation generation exceeded the product deadline",
+            retryable=True,
+            provider_id="dsh-web",
+            origin="orchestration",
+            cause_code="dsh_web_deadline_elapsed",
+            deadline_ms=180_000,
+        )
+
+    harness = FakeResearchHarness(first_round_then_timeout)
+    observability = ResearchObservabilityService(database, clock=lambda: NOW)
+    graph = build_agentic_research_graph(
+        harness,
+        ResearchEvidenceService(database),
+        trace_sink=observability,
+        progress_reader=observability,
+    )
+
+    result = await graph.ainvoke(initial_research_state(request))
+
+    assert len(harness.requests) == 2
+    final = result["final_result"]
+    assert final["status"] == "degraded"
+    assert final["stop_reason"]["code"] == "critical_data_unavailable"
+    assert "provider_timeout" in final["stop_reason"]["detail"]
+    assert len(final["rounds"]) == 1
+    assert [item["evidence_id"] for item in final["evidence_candidates"]] == [
+        "evidence-official"
+    ]
+    assert final["total_tool_calls"] == 1
+    failure = next(
+        item
+        for item in observability.list_trace(request.run_id)
+        if item.event_type == "round_completed" and item.error_code == "provider_timeout"
+    )
+    assert failure.status == "degraded"
+    assert failure.error is not None
+    assert failure.error.cause_code == "dsh_web_deadline_elapsed"
 
 
 @pytest.mark.asyncio

@@ -1,12 +1,12 @@
-import { p as d, q as y, s as _ } from "./index-DHMPbtxF.js";
-import { defineTool as h } from "@deepseek-ai/dsh-tools";
+import { t as d, u as y, v as _ } from "./index-CWciLEwK.js";
+import { defineTool as p } from "@deepseek-ai/dsh-tools";
 import i from "@deepseek-ai/schemastery";
-const w = "decision-hub-research-tool", v = ["tools"], p = "decision_hub_research", l = 25e3, S = i.object({
+const w = "decision-hub-research-tool", v = ["tools"], l = "decision_hub_research", h = 25e3, O = i.object({
   serviceUrl: i.string(),
   authKey: i.string(),
   // The Gateway owns the 20s capability deadline. Keep a small transport grace
   // so its typed ErrorProvenance reaches DSH before the wrapper times out.
-  timeoutMs: i.natural().min(1).default(l)
+  timeoutMs: i.natural().min(1).default(h)
 }), m = {
   request_id: { type: "string", required: !0 },
   capability_id: { type: "string", required: !0 },
@@ -18,6 +18,11 @@ const w = "decision-hub-research-tool", v = ["tools"], p = "decision_hub_researc
   allowed_domains: { type: "array", items: { type: "string" }, required: !0 },
   max_results: { type: "integer", required: !0 },
   max_cost_usd: { oneOf: [{ type: "number" }, { type: "null" }], required: !0 },
+  event_id: { oneOf: [{ type: "string" }, { type: "null" }] },
+  event_at: { oneOf: [{ type: "string" }, { type: "null" }] },
+  window_start_at: { oneOf: [{ type: "string" }, { type: "null" }] },
+  window_end_at: { oneOf: [{ type: "string" }, { type: "null" }] },
+  requested_event_offsets: { type: "array", items: { type: "string" } },
   round: { type: "integer", required: !0 },
   mode: { type: "string", enum: ["live", "replay"], required: !0 },
   observed_at: { type: "string", required: !0 },
@@ -31,8 +36,8 @@ function g(e) {
   if (!Number.isInteger(e.timeoutMs) || e.timeoutMs < 1)
     throw new Error("decision_hub_research_timeout_invalid");
   const u = e.fetchImpl ?? fetch;
-  return h({
-    name: p,
+  return p({
+    name: l,
     description: "Execute one audited Decision Hub research capability. Session identity is supplied by the trusted DSH execution context; never include or infer a Session identifier.",
     parameters: m,
     output: {
@@ -69,14 +74,14 @@ function g(e) {
     }
   });
 }
-function E(e, t) {
+function S(e, t) {
   e.tools.register(g(t));
 }
 export {
-  S as Config,
-  l as DEFAULT_RESEARCH_TOOL_TIMEOUT_MS,
-  p as RESEARCH_TOOL_NAME,
-  E as apply,
+  O as Config,
+  h as DEFAULT_RESEARCH_TOOL_TIMEOUT_MS,
+  l as RESEARCH_TOOL_NAME,
+  S as apply,
   g as createResearchToolDefinition,
   v as inject,
   w as name

@@ -1,25 +1,25 @@
 import d from "@deepseek-ai/schemastery";
 import { timingSafeEqual as D, createHash as I } from "node:crypto";
-import { d as A, a as B, b as O, r as H, c as J, e as N, f as S, g as K, h as $, i as G, j as L, k as z, l as F, m as V, n as W, o as Z, Z as Y } from "./index-DHMPbtxF.js";
-const Q = "x-decision-hub-host-key";
-function X(i, e) {
+import { d as A, a as q, b as O, r as H, c as J, e as N, f as G, g as V, h as K, i as v, j as L, k as $, l as z, m as F, n as W, o as Z, p as Y, q as Q, s as X, Z as ee } from "./index-CWciLEwK.js";
+const te = "x-decision-hub-host-key";
+function se(i, e) {
   if (typeof i != "string" || e.length === 0) return !1;
   const t = Buffer.from(i), s = Buffer.from(e);
   return t.length === s.length && D(t, s);
 }
-class v extends Error {
+class S extends Error {
   constructor(e) {
     super(e), this.code = e;
   }
 }
-async function C(i, e) {
-  if (i.headers["content-type"]?.split(";", 1)[0]?.trim().toLowerCase() !== "application/json") throw new v("host_content_type_invalid");
+async function E(i, e) {
+  if (i.headers["content-type"]?.split(";", 1)[0]?.trim().toLowerCase() !== "application/json") throw new S("host_content_type_invalid");
   const s = [];
   let n = 0;
   for await (const r of i) {
-    const a = Buffer.isBuffer(r) ? r : Buffer.from(r);
-    if (n += a.length, n > e) throw new v("host_body_too_large");
-    s.push(a);
+    const o = Buffer.isBuffer(r) ? r : Buffer.from(r);
+    if (n += o.length, n > e) throw new S("host_body_too_large");
+    s.push(o);
   }
   try {
     const r = JSON.parse(Buffer.concat(s).toString("utf8"));
@@ -27,7 +27,7 @@ async function C(i, e) {
       throw new Error("JSON body must be an object");
     return r;
   } catch {
-    throw new v("host_json_invalid");
+    throw new S("host_json_invalid");
   }
 }
 function m(i) {
@@ -38,7 +38,7 @@ class u extends Error {
     super(e, { cause: s }), this.code = e, this.retryable = t;
   }
 }
-class ee {
+class ne {
   constructor(e) {
     this.options = e, this.fetchImpl = e.fetchImpl ?? fetch;
   }
@@ -56,11 +56,11 @@ class ee {
   }
   async link(e) {
     const t = await this.request(`/v1/dsh/sessions/${encodeURIComponent(e)}`, { method: "GET" });
-    return B.parse(await this.json(t));
+    return q.parse(await this.json(t));
   }
   async linkBySession(e) {
     const t = await this.request(`/v1/dsh/sessions/by-session/${encodeURIComponent(e)}`, { method: "GET" });
-    return B.parse(await this.json(t));
+    return q.parse(await this.json(t));
   }
   async businessStatus(e) {
     const t = await this.request(`/v1/dsh/sessions/${encodeURIComponent(e)}/business-status`, { method: "GET" });
@@ -69,6 +69,24 @@ class ee {
   async researchDetail(e) {
     const t = await this.request(`/v1/research/runs/${encodeURIComponent(e)}`, { method: "GET" });
     return H.parse(await this.json(t));
+  }
+  async researchInbox(e = 100) {
+    const t = Math.max(1, Math.min(500, Math.trunc(e))), s = await this.request(`/v1/research/inbox?limit=${t}`, { method: "GET" });
+    return J.parse(await this.json(s));
+  }
+  async researchObservability(e) {
+    const t = await this.request(
+      `/v1/research/runs/${encodeURIComponent(e)}/observability`,
+      { method: "GET" }
+    );
+    return N.parse(await this.json(t));
+  }
+  async researchValueEvaluation(e) {
+    const t = await this.request(
+      `/v1/research/runs/${encodeURIComponent(e)}/value-evaluation`,
+      { method: "GET" }
+    );
+    return G.parse(await this.json(t));
   }
   async accepted(e) {
     await this.json(await this.request(`/v1/dsh/sessions/${encodeURIComponent(e.run_id)}/accepted`, {
@@ -105,7 +123,7 @@ class ee {
         "idempotency-key": t
       }
     });
-    return J.parse(await this.json(s));
+    return V.parse(await this.json(s));
   }
   async researchCommand(e, t) {
     const s = await this.request(`/v1/research/runs/${encodeURIComponent(e)}/commands`, {
@@ -117,16 +135,16 @@ class ee {
         "x-owner-id": this.options.ownerId
       }
     });
-    return N.parse(await this.json(s));
+    return K.parse(await this.json(s));
   }
   async request(e, t, s = this.options.attempts) {
     let n;
     for (let r = 1; r <= s; r += 1) {
-      const a = new AbortController(), h = setTimeout(() => a.abort(), this.options.timeoutMs);
+      const o = new AbortController(), h = setTimeout(() => o.abort(), this.options.timeoutMs);
       try {
         const c = await this.fetchImpl(new URL(e, this.options.baseUrl), {
           ...t,
-          signal: a.signal,
+          signal: o.signal,
           headers: {
             "x-decision-hub-bridge-key": this.options.callbackKey,
             ...t.headers
@@ -153,13 +171,13 @@ class ee {
     }
   }
 }
-const te = 15e4;
+const re = 15e4;
 function j(i, e, t = 1) {
   if (!Number.isInteger(t) || t < 1) throw new Error("host_generation_invalid");
   const s = I("sha256").update(`dsh-host-bridge.v1\0${i}\0${e}`).digest("hex"), n = t === 1 ? s : I("sha256").update(`dsh-host-turn.v1\0${i}\0${e}\0${t}`).digest("hex");
   return { sessionId: `dsh_${s}`, requestId: `req_${n}` };
 }
-class se {
+class ie {
   byRun = /* @__PURE__ */ new Map();
   runBySession = /* @__PURE__ */ new Map();
   admit(e) {
@@ -210,7 +228,7 @@ class se {
       // The submit payload is not part of the durable link view yet. Keep a
       // bounded recovery default until the next generation re-submits its
       // canonical budget instead of disabling the watchdog after restart.
-      modelStepTimeoutMs: te,
+      modelStepTimeoutMs: re,
       modelStepTimeoutTriggered: e.error_code === "dsh_model_step_timeout",
       state: e.state,
       lastSeq: e.last_seq,
@@ -238,7 +256,7 @@ function P(i, e) {
     return typeof s == "object" && s !== null && s.kind === "user" && s.rpcId === e;
   });
 }
-function ne(i) {
+function oe(i) {
   const e = i.data.message;
   if (typeof e != "object" || e === null) return "";
   const t = e.content;
@@ -249,27 +267,27 @@ function ne(i) {
   }).join(`
 `).trim() : "";
 }
-function re(i, e) {
+function ae(i, e) {
   return P(i.events, e) >= 0;
 }
-function ie(i, e) {
+function ce(i, e) {
   const t = e.events, s = t.reduce((l, p) => Math.max(l, p.seq), 0), n = P(t, i.requestId);
-  let r = i.state, a = i.errorCode, h = null, c = null;
+  let r = i.state, o = i.errorCode, h = null, c = null;
   if (n >= 0) {
     const l = t.slice(n + 1), p = l.find((f) => f.type === "turn/end");
     if (p === void 0)
       r = r === "admitted" ? "running" : r;
     else {
-      const f = p.data.reason, _ = typeof f == "object" && f !== null ? String(f.kind ?? "unknown") : "unknown", k = l.filter((T) => T.type === "assistant/message").at(-1), x = k === void 0 ? "" : ne(k), w = U(p.time), g = `dsh://sessions/${encodeURIComponent(i.sessionId)}?last_seq=${s}`;
+      const f = p.data.reason, _ = typeof f == "object" && f !== null ? String(f.kind ?? "unknown") : "unknown", k = l.filter((T) => T.type === "assistant/message").at(-1), C = k === void 0 ? "" : oe(k), w = U(p.time), b = `dsh://sessions/${encodeURIComponent(i.sessionId)}?last_seq=${s}`;
       if (i.modelStepTimeoutTriggered)
-        r = "failed", a = "dsh_model_step_timeout", h = S.parse({
+        r = "failed", o = "dsh_model_step_timeout", h = v.parse({
           schema_version: "dsh-session-completion.v1",
           run_id: i.runId,
           dsh_session_id: i.sessionId,
           terminal_status: "failed",
           generation: i.generation,
           last_seq: s,
-          trace_ref: g,
+          trace_ref: b,
           result_ref: null,
           result_hash: null,
           completed_at: w,
@@ -280,60 +298,60 @@ function ie(i, e) {
           }
         });
       else if ((_ === "completed" || _ === "max-tokens") && k !== void 0) {
-        const T = l.filter((b) => b.type !== "assistant/chunk" && b.type !== "request/header").map((b) => ({
+        const T = l.filter((g) => g.type !== "assistant/chunk" && g.type !== "request/header").map((g) => ({
           method: "session.event",
-          payload: { sessionId: i.sessionId, event: b }
-        })), q = JSON.stringify(T), M = I("sha256").update(x).update("\0").update(q).digest("hex");
-        c = K.parse({
+          payload: { sessionId: i.sessionId, event: g }
+        })), B = JSON.stringify(T), M = I("sha256").update(C).update("\0").update(B).digest("hex");
+        c = L.parse({
           schema_version: "dsh-session-result.v1",
           run_id: i.runId,
           dsh_session_id: i.sessionId,
           generation: i.generation,
           last_seq: s,
-          final_response: x,
+          final_response: C,
           finish_reason: _,
-          events_json: q,
+          events_json: B,
           started_at: U(t[n]?.time ?? e.meta.createdAt),
           finished_at: w,
-          trace_ref: g,
+          trace_ref: b,
           result_hash: M
-        }), r = "completed", h = S.parse({
+        }), r = "completed", h = v.parse({
           schema_version: "dsh-session-completion.v1",
           run_id: i.runId,
           dsh_session_id: i.sessionId,
           terminal_status: "completed",
           generation: i.generation,
           last_seq: s,
-          trace_ref: g,
+          trace_ref: b,
           result_ref: `dsh-host://runs/${encodeURIComponent(i.runId)}/result`,
           result_hash: M,
           completed_at: w,
           error: null
         });
-      } else _ === "aborted" ? (r = "cancelled", h = S.parse({
+      } else _ === "aborted" ? (r = "cancelled", h = v.parse({
         schema_version: "dsh-session-completion.v1",
         run_id: i.runId,
         dsh_session_id: i.sessionId,
         terminal_status: "cancelled",
         generation: i.generation,
         last_seq: s,
-        trace_ref: g,
+        trace_ref: b,
         result_ref: null,
         result_hash: null,
         completed_at: w,
         error: null
-      })) : (r = "failed", a = _ === "completed" ? "host_terminal_result_unavailable" : `dsh_turn_${_}`, h = S.parse({
+      })) : (r = "failed", o = _ === "completed" ? "host_terminal_result_unavailable" : `dsh_turn_${_}`, h = v.parse({
         schema_version: "dsh-session-completion.v1",
         run_id: i.runId,
         dsh_session_id: i.sessionId,
         terminal_status: "failed",
         generation: i.generation,
         last_seq: s,
-        trace_ref: g,
+        trace_ref: b,
         result_ref: null,
         result_hash: null,
         completed_at: w,
-        error: { code: a, message: "DSH turn did not produce an attested result", retryable: !1 }
+        error: { code: o, message: "DSH turn did not produce an attested result", retryable: !1 }
       }));
     }
   }
@@ -345,11 +363,11 @@ function ie(i, e) {
     generation: i.generation,
     last_seq: s,
     observed_at: (/* @__PURE__ */ new Date()).toISOString(),
-    error_code: a
+    error_code: o
   }), completion: h, result: c };
 }
-const R = "4d172b7d416c332d2607a461d86487fdac0a62a5ddb1e3593ea4bfff8bc3960e", oe = "0a53fb55bea101816fa226bb964ae2bed71c343b", E = "0.1.2-alpha.2", ae = /^[a-f0-9]{64}$/, ce = /^[A-Za-z0-9._:-]{8,256}$/;
-function he(i) {
+const R = "3c0118e76c8c932f2a6f59a2269f2c0603c063e0d56b7ad30a9d01125e1b1889", he = "0a53fb55bea101816fa226bb964ae2bed71c343b", x = "0.1.2-alpha.2", de = /^[a-f0-9]{64}$/, le = /^[A-Za-z0-9._:-]{8,256}$/;
+function ue(i) {
   return {
     hubBaseUrl: i.hubBaseUrl ?? "http://127.0.0.1:8000",
     decisionDeskBaseUrl: i.decisionDeskBaseUrl ?? "http://127.0.0.1:8000",
@@ -371,14 +389,14 @@ function he(i) {
     ...i.fetchImpl === void 0 ? {} : { fetchImpl: i.fetchImpl }
   };
 }
-class o extends Error {
+class a extends Error {
   constructor(e, t, s = !1) {
     super(e), this.code = e, this.status = t, this.retryable = s;
   }
 }
-class de {
+class _e {
   constructor(e, t) {
-    this.ctx = e, this.config = t, this.hub = new ee({
+    this.ctx = e, this.config = t, this.hub = new ne({
       baseUrl: t.hubBaseUrl,
       callbackKey: t.callbackKey,
       timeoutMs: t.callbackTimeoutMs,
@@ -387,7 +405,7 @@ class de {
       ...t.fetchImpl === void 0 ? {} : { fetchImpl: t.fetchImpl }
     });
   }
-  correlations = new se();
+  correlations = new ie();
   hub;
   results = /* @__PURE__ */ new Map();
   terminalSent = /* @__PURE__ */ new Set();
@@ -409,6 +427,21 @@ class de {
         path: "/api/decision-hub/report",
         methods: ["GET", "HEAD"],
         fetch: (t) => this.browserReport(t)
+      }),
+      this.ctx.connection.fetch.register({
+        path: "/api/decision-hub/inbox",
+        methods: ["GET", "HEAD"],
+        fetch: (t) => this.browserInbox(t)
+      }),
+      this.ctx.connection.fetch.register({
+        path: "/api/decision-hub/observability",
+        methods: ["GET", "HEAD"],
+        fetch: (t) => this.browserObservability(t)
+      }),
+      this.ctx.connection.fetch.register({
+        path: "/api/decision-hub/value-evaluation",
+        methods: ["GET", "HEAD"],
+        fetch: (t) => this.browserValueEvaluation(t)
       }),
       this.ctx.on("api-session/status", (t, s) => {
         this.onStatus(t, s);
@@ -433,38 +466,46 @@ class de {
       source_commit: this.config.sourceCommit,
       source_version: this.config.sourceVersion,
       package_versions: {
-        "@deepseek-ai/dsh-api-session-controller": E,
-        "@deepseek-ai/dsh-host-webserver": E
+        "@deepseek-ai/dsh-api-session-controller": x,
+        "@deepseek-ai/dsh-host-webserver": x
       },
       plugin_build_hash: R
     };
   }
   async readiness(e, t) {
-    if (e.method !== "GET") return this.error(t, new o("host_method_not_allowed", 405));
+    if (e.method !== "GET") return this.error(t, new a("host_method_not_allowed", 405));
     this.hubReachable = await this.hub.readiness();
-    const s = this.versionCompatible(), n = s && this.hubReachable && (!this.config.requireClientPlugin || this.config.clientPlugin) && this.config.inboundKey.length > 0 && this.config.callbackKey.length > 0, r = G.parse({
+    const s = this.versionCompatible(), n = s && this.hubReachable && (!this.config.requireClientPlugin || this.config.clientPlugin) && this.config.inboundKey.length > 0 && this.config.callbackKey.length > 0;
+    let r = null;
+    if (n)
+      try {
+        await this.resolveWorkspace();
+      } catch (c) {
+        r = c instanceof a ? c.code : "host_workspace_resolution_failed";
+      }
+    const o = n && r === null, h = z.parse({
       schema_version: "dsh-host-readiness.v1",
-      ready: n,
+      ready: o,
       version_compatible: s,
       session_controller: !0,
       client_plugin: this.config.clientPlugin,
       hub_reachable: this.hubReachable,
       upstream_identity: this.identity(),
       checked_at: (/* @__PURE__ */ new Date()).toISOString(),
-      error_code: n ? null : this.readinessError()
+      error_code: o ? null : r ?? this.readinessError()
     });
-    this.json(t, n ? 200 : 503, r);
+    this.json(t, o ? 200 : 503, h);
   }
   readinessError() {
     return this.config.inboundKey.length === 0 || this.config.callbackKey.length === 0 ? "host_secret_missing" : this.versionCompatible() ? this.hubReachable ? this.config.requireClientPlugin && !this.config.clientPlugin ? "host_client_plugin_missing" : "host_not_ready" : "host_hub_unreachable" : "host_version_incompatible";
   }
   versionCompatible() {
-    return this.config.sourceCommit === oe && this.config.sourceVersion === E && this.config.pluginBuildHash === R && ae.test(R);
+    return this.config.sourceCommit === he && this.config.sourceVersion === x && this.config.pluginBuildHash === R && de.test(R);
   }
   async browserStatus(e) {
     this.hubReachable = await this.hub.readiness();
     const t = new URL(e.url), s = t.searchParams.get("session_id"), n = t.searchParams.get("run_id");
-    let r = null, a = null;
+    let r = null, o = null;
     if (s !== null && s.length > 0)
       try {
         r = await this.hub.linkBySession(s);
@@ -503,7 +544,7 @@ class de {
       }
     if (r?.run_id !== void 0)
       try {
-        a = await this.businessStatus(r.run_id);
+        o = await this.businessStatus(r.run_id);
       } catch (c) {
         if (!(c instanceof u && c.code === "host_hub_http_404"))
           return this.browserJson(503, {
@@ -530,7 +571,7 @@ class de {
       state: r?.state ?? null,
       error_code: h ? r?.error_code ?? null : this.readinessError(),
       decision_desk_url: this.decisionDeskUrl(r?.run_id ?? null),
-      business: a
+      business: o
     }, e.method);
   }
   async businessStatus(e) {
@@ -555,12 +596,56 @@ class de {
       }, e.method);
     }
   }
+  async browserInbox(e) {
+    try {
+      const t = new URL(e.url).searchParams.get("limit"), s = t === null || t.length === 0 ? 100 : Number(t);
+      if (!Number.isInteger(s) || s < 1 || s > 500)
+        return this.rawBrowserJson(400, {
+          error: { code: "host_inbox_limit_invalid", retryable: !1 }
+        }, e.method);
+      const n = await this.hub.researchInbox(s);
+      return this.rawBrowserJson(200, n, e.method);
+    } catch (t) {
+      const s = t instanceof u && t.code === "host_hub_http_404";
+      return this.rawBrowserJson(s ? 404 : 503, {
+        error: {
+          code: s ? "host_research_inbox_not_found" : "host_research_inbox_unavailable",
+          retryable: !s
+        }
+      }, e.method);
+    }
+  }
+  async browserObservability(e) {
+    return this.browserRunProductView(e, "observability");
+  }
+  async browserValueEvaluation(e) {
+    return this.browserRunProductView(e, "value-evaluation");
+  }
+  async browserRunProductView(e, t) {
+    const s = new URL(e.url).searchParams.get("run_id");
+    if (s === null || s.length === 0)
+      return this.rawBrowserJson(400, {
+        error: { code: "host_run_id_required", retryable: !1 }
+      }, e.method);
+    try {
+      const n = t === "observability" ? await this.hub.researchObservability(s) : await this.hub.researchValueEvaluation(s);
+      return this.rawBrowserJson(200, n, e.method);
+    } catch (n) {
+      const r = n instanceof u && n.code === "host_hub_http_404", o = t === "observability" ? "observability" : "value_evaluation";
+      return this.rawBrowserJson(r ? 404 : 503, {
+        error: {
+          code: r ? `host_research_${o}_not_found` : `host_research_${o}_unavailable`,
+          retryable: !r
+        }
+      }, e.method);
+    }
+  }
   decisionDeskUrl(e) {
     const t = new URL(this.config.decisionDeskBaseUrl);
     return e !== null && t.searchParams.set("run_id", e), t.toString();
   }
   browserJson(e, t, s) {
-    const n = L.parse(t);
+    const n = F.parse(t);
     return this.rawBrowserJson(e, n, s);
   }
   rawBrowserJson(e, t, s) {
@@ -571,34 +656,34 @@ class de {
   }
   async runs(e, t) {
     try {
-      if (this.authorize(e), !this.versionCompatible()) throw new o("host_version_incompatible", 503);
+      if (this.authorize(e), !this.versionCompatible()) throw new a("host_version_incompatible", 503);
       const s = new URL(e.url ?? "/", "http://localhost"), n = /^\/decision-hub\/v1\/runs\/([^/]+)(?:\/(cancel|result))?$/.exec(s.pathname);
-      if (n === null) throw new o("host_route_not_found", 404);
-      const r = decodeURIComponent(n[1]), a = n[2];
-      if (a === "cancel") {
-        if (e.method !== "POST") throw new o("host_method_not_allowed", 405);
+      if (n === null) throw new a("host_route_not_found", 404);
+      const r = decodeURIComponent(n[1]), o = n[2];
+      if (o === "cancel") {
+        if (e.method !== "POST") throw new a("host_method_not_allowed", 405);
         return await this.cancel(r, t);
       }
-      if (a === "result") {
-        if (e.method !== "GET") throw new o("host_method_not_allowed", 405);
+      if (o === "result") {
+        if (e.method !== "GET") throw new a("host_method_not_allowed", 405);
         return await this.result(r, t);
       }
       if (e.method === "PUT") return await this.submit(r, e, t);
       if (e.method === "GET") return await this.status(r, t);
-      throw new o("host_method_not_allowed", 405);
+      throw new a("host_method_not_allowed", 405);
     } catch (s) {
       this.error(t, this.normalizeError(s));
     }
   }
   async researchIntake(e, t) {
     try {
-      if (e.method !== "POST") throw new o("host_method_not_allowed", 405);
-      if (this.config.runtimeMode === "replay") throw new o("host_replay_read_only", 409);
-      if (!this.versionCompatible()) throw new o("host_version_incompatible", 503);
-      const s = z.parse(await C(e, this.config.maxBodyBytes)), n = e.headers["idempotency-key"];
-      if (typeof n != "string" || !ce.test(n))
-        throw new o("host_intake_idempotency_required", 400);
-      const r = `dsh-intake.v2\0${n}`, a = `dsh-intake-${I("sha256").update(r).digest("hex")}`, h = await this.hub.researchIntake(s, a), c = F.parse({
+      if (e.method !== "POST") throw new a("host_method_not_allowed", 405);
+      if (this.config.runtimeMode === "replay") throw new a("host_replay_read_only", 409);
+      if (!this.versionCompatible()) throw new a("host_version_incompatible", 503);
+      const s = W.parse(await E(e, this.config.maxBodyBytes)), n = e.headers["idempotency-key"];
+      if (typeof n != "string" || !le.test(n))
+        throw new a("host_intake_idempotency_required", 400);
+      const r = `dsh-intake.v2\0${n}`, o = `dsh-intake-${I("sha256").update(r).digest("hex")}`, h = await this.hub.researchIntake(s, o), c = Z.parse({
         schema_version: "dsh-research-intake-accepted.v1",
         event_id: h.event_id,
         run_id: h.run_id,
@@ -613,35 +698,35 @@ class de {
   }
   async researchRetry(e, t) {
     try {
-      if (e.method !== "POST") throw new o("host_method_not_allowed", 405);
-      if (this.config.runtimeMode === "replay") throw new o("host_replay_read_only", 409);
-      if (!this.versionCompatible()) throw new o("host_version_incompatible", 503);
-      const s = V.parse(
-        await C(e, this.config.maxBodyBytes)
+      if (e.method !== "POST") throw new a("host_method_not_allowed", 405);
+      if (this.config.runtimeMode === "replay") throw new a("host_replay_read_only", 409);
+      if (!this.versionCompatible()) throw new a("host_version_incompatible", 503);
+      const s = Y.parse(
+        await E(e, this.config.maxBodyBytes)
       );
-      if (s.command !== "retry") throw new o("host_command_unsupported", 422);
+      if (s.command !== "retry") throw new a("host_command_unsupported", 422);
       const n = "dsh-retry:";
       if (!s.request_id.startsWith(n) || s.request_id.length <= n.length)
-        throw new o("host_retry_request_id_invalid", 422);
-      const r = s.request_id.slice(n.length), a = await this.hub.researchCommand(r, s);
-      this.json(t, 200, a);
+        throw new a("host_retry_request_id_invalid", 422);
+      const r = s.request_id.slice(n.length), o = await this.hub.researchCommand(r, s);
+      this.json(t, 200, o);
     } catch (s) {
       this.error(t, this.normalizeError(s));
     }
   }
   authorize(e) {
-    if (!X(e.headers[Q], this.config.inboundKey))
-      throw new o("host_unauthorized", 401);
+    if (!se(e.headers[te], this.config.inboundKey))
+      throw new a("host_unauthorized", 401);
   }
   async submit(e, t, s) {
-    const n = W.parse(await C(t, this.config.maxBodyBytes));
-    if (n.run_id !== e) throw new o("host_run_id_mismatch", 400);
-    if (Date.parse(n.deadline_at) <= Date.now()) throw new o("host_deadline_elapsed", 408);
+    const n = Q.parse(await E(t, this.config.maxBodyBytes));
+    if (n.run_id !== e) throw new a("host_run_id_mismatch", 400);
+    if (Date.parse(n.deadline_at) <= Date.now()) throw new a("host_deadline_elapsed", 408);
     this.validateRefs(n);
-    const { correlation: r } = this.correlations.admit(n), a = this.deadlineSignal(n.deadline_at);
+    const { correlation: r } = this.correlations.admit(n), o = this.deadlineSignal(n.deadline_at);
     let h = null;
     try {
-      h = await this.ctx.sessionController.inspect(r.sessionId, a);
+      h = await this.ctx.sessionController.inspect(r.sessionId, o);
     } catch {
     }
     const c = await this.resolveWorkspace();
@@ -650,44 +735,44 @@ class de {
       workspaceId: c.id,
       ...n.agent_preset === null ? {} : { agentPreset: n.agent_preset }
     })).sessionId !== r.sessionId)
-      throw new o("host_session_identity_changed", 502);
-    const y = Z.parse({
+      throw new a("host_session_identity_changed", 502);
+    const y = X.parse({
       schema_version: "dsh-session-accepted.v1",
       run_id: e,
       dsh_session_id: r.sessionId,
       accepted_at: (/* @__PURE__ */ new Date()).toISOString(),
       generation: r.generation
     });
-    if (await this.hub.accepted(y), r.acceptedAt = y.accepted_at, h === null || !re(h, r.requestId)) {
+    if (await this.hub.accepted(y), r.acceptedAt = y.accepted_at, h === null || !ae(h, r.requestId)) {
       const l = await this.hub.prompt(e, r.generation);
       if (l.run_id !== e || l.dsh_session_id !== r.sessionId || l.request_id !== r.requestId || l.request_hash !== r.requestHash || l.generation !== r.generation)
-        throw new o("host_prompt_conflict", 409);
+        throw new a("host_prompt_conflict", 409);
       await this.ctx.sessionController.prompt({
         requestId: r.requestId,
         sessionId: r.sessionId,
         mode: "queue",
         content: [{ type: "text", text: l.prompt }]
-      }, a);
+      }, o);
     }
     this.json(s, 202, y);
   }
   validateRefs(e) {
     if (e.workspace_ref !== "decision-hub://workspace/default")
-      throw new o("host_workspace_ref_unsupported", 422);
+      throw new a("host_workspace_ref_unsupported", 422);
     if (e.prompt_ref !== `hub://runs/${e.run_id}/prompts/${e.generation}`)
-      throw new o("host_prompt_ref_unsupported", 422);
+      throw new a("host_prompt_ref_unsupported", 422);
     if (!this.config.allowedPermissionRefs.has(e.permission_ref))
-      throw new o("host_permission_ref_unsupported", 422);
+      throw new a("host_permission_ref_unsupported", 422);
   }
   async resolveWorkspace() {
     let e;
     try {
       e = await this.ctx.workspaceRegistry.resolveByPath(this.config.defaultWorkspaceCwd);
     } catch {
-      throw new o("host_workspace_resolution_failed", 503, !0);
+      throw new a("host_workspace_resolution_failed", 503, !0);
     }
     if (e === void 0)
-      throw new o("host_workspace_not_registered", 503);
+      throw new a("host_workspace_not_registered", 503);
     return e;
   }
   async status(e, t) {
@@ -696,7 +781,7 @@ class de {
   }
   async result(e, t) {
     const s = await this.correlation(e), n = await this.inspect(s);
-    if (n.result === null) throw new o("host_terminal_result_unavailable", 409);
+    if (n.result === null) throw new a("host_terminal_result_unavailable", 409);
     await this.maybeTerminal(s, n.completion, n.result), this.json(t, 200, n.result);
   }
   async cancel(e, t) {
@@ -711,13 +796,13 @@ class de {
     try {
       return this.correlations.recover(await this.hub.link(e));
     } catch (s) {
-      throw s instanceof u && s.code === "host_hub_http_404" ? new o("host_run_not_found", 404) : s;
+      throw s instanceof u && s.code === "host_hub_http_404" ? new a("host_run_not_found", 404) : s;
     }
   }
   async inspect(e) {
     const t = new AbortController(), s = setTimeout(() => t.abort(), this.config.operationTimeoutMs);
     try {
-      const n = ie(e, await this.ctx.sessionController.inspect(e.sessionId, t.signal));
+      const n = ce(e, await this.ctx.sessionController.inspect(e.sessionId, t.signal));
       return e.state = n.status.state, e.lastSeq = n.status.last_seq, e.errorCode = n.status.error_code, ["completed", "failed", "cancelled"].includes(n.status.state) && this.clearModelStepTimer(e.sessionId), n;
     } finally {
       clearTimeout(s);
@@ -748,9 +833,9 @@ class de {
         const r = setTimeout(() => {
           this.modelStepTimers.delete(e), s.modelStepTimeoutTriggered = !0, s.errorCode = "dsh_model_step_timeout";
           try {
-            Promise.resolve(this.ctx.sessionController.cancel({ sessionId: e })).catch((a) => this.ctx.logger.warn(`decision-hub model-step watchdog cancel failed: ${m(a)}`));
-          } catch (a) {
-            this.ctx.logger.warn(`decision-hub model-step watchdog cancel failed: ${m(a)}`);
+            Promise.resolve(this.ctx.sessionController.cancel({ sessionId: e })).catch((o) => this.ctx.logger.warn(`decision-hub model-step watchdog cancel failed: ${m(o)}`));
+          } catch (o) {
+            this.ctx.logger.warn(`decision-hub model-step watchdog cancel failed: ${m(o)}`);
           }
         }, n);
         this.modelStepTimers.set(e, r);
@@ -770,14 +855,14 @@ class de {
     if (this.terminalSent.has(n)) return;
     const r = this.terminalInFlight.get(n);
     if (r !== void 0) return await r;
-    const a = this.hub.terminal(t).then(() => {
+    const o = this.hub.terminal(t).then(() => {
       this.terminalSent.add(n), e.terminalAt = t.completed_at;
     });
-    this.terminalInFlight.set(n, a);
+    this.terminalInFlight.set(n, o);
     try {
-      await a;
+      await o;
     } finally {
-      this.terminalInFlight.get(n) === a && this.terminalInFlight.delete(n);
+      this.terminalInFlight.get(n) === o && this.terminalInFlight.delete(n);
     }
   }
   async onStatus(e, t) {
@@ -807,16 +892,16 @@ class de {
   }
   deadlineSignal(e) {
     const t = Math.min(this.config.operationTimeoutMs, Date.parse(e) - Date.now());
-    if (t <= 0) throw new o("host_deadline_elapsed", 408);
+    if (t <= 0) throw new a("host_deadline_elapsed", 408);
     return AbortSignal.timeout(t);
   }
   normalizeError(e) {
-    if (e instanceof o) return e;
-    if (e instanceof v) {
+    if (e instanceof a) return e;
+    if (e instanceof S) {
       const t = e.code === "host_body_too_large" ? 413 : e.code === "host_content_type_invalid" ? 415 : 400;
-      return new o(e.code, t);
+      return new a(e.code, t);
     }
-    return e instanceof Y ? new o("host_contract_invalid", 422) : e instanceof u ? new o(e.code, e.retryable ? 503 : 502, e.retryable) : e instanceof Error && e.message.startsWith("host_") ? new o(e.message, 409) : e instanceof DOMException && e.name === "TimeoutError" ? new o("host_deadline_elapsed", 408, !0) : (this.ctx.logger.warn(`decision-hub route failed: ${m(e)}`), new o("host_internal_error", 500));
+    return e instanceof ee ? new a("host_contract_invalid", 422) : e instanceof u ? new a(e.code, e.retryable ? 503 : 502, e.retryable) : e instanceof Error && e.message.startsWith("host_") ? new a(e.message, 409) : e instanceof DOMException && e.name === "TimeoutError" ? new a("host_deadline_elapsed", 408, !0) : (this.ctx.logger.warn(`decision-hub route failed: ${m(e)}`), new a("host_internal_error", 500));
   }
   error(e, t) {
     this.json(e, t.status, { error: { code: t.code, message: t.code, retryable: t.retryable } });
@@ -825,7 +910,7 @@ class de {
     e.headersSent || (e.writeHead(t, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" }), e.end(JSON.stringify(s)));
   }
 }
-const me = "decision-hub", pe = ["webServer", "sessionController", "workspaceRegistry", "connection"], fe = d.object({
+const we = "decision-hub", be = ["webServer", "sessionController", "workspaceRegistry", "connection"], ye = d.object({
   hubBaseUrl: d.string().default("http://127.0.0.1:8000"),
   decisionDeskBaseUrl: d.string().default("http://127.0.0.1:8000"),
   inboundKey: d.string(),
@@ -844,16 +929,16 @@ const me = "decision-hub", pe = ["webServer", "sessionController", "workspaceReg
   sourceVersion: d.string(),
   pluginBuildHash: d.string()
 });
-function we(i, e) {
-  const t = new de(i, he(e));
+function ge(i, e) {
+  const t = new _e(i, ue(e));
   i.effect(() => t.start(), "decision-hub.host-bridge");
 }
 export {
-  fe as Config,
-  de as DecisionHubHostBridge,
-  we as apply,
-  pe as inject,
-  me as name,
-  he as resolveHostConfig
+  ye as Config,
+  _e as DecisionHubHostBridge,
+  ge as apply,
+  be as inject,
+  we as name,
+  ue as resolveHostConfig
 };
 //# sourceMappingURL=index.js.map

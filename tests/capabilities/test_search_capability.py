@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Mapping
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Literal
@@ -23,10 +24,13 @@ from packages.kernel.decision_hub_kernel.application.search import (
 from packages.kernel.decision_hub_kernel.application.workbench import WorkbenchAssetService
 from packages.kernel.decision_hub_kernel.persistence.db import Database
 from packages.kernel.decision_hub_kernel.ports.search import SearchCapabilityError
+from packages.provider_adapters.research import WebSearchResearchAdapter
 from packages.provider_adapters.search import (
+    DshNativeWebSearchTransport,
     FakeSearchTransport,
     OpenAICompatibleSearchTransport,
     OpenAIResponsesWebSearchTransport,
+    TavilySearchTransport,
 )
 
 REQUESTED_AT = datetime(2026, 8, 29, 2, 0, tzinfo=UTC)
@@ -53,9 +57,7 @@ def _manifest(
         license="owner-approved",
         input_schema_ref=SEARCH_INPUT_SCHEMA_REF,
         output_schema_ref=SEARCH_OUTPUT_SCHEMA_REF,
-        permissions=(
-            permissions if permissions is not None else ["read_only", "network:https"]
-        ),
+        permissions=(permissions if permissions is not None else ["read_only", "network:https"]),
         network_domains=domains if domains is not None else ["federalreserve.gov"],
         timeout_seconds=timeout_seconds,
         max_cost_usd=max_cost_usd,
@@ -216,18 +218,12 @@ def test_manifest_gate_denies_permission_domain_and_budget(
             "search_pit_violation",
         ),
         (
-            _result(
-                evidence=[
-                    _evidence().model_copy(update={"content_hash": "0" * 64})
-                ]
-            ),
+            _result(evidence=[_evidence().model_copy(update={"content_hash": "0" * 64})]),
             "search_content_hash_mismatch",
         ),
     ],
 )
-def test_search_output_is_fail_closed(
-    tmp_path: Path, result: SearchResult, expected: str
-) -> None:
+def test_search_output_is_fail_closed(tmp_path: Path, result: SearchResult, expected: str) -> None:
     service, _ = _service(tmp_path, result)
 
     assert _error(service, _query()) == expected
@@ -246,10 +242,7 @@ def test_manifest_timeout_is_enforced(tmp_path: Path) -> None:
     workbench.register_capability(selected)
     workbench.set_capability_status(selected.capability_id, "enabled")
 
-    assert (
-        _error(SearchCapabilityService(workbench, SlowTransport()), _query())
-        == "search_timeout"
-    )
+    assert _error(SearchCapabilityService(workbench, SlowTransport()), _query()) == "search_timeout"
 
 
 def test_openai_compatible_seam_only_accepts_canonical_output() -> None:
@@ -260,6 +253,128 @@ def test_openai_compatible_seam_only_accepts_canonical_output() -> None:
     with pytest.raises(SearchCapabilityError) as captured:
         asyncio.run(invalid.search(_query()))
     assert captured.value.error_code == "search_output_invalid"
+
+
+class _TavilyResponse:
+    status_code = 200
+
+    def __init__(self, payload: object) -> None:
+        self.payload = payload
+
+    def json(self) -> object:
+        return self.payload
+
+
+class _TavilyClient:
+    def __init__(self, payload: object) -> None:
+        self.payload = payload
+        self.calls: list[dict[str, object]] = []
+
+    async def post(
+        self, url: str, *, headers: Mapping[str, str], json: object
+    ) -> _TavilyResponse:
+        self.calls.append({"url": url, "headers": headers, "json": json})
+        return _TavilyResponse(self.payload)
+
+
+def test_tavily_fallback_maps_results_to_discovery_evidence_without_exposing_key() -> None:
+    client = _TavilyClient(
+        {
+            "results": [
+                {
+                    "title": "FOMC statement",
+                    "url": "https://www.federalreserve.gov/newsevents.htm",
+                    "content": "The Committee remains attentive to inflation risks.",
+                    "published_date": "2026-08-28T12:00:00Z",
+                }
+            ]
+        }
+    )
+    transport = TavilySearchTransport(
+        api_key="secret-key",
+        client=client,
+        clock=lambda: OBSERVED_AT,
+    )
+    result = asyncio.run(transport.search(_query()))
+
+    assert result.provider == "tavily-search"
+    assert result.cost_usd == 0.008
+    assert result.evidence[0].source_url.host == "www.federalreserve.gov"
+    body = client.calls[0]["json"]
+    assert isinstance(body, dict)
+    assert "api_key" in body
+    assert "secret-key" not in repr(result)
+
+
+def test_dsh_native_search_maps_structured_tool_result() -> None:
+    client = _TavilyClient(
+        {
+            "content": [
+                {
+                    "type": "web_search_tool_result",
+                    "content": [
+                        {
+                            "url": "https://www.federalreserve.gov/newsevents.htm",
+                            "title": "FOMC statement",
+                            "snippet": "The Committee remains attentive to inflation risks.",
+                            "published_at": "2026-08-28T12:00:00Z",
+                        }
+                    ],
+                }
+            ]
+        }
+    )
+    transport = DshNativeWebSearchTransport(
+        api_key="deepseek-secret",
+        client=client,
+        clock=lambda: OBSERVED_AT,
+    )
+    result = asyncio.run(transport.search(_query()))
+
+    assert result.provider == "dsh-native-web-search"
+    assert result.evidence[0].source_url.host == "www.federalreserve.gov"
+    request = client.calls[0]["json"]
+    assert isinstance(request, dict)
+    assert request["tools"] == [{"type": "web_search_20260209", "name": "web_search"}]
+
+
+def test_dsh_native_search_retains_title_only_locator_for_later_fetch() -> None:
+    client = _TavilyClient(
+        {
+            "content": [
+                {
+                    "type": "web_search_tool_result",
+                    "content": [
+                        {
+                            "type": "web_search_result",
+                            "title": "FOMC statement",
+                            "url": "https://www.federalreserve.gov/newsevents.htm",
+                            "encrypted_content": "opaque",
+                        }
+                    ],
+                }
+            ]
+        }
+    )
+    transport = DshNativeWebSearchTransport(
+        api_key="deepseek-secret",
+        client=client,
+        clock=lambda: OBSERVED_AT,
+    )
+    result = asyncio.run(transport.search(_query()))
+
+    assert len(result.evidence) == 1
+    assert "fetch required" in result.evidence[0].snippet
+
+
+def test_search_adapters_keep_distinct_capability_ids_for_fallback_selection() -> None:
+    native = WebSearchResearchAdapter(FakeSearchTransport(_result()), capability_id="web.search")
+    fallback = WebSearchResearchAdapter(
+        FakeSearchTransport(_result()), capability_id="web.search.tavily"
+    )
+
+    assert native.capability_id == "web.search"
+    assert fallback.capability_id == "web.search.tavily"
 
 
 class _FakeResponses:

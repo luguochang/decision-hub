@@ -1,0 +1,39 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/research_fact.schema.json
+title: ResearchFactContracts
+type: object
+additionalProperties: false
+required: [schema_version]
+properties:
+  schema_version: {type: string, const: research-fact.v1}
+$defs:
+  fact_envelope:
+    type: object
+    additionalProperties: false
+    required: [schema_version, fact_id, evidence_id, requirement_id, metric_family, field, instrument, venue, value, unit, window_start_at, window_end_at, event_offset, observed_at, received_at, published_at, source_id, independence_group, quality, delay_class, payload_schema_ref, payload_hash, attributes]
+    properties:
+      schema_version: {type: string, const: fact-envelope.v1}
+      fact_id: {type: string, minLength: 1}
+      evidence_id: {type: string, minLength: 1}
+      requirement_id: {type: string, minLength: 1}
+      metric_family: {type: string, minLength: 1}
+      field: {type: string, minLength: 1}
+      instrument: {type: [string, 'null']}
+      venue: {type: [string, 'null']}
+      value: {type: [number, string, 'null']}
+      unit: {type: string, minLength: 1}
+      window_start_at: {type: [string, 'null'], format: date-time}
+      window_end_at: {type: [string, 'null'], format: date-time}
+      event_offset: {type: [string, 'null']}
+      observed_at: {type: string, format: date-time}
+      received_at: {type: string, format: date-time}
+      published_at: {type: [string, 'null'], format: date-time}
+      source_id: {type: string, minLength: 1}
+      independence_group: {type: string, minLength: 1}
+      quality: {type: string, enum: [candidate, accepted, rejected, stale, conflicted]}
+      delay_class: {type: string, enum: [realtime, delayed, historical, unknown]}
+      payload_schema_ref: {type: string, minLength: 1}
+      payload_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      attributes:
+        type: object
+        additionalProperties: {type: [number, string, boolean, 'null']}

@@ -1,0 +1,180 @@
+schema_version: research-source-registry.v1
+pack_id: crypto_macro.v1
+version: 1.0.0
+sources:
+  - source_ref: fed.monetary_policy
+    tier: P0
+    publisher: Board of Governors of the Federal Reserve System
+    authority: official
+    independence_group: federal-reserve
+    domains: [federalreserve.gov]
+    allowed_paths: [/feeds/, /newsevents/speech/, /newsevents/pressreleases/, /monetarypolicy/]
+    requirement_ids: [event.identity, policy.delta, counter.thesis]
+    allow_search: true
+    allow_fetch: true
+    allow_evidence: true
+    parser_ref: official-event.v1
+    license_status: approved
+    retention_policy: hash_excerpt
+    audit_status: approved
+    redirect_policy: same_source_only
+  - source_ref: bls.releases
+    tier: P0
+    publisher: U.S. Bureau of Labor Statistics
+    authority: official
+    independence_group: bls
+    domains: [bls.gov]
+    allowed_paths: [/]
+    requirement_ids: [event.identity, policy.delta]
+    allow_search: true
+    allow_fetch: true
+    allow_evidence: true
+    parser_ref: official-event.v1
+    license_status: approved
+    retention_policy: hash_excerpt
+    audit_status: approved
+    redirect_policy: same_source_only
+  - source_ref: bea.releases
+    tier: P0
+    publisher: U.S. Bureau of Economic Analysis
+    authority: official
+    independence_group: bea
+    domains: [bea.gov]
+    allowed_paths: [/]
+    requirement_ids: [event.identity, policy.delta]
+    allow_search: true
+    allow_fetch: true
+    allow_evidence: true
+    parser_ref: official-event.v1
+    license_status: approved
+    retention_policy: hash_excerpt
+    audit_status: approved
+    redirect_policy: same_source_only
+  - source_ref: treasury.rates
+    tier: P0
+    publisher: U.S. Department of the Treasury
+    authority: official
+    independence_group: us-treasury
+    domains: [treasury.gov]
+    allowed_paths: [/]
+    requirement_ids: [expectation.pricing, macro.transmission, cross_asset.confirmation]
+    allow_search: true
+    allow_fetch: true
+    allow_evidence: false
+    parser_ref: null
+    license_status: approved
+    retention_policy: hash_only
+    audit_status: approved
+    redirect_policy: same_source_only
+  - source_ref: fred.macro
+    tier: P0
+    publisher: Federal Reserve Bank of St. Louis
+    authority: official
+    independence_group: fred
+    domains: [fred.stlouisfed.org]
+    allowed_paths: [/]
+    requirement_ids: [expectation.pricing, macro.transmission, cross_asset.confirmation]
+    allow_search: true
+    allow_fetch: true
+    allow_evidence: false
+    parser_ref: null
+    license_status: approved
+    retention_policy: hash_only
+    audit_status: approved
+    redirect_policy: same_source_only
+  - source_ref: cme.policy_pricing
+    tier: P1
+    publisher: CME Group
+    authority: verified_web
+    independence_group: cme-group
+    domains: [cmegroup.com]
+    allowed_paths: [/]
+    requirement_ids: [expectation.pricing, counter.thesis]
+    allow_search: true
+    allow_fetch: true
+    allow_evidence: true
+    parser_ref: null
+    license_status: review_required
+    retention_policy: hash_only
+    audit_status: candidate
+    redirect_policy: same_source_only
+  - source_ref: reuters.markets_macro
+    tier: P1
+    publisher: Reuters
+    authority: verified_web
+    independence_group: reuters
+    domains: [reuters.com]
+    allowed_paths: [/markets/, /world/, /business/]
+    requirement_ids: [event.identity, policy.delta, cross_asset.confirmation, counter.thesis]
+    allow_search: true
+    allow_fetch: true
+    allow_evidence: true
+    parser_ref: null
+    license_status: review_required
+    retention_policy: hash_only
+    audit_status: candidate
+    redirect_policy: same_source_only
+  - source_ref: crypto.exchange_market
+    tier: P0
+    publisher: Audited crypto exchanges
+    authority: exchange
+    independence_group: crypto-exchange
+    domains: [okx.com, api.coinex.com, deribit.com, bybit.com]
+    allowed_paths: [/]
+    requirement_ids: [crypto.spot, crypto.derivatives]
+    allow_search: false
+    allow_fetch: false
+    allow_evidence: false
+    parser_ref: typed-provider-only.v1
+    license_status: approved
+    retention_policy: hash_only
+    audit_status: approved
+    redirect_policy: deny
+  - source_ref: coinglass.aggregator
+    tier: P2
+    publisher: CoinGlass
+    authority: audited_aggregator
+    independence_group: coinglass
+    domains: [coinglass.com]
+    allowed_paths: [/]
+    requirement_ids: [crypto.derivatives, counter.thesis]
+    allow_search: true
+    allow_fetch: false
+    allow_evidence: false
+    parser_ref: null
+    license_status: review_required
+    retention_policy: hash_only
+    audit_status: candidate
+    redirect_policy: deny
+  - source_ref: general.finance_discovery
+    tier: P3
+    publisher: General finance discovery
+    authority: search_derived
+    independence_group: discovery-only
+    domains: [finance.yahoo.com]
+    allowed_paths: [/]
+    requirement_ids: [event.identity, policy.delta, expectation.pricing, macro.transmission, cross_asset.confirmation, crypto.spot, crypto.derivatives, counter.thesis]
+    allow_search: true
+    allow_fetch: false
+    allow_evidence: false
+    parser_ref: null
+    license_status: review_required
+    retention_policy: hash_only
+    audit_status: candidate
+    redirect_policy: deny
+  - source_ref: social.untrusted
+    tier: P4
+    publisher: Untrusted social sources
+    authority: unverified
+    independence_group: untrusted-social
+    domains: [x.com]
+    allowed_paths: [/]
+    requirement_ids: [counter.thesis]
+    allow_search: false
+    allow_fetch: false
+    allow_evidence: false
+    parser_ref: null
+    license_status: denied
+    retention_policy: hash_only
+    audit_status: denied
+    redirect_policy: deny

@@ -21,6 +21,39 @@ from .generated.evolution_job import SearchQuery as _SearchQuery
 from .generated.evolution_job import SearchResult as _SearchResult
 from .generated.evolution_job import ServiceHeartbeat as _ServiceHeartbeat
 from .generated.evolution_job import SourceOperation as _SourceOperation
+from .generated.research_product_view import (
+    EvolutionCandidateSummary as _EvolutionCandidateSummary,
+)
+from .generated.research_product_view import (
+    HorizonOutcomeView as _HorizonOutcomeView,
+)
+from .generated.research_product_view import (
+    RequirementReadinessItem as _RequirementReadinessItem,
+)
+from .generated.research_product_view import (
+    ResearchCostBreakdown as _ResearchCostBreakdown,
+)
+from .generated.research_product_view import (
+    ResearchCostComponent as _ResearchCostComponent,
+)
+from .generated.research_product_view import (
+    ResearchInboxItem as _ResearchInboxItem,
+)
+from .generated.research_product_view import (
+    ResearchInboxView as _ResearchInboxView,
+)
+from .generated.research_product_view import (
+    ResearchObservabilityView as _ResearchObservabilityView,
+)
+from .generated.research_product_view import (
+    ResearchValueEvaluation as _ResearchValueEvaluation,
+)
+from .generated.research_product_view import (
+    ResearchVersionLineage as _ResearchVersionLineage,
+)
+from .generated.research_product_view import (
+    SourceAttemptView as _SourceAttemptView,
+)
 from .generated.run_inspector import (
     EvidenceLineage as _EvidenceLineage,
 )
@@ -141,6 +174,17 @@ EvidenceLineageView = _EvidenceLineage
 OrchestrationLineageView = _OrchestrationLineage
 RunTimelineItemView = _TimelineItem
 VersionLineageView = _VersionLineage
+EvolutionCandidateSummary = _EvolutionCandidateSummary
+HorizonOutcomeView = _HorizonOutcomeView
+RequirementReadinessItem = _RequirementReadinessItem
+ResearchCostBreakdown = _ResearchCostBreakdown
+ResearchCostComponent = _ResearchCostComponent
+ResearchInboxItem = _ResearchInboxItem
+ResearchInboxView = _ResearchInboxView
+ResearchObservabilityView = _ResearchObservabilityView
+ResearchValueEvaluation = _ResearchValueEvaluation
+ResearchVersionLineage = _ResearchVersionLineage
+SourceAttemptView = _SourceAttemptView
 DshBridgeError = _dsh_host_bridge.DshBridgeError
 DshBusinessFailure = _dsh_host_bridge.DshBusinessFailure
 DshBusinessStatus = _dsh_host_bridge.DshBusinessStatus
@@ -157,6 +201,12 @@ DshSessionStatus = _dsh_host_bridge.DshSessionStatus
 DshSessionSubmit = _dsh_host_bridge.DshSessionSubmit
 DshUpstreamIdentity = _dsh_host_bridge.DshUpstreamIdentity
 AgenticResearchContracts = _agentic_research.AgenticResearchContracts
+EventWatch = _agentic_research.EventWatch
+EventWindowSample = _agentic_research.EventWindowSample
+EventWindowCapture = _agentic_research.EventWindowCapture
+CryptoEventWindowObservation = _agentic_research.CryptoEventWindowObservation
+CryptoEventWindowFailure = _agentic_research.CryptoEventWindowFailure
+CryptoEventWindowPayload = _agentic_research.CryptoEventWindowPayload
 CausalCase = _agentic_research.CausalCase
 CausalLink = _agentic_research.CausalLink
 ConflictItem = _agentic_research.ConflictItem
@@ -170,9 +220,13 @@ EvidenceRequirement = _agentic_research.EvidenceRequirement
 ExecutionBudget = _agentic_research.ExecutionBudget
 HorizonDecision = _agentic_research.HorizonDecision
 ProductExtensionManifest = _agentic_research.ProductExtensionManifest
+ProviderAttempt = _agentic_research.ProviderAttempt
+ProviderRoute = _agentic_research.ProviderRoute
 ResearchCapabilityManifest = _agentic_research.ResearchCapabilityManifest
 ResearchCapabilityQuery = _agentic_research.ResearchCapabilityQuery
 ResearchCapabilityResult = _agentic_research.ResearchCapabilityResult
+ResearchSourcePolicy = _agentic_research.ResearchSourcePolicy
+ResearchSourceRegistry = _agentic_research.ResearchSourceRegistry
 ResearchRunQueued = _agentic_research.ResearchRunQueued
 ResearchEvaluationCapabilityFixture = _agentic_research.ResearchEvaluationCapabilityFixture
 ResearchEvaluationCase = _agentic_research.ResearchEvaluationCase
@@ -194,6 +248,10 @@ ResearchStopReason = _agentic_research.ResearchStopReason
 ResearchTask = _agentic_research.ResearchTask
 ResearchTraceEvent = _agentic_research.ResearchTraceEvent
 RoleProfile = _agentic_research.RoleProfile
+# Cross-file JSON Schema references are inlined by datamodel-codegen. Export the
+# exact class used by ResearchCapabilityResult so callers never see two
+# structurally-equal but Pydantic-incompatible FactEnvelope identities.
+FactEnvelope = _agentic_research.FactEnvelope
 ToolInvocation = _agentic_research.ToolInvocation
 ToolResultSummary = _agentic_research.ToolResultSummary
 
@@ -241,6 +299,8 @@ class TextEnvelope(BaseModel):
     raw_text: str = Field(min_length=1, max_length=200_000)
     language: str = Field(min_length=2, max_length=16)
     event_hint: str | None = Field(default=None, max_length=128)
+    event_family: str | None = Field(default=None, max_length=128)
+    scheduled_at: datetime | None = None
     source_url: HttpUrl | None = None
     revision_of: str | None = None
     content_hash: str = Field(pattern=r"^[a-f0-9]{64}$")

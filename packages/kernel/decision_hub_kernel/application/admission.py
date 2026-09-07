@@ -66,7 +66,9 @@ class AdmissionService:
                     EventRecord(
                         event_id=event_id,
                         event_type=envelope.event_hint or "macro_event",
-                        occurred_at=envelope.observed_at,
+                        # A calendar envelope describes a planned occurrence;
+                        # ordinary text retains observed_at as its event time.
+                        occurred_at=envelope.scheduled_at or envelope.observed_at,
                         received_at=envelope.received_at,
                     )
                 )
@@ -84,6 +86,7 @@ class AdmissionService:
                         content_hash=envelope.content_hash,
                         source_url=str(envelope.source_url) if envelope.source_url else None,
                         event_hint=envelope.event_hint,
+                        scheduled_at=envelope.scheduled_at,
                         revision_of=envelope.revision_of,
                     )
                 )

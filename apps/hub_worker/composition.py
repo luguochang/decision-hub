@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import os
 import socket
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -13,6 +14,7 @@ from packages.contracts_py.decision_hub_contracts.models import CandidateProposa
 from packages.evals.runner import EvaluationRunner
 from packages.kernel.decision_hub_kernel.application.admission import AdmissionService
 from packages.kernel.decision_hub_kernel.application.dsh_sessions import DshSessionLinkService
+from packages.kernel.decision_hub_kernel.application.event_watch import EventWatchService
 from packages.kernel.decision_hub_kernel.application.evolution import EvolutionAssetService
 from packages.kernel.decision_hub_kernel.application.live_observation import (
     EvolutionContextService,
@@ -43,6 +45,15 @@ from packages.orchestration.langgraph.evolution_executor import (
     SupervisorEvolutionPlanner,
 )
 from packages.pilot_runtime import PilotSettings, build_notification_adapters
+from packages.provider_adapters.market import (
+    CapabilitySnapshotWindowProvider,
+    CoinExMarketResearchAdapter,
+    CryptoCrowdingResearchAdapter,
+    CryptoEventWindowArchive,
+    CryptoEventWindowProvider,
+    CryptoEventWindowSampler,
+    OKXDerivativesResearchAdapter,
+)
 from packages.provider_adapters.market.okx import OKXPublicMarketAdapter
 from packages.provider_adapters.research.discovery import CryptoMacroDiscoveryPolicy
 from packages.runtime_adapters.dsh_runtime import (
@@ -200,6 +211,7 @@ def build_realtime_worker(
     runtime: AgentRuntime | None = None,
     settings: PilotSettings | None = None,
     heartbeat_interval_seconds: float = 10,
+    window_providers: Iterable[CryptoEventWindowProvider] | None = None,
 ) -> RealtimeWorker:
     selected_settings = settings or PilotSettings.from_env()
     selected_registry = registry or SourceRegistry()
@@ -216,6 +228,7 @@ def build_realtime_worker(
         selected_runtime,
         checkpoint_path=data_dir / "checkpoints" / "decision_graph.sqlite3",
     )
+    event_watches = EventWatchService(database)
     ingestion = SourceIngestionService(
         database,
         selected_registry,
@@ -223,11 +236,17 @@ def build_realtime_worker(
         strategy_selector=CryptoMacroDiscoveryPolicy.from_pack(
             Path(__file__).resolve().parents[2] / "packs" / "crypto_macro"
         ),
+        event_watches=event_watches,
     )
 
     async def execute_target(target: RunTarget) -> None:
         await analyzer.run_admitted(target.event_id, target.run_id)
 
+    window_sampler = _build_event_window_sampler(
+        selected_settings,
+        data_dir,
+        window_providers,
+    )
     scheduler = RealtimeScheduler(
         ingestion,
         run_executor=execute_target,
@@ -240,6 +259,7 @@ def build_realtime_worker(
             database,
             build_notification_adapters(selected_settings, data_dir),
         ),
+        window_sampler=window_sampler,
     )
     return RealtimeWorker(
         scheduler=scheduler,
@@ -248,6 +268,67 @@ def build_realtime_worker(
         mode=_runtime_mode(selected_runtime),
         heartbeat_interval_seconds=heartbeat_interval_seconds,
         started_at=datetime.now(UTC),
+    )
+
+
+def _build_event_window_sampler(
+    settings: PilotSettings,
+    data_dir: Path,
+    providers: Iterable[CryptoEventWindowProvider] | None,
+) -> CryptoEventWindowSampler | None:
+    """Enable event captures only when market data and the explicit flag are on."""
+
+    enabled = os.getenv("DECISION_HUB_EVENT_WINDOW_LIVE_ENABLED", "0").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+    if not settings.market_enabled or (providers is None and not enabled):
+        return None
+    selected = (
+        tuple(providers)
+        if providers is not None
+        else (
+            CapabilitySnapshotWindowProvider(
+                "okx-public",
+                OKXDerivativesResearchAdapter(),
+                symbols=("BTC-USDT-SWAP",),
+                fields=("ticker", "funding_rate", "open_interest", "mark_price"),
+            ),
+            CapabilitySnapshotWindowProvider(
+                "coinex-public",
+                CoinExMarketResearchAdapter(),
+                symbols=("BTC",),
+                fields=(
+                    "spot_price",
+                    "spot_volume",
+                    "funding_rate",
+                    "open_interest",
+                    "mark_price",
+                    "index_price",
+                    "basis",
+                ),
+            ),
+            CapabilitySnapshotWindowProvider(
+                "okx-orderbook-public",
+                CryptoCrowdingResearchAdapter(
+                    provider_id="okx-orderbook-public",
+                    base_url="https://www.okx.com",
+                    exchange="okx",
+                ),
+                symbols=("BTC-USDT-SWAP",),
+                fields=("crowding_signal", "book_imbalance", "bid_depth", "ask_depth"),
+            ),
+        )
+    )
+    if not selected:
+        raise ValueError("event_window_provider_required")
+    # Constructing the sampler validates provider identity before the worker
+    # starts; EventWatch state remains owned by SourceIngestionService.
+    return CryptoEventWindowSampler(
+        selected,
+        CryptoEventWindowArchive(data_dir / "event-windows"),
     )
 
 
@@ -334,6 +415,9 @@ def _research_runtime_from_env(database: Database) -> ResearchHarnessRuntime:
             DshWebHostClient(config),
             poll_interval_seconds=float(
                 os.getenv("DECISION_HUB_DSH_POLL_INTERVAL_SECONDS", "0.25")
+            ),
+            readiness_grace_seconds=float(
+                os.getenv("DECISION_HUB_DSH_READINESS_GRACE_SECONDS", "10")
             ),
         )
     if mode == "replay":

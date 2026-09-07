@@ -14,11 +14,13 @@ from packages.contracts_py.decision_hub_contracts import (
     DshUpstreamIdentity,
     EvidenceCandidate,
     EvidenceRequirement,
+    ProviderAttempt,
     ResearchCapabilityManifest,
     ResearchCapabilityQuery,
     ResearchCapabilityResult,
 )
 from packages.kernel.decision_hub_kernel.application.dsh_sessions import DshSessionLinkService
+from packages.kernel.decision_hub_kernel.application.event_watch import EventWatchService
 from packages.kernel.decision_hub_kernel.application.research_evidence import (
     ResearchCapabilityError,
     ResearchCapabilityGatewayService,
@@ -228,6 +230,7 @@ def _gateway(
     *,
     adapter: _Adapter | None = None,
     requirement: EvidenceRequirement | None = None,
+    event_watches: EventWatchService | None = None,
 ):
     inner = ResearchCapabilityGatewayService(
         [_manifest()],
@@ -241,8 +244,21 @@ def _gateway(
         ResearchEvidenceService(database),
         ResearchObservabilityService(database, clock=lambda: NOW + timedelta(seconds=3)),
         requirements={"event_identity": requirement or _requirement()},
+        event_watches=event_watches,
         clock=lambda: NOW + timedelta(seconds=3),
     )
+
+
+def _event_watch(database: Database) -> EventWatchService:
+    service = EventWatchService(database, clock=lambda: NOW)
+    service.ensure_watch(
+        event_id="event-durable",
+        source_id="calendar",
+        event_family="central_bank_speech",
+        scheduled_at=NOW + timedelta(minutes=30),
+        window_offsets=("t-5m", "t+1m"),
+    )
+    return service
 
 
 @pytest.mark.asyncio
@@ -296,8 +312,127 @@ async def test_live_cutoff_is_clamped_to_durable_dsh_deadline(tmp_path: Path) ->
 
 
 @pytest.mark.asyncio
+async def test_event_query_projects_server_owned_watch_lineage(tmp_path: Path) -> None:
+    database, _run_id, session_id = _database(tmp_path)
+    event_watches = _event_watch(database)
+    adapter = _Adapter(session_id)
+    watch = event_watches.get_watch_by_event_id("event-durable")
+    assert watch is not None
+
+    query = _query(session_id).model_copy(
+        update={
+            "event_id": "event-durable",
+            "event_at": watch.scheduled_at,
+            "window_start_at": NOW + timedelta(minutes=25),
+            "window_end_at": NOW + timedelta(minutes=31),
+            "requested_event_offsets": ["t-5m", "t+1m"],
+        }
+    )
+    await _gateway(
+        database, session_id, adapter=adapter, event_watches=event_watches
+    ).execute(query)
+
+    assert adapter.last_query.event_id == "event-durable"
+    assert adapter.last_query.event_at == watch.scheduled_at
+    assert adapter.last_query.window_start_at == NOW + timedelta(minutes=25)
+    assert adapter.last_query.window_end_at == NOW + timedelta(minutes=31)
+
+
+@pytest.mark.asyncio
+async def test_event_id_mismatch_fails_before_provider_execution(tmp_path: Path) -> None:
+    database, _run_id, session_id = _database(tmp_path)
+    adapter = _Adapter(session_id)
+
+    with pytest.raises(ResearchCapabilityError) as raised:
+        await _gateway(database, session_id, adapter=adapter).execute(
+            _query(session_id).model_copy(
+                update={
+                    "event_id": "another-event",
+                    "requested_event_offsets": ["t-5m", "t+1m"],
+                }
+            )
+        )
+
+    assert raised.value.error_code == "research_event_lineage_mismatch"
+    assert adapter.call_count == 0
+
+
+@pytest.mark.asyncio
+async def test_event_query_requires_durable_watch_and_valid_offsets(tmp_path: Path) -> None:
+    database, _run_id, session_id = _database(tmp_path)
+    adapter = _Adapter(session_id)
+    query = _query(session_id).model_copy(
+        update={
+            "event_id": "event-durable",
+            "requested_event_offsets": ["t-5m", "t+1m"],
+        }
+    )
+
+    with pytest.raises(ResearchCapabilityError) as missing:
+        await _gateway(database, session_id, adapter=adapter).execute(query)
+    assert missing.value.error_code == "research_event_watch_not_found"
+    assert adapter.call_count == 0
+
+    event_watches = _event_watch(database)
+    with pytest.raises(ResearchCapabilityError) as invalid:
+        await _gateway(
+            database, session_id, adapter=adapter, event_watches=event_watches
+        ).execute(
+            query.model_copy(update={"requested_event_offsets": ["t+72h"]})
+        )
+    assert invalid.value.error_code == "research_event_window_offset_invalid"
+    assert adapter.call_count == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        ("event_at", NOW + timedelta(minutes=29)),
+        ("window_start_at", NOW + timedelta(minutes=24)),
+        ("window_end_at", NOW + timedelta(minutes=32)),
+    ),
+)
+async def test_event_query_rejects_model_supplied_time_conflicts(
+    tmp_path: Path, field: str, value: datetime
+) -> None:
+    database, _run_id, session_id = _database(tmp_path)
+    event_watches = _event_watch(database)
+    adapter = _Adapter(session_id)
+    query = _query(session_id).model_copy(
+        update={
+            "event_id": "event-durable",
+            "requested_event_offsets": ["t-5m", "t+1m"],
+            field: value,
+        }
+    )
+
+    with pytest.raises(ResearchCapabilityError) as raised:
+        await _gateway(
+            database, session_id, adapter=adapter, event_watches=event_watches
+        ).execute(query)
+
+    assert raised.value.error_code == "research_event_time_mismatch"
+    assert adapter.call_count == 0
+
+
+@pytest.mark.asyncio
 async def test_failure_persists_provenance_and_is_retryable(tmp_path: Path) -> None:
     database, run_id, session_id = _database(tmp_path)
+    attempt = ProviderAttempt.model_validate(
+        {
+            "provider_id": "official-fixture",
+            "route_role": "primary",
+            "service_tier": "replay",
+            "status": "failed",
+            "started_at": NOW,
+            "finished_at": NOW + timedelta(seconds=1),
+            "latency_ms": 1000,
+            "cost_usd": 0.01,
+            "error_code": "provider_timeout",
+            "retryable": True,
+        }
+    )
     adapter = _Adapter(
         session_id,
         fail=ResearchCapabilityError(
@@ -307,17 +442,31 @@ async def test_failure_persists_provenance_and_is_retryable(tmp_path: Path) -> N
             origin="transport",
             cause_code="deadline",
             deadline_ms=20_000,
+            provider_attempts=[attempt],
         ),
     )
-    with pytest.raises(ResearchCapabilityError):
+    with pytest.raises(ResearchCapabilityError) as first_failure:
         await _gateway(database, session_id, adapter=adapter).execute(_query(session_id))
+    assert first_failure.value.provenance().provider_attempts == [attempt]
 
     trace = ResearchObservabilityService(database).list_trace(run_id)
     assert trace[-1].event_type == "tool_failed"
     assert trace[-1].error is not None
     assert trace[-1].error.origin == "transport"
     assert trace[-1].error.retryable is True
+    assert trace[-1].error.provider_attempts is not None
+    assert trace[-1].error.provider_attempts[0].provider_id == "official-fixture"
     assert ResearchEvidenceService(database).list_run_evidence(run_id) == []
+
+    # A retry after process recovery reads the durable error projection and
+    # must retain the exact provider-attempt lineage rather than collapsing it
+    # to a generic capability failure.
+    with pytest.raises(ResearchCapabilityError) as recovered_failure:
+        await _gateway(database, session_id, adapter=_Adapter(session_id)).execute(
+            _query(session_id)
+        )
+    assert recovered_failure.value.error_code == "research_capability_timeout"
+    assert recovered_failure.value.provider_attempts == (attempt,)
 
 
 @pytest.mark.asyncio

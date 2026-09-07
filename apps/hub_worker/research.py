@@ -18,8 +18,12 @@ from packages.contracts_py.decision_hub_contracts import (
     RunStatus,
 )
 from packages.kernel.decision_hub_kernel.application.commit import CommitDecisionService
+from packages.kernel.decision_hub_kernel.application.event_watch import EventWatchService
 from packages.kernel.decision_hub_kernel.application.research_observability import (
     ResearchObservabilityService,
+)
+from packages.kernel.decision_hub_kernel.application.research_value import (
+    ResearchValueEvaluationService,
 )
 from packages.kernel.decision_hub_kernel.application.run import RunService
 from packages.kernel.decision_hub_kernel.application.snapshot import SnapshotService
@@ -61,6 +65,7 @@ class ResearchRequestFactory:
         self.execution_mode = execution_mode
         self.clock = clock
         self.fact_pack = CryptoMacroFactPack.from_pack(pack_root)
+        self.event_watches = EventWatchService(database, clock=clock)
 
     def build(self, event_id: str, run_id: str) -> ResearchSessionRequest:
         snapshot_id, _ = SnapshotService(self.database).freeze_for_run(run_id, event_id)
@@ -82,6 +87,12 @@ class ResearchRequestFactory:
             if self.execution_mode == "replay"
             else deadline_at
         )
+        event_watch = self.event_watches.get_watch_by_event_id(event_id)
+        event_window_samples = (
+            list(self.event_watches.list_event_samples(event_id))
+            if event_watch is not None
+            else []
+        )
         return ResearchSessionRequest(
             schema_version="research-session-request.v1",
             request_id=f"research-request:{run_id}",
@@ -97,6 +108,8 @@ class ResearchRequestFactory:
             input_evidence=input_evidence,
             evidence_requirements=requirements,
             target_gaps=[],
+            event_watch=event_watch,
+            event_window_samples=event_window_samples,
             allowed_capabilities=list(self.allowed_capabilities),
             execution_budget=pack.execution_budget,
             deadline_at=deadline_at,
@@ -142,6 +155,9 @@ class DurableResearchWorker:
         )
         self.commit = CommitDecisionService(database, clock=clock)
         self.observability = ResearchObservabilityService(database, clock=clock)
+        self.value_evaluations = ResearchValueEvaluationService(
+            database, pack_root=pack_root, clock=clock
+        )
         self.clock = clock
 
     async def tick(self) -> ResearchWorkerReport | None:
@@ -162,6 +178,7 @@ class DurableResearchWorker:
             final = ResearchSessionResult.model_validate(state["final_result"])
             artifact_id, gate = self.commit.commit_research_result(run_id, event_id, final)
             self._record_completed(run_id, state, gate.status.value, artifact_id)
+            self._evaluate_terminal_safely(run_id)
             return ResearchWorkerReport(
                 status=gate.status.value,
                 run_id=run_id,
@@ -202,7 +219,32 @@ class DurableResearchWorker:
                 "research.agentic.failed",
                 {"error_code": error_code},
             )
+            self._evaluate_terminal_safely(run_id)
             return ResearchWorkerReport(status="failed", run_id=run_id, error_code=error_code)
+
+    def _evaluate_terminal_safely(self, run_id: str) -> bool:
+        """Keep derived evaluation failures outside the committed Run outcome.
+
+        Research value evaluation is an append-only projection. It may be retried
+        independently, but it must never turn an already committed Artifact or a
+        correctly classified runtime failure into a different business outcome.
+        """
+
+        try:
+            self.value_evaluations.evaluate_current(run_id)
+            return True
+        except Exception as exc:
+            self.database.record_run_event(
+                run_id,
+                self._next_event_sequence(run_id),
+                "research.value_evaluation.failed",
+                {
+                    "error_code": "research_value_evaluation_failed",
+                    "cause_code": str(getattr(exc, "error_code", type(exc).__name__)),
+                    "retryable": True,
+                },
+            )
+            return False
 
     def _record_completed(
         self,

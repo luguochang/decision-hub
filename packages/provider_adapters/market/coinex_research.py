@@ -10,8 +10,13 @@ from pydantic import AnyUrl
 
 from packages.contracts_py.decision_hub_contracts import (
     EvidenceCandidate,
+    FactEnvelope,
     ResearchCapabilityQuery,
     ResearchCapabilityResult,
+)
+from packages.kernel.decision_hub_kernel.application.fact_store import (
+    research_fact_instance_id,
+    research_fact_payload_hash,
 )
 from packages.kernel.decision_hub_kernel.application.research_evidence import (
     ResearchCapabilityError,
@@ -37,6 +42,17 @@ class CoinExMarketResearchAdapter:
 
     capability_id = "market.crypto_derivatives"
     supported_modes = frozenset({"live"})
+    supported_fields = frozenset(
+        {
+            "spot_price",
+            "spot_volume",
+            "funding_rate",
+            "open_interest",
+            "mark_price",
+            "index_price",
+            "basis",
+        }
+    )
     _spot_fields = frozenset({"spot_price", "spot_volume"})
     _derivatives_fields = frozenset(
         {"funding_rate", "open_interest", "mark_price", "index_price", "basis"}
@@ -125,12 +141,41 @@ class CoinExMarketResearchAdapter:
             freshness_status="unknown",
             conflict_group=None,
         )
+        metric_family = (
+            "crypto.spot" if fields <= self._spot_fields else "crypto.derivatives"
+        )
+        field_aliases = {"spot_price": "price", "spot_volume": "volume"}
+        field_units = {
+            "spot_price": "usdt",
+            "spot_volume": "btc",
+            "funding_rate": "rate",
+            "open_interest": "btc",
+            "mark_price": "usdt",
+            "index_price": "usdt",
+            "basis": "rate",
+        }
+        facts = [
+            _fact(
+                query=query,
+                evidence_id=candidate.evidence_id,
+                source_id=candidate.source_id,
+                metric_family=metric_family,
+                field=field_aliases.get(field, field),
+                value=values[field],
+                unit=field_units[field],
+                instrument=market,
+                received_at=received_at,
+                provider_field=field,
+            )
+            for field in sorted(values)
+        ]
         return ResearchCapabilityResult(
             schema_version="research-capability-result.v1",
             request_id=query.request_id,
             capability_id=query.capability_id,
             provider="coinex-public",
             evidence_candidates=[candidate],
+            facts=facts,
             cost_usd=0.0,
             completed_at=received_at,
         )
@@ -205,3 +250,66 @@ def _basis(mark_price: object, index_price: object) -> str:
             "research_market_output_invalid",
             "CoinEx response cannot produce a valid basis",
         ) from exc
+
+
+def _fact(
+    *,
+    query: ResearchCapabilityQuery,
+    evidence_id: str,
+    source_id: str,
+    metric_family: str,
+    field: str,
+    value: object,
+    unit: str,
+    instrument: str,
+    received_at: datetime,
+    provider_field: str,
+) -> FactEnvelope:
+    normalized_value: str | float | None = None if value is None else str(value)
+    attributes: dict[str, float | str | bool | None] = {"provider_field": provider_field}
+    payload_schema_ref = "coinex.public-market.v2"
+    payload_hash = research_fact_payload_hash(
+        requirement_id=query.requirement_id,
+        metric_family=metric_family,
+        field=field,
+        instrument=instrument,
+        venue="coinex",
+        value=normalized_value,
+        unit=unit,
+        window_start_at=None,
+        window_end_at=None,
+        event_offset=None,
+        published_at=None,
+        source_id=source_id,
+        independence_group="coinex",
+        delay_class="realtime",
+        payload_schema_ref=payload_schema_ref,
+        attributes=attributes,
+    )
+    return FactEnvelope(
+        schema_version="fact-envelope.v1",
+        fact_id=research_fact_instance_id(
+            evidence_id=evidence_id, payload_hash=payload_hash
+        ),
+        evidence_id=evidence_id,
+        requirement_id=query.requirement_id,
+        metric_family=metric_family,
+        field=field,
+        instrument=instrument,
+        venue="coinex",
+        value=normalized_value,
+        unit=unit,
+        window_start_at=None,
+        window_end_at=None,
+        event_offset=None,
+        observed_at=received_at,
+        received_at=received_at,
+        published_at=None,
+        source_id=source_id,
+        independence_group="coinex",
+        quality="candidate",
+        delay_class="realtime",
+        payload_schema_ref=payload_schema_ref,
+        payload_hash=payload_hash,
+        attributes=attributes,
+    )

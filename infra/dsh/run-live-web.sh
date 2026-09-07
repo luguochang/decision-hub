@@ -15,16 +15,11 @@ if [[ -n "${DSH_REPLAY_PLUGIN:-}" || -n "${DSH_SNAPSHOT_FILE:-}" || -n "${DSH_SN
   exit 2
 fi
 
-# DSH's official provider is named DeepSeek, while this local route is served
-# by llm-pi-ai over the gateway's OpenAI Responses contract. Explicit DeepSeek
-# variables win; the OpenAI names are a convenience for a compatible gateway
-# and never get persisted.
-if [[ -z "${DEEPSEEK_API_KEY:-}" && -n "${OPENAI_API_KEY:-}" ]]; then
-  export DEEPSEEK_API_KEY="$OPENAI_API_KEY"
-fi
-if [[ -z "${DEEPSEEK_BASE_URL:-}" && -n "${OPENAI_BASE_URL:-}" ]]; then
-  export DEEPSEEK_BASE_URL="$OPENAI_BASE_URL"
-fi
+# Provider credential namespaces remain isolated. Official DSH resolves the
+# inherited process environment before DSH_HOME/.env, so aliasing OPENAI_* to
+# DEEPSEEK_* here would override the DeepSeek credential and endpoint selected
+# by the live profile. OpenAI-compatible routes declare OPENAI_* directly in
+# settings.yaml; the official DeepSeek route resolves DEEPSEEK_* independently.
 credential_file="$DSH_WEB_HOME/.env"
 credential_file_configured=false
 if [[ -f "$credential_file" ]] && grep -Eq '^(DEEPSEEK_API_KEY|OPENAI_API_KEY)=[^[:space:]]' "$credential_file"; then

@@ -4,7 +4,7 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import NoReturn
+from typing import NoReturn, cast
 
 import pytest
 from sqlalchemy.orm import Session
@@ -29,12 +29,14 @@ from packages.kernel.decision_hub_kernel.application.research_observability impo
 from packages.kernel.decision_hub_kernel.application.run import RunService
 from packages.kernel.decision_hub_kernel.persistence.db import (
     ArtifactRecord,
+    ObservationRecord,
     ResearchCommandRecord,
     ResearchResultRecord,
     ResearchTraceRecord,
 )
 from packages.provider_adapters.research import CryptoMacroFactPack
 from packages.query_views.research import ResearchQueryService
+from packages.query_views.research.service import _event_title
 from tests.evolution.test_research_worker import (
     NOW,
     PACK_ROOT,
@@ -62,6 +64,23 @@ def _trace(run_id: str, *, event_type: str, summary: str) -> ResearchTraceEvent:
             "status": "running",
             "error_code": None,
         }
+    )
+
+
+def test_event_title_uses_only_the_first_nonempty_source_line() -> None:
+    observation = type(
+        "Observation",
+        (),
+        {
+            "text": (
+                "Waller, The Economic Outlook and Some Comments on My Policy Communication\n"
+                "Skip to main content\nThe full source body follows."
+            )
+        },
+    )()
+
+    assert _event_title(cast(ObservationRecord, observation)) == (
+        "Waller, The Economic Outlook and Some Comments on My Policy Communication"
     )
 
 
@@ -281,7 +300,13 @@ def test_partial_progress_remains_visible_without_final_result(tmp_path: Path) -
     business = ResearchQueryService(database, pack_root=PACK_ROOT).business_status(run_id)
     assert business is not None
     assert business.coverage_status == "insufficient"
-    assert business.hard_coverage_ratio == pytest.approx(1 / 6)
+    # The official excerpt has no typed event identity fields/window, so the
+    # semantic Gate must not count it as one of the six minimum facts.
+    assert business.hard_coverage_ratio == 0
+    event_gap = next(
+        item for item in detail.run.coverage.gaps if item.requirement_id == "event_identity"
+    )
+    assert event_gap.reason_code == "semantic_mismatch"
     assert [item.error_code for item in business.failures] == ["research_capability_timeout"]
     assert business.failures[0].origin == "transport"
 

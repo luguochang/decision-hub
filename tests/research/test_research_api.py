@@ -10,9 +10,11 @@ from fastapi.testclient import TestClient
 from apps.hub_api.main import create_app
 from apps.hub_worker.research import DurableResearchWorker
 from packages.kernel.decision_hub_kernel.application.commit import CommitDecisionService
+from packages.kernel.decision_hub_kernel.application.event_watch import EventWatchService
 from packages.kernel.decision_hub_kernel.application.research_observability import (
     ResearchObservabilityService,
 )
+from packages.kernel.decision_hub_kernel.persistence.db import RunRecord
 from packages.query_views.research import ResearchQueryService
 from tests.evolution.test_research_worker import (
     NOW,
@@ -153,3 +155,59 @@ def test_failed_run_without_result_projects_error_provenance(tmp_path: Path) -> 
             "retryable": True,
         }
     ]
+
+
+def test_product_research_routes_expose_inbox_observability_and_value(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("DECISION_HUB_LLM_ENABLED", "0")
+    database, _event_id, run_id = _admitted_run(tmp_path)
+    report = asyncio.run(
+        DurableResearchWorker(
+            database,
+            FakeResearchRuntime(),
+            pack_root=PACK_ROOT,
+            clock=lambda: NOW,
+        ).tick()
+    )
+    assert report is not None and report.artifact_id is not None
+
+    with TestClient(create_app(database, source_connectors=[])) as client:
+        inbox = client.get("/v1/research/inbox")
+        observability = client.get(f"/v1/research/runs/{run_id}/observability")
+        evaluation = client.get(f"/v1/research/runs/{run_id}/value-evaluation")
+
+    assert inbox.status_code == 200
+    item = next(row for row in inbox.json()["items"] if row["run_id"] == run_id)
+    assert item["status"] == "research_only"
+    assert item["report_available"] is True
+    assert item["notification_status"] == "pending"
+    assert observability.status_code == 200
+    assert observability.json()["run_id"] == run_id
+    assert observability.json()["cost"]["status"] == "partial"
+    assert "subscription" in observability.json()["cost"]["unknown_components"]
+    assert evaluation.status_code == 200
+    assert evaluation.json()["mode"] == "research_only"
+    assert all(row["brier_score"] is None for row in evaluation.json()["outcomes"])
+
+
+def test_watch_without_run_is_visible_without_fabricated_run_id(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("DECISION_HUB_LLM_ENABLED", "0")
+    database, event_id, run_id = _admitted_run(tmp_path)
+    with database.session() as session:
+        session.query(RunRecord).filter_by(run_id=run_id).delete()
+    EventWatchService(database, clock=lambda: NOW).ensure_watch(
+        event_id=event_id,
+        source_id="official-calendar",
+        event_family="central_bank_speech",
+        scheduled_at=NOW.replace(hour=14),
+    )
+
+    with TestClient(create_app(database, source_connectors=[])) as client:
+        response = client.get("/v1/research/inbox")
+
+    assert response.status_code == 200
+    assert response.json()["items"][0]["status"] == "watching"
+    assert response.json()["items"][0]["run_id"] is None

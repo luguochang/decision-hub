@@ -6,6 +6,8 @@ from typing import Protocol
 from pydantic import BaseModel, ConfigDict, Field
 
 from packages.contracts_py.decision_hub_contracts.models import (
+    EventWindowCapture,
+    EventWindowSample,
     MarketQuote,
     NotificationMessage,
     SourceManifest,
@@ -56,6 +58,12 @@ class MarketWindowPort(Protocol):
     async def window(
         self, instrument: str, emitted_at: datetime, expires_at: datetime
     ) -> PriceWindow | None: ...
+
+
+class EventWindowSamplerPort(Protocol):
+    """Capture one due slot without exposing provider payloads to the Kernel."""
+
+    async def capture(self, sample: EventWindowSample) -> EventWindowCapture | None: ...
 
 
 class NotificationResult(BaseModel):

@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import os
 from datetime import UTC, datetime
+from typing import cast
 
 import pytest
 from mcp_types import CallToolResult
@@ -29,6 +30,14 @@ class _PassingFactServer:
                         "observed_at": datetime.now(UTC).isoformat(),
                     }
                 ],
+                "facts": [
+                    {
+                        "metric_family": "event.identity",
+                        "delay_class": "realtime",
+                        "event_offset": None,
+                    }
+                ],
+                "provider_attempts": [],
             },
         )
 
@@ -53,6 +62,10 @@ def test_fact_canary_disables_durable_progress_and_restores_environment(
     result = asyncio.run(fact_canary._run())
 
     assert result["status"] == "passed"
+    assert result["semantic_scope"] == "current_snapshot_adapter_health_only"
+    cases = cast(list[dict[str, object]], result["cases"])
+    assert len(cases) == 5
+    assert all(item["fact_count"] == 1 for item in cases)
     assert observed == {
         "durable_progress": "0",
         "capabilities": fact_canary.CAPABILITIES,

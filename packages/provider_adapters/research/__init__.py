@@ -8,6 +8,11 @@ from .replay import (
     load_replay_archive,
     load_replay_fixtures,
 )
+from .source_registry import (
+    ResearchSourceRegistry,
+    ResearchSourceRegistryError,
+    SourceLocatorDecision,
+)
 from .web_search import WebSearchResearchAdapter
 
 __all__ = [
@@ -24,4 +29,7 @@ __all__ = [
     "FactReplayVariant",
     "load_replay_archive",
     "load_replay_fixtures",
+    "ResearchSourceRegistry",
+    "ResearchSourceRegistryError",
+    "SourceLocatorDecision",
 ]

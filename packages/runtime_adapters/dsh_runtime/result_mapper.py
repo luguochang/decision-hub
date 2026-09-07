@@ -9,6 +9,7 @@ from pydantic import ValidationError
 
 from packages.contracts_py.decision_hub_contracts import (
     EvidenceCandidate,
+    FactEnvelope,
     ResearchPlan,
     ResearchRound,
     ResearchSessionRequest,
@@ -28,6 +29,7 @@ from packages.kernel.decision_hub_kernel.ports.runtime import AgentExecutionErro
 from .client import DshSdkRun
 from .tool_result_attestation import (
     extract_attested_capability_results,
+    extract_attested_synthesis_candidates,
 )
 
 
@@ -45,6 +47,7 @@ def map_session_result(
 
     incomplete = run.finish_reason != "completed"
     evidence = _trusted_evidence(run, request)
+    facts = _trusted_facts(run, request, evidence)
     if incomplete and not evidence:
         raise AgentExecutionError(
             "dsh_session_incomplete",
@@ -53,21 +56,29 @@ def map_session_result(
             origin="dsh",
             cause_code=run.finish_reason or "missing_finish_reason",
         )
-    try:
-        synthesis = ResearchSynthesisCandidate.model_validate_json(run.final_response)
-    except ValidationError as exc:
-        if incomplete:
-            synthesis = ResearchSynthesisCandidate(
-                schema_version="research-synthesis-candidate.v1",
-                request_id=request.request_id,
-                causal_case=None,
-                horizons=[],
-            )
-        else:
-            raise AgentExecutionError(
-                "structured_output_invalid",
-                "DSH returned a response that does not satisfy research-synthesis-candidate.v1",
-            ) from exc
+    captures = extract_attested_synthesis_candidates(
+        run.notifications,
+        expected_session_id=run.session_id,
+    )
+    if captures:
+        synthesis = captures[-1]
+    else:
+        try:
+            synthesis = ResearchSynthesisCandidate.model_validate_json(run.final_response)
+        except ValidationError as exc:
+            if incomplete:
+                synthesis = ResearchSynthesisCandidate(
+                    schema_version="research-synthesis-candidate.v1",
+                    request_id=request.request_id,
+                    causal_case=None,
+                    horizons=[],
+                )
+            else:
+                raise AgentExecutionError(
+                    "structured_output_invalid",
+                    "DSH returned neither an attested synthesis Tool result nor a response "
+                    "that satisfies research-synthesis-candidate.v1",
+                ) from exc
 
     if synthesis.request_id != request.request_id:
         raise AgentExecutionError(
@@ -80,6 +91,7 @@ def map_session_result(
         request.evidence_requirements,
         evidence,
         cutoff_at=_coverage_cutoff(request, evidence, finished_at),
+        facts=facts,
     )
     hard_gaps = [gap.requirement_id for gap in coverage.gaps if gap.importance == "hard"]
     trace_hash = _trace_hash(traces)
@@ -89,7 +101,11 @@ def map_session_result(
 
     research_round = ResearchRound(
         round=request.current_round,
-        plan=_trusted_plan(request, started_at),
+        plan=_trusted_plan(
+            request,
+            started_at,
+            allow_native_discovery=profile_ref.startswith("decision-research.web"),
+        ),
         tool_invocations=tool_invocations,
         tool_results=tool_results,
         new_evidence_refs=[item.evidence_id for item in evidence],
@@ -119,6 +135,7 @@ def map_session_result(
         status="degraded" if hard_gaps or incomplete else "completed",
         rounds=[research_round],
         evidence_candidates=evidence,
+        facts=facts,
         final_coverage=coverage,
         causal_case=synthesis.causal_case,
         horizons=synthesis.horizons,
@@ -166,6 +183,7 @@ def map_evidence_only_result(
     """
 
     evidence = _trusted_evidence(run, request)
+    facts = _trusted_facts(run, request, evidence)
     if not evidence:
         raise AgentExecutionError(
             failure_code,
@@ -177,11 +195,16 @@ def map_evidence_only_result(
         request.evidence_requirements,
         evidence,
         cutoff_at=_coverage_cutoff(request, evidence, finished_at),
+        facts=facts,
     )
     tool_invocations, tool_results = _trusted_tool_projection(run, request, traces)
     round_record = ResearchRound(
         round=request.current_round,
-        plan=_trusted_plan(request, started_at),
+        plan=_trusted_plan(
+            request,
+            started_at,
+            allow_native_discovery=profile_ref.startswith("decision-research.web"),
+        ),
         tool_invocations=tool_invocations,
         tool_results=tool_results,
         new_evidence_refs=[item.evidence_id for item in evidence],
@@ -202,6 +225,7 @@ def map_evidence_only_result(
         status="degraded",
         rounds=[round_record],
         evidence_candidates=evidence,
+        facts=facts,
         final_coverage=coverage,
         causal_case=None,
         horizons=[],
@@ -266,6 +290,53 @@ def _trusted_evidence(run: DshSdkRun, request: ResearchSessionRequest) -> list[E
             fingerprints[evidence.evidence_id] = fingerprint
             by_id[evidence.evidence_id] = evidence
     return list(by_id.values())
+
+
+def _trusted_facts(
+    run: DshSdkRun,
+    request: ResearchSessionRequest,
+    evidence: list[EvidenceCandidate],
+) -> list[FactEnvelope]:
+    allowed = frozenset(request.allowed_capabilities)
+    evidence_ids = {item.evidence_id for item in evidence}
+    by_id: dict[str, FactEnvelope] = {}
+    fingerprints: dict[str, str] = {}
+    for attested in extract_attested_capability_results(run.notifications):
+        result = attested.result
+        if result.capability_id not in allowed or not _result_belongs_to_request(
+            result.request_id,
+            request.request_id,
+            attested.tool_call_id,
+            attested.declared_request_id,
+        ):
+            continue
+        for fact in result.facts or []:
+            if fact.evidence_id not in evidence_ids:
+                raise AgentExecutionError(
+                    "dsh_fact_unattested",
+                    "allowed MCP result returned a fact without retained evidence",
+                    cause_code="fact_evidence_missing",
+                )
+            fingerprint = _fact_fingerprint(fact)
+            previous = fingerprints.get(fact.fact_id)
+            if previous is not None and previous != fingerprint:
+                raise AgentExecutionError(
+                    "dsh_fact_unattested",
+                    "allowed MCP results returned conflicting payloads for one fact id",
+                    cause_code="capability_fact_conflict",
+                )
+            fingerprints[fact.fact_id] = fingerprint
+            by_id[fact.fact_id] = fact
+    return list(by_id.values())
+
+
+def _fact_fingerprint(fact: FactEnvelope) -> str:
+    return json.dumps(
+        fact.model_dump(mode="json"),
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
 
 
 def _validate_synthesis_evidence_refs(
@@ -379,7 +450,12 @@ def _synthesis_evidence_ref_entries(
     return entries
 
 
-def _trusted_plan(request: ResearchSessionRequest, created_at: datetime) -> ResearchPlan:
+def _trusted_plan(
+    request: ResearchSessionRequest,
+    created_at: datetime,
+    *,
+    allow_native_discovery: bool = False,
+) -> ResearchPlan:
     requirement_by_id = {item.requirement_id: item for item in request.evidence_requirements}
     target_ids = [gap.requirement_id for gap in request.target_gaps]
     requirements = [
@@ -389,10 +465,12 @@ def _trusted_plan(request: ResearchSessionRequest, created_at: datetime) -> Rese
     tasks = [
         ResearchTask(
             task_id=f"round-{request.current_round}:{item.requirement_id}",
+            requirement_id=item.requirement_id,
             capability_id=_preferred_capability(
                 item.preferred_capabilities,
                 allowed,
                 execution_mode=request.execution_mode,
+                allow_native_discovery=allow_native_discovery,
             ),
             objective=item.description,
             question=item.description,
@@ -414,6 +492,7 @@ def _trusted_plan(request: ResearchSessionRequest, created_at: datetime) -> Rese
                     item.preferred_capabilities,
                     allowed,
                     execution_mode=request.execution_mode,
+                    allow_native_discovery=allow_native_discovery,
                 )
                 for item in requirements
             )
@@ -427,6 +506,7 @@ def _preferred_capability(
     allowed: tuple[str, ...],
     *,
     execution_mode: Literal["live", "replay"],
+    allow_native_discovery: bool = False,
 ) -> str:
     for capability_id in preferred:
         if capability_id in allowed:
@@ -436,6 +516,12 @@ def _preferred_capability(
     # replay-scoped; live requests must resolve through their declared ladder.
     if execution_mode == "replay" and "replay.research" in allowed:
         return "replay.research"
+    # Official DSH Web can use its native search tool as a discovery-only
+    # capability. It is intentionally not part of the Hub allowlist and can
+    # never create business Evidence; a later Hub Fetch/typed provider call is
+    # still required for attestation.
+    if allow_native_discovery and "web.search" in preferred:
+        return "dsh.native.web_search"
     raise AgentExecutionError(
         "research_capability_unavailable",
         "no allowed capability satisfies the requirement capability ladder",
@@ -594,6 +680,10 @@ def _capability_from_tool(
         request.allowed_capabilities
     ) == 1:
         return request.allowed_capabilities[0]
+    if tool_name == "web_search":
+        return "dsh.native.web_search"
+    if tool_name == "web_fetch":
+        return "dsh.native.web_fetch"
     normalized = "".join(
         character if character.isalnum() or character in {".", "_", "-"} else "_"
         for character in tool_name

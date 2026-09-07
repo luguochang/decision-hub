@@ -181,7 +181,10 @@ class CommitDecisionService:
                     payload_json=json.dumps({"artifact_id": artifact_id}),
                 )
             )
-            if gate.status.value in {"publish", "degraded"}:
+            # Every committed research Artifact is owner-visible, including a
+            # fail-closed research_only/reject report. Provider failures never
+            # reach this branch because they have no Artifact to notify.
+            if gate.status.value in {"publish", "degraded"} or research_result is not None:
                 session.add(
                     OutboxRecord(
                         artifact_id=artifact_id,

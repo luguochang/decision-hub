@@ -9,7 +9,7 @@ from sqlalchemy import create_engine, inspect, text
 from packages.kernel.decision_hub_kernel.persistence.db import Database
 
 ROOT = Path(__file__).resolve().parents[2]
-CURRENT_HEAD = "0027_durable_tool_budget"
+CURRENT_HEAD = "0030_research_value_evaluations"
 
 
 def upgrade(path: Path, revision: str) -> None:
@@ -76,6 +76,17 @@ def test_r1_0009_upgrades_to_current_head(tmp_path: Path) -> None:
     tables = inspect(create_engine(f"sqlite+pysqlite:///{path}")).get_table_names()
     assert {"evolution_jobs", "service_heartbeats"}.issubset(tables)
     assert "research_evidence" in tables
+    assert "research_facts" in tables
+    assert "event_watches" in tables
+    assert "event_window_samples" in tables
+    assert {
+        "evidence_id",
+        "requirement_id",
+        "metric_family",
+        "field",
+        "event_offset",
+        "payload_hash",
+    }.issubset(columns(path, "research_facts"))
     assert {"snapshot_type", "run_id", "generation", "created_at"}.issubset(
         columns(path, "snapshots")
     )
@@ -96,7 +107,15 @@ def test_r1_0009_upgrades_to_current_head(tmp_path: Path) -> None:
     assert {"generation", "dsh_session_id", "request_id", "request_hash", "prompt"}.issubset(
         columns(path, "dsh_session_prompts")
     )
+    assert "scheduled_at" in columns(path, "observations")
     assert {"admission_origin", "priority"}.issubset(columns(path, "runs"))
+    assert "research_value_evaluations" in tables
+    assert {
+        "run_id",
+        "artifact_id",
+        "evaluation_version",
+        "payload_hash",
+    }.issubset(columns(path, "research_value_evaluations"))
 
 
 def test_0025_preserves_historical_run_and_marks_it_legacy(tmp_path: Path) -> None:

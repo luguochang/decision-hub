@@ -15,6 +15,7 @@ from packages.contracts_py.decision_hub_contracts.models import (
     TextEnvelope,
 )
 from packages.kernel.decision_hub_kernel.application.admission import AdmissionService
+from packages.kernel.decision_hub_kernel.application.event_watch import EventWatchService
 from packages.kernel.decision_hub_kernel.application.run import RunService
 from packages.kernel.decision_hub_kernel.persistence.db import Database, utcnow
 from packages.kernel.decision_hub_kernel.ports.sources import SourceRegistryPort
@@ -56,6 +57,7 @@ class SourceIngestionService:
         clock: Callable[[], datetime] = utcnow,
         strategy_selector: RunStrategySelector | None = None,
         immediate_strategy_versions: Iterable[str] = ("baseline.v1",),
+        event_watches: EventWatchService | None = None,
     ) -> None:
         self.database = database
         self.registry = registry
@@ -64,6 +66,7 @@ class SourceIngestionService:
         self.clock = clock
         self.strategy_selector = strategy_selector or _baseline_strategy
         self.immediate_strategy_versions = frozenset(immediate_strategy_versions)
+        self.event_watches = event_watches or EventWatchService(database, clock=clock)
         for manifest in registry.manifests():
             self.database.ensure_source_state(manifest)
 
@@ -118,6 +121,15 @@ class SourceIngestionService:
             )
             targets: list[RunTarget] = []
             for event_id, envelope, _created in admitted:
+                if envelope.scheduled_at is not None:
+                    self.event_watches.ensure_watch(
+                        event_id=event_id,
+                        source_id=envelope.source_id,
+                        event_family=envelope.event_family
+                        or envelope.event_hint
+                        or "scheduled_event",
+                        scheduled_at=envelope.scheduled_at,
+                    )
                 strategies = tuple(
                     dict.fromkeys(
                         strategy
@@ -141,9 +153,11 @@ class SourceIngestionService:
                         idempotency_key=key,
                         strategy_version=strategy_version,
                         admission_origin="automatic",
+                        available_at=envelope.scheduled_at,
                     )
                     run = self.database.get_run_record(run_id)
-                    if strategy_version in self.immediate_strategy_versions and (
+                    due = envelope.scheduled_at is None or envelope.scheduled_at <= self.clock()
+                    if strategy_version in self.immediate_strategy_versions and due and (
                         run_created or (run and run.status == RunStatus.admitted.value)
                     ):
                         targets.append(

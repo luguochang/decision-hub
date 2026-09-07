@@ -30,6 +30,9 @@ import type {
   ResearchRunCommand,
   ResearchRunDetailView,
   ResearchRunView,
+  ResearchInboxItem,
+  ResearchObservabilityView,
+  ResearchValueEvaluation,
 } from '../api/types'
 import { PageTitle } from '../OperationsPage'
 
@@ -79,6 +82,12 @@ export function ResearchPage({ operations, operationsLoading, operationsFailed }
     refetchInterval: 3_000,
     retry: false,
   })
+  const inboxQuery = useQuery({
+    queryKey: ['research-inbox'],
+    queryFn: api.researchInbox,
+    refetchInterval: 5_000,
+    retry: false,
+  })
   const runs = runsQuery.data ?? []
   const displayRuns = useMemo(
     () => [...runs].sort((left, right) => Number(Boolean(left.parent_run_id)) - Number(Boolean(right.parent_run_id))),
@@ -98,6 +107,18 @@ export function ResearchPage({ operations, operationsLoading, operationsFailed }
     retry: false,
   })
   const detail = detailQuery.data
+  const observabilityQuery = useQuery({
+    queryKey: ['research-observability', selectedId],
+    queryFn: () => api.researchObservability(selectedId!),
+    enabled: Boolean(selectedId),
+    retry: false,
+  })
+  const valueEvaluationQuery = useQuery({
+    queryKey: ['research-value-evaluation', selectedId],
+    queryFn: () => api.researchValueEvaluation(selectedId!),
+    enabled: Boolean(selectedId),
+    retry: false,
+  })
   useResearchTrace(selectedId, detail?.run.latest_sequence_no ?? 0, queryClient)
 
   const submit = useMutation({
@@ -137,7 +158,10 @@ export function ResearchPage({ operations, operationsLoading, operationsFailed }
     active: runs.filter((item) => item.status === 'researching' || item.status === 'queued').length,
     gaps: runs.filter((item) => item.coverage?.status === 'insufficient').length,
     completed: runs.filter((item) => TERMINAL.has(item.status)).length,
-    cost: runs.reduce((sum, item) => sum + (item.run_id === detail?.run.run_id ? detail.estimated_cost_usd ?? 0 : 0), 0),
+    // The list endpoint intentionally does not carry cost. Do not present an
+    // incomplete aggregate as $0; only the selected detail can provide a
+    // known estimate and null remains visibly unknown.
+    cost: detail?.estimated_cost_usd ?? null,
   }), [runs, detail])
 
   return <div className="content-wrap research-page">
@@ -152,8 +176,9 @@ export function ResearchPage({ operations, operationsLoading, operationsFailed }
       <ResearchMetric icon={Activity} label="正在处理" value={stats.active} detail="Durable runs" tone="blue" />
       <ResearchMetric icon={ShieldAlert} label="证据不足" value={stats.gaps} detail="Open sufficiency gaps" tone="amber" />
       <ResearchMetric icon={CheckCircle2} label="已有终态" value={stats.completed} detail="Completed or bounded" tone="green" />
-      <ResearchMetric icon={CircleGauge} label="当前详情成本" value={`$${stats.cost.toFixed(4)}`} detail="Known estimate only" tone="neutral" />
+      <ResearchMetric icon={CircleGauge} label="选中任务成本" value={stats.cost === null ? '未知' : `$${stats.cost.toFixed(4)}`} detail="仅显示已知模型/工具估算" tone="neutral" />
     </section>
+    <ResearchInboxPanel inbox={inboxQuery.data?.items ?? []} loading={inboxQuery.isLoading} failed={inboxQuery.isError} onSelectRun={setSelectedId} />
     <div className="research-toolbar">
       <div><span className={`live-dot ${worker?.status !== 'online' ? 'warning' : ''}`} /><strong>{worker?.status === 'online' ? '后台研究循环在线' : '后台研究循环未确认在线'}</strong><small>{worker?.mode ?? 'mode unknown'} · {worker?.heartbeat_at ? formatDate(worker.heartbeat_at) : 'no heartbeat'}</small></div>
       <button className="button primary" onClick={() => setComposerOpen((value) => !value)}><FileSearch size={15} />提交研究材料</button>
@@ -169,10 +194,58 @@ export function ResearchPage({ operations, operationsLoading, operationsFailed }
         {detailQuery.isLoading && <ResearchState icon={Activity} text="正在读取规范化研究轨迹…" />}
         {detailQuery.isError && <ResearchState icon={AlertTriangle} text="研究详情不可用，未显示 raw JSON 或演示数据。" danger />}
         {!selectedId && !detailQuery.isLoading && <ResearchState icon={SearchCheck} text="选择一个研究任务查看计划、证据和结论。" />}
-        {detail && <ResearchRunDetail detail={detail} commandReason={commandReason} setCommandReason={setCommandReason} commandPending={command.isPending} commandError={command.isError ? command.error.message : null} onCommand={sendCommand} />}
+        {detail && <><ResearchDiagnostics observability={observabilityQuery.data} evaluation={valueEvaluationQuery.data} loading={observabilityQuery.isLoading || valueEvaluationQuery.isLoading} /><ResearchRunDetail detail={detail} commandReason={commandReason} setCommandReason={setCommandReason} commandPending={command.isPending} commandError={command.isError ? command.error.message : null} onCommand={sendCommand} /></>}
       </section>
     </div>
   </div>
+}
+
+const inboxStatusLabel: Record<ResearchInboxItem['status'], string> = {
+  watching: '观察中', queued: '排队中', researching: '研究中', report_ready: '报告就绪',
+  research_only: '仅研究', rejected: '已拒绝', failed: '失败', cancelled: '已取消',
+}
+const inboxBaselineLabel: Record<ResearchInboxItem['baseline_status'], string> = {
+  not_applicable: '无需基线', pending: '基线采集中', ready: '基线就绪', unavailable: '基线不可用',
+}
+const inboxNotificationLabel: Record<ResearchInboxItem['notification_status'], string> = {
+  not_applicable: '无需通知', pending: '通知待发送', retry_wait: '通知待重试',
+  delivered: '通知已送达', failed: '通知失败',
+}
+
+function ResearchInboxPanel({ inbox, loading, failed, onSelectRun }: { inbox: ResearchInboxItem[]; loading: boolean; failed: boolean; onSelectRun: (id: string) => void }) {
+  return <section className="panel research-inbox-panel" aria-label="Active research inbox">
+    <div className="panel-header">
+      <div><h2>主动研究 Inbox</h2><p>后台观察、事件触发、报告与通知状态</p></div>
+      <span>{loading ? '同步中' : String(inbox.length) + ' 项'}</span>
+    </div>
+    {failed && <ResearchState icon={AlertTriangle} text="主动研究 Inbox 不可用" danger />}
+    {!loading && !failed && inbox.length === 0 && <ResearchState icon={BookOpenCheck} text="暂无主动研究任务或观察事件" />}
+    {!failed && inbox.length > 0 && <div className="research-inbox-items">{inbox.slice(0, 8).map((item) => {
+      const canOpen = typeof item.run_id === 'string' && item.run_id.length > 0
+      return <button key={item.event_id + ':' + (item.run_id ?? 'watch')} className={'research-inbox-item ' + (canOpen ? 'interactive' : '')} disabled={!canOpen} onClick={() => canOpen && onSelectRun(item.run_id!)}>
+        <div className="research-inbox-heading"><span className={'research-status ' + inboxTone(item.status)}>{inboxStatusLabel[item.status]}</span><time>{formatRelative(item.updated_at)}</time></div>
+        <strong>{item.event_title}</strong>
+        <small>{item.event_family ?? '未分类事件'} · {inboxBaselineLabel[item.baseline_status]} · {inboxNotificationLabel[item.notification_status]}</small>
+        <div className="research-inbox-meta"><span>{item.gate_status ?? '待裁决'}</span>{item.headline && <span>{item.headline}</span>}{item.next_recheck_at && <span>复查 {formatDate(item.next_recheck_at)}</span>}</div>
+        {!canOpen && <em>观察中，尚未触发研究</em>}
+      </button>
+    })}</div>}
+  </section>
+}
+
+function inboxTone(status: ResearchInboxItem['status']) {
+  return status === 'report_ready' ? 'success' : status === 'failed' || status === 'rejected' || status === 'cancelled' ? 'danger' : status === 'research_only' ? 'warning' : 'running'
+}
+
+function ResearchDiagnostics({ observability, evaluation, loading }: { observability?: ResearchObservabilityView; evaluation?: ResearchValueEvaluation | null; loading: boolean }) {
+  if (loading && !observability && !evaluation) return <div className="research-diagnostics loading">正在读取版本、来源和成本投影…</div>
+  if (!observability && !evaluation) return <div className="research-diagnostics unavailable">当前任务暂无可用的可观测或价值评估记录</div>
+  return <section className="research-diagnostics" aria-label="Research observability and evaluation">
+    <div className="diagnostic-grid">
+      {observability && <><div><span>运行版本</span><strong>{observability.versions.runtime_id} · {observability.versions.runtime_version}</strong><small>{observability.versions.domain_pack_ref} · {observability.versions.domain_pack_version}</small></div><div><span>来源尝试</span><strong>{observability.source_attempts.length} 次</strong><small>{observability.readiness.filter((item) => item.status !== 'ready').length} 个 requirement 未就绪</small></div><div><span>成本</span><strong>{observability.cost.status === 'known' && observability.cost.total_usd !== null ? '$' + observability.cost.total_usd.toFixed(4) : '未知/部分'}</strong><small>{observability.cost.unknown_components.length ? observability.cost.unknown_components.join(' · ') : '全部组件已归集'}</small></div></>}
+      {evaluation && <div><span>研究价值</span><strong>{evaluation.usefulness === 'unlabeled' ? '尚未标注' : evaluation.usefulness}</strong><small>{evaluation.mode} · {Math.round(evaluation.citation_traceability * 100)}% 引用可追溯</small></div>}
+    </div>
+  </section>
 }
 
 function useResearchTrace(selectedId: string | null, after: number, queryClient: ReturnType<typeof useQueryClient>) {

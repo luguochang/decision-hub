@@ -15,6 +15,8 @@ from packages.contracts_py.decision_hub_contracts import (
 from packages.kernel.decision_hub_kernel.application.dsh_sessions import (
     DshSessionLinkService,
 )
+from packages.kernel.decision_hub_kernel.application.event_watch import EventWatchService
+from packages.kernel.decision_hub_kernel.application.fact_store import ResearchFactStore
 from packages.kernel.decision_hub_kernel.application.research_evidence import (
     ResearchCapabilityError,
     ResearchEvidenceService,
@@ -41,19 +43,26 @@ class DurableResearchCapabilityGateway:
         observability: ResearchObservabilityService,
         *,
         requirements: Mapping[str, EvidenceRequirement],
+        event_watches: EventWatchService | None = None,
         clock: Callable[[], datetime] = utcnow,
     ) -> None:
         self.inner = inner
         self.links = links
         self.evidence = evidence
+        self.facts = ResearchFactStore(evidence.database)
         self.observability = observability
         self.requirements = dict(requirements)
+        self.event_watches = event_watches
         self.clock = clock
 
     async def execute(self, query: ResearchCapabilityQuery) -> ResearchCapabilityResult:
-        run_id, link = self._validate_session(query)
+        run_id, link, run_event_id = self._validate_session(query)
         try:
-            effective_query = self._effective_query(query, link.deadline_at)
+            effective_query = self._effective_query(
+                query,
+                link.deadline_at,
+                expected_event_id=run_event_id,
+            )
         except ResearchCapabilityError as exc:
             await self._trace(
                 query,
@@ -185,15 +194,19 @@ class DurableResearchCapabilityGateway:
 
         try:
             persistence_cutoff = (
-                result.completed_at
-                if effective_query.mode == "live"
-                else effective_query.cutoff_at
+                result.completed_at if effective_query.mode == "live" else effective_query.cutoff_at
             )
             accepted = self.evidence.accept_candidates(
                 run_id=run_id,
                 capability_id=effective_query.capability_id,
                 candidates=result.evidence_candidates,
                 requirements=self.requirements,
+                cutoff_at=persistence_cutoff,
+            )
+            accepted_facts = self.facts.accept_facts(
+                run_id=run_id,
+                capability_id=effective_query.capability_id,
+                facts=result.facts or [],
                 cutoff_at=persistence_cutoff,
             )
         except asyncio.CancelledError:
@@ -217,7 +230,9 @@ class DurableResearchCapabilityGateway:
             )
             raise error from exc
 
-        persisted = result.model_copy(update={"evidence_candidates": accepted})
+        persisted = result.model_copy(
+            update={"evidence_candidates": accepted, "facts": accepted_facts}
+        )
         self.observability.complete_tool_call(
             run_id=run_id,
             request_id=effective_query.request_id,
@@ -236,7 +251,7 @@ class DurableResearchCapabilityGateway:
 
     def _validate_session(
         self, query: ResearchCapabilityQuery
-    ) -> tuple[str, DshRunSessionLinkView]:
+    ) -> tuple[str, DshRunSessionLinkView, str]:
         link = self.links.get_by_session(query.research_session_id)
         if link is None:
             raise ResearchCapabilityError(
@@ -281,12 +296,31 @@ class DurableResearchCapabilityGateway:
                     capability_id=query.capability_id,
                     tool_call_id=query.request_id,
                 )
-        return link.run_id, link
+            if query.requested_event_offsets and query.event_id is None:
+                raise ResearchCapabilityError(
+                    "research_event_lineage_mismatch",
+                    "event-window offsets require an explicit event_id",
+                    origin="gateway",
+                    capability_id=query.capability_id,
+                    tool_call_id=query.request_id,
+                )
+            if query.event_id is not None and query.event_id != run.event_id:
+                raise ResearchCapabilityError(
+                    "research_event_lineage_mismatch",
+                    "capability event_id does not match the linked Hub Run",
+                    origin="gateway",
+                    capability_id=query.capability_id,
+                    tool_call_id=query.request_id,
+                )
+            run_event_id = run.event_id
+        return link.run_id, link, run_event_id
 
-    @staticmethod
     def _effective_query(
+        self,
         query: ResearchCapabilityQuery,
         deadline_at: datetime | None,
+        *,
+        expected_event_id: str,
     ) -> ResearchCapabilityQuery:
         """Clamp live capability PIT to the accepted durable DSH deadline.
 
@@ -297,8 +331,76 @@ class DurableResearchCapabilityGateway:
         time below, so the run ceiling is not used as an age calculation.
         """
 
+        update: dict[str, object] = {}
+        if query.event_id is not None:
+            if query.event_id != expected_event_id:
+                raise ResearchCapabilityError(
+                    "research_event_lineage_mismatch",
+                    "capability event_id does not match the linked Hub Run",
+                    origin="gateway",
+                    capability_id=query.capability_id,
+                    tool_call_id=query.request_id,
+                )
+            if query.requested_event_offsets:
+                if self.event_watches is None:
+                    raise ResearchCapabilityError(
+                        "research_event_watch_not_found",
+                        "event-window query requires the EventWatch service",
+                        origin="gateway",
+                        capability_id=query.capability_id,
+                        tool_call_id=query.request_id,
+                    )
+                watch = self.event_watches.get_watch_by_event_id(query.event_id)
+                if watch is None:
+                    raise ResearchCapabilityError(
+                        "research_event_watch_not_found",
+                        "event-window query has no durable EventWatch",
+                        origin="gateway",
+                        capability_id=query.capability_id,
+                        tool_call_id=query.request_id,
+                    )
+                requested = tuple(query.requested_event_offsets)
+                if any(offset not in watch.window_offsets for offset in requested):
+                    raise ResearchCapabilityError(
+                        "research_event_window_offset_invalid",
+                        "event-window query requests an offset outside the durable watch",
+                        origin="gateway",
+                        capability_id=query.capability_id,
+                        tool_call_id=query.request_id,
+                    )
+                samples = {
+                    item.offset: item
+                    for item in self.event_watches.list_event_samples(query.event_id)
+                }
+                selected = [samples[offset] for offset in requested if offset in samples]
+                if not selected:
+                    raise ResearchCapabilityError(
+                        "research_event_watch_not_found",
+                        "event-window query has no durable sample slots",
+                        origin="gateway",
+                        capability_id=query.capability_id,
+                        tool_call_id=query.request_id,
+                    )
+                event_at = watch.scheduled_at.astimezone(UTC)
+                window_start = min(item.target_at for item in selected).astimezone(UTC)
+                window_end = max(item.target_at for item in selected).astimezone(UTC)
+                for field, trusted in (
+                    ("event_at", event_at),
+                    ("window_start_at", window_start),
+                    ("window_end_at", window_end),
+                ):
+                    supplied = getattr(query, field)
+                    if supplied is not None and supplied.astimezone(UTC) != trusted:
+                        raise ResearchCapabilityError(
+                            "research_event_time_mismatch",
+                            f"{field} conflicts with the durable EventWatch",
+                            origin="gateway",
+                            capability_id=query.capability_id,
+                            tool_call_id=query.request_id,
+                        )
+                    update[field] = trusted
         if query.mode != "live":
-            return query
+            return query.model_copy(update=update) if update else query
         if deadline_at is None:
             raise ResearchCapabilityError(
                 "research_deadline_unavailable",
@@ -318,7 +420,8 @@ class DurableResearchCapabilityGateway:
                 tool_call_id=query.request_id,
             )
         effective_cutoff = min(query.cutoff_at, deadline_at.astimezone(UTC))
-        return query.model_copy(update={"cutoff_at": effective_cutoff})
+        update["cutoff_at"] = effective_cutoff
+        return query.model_copy(update=update)
 
     async def _trace(
         self,
@@ -353,9 +456,7 @@ class DurableResearchCapabilityGateway:
         query: ResearchCapabilityQuery, exc: Exception
     ) -> ResearchCapabilityError:
         error_code = (
-            str(exc)
-            if str(exc).startswith("research_")
-            else "research_evidence_persist_failed"
+            str(exc) if str(exc).startswith("research_") else "research_evidence_persist_failed"
         )
         return ResearchCapabilityError(
             error_code,
@@ -384,4 +485,5 @@ def _error_from_provenance(error: ErrorProvenance) -> ResearchCapabilityError:
         capability_id=error.capability_id,
         tool_call_id=error.tool_call_id,
         deadline_ms=error.deadline_ms,
+        provider_attempts=error.provider_attempts or [],
     )
