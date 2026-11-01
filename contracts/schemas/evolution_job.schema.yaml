@@ -24,6 +24,14 @@ $defs:
     additionalProperties: false
     required: [proposal_id, candidate_type, version, parent_version, summary, changes, rationale, evidence_refs]
     properties:
+      execution_scope: {type: [string, 'null'], enum: [directional_synthesis, research_harness, null]}
+      execution_rules:
+        type: [array, 'null']
+        minItems: 1
+        uniqueItems: true
+        items:
+          type: string
+          enum: [cite_frozen_evidence, separate_missing_evidence, examine_counter_evidence, abstain_on_conflicting_evidence]
       proposal_id: {type: string, minLength: 1}
       candidate_type: {type: string, enum: [strategy, runtime, profile, doctrine, provider_policy]}
       version: {type: string, minLength: 1}
@@ -88,7 +96,7 @@ $defs:
       trigger_key: {type: string, minLength: 1, maxLength: 512}
       trigger_type: {type: string, enum: [scheduled, feedback, failure_pattern, evaluation_batch]}
       domain_pack_ref: {type: string, minLength: 1}
-      status: {type: string, enum: [queued, running, retry_wait, pending_owner_review, completed, failed, cancelled]}
+      status: {type: string, enum: [queued, running, retry_wait, waiting_inputs, pending_owner_review, completed, failed, cancelled]}
       stage: {type: string, enum: [discover, plan, candidate, replay, holdout, shadow, review]}
       input_refs: {type: array, minItems: 1, items: {type: string, minLength: 1}}
       candidate_id: {type: [string, 'null']}
@@ -109,7 +117,7 @@ $defs:
     required: [service_id, role, instance_id, version, mode, status, interval_seconds, started_at, heartbeat_at, last_error_code]
     properties:
       service_id: {type: string, minLength: 1}
-      role: {type: string, enum: [api, realtime_worker, research_worker, evolution_worker]}
+      role: {type: string, enum: [api, realtime_worker, research_worker, documents_worker, historical_worker, evolution_worker]}
       instance_id: {type: [string, 'null'], minLength: 1}
       version: {type: [string, 'null'], minLength: 1}
       mode: {type: [string, 'null'], minLength: 1}
@@ -138,6 +146,7 @@ $defs:
       queued: {type: integer, minimum: 0}
       running: {type: integer, minimum: 0}
       retry_wait: {type: integer, minimum: 0}
+      waiting_inputs: {type: integer, minimum: 0, default: 0}
       pending_owner_review: {type: integer, minimum: 0}
       completed: {type: integer, minimum: 0}
       failed: {type: integer, minimum: 0}

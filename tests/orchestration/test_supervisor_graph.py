@@ -146,6 +146,8 @@ def test_supervisor_fails_closed_after_one_replan() -> None:
         asyncio.run(graph.ainvoke(candidate_input()))
 
     assert raised.value.error_code == "research_coverage_missing"
+    assert raised.value.retryable is True
+    assert raised.value.cause_code == "provider_unavailable"
     assert runtime.roles.count("counter_thesis") == 2
 
 

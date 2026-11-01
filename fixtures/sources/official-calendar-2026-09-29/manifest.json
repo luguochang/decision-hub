@@ -1,0 +1,17 @@
+{
+  "fed-calendar": {
+    "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+    "sha256": "6af8eed7cf9a6fb680fb8cb29c911274845fe079cb59202a7078b8ea2e065e21",
+    "origin": "audit capture"
+  },
+  "boj-calendar": {
+    "url": "https://www.boj.or.jp/en/mopo/mpmsche_minu/",
+    "sha256": "97914456e970e17151d166d1681b91f1f254228d2cad0d1217f98d1649871619",
+    "origin": "audit capture"
+  },
+  "ecb-calendar": {
+    "url": "https://www.ecb.europa.eu/press/calendars/mgcgc/html/index.en.html",
+    "sha256": "fc23d64a4fd56ab38623f6a51cd172c2fdb14d20e7041d4896604105e34de777",
+    "origin": "live fetch"
+  }
+}

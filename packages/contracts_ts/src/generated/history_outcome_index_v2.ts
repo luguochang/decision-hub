@@ -1,0 +1,21 @@
+// Generated from contracts/schemas/*.schema.yaml. Do not edit.
+import { z } from 'zod'
+
+type IndexItemRelation = { protocol_id: string; prepared_registered_at: string; independently_confirmed_registered_at: string | null; first_hour: string; last_hour: string; state: 'prepared' | 'confirmed' }
+function outcomeIndexItemRelation(v: IndexItemRelation, ctx: z.RefinementCtx) {
+  const first = Date.parse(v.first_hour), last = Date.parse(v.last_hour), prepared = Date.parse(v.prepared_registered_at)
+  const accepted = v.independently_confirmed_registered_at === null ? null : Date.parse(v.independently_confirmed_registered_at)
+  if (last - first !== 23 * 3600000 || first % 3600000 !== 0 || prepared >= first || (v.state === 'confirmed') !== (accepted !== null) || (accepted !== null && !(prepared <= accepted && accepted < first))) ctx.addIssue({ code: 'custom', message: 'history_outcome_index_protocol_clock_invalid' })
+}
+function outcomeIndexRelation(v: { actual_as_of: string; evaluations: IndexItemRelation[] }, ctx: z.RefinementCtx) {
+  const rows = v.evaluations, asof = Date.parse(v.actual_as_of)
+  const sorted = [...rows].sort((a, b) => Date.parse(b.first_hour) - Date.parse(a.first_hour) || a.protocol_id.localeCompare(b.protocol_id))
+  if (new Set(rows.map(row => row.protocol_id)).size !== rows.length || rows.some((row, i) => row.protocol_id !== sorted[i].protocol_id || Date.parse(row.prepared_registered_at) > asof || (row.independently_confirmed_registered_at !== null && Date.parse(row.independently_confirmed_registered_at) > asof))) ctx.addIssue({ code: 'custom', message: 'history_outcome_index_order_or_clock_invalid' })
+}
+
+
+export const historyOutcomeIndexItemV2Schema = /* @__PURE__ */ (() => (z.object({ "protocol_id": z.string().regex(new RegExp("^heval2_[a-f0-9]{48}$")), "prepared_registered_at": z.string().datetime({ offset: true }).regex(new RegExp("^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$")), "independently_confirmed_registered_at": z.string().datetime({ offset: true }).regex(new RegExp("^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$")).nullable(), "first_hour": z.string().datetime({ offset: true }).regex(new RegExp("^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:00:00(?:\\.0{1,6})?(?:Z|\\+00:00)$")), "last_hour": z.string().datetime({ offset: true }).regex(new RegExp("^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:00:00(?:\\.0{1,6})?(?:Z|\\+00:00)$")), "expected_total": z.literal(48), "state": z.enum(["prepared","confirmed"]), "fixture_mode": z.literal(false) }).strict().superRefine(outcomeIndexItemRelation)))()
+export type HistoryOutcomeIndexItemV2 = z.infer<typeof historyOutcomeIndexItemV2Schema>
+
+export const historyOutcomeIndexV2Schema = /* @__PURE__ */ (() => (z.object({ "schema_version": z.literal("history-outcome-index.v2"), "owner_authenticated": z.literal(true), "actual_as_of": z.string().datetime({ offset: true }).regex(new RegExp("^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$")), "evaluations": z.array(z.object({ "protocol_id": z.string().regex(new RegExp("^heval2_[a-f0-9]{48}$")), "prepared_registered_at": z.string().datetime({ offset: true }).regex(new RegExp("^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$")), "independently_confirmed_registered_at": z.string().datetime({ offset: true }).regex(new RegExp("^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$")).nullable(), "first_hour": z.string().datetime({ offset: true }).regex(new RegExp("^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:00:00(?:\\.0{1,6})?(?:Z|\\+00:00)$")), "last_hour": z.string().datetime({ offset: true }).regex(new RegExp("^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:00:00(?:\\.0{1,6})?(?:Z|\\+00:00)$")), "expected_total": z.literal(48), "state": z.enum(["prepared","confirmed"]), "fixture_mode": z.literal(false) }).strict().superRefine(outcomeIndexItemRelation)).max(16), "current_originals_verified": z.literal(false), "financial_qualified": z.literal(false), "promotion_allowed": z.literal(false) }).strict().superRefine(outcomeIndexRelation)))()
+export type HistoryOutcomeIndexV2 = z.infer<typeof historyOutcomeIndexV2Schema>

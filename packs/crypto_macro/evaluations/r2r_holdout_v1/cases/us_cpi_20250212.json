@@ -1,0 +1,355 @@
+{
+  "schema_version": "research-evaluation-case.v1",
+  "case_id": "us_cpi_20250212",
+  "event_family": "inflation_release",
+  "input_text": "US CPI rose 0.5 percent in January 2025 and 3.0 percent over twelve months.",
+  "trigger_evidence": {
+    "evidence_id": "trigger_us_cpi_20250212",
+    "kind": "transcript",
+    "authority": "unverified",
+    "source_id": "evaluation-catalog",
+    "source_url": "https://www.bls.gov/news.release/archives/cpi_02122025.htm",
+    "published_at": "2025-02-12T13:30:00Z",
+    "observed_at": "2025-02-12T13:30:00Z",
+    "received_at": "2025-02-12T13:30:02Z",
+    "content_hash": "28bce96bfba4d6f77bf92f2e67a395990bcc6fb6e2de1d8b63a087de690a11a7",
+    "excerpt": "US CPI rose 0.5 percent in January 2025 and 3.0 percent over twelve months."
+  },
+  "evidence_requirements": [
+    {
+      "requirement_id": "event_identity",
+      "description": "Identify the primary event, speaker or document, event time and revision status.",
+      "importance": "hard",
+      "source_priority": [
+        "official",
+        "verified_web"
+      ],
+      "authority_floor": "official",
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "freshness_seconds": 604800,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "confidence_cap": 0.45,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "policy_or_data_delta",
+      "description": "Establish what changed relative to prior wording, prior value or consensus.",
+      "importance": "hard",
+      "source_priority": [
+        "official",
+        "audited_aggregator",
+        "verified_web"
+      ],
+      "authority_floor": "official",
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "freshness_seconds": 86400,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "confidence_cap": 0.5,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "expectation_pricing",
+      "description": "Observe policy expectations, rates repricing or credible positioning evidence.",
+      "importance": "hard",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 900,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "confidence_cap": 0.55,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "macro_transmission",
+      "description": "Observe the rates and USD transmission path relevant to the event.",
+      "importance": "hard",
+      "source_priority": [
+        "official",
+        "exchange",
+        "audited_aggregator"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "official.macro",
+        "web.search"
+      ],
+      "freshness_seconds": 300,
+      "minimum_independent_sources": 2,
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "confidence_cap": 0.55,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "cross_asset_confirmation",
+      "description": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation.",
+      "importance": "soft",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ],
+      "authority_floor": "verified_web",
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 300,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "confidence_cap": 0.65,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "crypto_spot_confirmation",
+      "description": "Observe BTC spot reaction, volume and the event-time comparison window.",
+      "importance": "hard",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "freshness_seconds": 60,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [],
+      "confidence_cap": 0.5,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "derivatives_crowding",
+      "description": "Observe funding, open interest, basis and available liquidation or flow evidence.",
+      "importance": "hard",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "freshness_seconds": 60,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [],
+      "confidence_cap": 0.5,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "counter_thesis",
+      "description": "Build the strongest evidence-backed alternative transmission chain.",
+      "importance": "soft",
+      "source_priority": [
+        "official",
+        "exchange",
+        "verified_web"
+      ],
+      "authority_floor": "verified_web",
+      "preferred_capabilities": [
+        "official.macro",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 86400,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "confidence_cap": 0.7,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    }
+  ],
+  "expected_hard_requirement_ids": [
+    "event_identity",
+    "policy_or_data_delta",
+    "expectation_pricing",
+    "macro_transmission",
+    "crypto_spot_confirmation",
+    "derivatives_crowding"
+  ],
+  "archived_capability_fixtures": [
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "event_identity",
+      "query_aliases": [
+        "us_cpi_20250212:event_identity",
+        "Verify event identity for us_cpi_20250212"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_49d46bfb1950dad3e94ca15436dd5fe2",
+          "requirement_id": "event_identity",
+          "kind": "official",
+          "authority": "official",
+          "source_id": "bls.gov",
+          "source_url": "https://www.bls.gov/news.release/archives/cpi_02122025.htm",
+          "published_at": "2025-02-12T13:30:00Z",
+          "observed_at": "2025-02-12T13:30:01Z",
+          "received_at": "2025-02-12T13:30:02Z",
+          "content_hash": "49d46bfb1950dad3e94ca15436dd5fe2c2f61fb4d4f4b57a3b6aefab123a7b69",
+          "excerpt": "The Bureau of Labor Statistics released January 2025 Consumer Price Index data on February 12, 2025.",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:us_cpi_20250212:event_identity",
+          "research_session_id": "archive:us_cpi_20250212",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ]
+    },
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "policy_or_data_delta",
+      "query_aliases": [
+        "us_cpi_20250212:policy_or_data_delta",
+        "Verify policy or data delta for us_cpi_20250212"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_f46bb7a9a29ac3b5fa6e96bcf94f21d3",
+          "requirement_id": "policy_or_data_delta",
+          "kind": "official",
+          "authority": "official",
+          "source_id": "bls.gov",
+          "source_url": "https://www.bls.gov/news.release/archives/cpi_02122025.htm",
+          "published_at": "2025-02-12T13:30:00Z",
+          "observed_at": "2025-02-12T13:30:01Z",
+          "received_at": "2025-02-12T13:30:02Z",
+          "content_hash": "f46bb7a9a29ac3b5fa6e96bcf94f21d360a492df06da8a2844654f247263eff6",
+          "excerpt": "The all-items index increased 0.5 percent in January and 3.0 percent over the twelve months ending January.",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:us_cpi_20250212:policy_or_data_delta",
+          "research_session_id": "archive:us_cpi_20250212",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ]
+    }
+  ],
+  "cutoff_at": "2025-02-12T13:35:00Z",
+  "outcome_available_at": null,
+  "outcome_labels": [],
+  "source_refs": [
+    "https://www.bls.gov/news.release/archives/cpi_02122025.htm"
+  ]
+}

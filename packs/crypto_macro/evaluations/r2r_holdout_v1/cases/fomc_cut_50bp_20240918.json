@@ -1,0 +1,355 @@
+{
+  "schema_version": "research-evaluation-case.v1",
+  "case_id": "fomc_cut_50bp_20240918",
+  "event_family": "monetary_policy_decision",
+  "input_text": "The FOMC lowered the federal funds target range by 50 basis points to 4.75-5.00 percent.",
+  "trigger_evidence": {
+    "evidence_id": "trigger_fomc_cut_50bp_20240918",
+    "kind": "transcript",
+    "authority": "unverified",
+    "source_id": "evaluation-catalog",
+    "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20240918a.htm",
+    "published_at": "2024-09-18T18:00:00Z",
+    "observed_at": "2024-09-18T18:00:00Z",
+    "received_at": "2024-09-18T18:00:02Z",
+    "content_hash": "024ee9fa9d1cf2c6d38e88adf554c8906df6b1ab16d0abe097b3ab92acd6e18e",
+    "excerpt": "The FOMC lowered the federal funds target range by 50 basis points to 4.75-5.00 percent."
+  },
+  "evidence_requirements": [
+    {
+      "requirement_id": "event_identity",
+      "description": "Identify the primary event, speaker or document, event time and revision status.",
+      "importance": "hard",
+      "source_priority": [
+        "official",
+        "verified_web"
+      ],
+      "authority_floor": "official",
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "freshness_seconds": 604800,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "confidence_cap": 0.45,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "policy_or_data_delta",
+      "description": "Establish what changed relative to prior wording, prior value or consensus.",
+      "importance": "hard",
+      "source_priority": [
+        "official",
+        "audited_aggregator",
+        "verified_web"
+      ],
+      "authority_floor": "official",
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "freshness_seconds": 86400,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "confidence_cap": 0.5,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "expectation_pricing",
+      "description": "Observe policy expectations, rates repricing or credible positioning evidence.",
+      "importance": "hard",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 900,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "confidence_cap": 0.55,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "macro_transmission",
+      "description": "Observe the rates and USD transmission path relevant to the event.",
+      "importance": "hard",
+      "source_priority": [
+        "official",
+        "exchange",
+        "audited_aggregator"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "official.macro",
+        "web.search"
+      ],
+      "freshness_seconds": 300,
+      "minimum_independent_sources": 2,
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "confidence_cap": 0.55,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "cross_asset_confirmation",
+      "description": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation.",
+      "importance": "soft",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ],
+      "authority_floor": "verified_web",
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 300,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "confidence_cap": 0.65,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "crypto_spot_confirmation",
+      "description": "Observe BTC spot reaction, volume and the event-time comparison window.",
+      "importance": "hard",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "freshness_seconds": 60,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [],
+      "confidence_cap": 0.5,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "derivatives_crowding",
+      "description": "Observe funding, open interest, basis and available liquidation or flow evidence.",
+      "importance": "hard",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "freshness_seconds": 60,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [],
+      "confidence_cap": 0.5,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "counter_thesis",
+      "description": "Build the strongest evidence-backed alternative transmission chain.",
+      "importance": "soft",
+      "source_priority": [
+        "official",
+        "exchange",
+        "verified_web"
+      ],
+      "authority_floor": "verified_web",
+      "preferred_capabilities": [
+        "official.macro",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 86400,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "confidence_cap": 0.7,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    }
+  ],
+  "expected_hard_requirement_ids": [
+    "event_identity",
+    "policy_or_data_delta",
+    "expectation_pricing",
+    "macro_transmission",
+    "crypto_spot_confirmation",
+    "derivatives_crowding"
+  ],
+  "archived_capability_fixtures": [
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "event_identity",
+      "query_aliases": [
+        "fomc_cut_50bp_20240918:event_identity",
+        "Verify event identity for fomc_cut_50bp_20240918"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_af94dde6cf8d1c0633c46358617127d6",
+          "requirement_id": "event_identity",
+          "kind": "official",
+          "authority": "official",
+          "source_id": "federalreserve.gov",
+          "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20240918a.htm",
+          "published_at": "2024-09-18T18:00:00Z",
+          "observed_at": "2024-09-18T18:00:01Z",
+          "received_at": "2024-09-18T18:00:02Z",
+          "content_hash": "af94dde6cf8d1c0633c46358617127d61ec474769a129eccd5b5b0144d229e15",
+          "excerpt": "The Federal Reserve published its September 18, 2024 monetary policy decision.",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:fomc_cut_50bp_20240918:event_identity",
+          "research_session_id": "archive:fomc_cut_50bp_20240918",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ]
+    },
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "policy_or_data_delta",
+      "query_aliases": [
+        "fomc_cut_50bp_20240918:policy_or_data_delta",
+        "Verify policy or data delta for fomc_cut_50bp_20240918"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_b799af99928b328f97f99ffeb469b003",
+          "requirement_id": "policy_or_data_delta",
+          "kind": "official",
+          "authority": "official",
+          "source_id": "federalreserve.gov",
+          "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20240918a.htm",
+          "published_at": "2024-09-18T18:00:00Z",
+          "observed_at": "2024-09-18T18:00:01Z",
+          "received_at": "2024-09-18T18:00:02Z",
+          "content_hash": "b799af99928b328f97f99ffeb469b0034ae5561e3e36405f441cc9b5dfb4b73f",
+          "excerpt": "The Committee lowered the target range for the federal funds rate by one-half percentage point to 4.75 to 5 percent.",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:fomc_cut_50bp_20240918:policy_or_data_delta",
+          "research_session_id": "archive:fomc_cut_50bp_20240918",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ]
+    }
+  ],
+  "cutoff_at": "2024-09-18T18:05:00Z",
+  "outcome_available_at": null,
+  "outcome_labels": [],
+  "source_refs": [
+    "https://www.federalreserve.gov/newsevents/pressreleases/monetary20240918a.htm"
+  ]
+}

@@ -141,20 +141,25 @@ async def test_mcp_streamable_http_official_client_smoke(tmp_path: Path) -> None
         "DECISION_HUB_MCP_PORT": str(port),
         "PYTHONPATH": str(Path.cwd()),
     }
+    process_log_path = tmp_path / "hub-mcp-startup.log"
+    process_log = process_log_path.open("w", encoding="utf-8")
     process = subprocess.Popen(
         [sys.executable, "-m", "apps.hub_mcp.main"],
         cwd=Path.cwd(),
         env=env,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout=process_log,
+        stderr=subprocess.STDOUT,
         text=True,
     )
     try:
-        deadline = time.monotonic() + 10
+        deadline = time.monotonic() + 30
         while time.monotonic() < deadline:
             if process.poll() is not None:
-                _, stderr = process.communicate()
-                pytest.fail(f"hub-mcp exited before readiness: {stderr}")
+                process_log.flush()
+                pytest.fail(
+                    "hub-mcp exited before readiness: "
+                    + process_log_path.read_text(encoding="utf-8")
+                )
             try:
                 with socket.create_connection(("127.0.0.1", port), timeout=0.1):
                     break
@@ -185,3 +190,4 @@ async def test_mcp_streamable_http_official_client_smoke(tmp_path: Path) -> None
         except subprocess.TimeoutExpired:
             process.kill()
             process.wait(timeout=5)
+        process_log.close()

@@ -50,7 +50,7 @@ class OrchestrationLineage(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    mode: Literal["fixed_graph", "supervisor_candidate"]
+    mode: Literal["fixed_graph", "supervisor_candidate", "dsh_native", "unknown"]
     supervisor_role: str | None
     planned_capabilities: list[str]
     required_capabilities: list[str]

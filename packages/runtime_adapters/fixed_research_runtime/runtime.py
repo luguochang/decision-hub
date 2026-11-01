@@ -66,23 +66,29 @@ class FixedResearchRuntime:
         try:
             with tempfile.TemporaryDirectory(prefix="decision-hub-fixed-eval-") as raw:
                 database = Database(f"sqlite+pysqlite:///{Path(raw) / 'fixed.sqlite3'}")
-                database.create_all()
-                service = build_analyze_text_service(
-                    database,
-                    self._runtime,
-                    run_timeout_seconds=remaining,
-                    strategy_version="fixed-baseline.v1",
-                    admission_clock=lambda: trigger.received_at,
-                )
-                _event_id, run_id, _admitted = await service.submit_and_run(observation)
-                inspector = database.get_run_inspector(run_id)
-                if inspector is None or inspector.artifact is None:
-                    raise AgentExecutionError(
-                        "fixed_baseline_artifact_missing",
-                        "fixed baseline did not produce an artifact",
+                try:
+                    database.create_all()
+                    service = build_analyze_text_service(
+                        database,
+                        self._runtime,
+                        run_timeout_seconds=remaining,
+                        strategy_version="fixed-baseline.v1",
+                        admission_clock=lambda: trigger.received_at,
                     )
-                artifact = inspector.artifact
-                calls = inspector.calls
+                    _event_id, run_id, _admitted = await service.submit_and_run(observation)
+                    inspector = database.get_run_inspector(run_id)
+                    if inspector is None or inspector.artifact is None:
+                        raise AgentExecutionError(
+                            "fixed_baseline_artifact_missing",
+                            "fixed baseline did not produce an artifact",
+                        )
+                    artifact = inspector.artifact
+                    calls = inspector.calls
+                finally:
+                    # SQLite keeps Windows file handles open until the pooled
+                    # engine is disposed, which otherwise turns a successful
+                    # evaluation into a TemporaryDirectory cleanup failure.
+                    database.engine.dispose()
         except AgentExecutionError:
             raise
         except BaseException as exc:

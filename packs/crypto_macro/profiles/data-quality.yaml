@@ -8,6 +8,9 @@ required_capabilities:
   - derivatives_crowding
 allowed_tools:
   - web.fetch
+  - browser.readback
+  - document.readback
+  - data.historical
   - official.macro
   - market.crypto_derivatives
   - market.cross_asset

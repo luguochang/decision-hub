@@ -1,0 +1,1525 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.local/contracts/research_binding.schema.json",
+  "title": "ResearchBindingContracts",
+  "$defs": {
+    "research_factory_event_source": {
+      "title": "ResearchFactoryEventSource",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "event_type": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 128
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "received_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        }
+      },
+      "required": [
+        "event_id",
+        "event_type",
+        "occurred_at",
+        "received_at",
+        "generation",
+        "status"
+      ]
+    },
+    "research_factory_study_source": {
+      "title": "ResearchFactoryStudySource",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "study_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "scope_key": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "question_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "market": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "instrument": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "raw_horizon_scope": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "horizon_scope": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "30m",
+              "24h",
+              "72h"
+            ]
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "uniqueItems": true
+        },
+        "identity_basis": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        }
+      },
+      "required": [
+        "study_id",
+        "scope_key",
+        "question_key",
+        "market",
+        "instrument",
+        "raw_horizon_scope",
+        "horizon_scope",
+        "identity_basis",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    "research_factory_trigger_source": {
+      "title": "ResearchFactoryTriggerSource",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "snapshot_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "snapshot_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "run_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "snapshot_type": {
+          "type": "string",
+          "const": "trigger"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "cutoff_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "pack_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "snapshot_id",
+        "snapshot_hash",
+        "event_id",
+        "run_id",
+        "snapshot_type",
+        "generation",
+        "cutoff_at",
+        "created_at",
+        "pack_version"
+      ]
+    },
+    "research_factory_library_scope_source": {
+      "title": "ResearchFactoryLibraryScopeSource",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "research_family": {
+          "$ref": "research_library.schema.yaml#/$defs/research_family"
+        },
+        "domain_pack_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "instrument_scope": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true
+        },
+        "instrument_scope_json": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8192
+        },
+        "library_context_mode": {
+          "type": "string",
+          "enum": [
+            "none",
+            "auto",
+            "selected"
+          ]
+        },
+        "selected_version_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "minItems": 0,
+          "maxItems": 50,
+          "uniqueItems": true
+        },
+        "selected_version_ids_json": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16384
+        },
+        "allow_remote_library_content": {
+          "type": "boolean"
+        },
+        "admission_request_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        }
+      },
+      "required": [
+        "run_id",
+        "research_family",
+        "domain_pack_ref",
+        "instrument_scope",
+        "instrument_scope_json",
+        "library_context_mode",
+        "selected_version_ids",
+        "selected_version_ids_json",
+        "allow_remote_library_content",
+        "admission_request_hash",
+        "created_at"
+      ]
+    },
+    "research_factory_scope_source": {
+      "title": "ResearchFactoryScopeSource",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "research-factory-scope-source.v1"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "study_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "selected_from": {
+          "type": "string",
+          "enum": [
+            "watch",
+            "event",
+            "none"
+          ]
+        },
+        "watch": {
+          "anyOf": [
+            {
+              "$ref": "agentic_research.schema.yaml#/$defs/event_watch"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "event": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/research_factory_event_source"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "study": {
+          "$ref": "#/$defs/research_factory_study_source"
+        },
+        "trigger": {
+          "$ref": "#/$defs/research_factory_trigger_source"
+        },
+        "library_scope": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/research_factory_library_scope_source"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "schema_version",
+        "run_id",
+        "event_id",
+        "study_id",
+        "selected_from",
+        "watch",
+        "event",
+        "study",
+        "trigger",
+        "library_scope",
+        "source_hash"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "selected_from": {
+                "const": "watch"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "watch": {
+                "$ref": "agentic_research.schema.yaml#/$defs/event_watch"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selected_from": {
+                "const": "event"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "watch": {
+                "type": "null"
+              },
+              "event": {
+                "$ref": "#/$defs/research_factory_event_source"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selected_from": {
+                "const": "none"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "watch": {
+                "type": "null"
+              },
+              "event": {
+                "anyOf": [
+                  {
+                    "title": "ResearchFactoryEmptyEventSource",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "event_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128
+                      },
+                      "event_type": {
+                        "type": "string",
+                        "const": ""
+                      },
+                      "occurred_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+                      },
+                      "received_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+                      },
+                      "generation": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "status": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 32
+                      }
+                    },
+                    "required": [
+                      "event_id",
+                      "event_type",
+                      "occurred_at",
+                      "received_at",
+                      "generation",
+                      "status"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "research_pack_evidence_requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requirement_id",
+        "description",
+        "importance",
+        "source_priority",
+        "authority_floor",
+        "preferred_capabilities",
+        "freshness_seconds",
+        "minimum_independent_sources",
+        "allowed_fallbacks",
+        "confidence_cap",
+        "accepted_metric_families",
+        "required_metric_families",
+        "required_fields",
+        "required_event_offsets",
+        "unit_policy",
+        "field_units",
+        "minimum_venues",
+        "venue_required",
+        "minimum_independence_groups",
+        "allowed_delay_classes",
+        "semantic_policy_ref",
+        "canonical_requirement_id",
+        "minimum_fact"
+      ],
+      "properties": {
+        "requirement_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "maxLength": 2048
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "importance": {
+          "type": "string",
+          "enum": [
+            "hard",
+            "soft"
+          ],
+          "maxLength": 2048
+        },
+        "source_priority": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "minItems": 1,
+          "uniqueItems": true,
+          "maxItems": 128
+        },
+        "authority_floor": {
+          "type": "string",
+          "enum": [
+            "official",
+            "exchange",
+            "audited_aggregator",
+            "verified_web",
+            "search_derived",
+            "unverified"
+          ],
+          "maxLength": 2048
+        },
+        "preferred_capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "minItems": 1,
+          "uniqueItems": true,
+          "maxItems": 128
+        },
+        "freshness_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "minimum_independent_sources": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "allowed_fallbacks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "uniqueItems": true,
+          "maxItems": 128
+        },
+        "confidence_cap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "accepted_metric_families": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "uniqueItems": true,
+          "maxItems": 128
+        },
+        "required_metric_families": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "uniqueItems": true,
+          "maxItems": 128
+        },
+        "required_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "uniqueItems": true,
+          "maxItems": 128
+        },
+        "required_event_offsets": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "uniqueItems": true,
+          "maxItems": 128
+        },
+        "unit_policy": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "field_units": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "minItems": 1,
+            "maxItems": 32,
+            "uniqueItems": true
+          },
+          "maxProperties": 128,
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          }
+        },
+        "minimum_venues": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "venue_required": {
+          "type": "boolean"
+        },
+        "minimum_independence_groups": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "allowed_delay_classes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "realtime",
+              "delayed",
+              "historical",
+              "unknown"
+            ],
+            "maxLength": 2048
+          },
+          "uniqueItems": true,
+          "maxItems": 128
+        },
+        "semantic_policy_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "canonical_requirement_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "minimum_fact": {
+          "type": "boolean"
+        }
+      },
+      "title": "ResearchPackEvidenceRequirement"
+    },
+    "research_pack_evidence_policy_v3": {
+      "title": "ResearchPackEvidencePolicyV3",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "crypto-macro-evidence-policy.v3"
+        },
+        "pack_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "event_classes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "minItems": 1,
+          "maxItems": 128,
+          "uniqueItems": true
+        },
+        "event_requirement_overrides": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "hard",
+                "soft"
+              ]
+            },
+            "maxProperties": 128,
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            }
+          },
+          "maxProperties": 128,
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          }
+        },
+        "requirements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/research_pack_evidence_requirement"
+          },
+          "minItems": 1,
+          "maxItems": 128
+        }
+      },
+      "required": [
+        "schema_version",
+        "pack_id",
+        "event_classes",
+        "event_requirement_overrides",
+        "requirements"
+      ]
+    },
+    "research_pack_evidence_resource": {
+      "title": "ResearchPackEvidenceResource",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "relative_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "source_schema_version": {
+          "type": "string",
+          "const": "crypto-macro-evidence-policy.v3"
+        },
+        "raw_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "raw_utf8": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 65536
+        },
+        "canonical_definition_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "relative_ref",
+        "source_schema_version",
+        "raw_sha256",
+        "raw_utf8",
+        "canonical_definition_hash"
+      ]
+    },
+    "research_instruction_file": {
+      "title": "ResearchInstructionFile",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "content": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 65536
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "content",
+        "sha256"
+      ]
+    },
+    "research_frozen_role_instructions": {
+      "title": "ResearchFrozenRoleInstructions",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "profile": {
+          "$ref": "agentic_research.schema.yaml#/$defs/role_profile"
+        },
+        "instruction_file": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        }
+      },
+      "required": [
+        "profile",
+        "instruction_file"
+      ]
+    },
+    "research_instructions_snapshot_v2": {
+      "title": "ResearchInstructionsSnapshotV2",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "research-pack-instructions.v2"
+        },
+        "doctrine_file": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "manager_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "files": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/research_instruction_file"
+          },
+          "maxProperties": 32,
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          }
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/research_frozen_role_instructions"
+          },
+          "minItems": 1,
+          "maxItems": 32
+        }
+      },
+      "required": [
+        "schema_version",
+        "doctrine_file",
+        "manager_ref",
+        "files",
+        "roles"
+      ]
+    },
+    "research_pack_definition_v2": {
+      "title": "ResearchPackDefinitionV2",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "research-pack-definition.v2"
+        },
+        "scope": {
+          "type": "string",
+          "const": "request_manifest_evidence_and_research_instructions"
+        },
+        "manifest": {
+          "$ref": "agentic_research.schema.yaml#/$defs/domain_pack_manifest"
+        },
+        "evidence_policy": {
+          "$ref": "#/$defs/research_pack_evidence_policy_v3"
+        },
+        "research_policy": {
+          "$ref": "#/$defs/research_instructions_snapshot_v2"
+        },
+        "allowed_capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "minItems": 1,
+          "maxItems": 128,
+          "uniqueItems": true
+        },
+        "execution_mode": {
+          "type": "string",
+          "enum": [
+            "live",
+            "replay"
+          ]
+        },
+        "evidence_policy_resource": {
+          "$ref": "#/$defs/research_pack_evidence_resource"
+        },
+        "gate_policy_resource": {
+          "$ref": "research_policy.schema.yaml#/$defs/research_policy_resource"
+        },
+        "rubric_policy_resource": {
+          "$ref": "research_policy.schema.yaml#/$defs/research_policy_resource"
+        },
+        "role_rubric_bindings": {
+          "type": "array",
+          "items": {
+            "$ref": "research_policy.schema.yaml#/$defs/research_role_rubric_binding"
+          },
+          "minItems": 0,
+          "maxItems": 32
+        }
+      },
+      "required": [
+        "schema_version",
+        "scope",
+        "manifest",
+        "evidence_policy",
+        "research_policy",
+        "allowed_capabilities",
+        "execution_mode",
+        "evidence_policy_resource",
+        "gate_policy_resource",
+        "rubric_policy_resource",
+        "role_rubric_bindings"
+      ]
+    },
+    "research_request_pack_receipt_v2": {
+      "title": "ResearchRequestPackReceiptV2",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "research-request-pack.v2"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "definition": {
+          "$ref": "#/$defs/research_pack_definition_v2"
+        },
+        "definition_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "schema_version",
+        "run_id",
+        "definition",
+        "definition_hash"
+      ]
+    },
+    "research_task_receipt_v2": {
+      "title": "ResearchTaskReceiptV2",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "research-task-request.v2"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "request": {
+          "$ref": "agentic_research.schema.yaml#/$defs/research_session_request"
+        },
+        "request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "request_hash_kind": {
+          "type": "string",
+          "const": "complete_task_request.v1"
+        },
+        "factory_source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/research_factory_scope_source"
+            },
+            {
+              "$ref": "#/$defs/research_factory_scope_source_v2"
+            }
+          ]
+        },
+        "scope": {
+          "anyOf": [
+            {
+              "$ref": "research_policy.schema.yaml#/$defs/research_task_scope"
+            },
+            {
+              "$ref": "research_policy.schema.yaml#/$defs/research_task_scope_v2"
+            }
+          ]
+        },
+        "pack_definition_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "compiled_policy_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "library_inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/research_library_context_input_receipt"
+          },
+          "minItems": 0,
+          "maxItems": 50
+        }
+      },
+      "required": [
+        "schema_version",
+        "run_id",
+        "request",
+        "request_hash",
+        "request_hash_kind",
+        "factory_source",
+        "scope",
+        "pack_definition_hash",
+        "compiled_policy_hash",
+        "library_inputs"
+      ]
+    },
+    "research_compiled_policy_receipt_v1": {
+      "title": "ResearchCompiledPolicyReceiptV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "research-compiled-policy-receipt.v1"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "full_task_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "pack_definition_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "compiled": {
+          "$ref": "research_policy.schema.yaml#/$defs/research_compiled_policy"
+        }
+      },
+      "required": [
+        "schema_version",
+        "run_id",
+        "event_id",
+        "full_task_hash",
+        "pack_definition_hash",
+        "compiled"
+      ]
+    },
+    "research_library_context_input_receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version_id",
+        "evidence_id",
+        "excerpt",
+        "excerpt_hash",
+        "original_file_hash",
+        "locator_refs"
+      ],
+      "properties": {
+        "version_id": {
+          "type": "string",
+          "pattern": "^docver_[A-Za-z0-9_-]+$",
+          "maxLength": 128
+        },
+        "evidence_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "excerpt": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "excerpt_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "original_file_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "locator_refs": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          }
+        }
+      },
+      "title": "ResearchLibraryContextInputReceipt"
+    },
+    "research_factory_study_source_v2": {
+      "title": "ResearchFactoryStudySourceV2",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "study_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "scope_key": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "question_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "market": {
+          "const": "crypto"
+        },
+        "instrument": {
+          "type": "string",
+          "enum": [
+            "BTC-USDT-SWAP",
+            "ETH-USDT-SWAP"
+          ]
+        },
+        "raw_horizon_scope": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "horizon_scope": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "4h",
+              "24h",
+              "72h"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true
+        },
+        "identity_basis": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "schema_version": {
+          "const": "research-factory-study-source.v2"
+        },
+        "perpetual_scope_id": {
+          "type": "string",
+          "enum": [
+            "crypto:perp:okx:BTC-USDT-SWAP:trade:1m",
+            "crypto:perp:okx:ETH-USDT-SWAP:trade:1m"
+          ]
+        },
+        "admission_ref": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "hash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "ref",
+            "hash"
+          ]
+        }
+      },
+      "required": [
+        "study_id",
+        "scope_key",
+        "question_key",
+        "market",
+        "instrument",
+        "raw_horizon_scope",
+        "horizon_scope",
+        "identity_basis",
+        "created_at",
+        "updated_at",
+        "schema_version",
+        "perpetual_scope_id",
+        "admission_ref"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "instrument": {
+                "const": "BTC-USDT-SWAP"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "perpetual_scope_id": {
+                "const": "crypto:perp:okx:BTC-USDT-SWAP:trade:1m"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "instrument": {
+                "const": "ETH-USDT-SWAP"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "perpetual_scope_id": {
+                "const": "crypto:perp:okx:ETH-USDT-SWAP:trade:1m"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "research_factory_scope_source_v2": {
+      "title": "ResearchFactoryScopeSourceV2",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "research-factory-scope-source.v2"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "study_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "selected_from": {
+          "type": "string",
+          "enum": [
+            "watch",
+            "event",
+            "none"
+          ]
+        },
+        "watch": {
+          "anyOf": [
+            {
+              "$ref": "agentic_research.schema.yaml#/$defs/event_watch"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "event": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/research_factory_event_source"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "study": {
+          "$ref": "#/$defs/research_factory_study_source_v2"
+        },
+        "trigger": {
+          "$ref": "#/$defs/research_factory_trigger_source"
+        },
+        "library_scope": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/research_factory_library_scope_source"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "schema_version",
+        "run_id",
+        "event_id",
+        "study_id",
+        "selected_from",
+        "watch",
+        "event",
+        "study",
+        "trigger",
+        "library_scope",
+        "source_hash"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "selected_from": {
+                "const": "watch"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "watch": {
+                "$ref": "agentic_research.schema.yaml#/$defs/event_watch"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selected_from": {
+                "const": "event"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "watch": {
+                "type": "null"
+              },
+              "event": {
+                "$ref": "#/$defs/research_factory_event_source"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selected_from": {
+                "const": "none"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "watch": {
+                "type": "null"
+              },
+              "event": {
+                "anyOf": [
+                  {
+                    "title": "ResearchFactoryEmptyEventSource",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "event_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128
+                      },
+                      "event_type": {
+                        "type": "string",
+                        "const": ""
+                      },
+                      "occurred_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+                      },
+                      "received_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+                      },
+                      "generation": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "status": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 32
+                      }
+                    },
+                    "required": [
+                      "event_id",
+                      "event_type",
+                      "occurred_at",
+                      "received_at",
+                      "generation",
+                      "status"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

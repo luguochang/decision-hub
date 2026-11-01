@@ -1,0 +1,967 @@
+{
+  "schema_version": "research-evaluation-case.v1",
+  "case_id": "iran_attack_israel_20240413",
+  "event_family": "geopolitical_shock",
+  "input_text": "Iran launched an unprecedented aerial attack against Israel, sharply raising regional escalation risk.",
+  "trigger_evidence": {
+    "evidence_id": "trigger_iran_attack_israel_20240413",
+    "kind": "transcript",
+    "authority": "unverified",
+    "source_id": "evaluation-catalog",
+    "source_url": "https://bidenwhitehouse.archives.gov/briefing-room/statements-releases/2024/04/13/statement-from-president-joe-biden-on-irans-attacks-against-the-state-of-israel/",
+    "published_at": "2024-04-13T22:00:00Z",
+    "observed_at": "2024-04-13T22:00:00Z",
+    "received_at": "2024-04-13T22:00:02Z",
+    "content_hash": "63adc9186cc95b3dcde4fb129c2f6136f403d611b7d19e4f5d67b3dd1209b699",
+    "excerpt": "Iran launched an unprecedented aerial attack against Israel, sharply raising regional escalation risk."
+  },
+  "evidence_requirements": [
+    {
+      "requirement_id": "event_identity",
+      "description": "Identify the primary event, speaker or document, event time and revision status.",
+      "importance": "hard",
+      "source_priority": [
+        "official",
+        "verified_web"
+      ],
+      "authority_floor": "official",
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "freshness_seconds": 604800,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "confidence_cap": 0.45,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "policy_or_data_delta",
+      "description": "Establish what changed relative to prior wording, prior value or consensus.",
+      "importance": "hard",
+      "source_priority": [
+        "official",
+        "audited_aggregator",
+        "verified_web"
+      ],
+      "authority_floor": "official",
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "freshness_seconds": 86400,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "confidence_cap": 0.5,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "expectation_pricing",
+      "description": "Observe policy expectations, rates repricing or credible positioning evidence.",
+      "importance": "soft",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "macro.expectation_pricing",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 900,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "macro.expectation_pricing",
+        "market.cross_asset",
+        "web.search",
+        "web.search.tavily"
+      ],
+      "confidence_cap": 0.55,
+      "accepted_metric_families": [
+        "macro.policy_expectation"
+      ],
+      "required_metric_families": [
+        "macro.policy_expectation"
+      ],
+      "required_fields": [
+        "level",
+        "delta"
+      ],
+      "required_event_offsets": [
+        "baseline",
+        "t-5m"
+      ],
+      "unit_policy": "field_map.v1",
+      "field_units": {
+        "level": [
+          "probability",
+          "percent",
+          "bps",
+          "yield_percent"
+        ],
+        "delta": [
+          "percentage_point",
+          "bps"
+        ]
+      },
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [
+        "realtime"
+      ],
+      "semantic_policy_ref": "crypto_macro.fact_semantics.v1#expectation_pricing"
+    },
+    {
+      "requirement_id": "macro_transmission",
+      "description": "Observe the rates and USD transmission path relevant to the event.",
+      "importance": "soft",
+      "source_priority": [
+        "official",
+        "exchange",
+        "audited_aggregator"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "macro.cross_asset_intraday",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 600,
+      "minimum_independent_sources": 2,
+      "allowed_fallbacks": [
+        "macro.cross_asset_intraday",
+        "market.cross_asset",
+        "web.search",
+        "web.search.tavily"
+      ],
+      "confidence_cap": 0.55,
+      "accepted_metric_families": [
+        "macro.rates",
+        "macro.usd"
+      ],
+      "required_metric_families": [
+        "macro.rates",
+        "macro.usd"
+      ],
+      "required_fields": [
+        "level",
+        "event_return"
+      ],
+      "required_event_offsets": [
+        "t-5m",
+        "t+1m"
+      ],
+      "unit_policy": "field_map.v1",
+      "field_units": {
+        "level": [
+          "yield_percent",
+          "index"
+        ],
+        "event_return": [
+          "bps",
+          "percent"
+        ]
+      },
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 2,
+      "allowed_delay_classes": [
+        "realtime"
+      ],
+      "semantic_policy_ref": "crypto_macro.fact_semantics.v1#macro_transmission"
+    },
+    {
+      "requirement_id": "cross_asset_confirmation",
+      "description": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation.",
+      "importance": "soft",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ],
+      "authority_floor": "verified_web",
+      "preferred_capabilities": [
+        "macro.cross_asset_intraday",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 600,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "macro.cross_asset_intraday",
+        "market.cross_asset",
+        "web.search",
+        "web.search.tavily"
+      ],
+      "confidence_cap": 0.65,
+      "accepted_metric_families": [
+        "cross_asset.equity",
+        "cross_asset.volatility",
+        "cross_asset.commodity",
+        "cross_asset.credit"
+      ],
+      "required_metric_families": [],
+      "required_fields": [
+        "level",
+        "event_return"
+      ],
+      "required_event_offsets": [
+        "t-5m",
+        "t+1m"
+      ],
+      "unit_policy": "field_map.v1",
+      "field_units": {
+        "level": [
+          "price",
+          "index",
+          "spread_bps"
+        ],
+        "event_return": [
+          "percent",
+          "bps"
+        ]
+      },
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [
+        "realtime"
+      ],
+      "semantic_policy_ref": "crypto_macro.fact_semantics.v1#cross_asset_confirmation"
+    },
+    {
+      "requirement_id": "crypto_spot_confirmation",
+      "description": "Observe BTC spot reaction, volume and the event-time comparison window.",
+      "importance": "hard",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "freshness_seconds": 600,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [],
+      "confidence_cap": 0.5,
+      "accepted_metric_families": [
+        "crypto.spot"
+      ],
+      "required_metric_families": [
+        "crypto.spot"
+      ],
+      "required_fields": [
+        "price",
+        "volume",
+        "event_return"
+      ],
+      "required_event_offsets": [
+        "t-5m",
+        "t+1m"
+      ],
+      "unit_policy": "field_map.v1",
+      "field_units": {
+        "price": [
+          "usd",
+          "usdt"
+        ],
+        "volume": [
+          "btc",
+          "usd",
+          "usdt"
+        ],
+        "event_return": [
+          "percent"
+        ]
+      },
+      "minimum_venues": 1,
+      "venue_required": true,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [
+        "realtime"
+      ],
+      "semantic_policy_ref": "crypto_macro.fact_semantics.v1#crypto_spot_confirmation"
+    },
+    {
+      "requirement_id": "derivatives_crowding",
+      "description": "Observe funding, open interest, basis and available liquidation or flow evidence.",
+      "importance": "hard",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "market.crypto_derivatives",
+        "market.crypto_crowding"
+      ],
+      "freshness_seconds": 600,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "market.crypto_crowding"
+      ],
+      "confidence_cap": 0.5,
+      "accepted_metric_families": [
+        "crypto.derivatives"
+      ],
+      "required_metric_families": [
+        "crypto.derivatives"
+      ],
+      "required_fields": [
+        "funding_rate",
+        "open_interest",
+        "open_interest_delta",
+        "basis",
+        "crowding_signal"
+      ],
+      "required_event_offsets": [
+        "t-5m",
+        "t+1m"
+      ],
+      "unit_policy": "field_map.v1",
+      "field_units": {
+        "funding_rate": [
+          "rate"
+        ],
+        "open_interest": [
+          "contracts",
+          "btc",
+          "usd",
+          "usdt"
+        ],
+        "open_interest_delta": [
+          "percent"
+        ],
+        "basis": [
+          "rate",
+          "percent"
+        ],
+        "crowding_signal": [
+          "contracts",
+          "btc",
+          "usd",
+          "usdt",
+          "ratio"
+        ]
+      },
+      "minimum_venues": 1,
+      "venue_required": true,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [
+        "realtime"
+      ],
+      "semantic_policy_ref": "crypto_macro.fact_semantics.v1#derivatives_crowding"
+    },
+    {
+      "requirement_id": "counter_thesis",
+      "description": "Build the strongest evidence-backed alternative transmission chain.",
+      "importance": "soft",
+      "source_priority": [
+        "official",
+        "exchange",
+        "verified_web"
+      ],
+      "authority_floor": "verified_web",
+      "preferred_capabilities": [
+        "official.macro",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 86400,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "confidence_cap": 0.7,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    }
+  ],
+  "expected_hard_requirement_ids": [
+    "event_identity",
+    "policy_or_data_delta",
+    "crypto_spot_confirmation",
+    "derivatives_crowding"
+  ],
+  "archived_capability_fixtures": [
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "event_identity",
+      "query_aliases": [
+        "iran_attack_israel_20240413:event_identity",
+        "Verify event identity for iran_attack_israel_20240413"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_e085a3efb842465328edcdc052592ee7",
+          "requirement_id": "event_identity",
+          "kind": "official",
+          "authority": "official",
+          "source_id": "bidenwhitehouse.archives.gov",
+          "source_url": "https://bidenwhitehouse.archives.gov/briefing-room/statements-releases/2024/04/13/statement-from-president-joe-biden-on-irans-attacks-against-the-state-of-israel/",
+          "published_at": "2024-04-13T22:00:00Z",
+          "observed_at": "2024-04-13T22:00:01Z",
+          "received_at": "2024-04-13T22:00:02Z",
+          "content_hash": "e085a3efb842465328edcdc052592ee77422f0ac7cff9aab46ac04f9601368a6",
+          "excerpt": "President Biden issued a statement on Iran's April 13, 2024 attacks against Israel.",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:iran_attack_israel_20240413:event_identity",
+          "research_session_id": "archive:iran_attack_israel_20240413",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ]
+    },
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "policy_or_data_delta",
+      "query_aliases": [
+        "iran_attack_israel_20240413:policy_or_data_delta",
+        "Verify policy or data delta for iran_attack_israel_20240413"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_78e6aaa3d37bc083628bfac38551bc8d",
+          "requirement_id": "policy_or_data_delta",
+          "kind": "official",
+          "authority": "official",
+          "source_id": "bidenwhitehouse.archives.gov",
+          "source_url": "https://bidenwhitehouse.archives.gov/briefing-room/statements-releases/2024/04/13/statement-from-president-joe-biden-on-irans-attacks-against-the-state-of-israel/",
+          "published_at": "2024-04-13T22:00:00Z",
+          "observed_at": "2024-04-13T22:00:01Z",
+          "received_at": "2024-04-13T22:00:02Z",
+          "content_hash": "78e6aaa3d37bc083628bfac38551bc8da608d9d9fc3f08e2ec46e0a06ccdbed5",
+          "excerpt": "The statement described an unprecedented aerial attack launched from Iran and Yemen involving drones and missiles.",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:iran_attack_israel_20240413:policy_or_data_delta",
+          "research_session_id": "archive:iran_attack_israel_20240413",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ]
+    },
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "crypto_spot_confirmation",
+      "query_aliases": [
+        "iran_attack_israel_20240413:crypto_spot_confirmation",
+        "Acquire typed crypto_spot_confirmation event-window evidence for iran_attack_israel_20240413"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_2085ee629af98c381058982b7e74b0dc",
+          "requirement_id": "crypto_spot_confirmation",
+          "kind": "market",
+          "authority": "exchange",
+          "source_id": "binance-vision",
+          "source_url": "https://data.binance.vision/data/spot/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2024-04-13.zip",
+          "published_at": "2024-04-13T22:01:00Z",
+          "observed_at": "2024-04-13T22:01:00Z",
+          "received_at": "2024-04-13T22:01:01Z",
+          "content_hash": "2085ee629af98c381058982b7e74b0dc36bad8a878aefaf0be12a8982ddab2eb",
+          "excerpt": "{\"archive\":\"Binance Vision\",\"case_id\":\"iran_attack_israel_20240413\",\"event_window\":{\"t+1m\":{\"price\":\"62694.23000000\",\"volume\":\"6616993.39315130\"},\"t-5m\":{\"price\":\"62488.57000000\",\"volume\":\"3802830.28420510\"}},\"reconstruction_mode\":\"reconstructed_history\",\"source_hashes\":[\"95d841fa7146d0563306132b7357583bfbf16a4a80dcc4e6598d5b2b4514fabd\"]}",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": "binance-vision://ebb8f6e110f4326d734a1655e297b9d4f3fca859cae3c85c8ee6e308069e6e58",
+          "tool_call_id": "archive:iran_attack_israel_20240413:crypto_spot_confirmation",
+          "research_session_id": "archive:iran_attack_israel_20240413",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ],
+      "facts": [
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_14725869c246e4fc9a6cfaa73b937535",
+          "evidence_id": "archive_2085ee629af98c381058982b7e74b0dc",
+          "requirement_id": "crypto_spot_confirmation",
+          "metric_family": "crypto.spot",
+          "field": "price",
+          "instrument": "BTCUSDT",
+          "venue": "binance",
+          "value": "62488.57000000",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2024-04-13T21:55:00Z",
+          "received_at": "2024-04-13T21:55:01Z",
+          "published_at": "2024-04-13T21:55:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "a1a67259c360b12393054719c0198881a78c886e9d4190cafd53126241899ae8",
+          "attributes": {
+            "archive_hash": "ebb8f6e110f4326d734a1655e297b9d4f3fca859cae3c85c8ee6e308069e6e58",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_47ebaebc26ea4afba00d6f3bb3d4adb7",
+          "evidence_id": "archive_2085ee629af98c381058982b7e74b0dc",
+          "requirement_id": "crypto_spot_confirmation",
+          "metric_family": "crypto.spot",
+          "field": "volume",
+          "instrument": "BTCUSDT",
+          "venue": "binance",
+          "value": "3802830.28420510",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2024-04-13T21:55:00Z",
+          "received_at": "2024-04-13T21:55:01Z",
+          "published_at": "2024-04-13T21:55:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "e0f4dfd99408a504404c4516bcec698be74c25160619229ad715879ac17bff7b",
+          "attributes": {
+            "archive_hash": "ebb8f6e110f4326d734a1655e297b9d4f3fca859cae3c85c8ee6e308069e6e58",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_295e040e4c67e94ed9cd3f4440389138",
+          "evidence_id": "archive_2085ee629af98c381058982b7e74b0dc",
+          "requirement_id": "crypto_spot_confirmation",
+          "metric_family": "crypto.spot",
+          "field": "price",
+          "instrument": "BTCUSDT",
+          "venue": "binance",
+          "value": "62694.23000000",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2024-04-13T22:01:00Z",
+          "received_at": "2024-04-13T22:01:01Z",
+          "published_at": "2024-04-13T22:01:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "926327273c69307489625d1405fefe2a5570b9a082caaf93e690825071183fe3",
+          "attributes": {
+            "archive_hash": "ebb8f6e110f4326d734a1655e297b9d4f3fca859cae3c85c8ee6e308069e6e58",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_f30bea9380624ff88ffcfa3bdfb0fdec",
+          "evidence_id": "archive_2085ee629af98c381058982b7e74b0dc",
+          "requirement_id": "crypto_spot_confirmation",
+          "metric_family": "crypto.spot",
+          "field": "volume",
+          "instrument": "BTCUSDT",
+          "venue": "binance",
+          "value": "6616993.39315130",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2024-04-13T22:01:00Z",
+          "received_at": "2024-04-13T22:01:01Z",
+          "published_at": "2024-04-13T22:01:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "ff08578dbdee58ed3c0b0ef3211da041170e178e24361d997a4dd2c7e279b0b3",
+          "attributes": {
+            "archive_hash": "ebb8f6e110f4326d734a1655e297b9d4f3fca859cae3c85c8ee6e308069e6e58",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_01ca169c99ae44e6adf8e24603f2575d",
+          "evidence_id": "archive_2085ee629af98c381058982b7e74b0dc",
+          "requirement_id": "crypto_spot_confirmation",
+          "metric_family": "crypto.spot",
+          "field": "event_return",
+          "instrument": "BTCUSDT",
+          "venue": "binance",
+          "value": "0.329116188768602001934113700",
+          "unit": "percent",
+          "window_start_at": "2024-04-13T21:55:00Z",
+          "window_end_at": "2024-04-13T22:01:00Z",
+          "event_offset": "t+1m",
+          "observed_at": "2024-04-13T22:01:00Z",
+          "received_at": "2024-04-13T22:01:01Z",
+          "published_at": "2024-04-13T22:01:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "d263c5b0e533b02085f10b56f0f76febc7c3180def9d3589c46fd22607c54e46",
+          "attributes": {
+            "archive_hash": "ebb8f6e110f4326d734a1655e297b9d4f3fca859cae3c85c8ee6e308069e6e58",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        }
+      ]
+    },
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "derivatives_crowding",
+      "query_aliases": [
+        "iran_attack_israel_20240413:derivatives_crowding",
+        "Acquire typed derivatives_crowding event-window evidence for iran_attack_israel_20240413"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_f08bc272f4f8154845490ff3f69c9b09",
+          "requirement_id": "derivatives_crowding",
+          "kind": "market",
+          "authority": "exchange",
+          "source_id": "binance-vision",
+          "source_url": "https://data.binance.vision/data/futures/um/daily/metrics/BTCUSDT/BTCUSDT-metrics-2024-04-13.zip",
+          "published_at": "2024-04-13T22:01:00Z",
+          "observed_at": "2024-04-13T22:01:00Z",
+          "received_at": "2024-04-13T22:01:01Z",
+          "content_hash": "f08bc272f4f8154845490ff3f69c9b091a140cfde38d9b63c37492adc7fbdb29",
+          "excerpt": "{\"archive\":\"Binance Vision\",\"case_id\":\"iran_attack_israel_20240413\",\"event_window\":{\"t+1m\":{\"basis\":\"-0.00015386\",\"crowding_signal\":\"1.95541624\",\"funding_rate\":\"0.00010000\",\"open_interest\":\"4191755113.2964160000000000\"},\"t-5m\":{\"basis\":\"0.00044983\",\"crowding_signal\":\"1.97398341\",\"funding_rate\":\"0.00010000\",\"open_interest\":\"4227311988.4882230000000000\"}},\"reconstruction_mode\":\"reconstructed_history\",\"source_hashes\":[\"d6e3292fddb92feac3c0308b43eee657388417d5132786dff0c831d81609376d\",\"7547b85133b2c0e46bf0c1bc4eb98789d011fc52b465647a16d9cfc076a3c5fb\",\"6d220b8e2815362a11d294d35dbca28568370d8295351937eceec10f2b359b85\"]}",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": "binance-vision://63114a32e338553af4fb63b6de6586c7c3c2df157407ffc49633bc8fa51c9c12",
+          "tool_call_id": "archive:iran_attack_israel_20240413:derivatives_crowding",
+          "research_session_id": "archive:iran_attack_israel_20240413",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ],
+      "facts": [
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_531d0a03a4393094c2ddb72d020ea55d",
+          "evidence_id": "archive_f08bc272f4f8154845490ff3f69c9b09",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "funding_rate",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "0.00010000",
+          "unit": "rate",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2024-04-13T21:55:00Z",
+          "received_at": "2024-04-13T21:55:01Z",
+          "published_at": "2024-04-13T21:55:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "9c5a32a93a41b1ecd59802564929e6faff8b665e8b5693b50d2d282b70c71248",
+          "attributes": {
+            "archive_hash": "63114a32e338553af4fb63b6de6586c7c3c2df157407ffc49633bc8fa51c9c12",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_9fcc37979228b344443808791ca7efa8",
+          "evidence_id": "archive_f08bc272f4f8154845490ff3f69c9b09",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "open_interest",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "4227311988.4882230000000000",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2024-04-13T21:55:00Z",
+          "received_at": "2024-04-13T21:55:01Z",
+          "published_at": "2024-04-13T21:55:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "cefef02d903d246dd372d2a633c13466da4067e2f86305c09c0235a5a574a6c7",
+          "attributes": {
+            "archive_hash": "63114a32e338553af4fb63b6de6586c7c3c2df157407ffc49633bc8fa51c9c12",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_3b1e493e45271bfb3d0154135f7aa14e",
+          "evidence_id": "archive_f08bc272f4f8154845490ff3f69c9b09",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "basis",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "0.00044983",
+          "unit": "rate",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2024-04-13T21:55:00Z",
+          "received_at": "2024-04-13T21:55:01Z",
+          "published_at": "2024-04-13T21:55:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "06e584295d9ec771e541be62d4be2d85d9ed188d820f332c454730eae4c01183",
+          "attributes": {
+            "archive_hash": "63114a32e338553af4fb63b6de6586c7c3c2df157407ffc49633bc8fa51c9c12",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_b04ff86f5bce66b0e955bc4f37ddb762",
+          "evidence_id": "archive_f08bc272f4f8154845490ff3f69c9b09",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "crowding_signal",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "1.97398341",
+          "unit": "ratio",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2024-04-13T21:55:00Z",
+          "received_at": "2024-04-13T21:55:01Z",
+          "published_at": "2024-04-13T21:55:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "7e5bc9cc6a11a22986dcd4f434efa2280eebeb51dc13d8ec13462ab04f5d6f48",
+          "attributes": {
+            "archive_hash": "63114a32e338553af4fb63b6de6586c7c3c2df157407ffc49633bc8fa51c9c12",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_f8c31f74d7ea3658edb02d803d3a1dff",
+          "evidence_id": "archive_f08bc272f4f8154845490ff3f69c9b09",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "funding_rate",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "0.00010000",
+          "unit": "rate",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2024-04-13T22:01:00Z",
+          "received_at": "2024-04-13T22:01:01Z",
+          "published_at": "2024-04-13T22:01:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "c7b95af4394aa7222e4d6df935e0e0265ba78267838115ebca43047196674de1",
+          "attributes": {
+            "archive_hash": "63114a32e338553af4fb63b6de6586c7c3c2df157407ffc49633bc8fa51c9c12",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_597781806b320a5bb245d39aa102c8a9",
+          "evidence_id": "archive_f08bc272f4f8154845490ff3f69c9b09",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "open_interest",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "4191755113.2964160000000000",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2024-04-13T22:01:00Z",
+          "received_at": "2024-04-13T22:01:01Z",
+          "published_at": "2024-04-13T22:01:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "d8f8e18f8eb6809f884247266b3f3c725903b22fd26392816b40f9494b7e60e9",
+          "attributes": {
+            "archive_hash": "63114a32e338553af4fb63b6de6586c7c3c2df157407ffc49633bc8fa51c9c12",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_54eb538338664205205d9b58c65a7f8d",
+          "evidence_id": "archive_f08bc272f4f8154845490ff3f69c9b09",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "basis",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "-0.00015386",
+          "unit": "rate",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2024-04-13T22:01:00Z",
+          "received_at": "2024-04-13T22:01:01Z",
+          "published_at": "2024-04-13T22:01:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "fef05c0d03b7d21e6e4244c5dfad75a4ec30cb48948f72c3cee661fd217debc0",
+          "attributes": {
+            "archive_hash": "63114a32e338553af4fb63b6de6586c7c3c2df157407ffc49633bc8fa51c9c12",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_7e25d82223914aee6af2915002f00b11",
+          "evidence_id": "archive_f08bc272f4f8154845490ff3f69c9b09",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "crowding_signal",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "1.95541624",
+          "unit": "ratio",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2024-04-13T22:01:00Z",
+          "received_at": "2024-04-13T22:01:01Z",
+          "published_at": "2024-04-13T22:01:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "6b4ccc9df6694178184b6a964b947d8bfea818fd59245298992202350d4e086e",
+          "attributes": {
+            "archive_hash": "63114a32e338553af4fb63b6de6586c7c3c2df157407ffc49633bc8fa51c9c12",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_4bec650f5e82dd8577458e5d3eddf074",
+          "evidence_id": "archive_f08bc272f4f8154845490ff3f69c9b09",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "open_interest_delta",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "-0.8411225688720197237681610900",
+          "unit": "percent",
+          "window_start_at": "2024-04-13T21:55:00Z",
+          "window_end_at": "2024-04-13T22:01:00Z",
+          "event_offset": "t+1m",
+          "observed_at": "2024-04-13T22:01:00Z",
+          "received_at": "2024-04-13T22:01:01Z",
+          "published_at": "2024-04-13T22:01:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "44c6bb5058d120c38ec763e68d34c9533a0a5f2a3a342944973232c206618c2c",
+          "attributes": {
+            "archive_hash": "63114a32e338553af4fb63b6de6586c7c3c2df157407ffc49633bc8fa51c9c12",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        }
+      ]
+    }
+  ],
+  "cutoff_at": "2024-04-13T22:05:00Z",
+  "outcome_available_at": null,
+  "outcome_labels": [],
+  "source_refs": [
+    "https://bidenwhitehouse.archives.gov/briefing-room/statements-releases/2024/04/13/statement-from-president-joe-biden-on-irans-attacks-against-the-state-of-israel/",
+    "https://data.binance.vision/data/spot/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2024-04-13.zip",
+    "https://data.binance.vision/data/futures/um/daily/metrics/BTCUSDT/BTCUSDT-metrics-2024-04-13.zip",
+    "https://data.binance.vision/data/futures/um/daily/premiumIndexKlines/BTCUSDT/1m/BTCUSDT-1m-2024-04-13.zip",
+    "https://data.binance.vision/data/futures/um/monthly/fundingRate/BTCUSDT/BTCUSDT-fundingRate-2024-04.zip"
+  ]
+}

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import asyncio
 import re
+from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
 from xml.etree import ElementTree
@@ -22,6 +24,7 @@ from packages.kernel.decision_hub_kernel.application.research_evidence import (
     research_evidence_content_hash,
     research_evidence_instance_id,
 )
+from packages.provider_adapters.research.document_store import ContentAddressedDocumentStore
 from packages.provider_adapters.research.documents import (
     DocumentFetcher,
     FetchedDocument,
@@ -33,6 +36,9 @@ from packages.provider_adapters.research.source_registry import (
 )
 
 
+from .macro_series import SERIES, execute_current_series
+
+
 class OfficialDocumentResearchAdapter(HttpDocumentResearchAdapter):
     """Fetch an approved official document and emit deterministic event facts."""
 
@@ -41,6 +47,8 @@ class OfficialDocumentResearchAdapter(HttpDocumentResearchAdapter):
         *,
         fetcher: DocumentFetcher | None = None,
         source_registry: ResearchSourceRegistry | None = None,
+        document_store: ContentAddressedDocumentStore | None = None,
+        current_series_fetcher: Callable[[ResearchCapabilityQuery, str], Awaitable[FetchedDocument]] | None = None,
     ) -> None:
         super().__init__(
             capability_id="official.macro",
@@ -49,7 +57,10 @@ class OfficialDocumentResearchAdapter(HttpDocumentResearchAdapter):
             source_id="official-macro-document",
             fetcher=fetcher,
             source_registry=source_registry,
+            document_store=document_store,
         )
+
+        self.current_series_fetcher = current_series_fetcher
 
     async def execute(self, query: ResearchCapabilityQuery) -> ResearchCapabilityResult:
         canonical_requirement_id = (
@@ -57,6 +68,31 @@ class OfficialDocumentResearchAdapter(HttpDocumentResearchAdapter):
             if self.source_registry is not None
             else query.requirement_id
         )
+        if canonical_requirement_id in SERIES:
+            if self.source_registry is None:
+                raise ResearchCapabilityError(
+                    "official_macro_registry_required", "Official current series needs audited source policy",
+                )
+            if self.current_series_fetcher is None:
+                return await execute_current_series(
+                    query, canonical_requirement_id=canonical_requirement_id,
+                    fetcher=self.fetcher, registry=self.source_registry, archive=self.archive_document,
+                )
+            # Browser-first only for the three closed current-series routes.
+            # The original gateway budget remains twenty seconds in total.
+            loop = asyncio.get_running_loop()
+            deadline = loop.time() + 20
+            async def fetch_current(url: str) -> FetchedDocument:
+                assert self.current_series_fetcher is not None
+                return await self.current_series_fetcher(query, url)
+            async with asyncio.timeout_at(deadline):
+                result = await execute_current_series(
+                    query, canonical_requirement_id=canonical_requirement_id,
+                    fetcher=fetch_current, registry=self.source_registry, archive=self.archive_document,
+                )
+                if loop.time() >= deadline:
+                    raise TimeoutError("official_macro_browser_deadline")
+                return result
         if canonical_requirement_id not in {"event_identity", "event.identity"}:
             raise ResearchCapabilityError(
                 "research_capability_requirement_unsupported",
@@ -100,7 +136,7 @@ class OfficialDocumentResearchAdapter(HttpDocumentResearchAdapter):
             raise ResearchCapabilityError(
                 exc.error_code, str(exc), retryable=False, origin="gateway"
             ) from exc
-        parsed = _parse_official_event(document)
+        parsed = _parse_official_event(document, query)
         if parsed is None:
             raise ResearchCapabilityError(
                 "official_event_identity_incomplete",
@@ -126,6 +162,7 @@ class OfficialDocumentResearchAdapter(HttpDocumentResearchAdapter):
             )
         source_id = final_policy.source_ref
         structured_ref = f"source-registry://{source_id}"
+        asset = self.archive_document(document, final_policy)
         content_hash = research_evidence_content_hash(
             requirement_id=query.requirement_id,
             kind="official",
@@ -140,6 +177,8 @@ class OfficialDocumentResearchAdapter(HttpDocumentResearchAdapter):
             evidence_id=research_evidence_instance_id(
                 content_hash=content_hash,
                 research_session_id=query.research_session_id,
+                content_ref=asset.content_ref if asset is not None else None,
+                acquisition_receipt_id=None,
             ),
             requirement_id=query.requirement_id,
             kind="official",
@@ -151,6 +190,9 @@ class OfficialDocumentResearchAdapter(HttpDocumentResearchAdapter):
             received_at=document.received_at,
             content_hash=content_hash,
             excerpt=excerpt[:4000],
+            content_ref=asset.content_ref if asset is not None else None,
+            source_content_hash=(asset.source_content_hash if asset is not None else None),
+            parser_ref=asset.parser_ref if asset is not None else None,
             structured_payload_ref=structured_ref,
             tool_call_id=query.request_id,
             research_session_id=query.research_session_id,
@@ -178,6 +220,7 @@ class OfficialDocumentResearchAdapter(HttpDocumentResearchAdapter):
 
 def _parse_official_event(
     document: FetchedDocument,
+    query: ResearchCapabilityQuery,
 ) -> tuple[str, str, str, datetime, str] | None:
     """Parse RSS/Atom metadata or a direct official page metadata pair."""
 
@@ -191,11 +234,9 @@ def _parse_official_event(
         except ElementTree.ParseError:
             root = None
         if root is not None:
-            item = next(
-                (node for node in root.iter() if _local_name(node.tag) in {"item", "entry"}),
-                None,
-            )
-            if item is not None:
+            items = [node for node in root.iter() if _local_name(node.tag) in {"item", "entry"}]
+            matches: list[tuple[str, str, str, datetime, str]] = []
+            for item in items:
                 values = {_local_name(child.tag): (child.text or "").strip() for child in item}
                 title = values.get("title", "")
                 link_node = next(
@@ -212,8 +253,25 @@ def _parse_official_event(
                         value for value in (title, values.get("description", "")) if value
                     )
                     actor = _actor_from_title(title)
-                    if actor:
-                        return source_url, excerpt, actor, published, _revision_status(excerpt)
+                    if actor and _matches_event(query, source_url, actor, published):
+                        matches.append(
+                            (source_url, excerpt, actor, published, _revision_status(excerpt))
+                        )
+            if items:
+                # Feed ordering is not an event identity. Even one feed entry
+                # cannot be attached to an unrelated request merely by copying
+                # its opaque event_id. Ask discovery for an exact article when
+                # actor/date constraints are missing or still ambiguous.
+                unique = list(dict.fromkeys(matches))
+                if len(unique) != 1:
+                    raise ResearchCapabilityError(
+                        "official_event_target_unresolved",
+                        "Use an exact article URL or a unique speaker and ISO date; "
+                        "the feed did not identify exactly one requested event",
+                        retryable=False,
+                        origin="provider",
+                    )
+                return unique[0]
     published = document.published_at
     if published is None:
         return None
@@ -222,6 +280,26 @@ def _parse_official_event(
     if not actor:
         return None
     return document.source_url, text[:4000], actor, published, _revision_status(text)
+
+
+def _matches_event(
+    query: ResearchCapabilityQuery, url: str, actor: str, published: datetime
+) -> bool:
+    if query.event_at is not None and published != query.event_at.astimezone(UTC):
+        return False
+    urls = re.findall(r"https?://[^\s<>\"']+", query.query)
+    if urls:
+        return url in [value.rstrip(".,;，。；)") for value in urls]
+    dates = re.findall(r"(?<!\d)\d{4}-\d{2}-\d{2}(?!\d)", query.query)
+    date_matches = (
+        dates == [published.date().isoformat()]
+        if dates
+        else query.event_at is not None
+    )
+    # An opaque event id is not parsed as a person's name or a timestamp.
+    surname = actor.split()[-1]
+    actor_matches = re.search(rf"(?<![A-Za-z]){re.escape(surname)}(?![A-Za-z])", query.query, re.I)
+    return date_matches and actor_matches is not None
 
 
 def _event_fact(

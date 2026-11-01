@@ -1,0 +1,355 @@
+{
+  "schema_version": "research-evaluation-case.v1",
+  "case_id": "iran_attack_israel_20240413",
+  "event_family": "geopolitical_shock",
+  "input_text": "Iran launched an unprecedented aerial attack against Israel, sharply raising regional escalation risk.",
+  "trigger_evidence": {
+    "evidence_id": "trigger_iran_attack_israel_20240413",
+    "kind": "transcript",
+    "authority": "unverified",
+    "source_id": "evaluation-catalog",
+    "source_url": "https://bidenwhitehouse.archives.gov/briefing-room/statements-releases/2024/04/13/statement-from-president-joe-biden-on-irans-attacks-against-the-state-of-israel/",
+    "published_at": "2024-04-13T22:00:00Z",
+    "observed_at": "2024-04-13T22:00:00Z",
+    "received_at": "2024-04-13T22:00:02Z",
+    "content_hash": "63adc9186cc95b3dcde4fb129c2f6136f403d611b7d19e4f5d67b3dd1209b699",
+    "excerpt": "Iran launched an unprecedented aerial attack against Israel, sharply raising regional escalation risk."
+  },
+  "evidence_requirements": [
+    {
+      "requirement_id": "event_identity",
+      "description": "Identify the primary event, speaker or document, event time and revision status.",
+      "importance": "hard",
+      "source_priority": [
+        "official",
+        "verified_web"
+      ],
+      "authority_floor": "official",
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "freshness_seconds": 604800,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "confidence_cap": 0.45,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "policy_or_data_delta",
+      "description": "Establish what changed relative to prior wording, prior value or consensus.",
+      "importance": "hard",
+      "source_priority": [
+        "official",
+        "audited_aggregator",
+        "verified_web"
+      ],
+      "authority_floor": "official",
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "freshness_seconds": 86400,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "confidence_cap": 0.5,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "expectation_pricing",
+      "description": "Observe policy expectations, rates repricing or credible positioning evidence.",
+      "importance": "hard",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 900,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "confidence_cap": 0.55,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "macro_transmission",
+      "description": "Observe the rates and USD transmission path relevant to the event.",
+      "importance": "hard",
+      "source_priority": [
+        "official",
+        "exchange",
+        "audited_aggregator"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "official.macro",
+        "web.search"
+      ],
+      "freshness_seconds": 300,
+      "minimum_independent_sources": 2,
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "confidence_cap": 0.55,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "cross_asset_confirmation",
+      "description": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation.",
+      "importance": "soft",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ],
+      "authority_floor": "verified_web",
+      "preferred_capabilities": [
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 300,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "confidence_cap": 0.65,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "crypto_spot_confirmation",
+      "description": "Observe BTC spot reaction, volume and the event-time comparison window.",
+      "importance": "hard",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "freshness_seconds": 60,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [],
+      "confidence_cap": 0.5,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "derivatives_crowding",
+      "description": "Observe funding, open interest, basis and available liquidation or flow evidence.",
+      "importance": "hard",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "freshness_seconds": 60,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [],
+      "confidence_cap": 0.5,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "counter_thesis",
+      "description": "Build the strongest evidence-backed alternative transmission chain.",
+      "importance": "soft",
+      "source_priority": [
+        "official",
+        "exchange",
+        "verified_web"
+      ],
+      "authority_floor": "verified_web",
+      "preferred_capabilities": [
+        "official.macro",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 86400,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "confidence_cap": 0.7,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    }
+  ],
+  "expected_hard_requirement_ids": [
+    "event_identity",
+    "policy_or_data_delta",
+    "expectation_pricing",
+    "macro_transmission",
+    "crypto_spot_confirmation",
+    "derivatives_crowding"
+  ],
+  "archived_capability_fixtures": [
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "event_identity",
+      "query_aliases": [
+        "iran_attack_israel_20240413:event_identity",
+        "Verify event identity for iran_attack_israel_20240413"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_e085a3efb842465328edcdc052592ee7",
+          "requirement_id": "event_identity",
+          "kind": "official",
+          "authority": "official",
+          "source_id": "bidenwhitehouse.archives.gov",
+          "source_url": "https://bidenwhitehouse.archives.gov/briefing-room/statements-releases/2024/04/13/statement-from-president-joe-biden-on-irans-attacks-against-the-state-of-israel/",
+          "published_at": "2024-04-13T22:00:00Z",
+          "observed_at": "2024-04-13T22:00:01Z",
+          "received_at": "2024-04-13T22:00:02Z",
+          "content_hash": "e085a3efb842465328edcdc052592ee77422f0ac7cff9aab46ac04f9601368a6",
+          "excerpt": "President Biden issued a statement on Iran's April 13, 2024 attacks against Israel.",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:iran_attack_israel_20240413:event_identity",
+          "research_session_id": "archive:iran_attack_israel_20240413",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ]
+    },
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "policy_or_data_delta",
+      "query_aliases": [
+        "iran_attack_israel_20240413:policy_or_data_delta",
+        "Verify policy or data delta for iran_attack_israel_20240413"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_78e6aaa3d37bc083628bfac38551bc8d",
+          "requirement_id": "policy_or_data_delta",
+          "kind": "official",
+          "authority": "official",
+          "source_id": "bidenwhitehouse.archives.gov",
+          "source_url": "https://bidenwhitehouse.archives.gov/briefing-room/statements-releases/2024/04/13/statement-from-president-joe-biden-on-irans-attacks-against-the-state-of-israel/",
+          "published_at": "2024-04-13T22:00:00Z",
+          "observed_at": "2024-04-13T22:00:01Z",
+          "received_at": "2024-04-13T22:00:02Z",
+          "content_hash": "78e6aaa3d37bc083628bfac38551bc8da608d9d9fc3f08e2ec46e0a06ccdbed5",
+          "excerpt": "The statement described an unprecedented aerial attack launched from Iran and Yemen involving drones and missiles.",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:iran_attack_israel_20240413:policy_or_data_delta",
+          "research_session_id": "archive:iran_attack_israel_20240413",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ]
+    }
+  ],
+  "cutoff_at": "2024-04-13T22:05:00Z",
+  "outcome_available_at": null,
+  "outcome_labels": [],
+  "source_refs": [
+    "https://bidenwhitehouse.archives.gov/briefing-room/statements-releases/2024/04/13/statement-from-president-joe-biden-on-irans-attacks-against-the-state-of-israel/"
+  ]
+}

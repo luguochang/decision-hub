@@ -7,6 +7,27 @@ required: [schema_version]
 properties:
   schema_version: {type: string, const: dsh-host-bridge.v1}
 $defs:
+  dsh_model_dispatch_binding:
+    type: object
+    additionalProperties: false
+    required: [schema_version, run_id, dsh_session_id, request_hash, generation, plugin_build_hash, purpose, provider, model, reasoning_effort, temperature, max_tokens, stop_sequences_hash]
+    properties:
+      schema_version: {type: string, const: dsh-model-dispatch-binding.v1}
+      run_id: {type: string, minLength: 1, maxLength: 128}
+      dsh_session_id: {type: string, minLength: 1, maxLength: 256}
+      execution_session_id: {type: [string, 'null'], minLength: 1, maxLength: 256, default: null}
+      parent_session_id: {type: [string, 'null'], minLength: 1, maxLength: 256, default: null}
+      request_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      generation: {type: integer, minimum: 1}
+      plugin_build_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      purpose: {type: string, enum: [conversation, compaction, session-title]}
+      provider: {type: string, minLength: 1, maxLength: 256}
+      model: {type: string, minLength: 1, maxLength: 256}
+      reasoning_effort: {type: [string, 'null'], maxLength: 128}
+      temperature: {type: [number, 'null']}
+      max_tokens: {type: [integer, 'null'], minimum: 1}
+      stop_sequences_hash: {type: [string, 'null'], pattern: '^[a-f0-9]{64}$'}
+
   dsh_research_intake:
     type: object
     additionalProperties: false
@@ -119,6 +140,8 @@ $defs:
       last_seq: {type: integer, minimum: 0}
       observed_at: {type: string, format: date-time}
       error_code: {type: [string, 'null'], maxLength: 128}
+      model_step_timeout_ms: {type: [integer, 'null'], minimum: 1000, maximum: 600000, default: null}
+      model_step_timeout_source: {type: [string, 'null'], enum: [submission, durable_link, legacy_default, null], default: null}
 
   dsh_bridge_error:
     type: object
@@ -149,6 +172,81 @@ $defs:
           - {$ref: '#/$defs/dsh_bridge_error'}
           - {type: 'null'}
 
+  dsh_instruction_change:
+    type: object
+    additionalProperties: false
+    required: [action, scope, path, digest]
+    properties:
+      action: {type: string, const: set}
+      scope: {type: string, minLength: 1, maxLength: 4096}
+      path: {type: string, minLength: 1, maxLength: 4096}
+      digest: {type: string, pattern: '^[a-f0-9]{40}$'}
+
+  dsh_instruction_source:
+    type: object
+    additionalProperties: false
+    required: [kind, form, baseline, baselineIdentity, changes]
+    properties:
+      kind: {type: string, const: agent-instructions}
+      form: {type: string, const: instructions}
+      baseline: {type: boolean, const: true}
+      baselineIdentity: {type: string, minLength: 1, maxLength: 4096}
+      changes: {type: array, items: {$ref: '#/$defs/dsh_instruction_change'}, maxItems: 4096}
+
+  dsh_instruction_text:
+    type: object
+    additionalProperties: false
+    required: [type, text]
+    properties:
+      type: {type: string, const: text}
+      text: {type: string, minLength: 1, maxLength: 1048576}
+
+  dsh_instruction_message:
+    type: object
+    additionalProperties: false
+    required: [role, id, source, content]
+    properties:
+      role: {type: string, const: user}
+      id: {type: string, minLength: 1, maxLength: 256}
+      source: {$ref: '#/$defs/dsh_instruction_source'}
+      content: {type: array, items: {$ref: '#/$defs/dsh_instruction_text'}, minItems: 1, maxItems: 1}
+
+  dsh_instruction_event:
+    type: object
+    additionalProperties: false
+    required: [seq, time, type, data]
+    properties:
+      seq: {type: integer, minimum: 0, maximum: 9007199254740991}
+      time: {type: number, minimum: 0}
+      type: {type: string, const: user/message}
+      data: {$ref: '#/$defs/dsh_instruction_message'}
+
+  dsh_reviewer_instruction_binding:
+    type: object
+    additionalProperties: false
+    required: [reviewer_call_id, reviewer_call_seq, reviewer_generation, reviewer_request_id, parent_prefix_last_seq, parent_prefix_sha256, baseline_event]
+    properties:
+      reviewer_call_id: {type: string, minLength: 1, maxLength: 256}
+      reviewer_call_seq: {type: integer, minimum: 1, maximum: 9007199254740991}
+      reviewer_generation: {type: integer, minimum: 1, maximum: 9007199254740991}
+      reviewer_request_id: {type: string, minLength: 1, maxLength: 256}
+      parent_prefix_last_seq: {type: integer, minimum: 0, maximum: 9007199254740991}
+      parent_prefix_sha256: {type: string, pattern: '^[a-f0-9]{64}$'}
+      baseline_event: {$ref: '#/$defs/dsh_instruction_event'}
+
+  dsh_reviewer_instruction_bindings:
+    type: object
+    additionalProperties: false
+    required: [schema_version, run_id, dsh_session_id, generation, request_id, request_hash, bindings]
+    properties:
+      schema_version: {type: string, const: dsh-reviewer-instruction-bindings.v1}
+      run_id: {type: string, minLength: 1, maxLength: 128}
+      dsh_session_id: {type: string, minLength: 1, maxLength: 256}
+      generation: {type: integer, minimum: 1, maximum: 9007199254740991}
+      request_id: {type: string, minLength: 1, maxLength: 256}
+      request_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      bindings: {type: array, items: {$ref: '#/$defs/dsh_reviewer_instruction_binding'}, minItems: 1, maxItems: 100}
+
   dsh_session_result:
     type: object
     additionalProperties: false
@@ -161,11 +259,14 @@ $defs:
       last_seq: {type: integer, minimum: 0}
       final_response: {type: string, maxLength: 1048576}
       finish_reason: {type: [string, 'null'], maxLength: 128}
-      events_json: {type: string, minLength: 2, maxLength: 8388608}
+      events_json: {type: string, minLength: 2}
       started_at: {type: string, format: date-time}
       finished_at: {type: string, format: date-time}
       trace_ref: {type: string, minLength: 1, maxLength: 2048}
       result_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      # Derived only from complete Host-inspected native prefixes. The legacy
+      # result_hash above covers final_response + NUL + events_json, not this field.
+      reviewer_instruction_bindings: {$ref: '#/$defs/dsh_reviewer_instruction_bindings'}
 
   dsh_run_session_link_view:
     type: object
@@ -185,6 +286,8 @@ $defs:
       # Nullable only for historical rows created before migration 0027. A
       # re-admission may fill the immutable ceiling; execution otherwise fails closed.
       max_tool_calls: {type: [integer, 'null'], minimum: 1, maximum: 100}
+      # Unknown for legacy submissions; never backfill from current defaults.
+      model_step_timeout_ms: {type: [integer, 'null'], minimum: 1000, maximum: 600000, default: null}
       tool_calls_started: {type: integer, minimum: 0}
       accepted_at: {type: [string, 'null'], format: date-time}
       last_seen_at: {type: [string, 'null'], format: date-time}
@@ -204,7 +307,7 @@ $defs:
     properties:
       capability_id: {type: string, minLength: 1, maxLength: 256}
       error_code: {type: string, minLength: 1, maxLength: 128}
-      origin: {type: string, enum: [provider, transport, mcp, dsh, gateway, pit, orchestration]}
+      origin: {type: string, enum: [provider, transport, mcp, dsh, gateway, pit, orchestration, source_registry, storage]}
       cause_code: {type: [string, 'null'], maxLength: 128}
       retryable: {type: boolean}
 

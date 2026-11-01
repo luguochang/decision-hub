@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.local/contracts/read_command_receipt.schema.json",
+  "title": "ReadCommandReceiptContracts",
+  "$defs": {
+    "read_command_receipt": {
+      "type": "object",
+      "title": "ReadCommandReceipt",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": { "type": "string", "const": "read-command-receipt.v1" },
+        "request_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "revision_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "owner_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "command": { "$ref": "product_delivery.schema.yaml#/$defs/read_receipt_command" },
+        "result": { "$ref": "product_delivery.schema.yaml#/$defs/read_receipt_view" },
+        "payload_hash": { "type": "string", "minLength": 64, "maxLength": 64, "pattern": "^[0-9a-f]{64}$" },
+        "confirmation_basis": { "type": "string", "const": "stored_command_hash" }
+      },
+      "required": [
+        "schema_version", "request_id", "revision_id", "owner_id",
+        "command", "result", "payload_hash", "confirmation_basis"
+      ]
+    }
+  }
+}

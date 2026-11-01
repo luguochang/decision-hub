@@ -1,0 +1,78 @@
+{
+  "data_kind": "synthetic_contract_fixture",
+  "not_market_advice": true,
+  "not_runtime_admission": true,
+  "description": "All hashes, scope admission, schemas and capabilities below are synthetic design fixtures. Nothing is executed.",
+  "workflow": {
+    "schema_version": "skill-workflow.v1",
+    "workflow_id": "synthetic_macro_review",
+    "version_id": "synthetic_macro_review_1",
+    "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+    "input_schema": "wf.root.in.v1",
+    "output_schema": "wf.monitor.out.v1",
+    "capability_catalog_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "required_capabilities": ["web.search"],
+    "nodes": [
+      {"id": "facts", "op": "fact.select", "depends_on": [], "input_schema": "wf.facts.in.v1", "inputs": {"asset": {"from": "workflow_input", "pointer": "/asset"}, "as_of": {"from": "workflow_input", "pointer": "/as_of"}}, "output_schema": "wf.facts.out.v1", "capability_id": null, "component_ref": null},
+      {"id": "evidence", "op": "evidence.acquire", "depends_on": [], "input_schema": "wf.evidence.in.v1", "inputs": {"query": {"from": "literal", "value": "synthetic official macro release query"}, "as_of": {"from": "workflow_input", "pointer": "/as_of"}}, "output_schema": "wf.evidence.out.v1", "capability_id": "web.search", "component_ref": null},
+      {"id": "feature", "op": "component.compute", "depends_on": ["facts"], "input_schema": "wf.feature.in.v1", "inputs": {"facts": {"from": "node_output", "node_id": "facts", "pointer": "/facts"}}, "output_schema": "wf.feature.out.v1", "capability_id": null, "component_ref": "spot.features.v1"},
+      {"id": "cases", "op": "case.retrieve", "depends_on": [], "input_schema": "wf.cases.in.v1", "inputs": {"asset": {"from": "workflow_input", "pointer": "/asset"}, "as_of": {"from": "workflow_input", "pointer": "/as_of"}}, "output_schema": "wf.cases.out.v1", "capability_id": null, "component_ref": null},
+      {"id": "hypothesis", "op": "hypothesis.check", "depends_on": ["facts", "evidence", "feature", "cases"], "input_schema": "wf.hypothesis.in.v1", "inputs": {"facts": {"from": "node_output", "node_id": "facts", "pointer": "/facts"}, "evidence": {"from": "node_output", "node_id": "evidence", "pointer": "/evidence"}, "features": {"from": "node_output", "node_id": "feature", "pointer": "/features"}, "cases": {"from": "node_output", "node_id": "cases", "pointer": "/cases"}}, "output_schema": "wf.hypothesis.out.v1", "capability_id": null, "component_ref": null},
+      {"id": "decision", "op": "decision.compose", "depends_on": ["hypothesis"], "input_schema": "wf.decision.in.v1", "inputs": {"hypothesis": {"from": "node_output", "node_id": "hypothesis", "pointer": "/hypothesis"}}, "output_schema": "wf.decision.out.v1", "capability_id": null, "component_ref": null},
+      {"id": "monitor", "op": "monitor.propose", "depends_on": ["decision"], "input_schema": "wf.monitor.in.v1", "inputs": {"decision": {"from": "node_output", "node_id": "decision", "pointer": "/decision"}}, "output_schema": "wf.monitor.out.v1", "capability_id": null, "component_ref": null}
+    ],
+    "exports": {"proposal": {"from": "node_output", "node_id": "monitor", "pointer": "/proposal"}}
+  },
+  "admission": {
+    "catalog_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "allowed_scope_ids": ["crypto:spot:okx:BTC-USDT:trade:1m"],
+    "allowed_capabilities": ["web.search"],
+    "op_contracts": {
+      "fact.select": {"input_schema": "wf.facts.in.v1", "output_schema": "wf.facts.out.v1"},
+      "evidence.acquire": {"input_schema": "wf.evidence.in.v1", "output_schema": "wf.evidence.out.v1"},
+      "component.compute": {"input_schema": "wf.feature.in.v1", "output_schema": "wf.feature.out.v1"},
+      "case.retrieve": {"input_schema": "wf.cases.in.v1", "output_schema": "wf.cases.out.v1"},
+      "hypothesis.check": {"input_schema": "wf.hypothesis.in.v1", "output_schema": "wf.hypothesis.out.v1"},
+      "decision.compose": {"input_schema": "wf.decision.in.v1", "output_schema": "wf.decision.out.v1"},
+      "monitor.propose": {"input_schema": "wf.monitor.in.v1", "output_schema": "wf.monitor.out.v1"}
+    },
+    "capability_contracts": {"web.search": {"input_schema": "wf.evidence.in.v1", "output_schema": "wf.evidence.out.v1"}},
+    "installed_components": {"spot.features.v1": {"input_schema": "wf.feature.in.v1", "output_schema": "wf.feature.out.v1"}},
+    "schema_catalog": {
+      "wf.root.in.v1": {"type": "object", "additionalProperties": false, "required": ["asset", "as_of"], "properties": {"asset": {"type": "string"}, "as_of": {"type": "string", "format": "date-time"}}},
+      "wf.facts.in.v1": {"type": "object", "additionalProperties": false, "required": ["asset", "as_of"], "properties": {"asset": {"type": "string"}, "as_of": {"type": "string", "format": "date-time"}}},
+      "wf.facts.out.v1": {"type": "object", "additionalProperties": false, "required": ["facts"], "properties": {"facts": {"type": "object"}}},
+      "wf.evidence.in.v1": {"type": "object", "additionalProperties": false, "required": ["query", "as_of"], "properties": {"query": {"type": "string"}, "as_of": {"type": "string", "format": "date-time"}}},
+      "wf.evidence.out.v1": {"type": "object", "additionalProperties": false, "required": ["evidence"], "properties": {"evidence": {"type": "object"}}},
+      "wf.feature.in.v1": {"type": "object", "additionalProperties": false, "required": ["facts"], "properties": {"facts": {"type": "object"}}},
+      "wf.feature.out.v1": {"type": "object", "additionalProperties": false, "required": ["features"], "properties": {"features": {"type": "object"}}},
+      "wf.cases.in.v1": {"type": "object", "additionalProperties": false, "required": ["asset", "as_of"], "properties": {"asset": {"type": "string"}, "as_of": {"type": "string", "format": "date-time"}}},
+      "wf.cases.out.v1": {"type": "object", "additionalProperties": false, "required": ["cases"], "properties": {"cases": {"type": "object"}}},
+      "wf.hypothesis.in.v1": {"type": "object", "additionalProperties": false, "required": ["facts", "evidence", "features", "cases"], "properties": {"facts": {"type": "object"}, "evidence": {"type": "object"}, "features": {"type": "object"}, "cases": {"type": "object"}}},
+      "wf.hypothesis.out.v1": {"type": "object", "additionalProperties": false, "required": ["hypothesis"], "properties": {"hypothesis": {"type": "object"}}},
+      "wf.decision.in.v1": {"type": "object", "additionalProperties": false, "required": ["hypothesis"], "properties": {"hypothesis": {"type": "object"}}},
+      "wf.decision.out.v1": {"type": "object", "additionalProperties": false, "required": ["decision"], "properties": {"decision": {"type": "object"}}},
+      "wf.monitor.in.v1": {"type": "object", "additionalProperties": false, "required": ["decision"], "properties": {"decision": {"type": "object"}}},
+      "wf.monitor.out.v1": {"type": "object", "additionalProperties": false, "required": ["proposal"], "properties": {"proposal": {"type": "object"}}}
+    }
+  },
+  "golden": [
+    {"id": "WF01_VALID_SEVEN_OPS", "patch": [], "expected": "valid", "expected_order": ["facts", "evidence", "feature", "cases", "hypothesis", "decision", "monitor"]},
+    {"id": "WF02_VALID_TRANSITIVE_PREDECESSOR", "patch": [{"path": "/nodes/3/depends_on", "value": ["feature"]}, {"path": "/nodes/4/depends_on", "value": ["cases", "evidence"]}], "expected": "valid"},
+    {"id": "WF03_UNKNOWN_OP", "patch": [{"path": "/nodes/1/op", "value": "shell.exec"}], "expected": "workflow_op_not_installed"},
+    {"id": "WF04_CAPABILITY_OVERREACH", "patch": [{"path": "/required_capabilities", "value": ["web.fetch"]}, {"path": "/nodes/1/capability_id", "value": "web.fetch"}], "expected": "workflow_capability_not_admitted"},
+    {"id": "WF05_MISSING_DEPENDENCY", "patch": [{"path": "/nodes/2/depends_on", "value": ["absent"]}], "expected": "workflow_dependency_missing"},
+    {"id": "WF06_CYCLE", "patch": [{"path": "/nodes/0/depends_on", "value": ["decision"]}], "expected": "workflow_dependency_cycle"},
+    {"id": "WF07_FORWARD_BINDING", "patch": [{"path": "/nodes/1/inputs/query", "value": {"from": "node_output", "node_id": "decision", "pointer": "/decision"}}], "expected": "workflow_binding_not_predecessor"},
+    {"id": "WF08_UNKNOWN_OUTPUT_FIELD", "patch": [{"path": "/nodes/5/inputs/hypothesis/pointer", "value": "/missing"}], "expected": "workflow_binding_field_unknown"},
+    {"id": "WF09_MISSING_REQUIRED_INPUT", "patch": [{"op": "remove", "path": "/nodes/1/inputs/query"}], "expected": "workflow_input_binding_missing"},
+    {"id": "WF10_DUPLICATE_NODE_ID", "patch": [{"path": "/nodes/1/id", "value": "facts"}], "expected": "workflow_node_id_duplicate"},
+    {"id": "WF11_LITERAL_TYPE_MISMATCH", "patch": [{"path": "/nodes/1/inputs/query/value", "value": 12}], "expected": "workflow_literal_invalid"},
+    {"id": "WF12_CATALOG_CHANGED", "patch": [{"path": "/capability_catalog_hash", "value": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}], "expected": "workflow_catalog_binding_changed"},
+    {"id": "WF13_SCOPE_OVERREACH", "patch": [{"path": "/scope_id", "value": "gold:spot:XAU-USD"}], "expected": "workflow_scope_not_admitted"},
+    {"id": "WF14_COMPONENT_NOT_INSTALLED", "patch": [{"path": "/nodes/2/component_ref", "value": "arbitrary.import"}], "expected": "workflow_component_not_installed"},
+    {"id": "WF15_SCHEMA_REF_UNKNOWN", "patch": [{"path": "/nodes/5/output_schema", "value": "unknown.output.v1"}], "expected": "workflow_schema_ref_unknown"},
+    {"id": "WF16_SCHEMA_SHAPE_INVALID", "patch": [{"op": "remove", "path": "/nodes/1/output_schema"}], "expected": "workflow_schema_invalid"},
+    {"id": "WF17_BINDING_TYPE_MISMATCH", "patch": [{"path": "/nodes/1/inputs/query", "value": {"from": "workflow_input", "pointer": ""}}], "expected": "workflow_binding_type_mismatch"}
+  ]
+}

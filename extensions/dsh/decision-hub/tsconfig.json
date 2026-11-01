@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022", "DOM"],
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "strict": true,
@@ -10,7 +13,66 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["node", "vitest/globals"]
+    "types": [
+      "node",
+      "vitest/globals"
+    ],
+    "baseUrl": "../../..",
+    "paths": {
+      "@deepseek-ai/dsh-agent": [
+        ".cache/dsh-upstream/source/packages/core/agent/lib/types/index.d.ts"
+      ],
+      "@deepseek-ai/dsh-agent/invariant": [
+        ".cache/dsh-upstream/source/packages/core/agent/lib/types/invariant.d.ts"
+      ],
+      "@deepseek-ai/dsh-agent/types": [
+        ".cache/dsh-upstream/source/packages/core/agent/lib/types/types.d.ts"
+      ],
+      "@deepseek-ai/dsh-session": [
+        ".cache/dsh-upstream/source/packages/core/session/lib/types/index.d.ts"
+      ],
+      "@deepseek-ai/dsh-session/invariant": [
+        ".cache/dsh-upstream/source/packages/core/session/lib/types/invariant.d.ts"
+      ],
+      "@deepseek-ai/dsh-session/types": [
+        ".cache/dsh-upstream/source/packages/core/session/lib/types/types.d.ts"
+      ],
+      "@deepseek-ai/dsh-session/chunk-rows": [
+        ".cache/dsh-upstream/source/packages/core/session/lib/types/chunk-rows.d.ts"
+      ],
+      "@deepseek-ai/dsh-session/surface": [
+        ".cache/dsh-upstream/source/packages/core/session/lib/types/surface.d.ts"
+      ],
+      "@deepseek-ai/dsh-compaction/types": [
+        ".cache/dsh-upstream/source/packages/compaction/compaction/lib/types/types.d.ts"
+      ],
+      "@deepseek-ai/dsh-llm": [
+        ".cache/dsh-upstream/source/packages/llm/llm/lib/types/index.d.ts"
+      ],
+      "@deepseek-ai/dsh-llm/invariant": [
+        ".cache/dsh-upstream/source/packages/llm/llm/lib/types/invariant.d.ts"
+      ],
+      "@deepseek-ai/dsh-llm/types": [
+        ".cache/dsh-upstream/source/packages/llm/llm/lib/types/types.d.ts"
+      ],
+      "@deepseek-ai/dsh-llm/brand": [
+        ".cache/dsh-upstream/source/packages/llm/llm/lib/types/brand.d.ts"
+      ],
+      "@deepseek-ai/dsh-llm/message": [
+        ".cache/dsh-upstream/source/packages/llm/llm/lib/types/message.d.ts"
+      ],
+      "@deepseek-ai/dsh-llm/typert": [
+        ".cache/dsh-upstream/source/packages/llm/llm/lib/typert.host.d.ts"
+      ],
+      "@deepseek-ai/dsh-llm/remote": [
+        ".cache/dsh-upstream/source/packages/llm/llm/lib/typert.remote-client.d.ts"
+      ]
+    }
   },
-  "include": ["src", "tests", "vite.host.config.ts", "vitest.config.ts"]
+  "include": [
+    "src",
+    "tests",
+    "vite.host.config.ts",
+    "vitest.config.ts"
+  ]
 }

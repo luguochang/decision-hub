@@ -7,8 +7,17 @@ function loadClientTestSurface(): {
   hubStatusLabel: (link: unknown, gate: string | null) => string
   shouldPollStatus: (value: unknown, attempt: number) => boolean
   runtimeModeLabel: (value: unknown) => string
+  horizonJudgmentLabel: (value: unknown) => string
+  actionSummaryModelOf: (value: unknown) => any
   runtimeNotice: (value: unknown) => string
   protectedComposerTarget: (value: unknown) => boolean
+  researchComposerSubmitIntent: (event: {
+    type: string
+    key?: string
+    shiftKey?: boolean
+    isComposing?: boolean
+    target?: unknown
+  }) => boolean
   composerText: (value: unknown) => string
   intakePayload: (text: string, sessionId: string | null) => unknown
   intakeHeaders: (requestId: string) => Record<string, string>
@@ -21,6 +30,7 @@ function loadClientTestSurface(): {
   reportViewRegistration: () => { name: string; id: string; order: number; label: string }
   inboxViewRegistration: () => { name: string; id: string; order: number; label: string }
   inboxItemModelOf: (value: unknown) => any
+  dataJobModelOf: (value: unknown) => any
   openInboxSessionOf: (sessions: unknown, value: unknown, currentSessionId: string | null) => Promise<boolean>
   retryCommand: (runId: string) => unknown
   intakeAction: (state: string, runId: string | null, managed?: boolean) => string
@@ -31,7 +41,8 @@ function loadClientTestSurface(): {
   conversationScopeProps: (props: unknown, owned?: Record<string, unknown>) => Record<string, unknown>
   productWorkspaceOf: (value: unknown) => any
   latestProductSessionOf: (workspace: unknown, snapshot: unknown, archived?: unknown) => string | null
-  autoSelectProductWorkspace: (sessions: unknown, workspaces: unknown) => () => void
+  managedInboxSessionIdOf: (value: unknown) => string | null
+  autoSelectProductWorkspace: (sessions: unknown, workspaces: unknown, fetchImpl?: unknown) => () => void
 } {
   const source = readFileSync(resolve(process.cwd(), 'src/client/index.js'), 'utf8')
   const module = { exports: {} as Record<string, unknown> }
@@ -50,6 +61,29 @@ function loadClientTestSurface(): {
 }
 
 describe('Decision Hub DSH Client projection', () => {
+  it('does not present a no-trade fallback or uncalibrated estimate as a probability', () => {
+    const { horizonJudgmentLabel } = loadClientTestSurface()
+    expect(horizonJudgmentLabel({ action: 'no_trade', subjective_probability: 0.5, probability_status: 'uncalibrated' }))
+      .toBe('暂不支持交易判断')
+    expect(horizonJudgmentLabel({ action: 'short', subjective_probability: 0.62, probability_status: 'uncalibrated' }))
+      .toBe('做空情景 · 概率未校准，不应用于仓位决策')
+  })
+
+  it('projects the canonical action boundary and rejects any trading authorization', () => {
+    const { actionSummaryModelOf } = loadClientTestSurface()
+    const summary = {
+      recommendation: 'wait_for_confirmation', headline: '暂不交易，等待第二交易所确认',
+      rationale: 'OI 变化与第二交易所确认缺失。', reliability: 'limited', data_status: 'partial',
+      artifact_status: 'limited', trade_authorized: false, accepted_evidence_count: 8,
+      stale_evidence_count: 1, rejected_evidence_count: 2, blocking_gap_ids: ['open_interest_delta'],
+      warning_codes: ['probability_uncalibrated'], supporting_evidence_refs: ['ev-1'], next_review_at: null,
+    }
+    expect(actionSummaryModelOf(summary)).toMatchObject({
+      recommendationLabel: '暂不交易，等待确认', headline: summary.headline,
+      reliability: '有限', dataStatus: '数据部分充分', tradeAuthorized: false,
+    })
+    expect(actionSummaryModelOf({ ...summary, trade_authorized: true })).toBeNull()
+  })
   it('finds the product workspace by its durable title or path basename', () => {
     const { productWorkspaceOf } = loadClientTestSurface()
     const workspace = { workspaceId: 'workspace-trader', title: 'Crypto Macro Trader', path: '/tmp/trader' }
@@ -92,9 +126,50 @@ describe('Decision Hub DSH Client projection', () => {
       open: (id: string) => { calls.push(`open:${id}`) },
       create: async () => { calls.push('create'); return 'created' },
     }
-    const dispose = autoSelectProductWorkspace(sessions, workspaces)
-    await Promise.resolve()
+    const fetchImpl = async () => ({ ok: true, json: async () => ({ items: [] }) })
+    const dispose = autoSelectProductWorkspace(sessions, workspaces, fetchImpl)
+    await new Promise(resolve => setTimeout(resolve, 0))
     expect(calls).toEqual(['open:run-session'])
+    dispose()
+  })
+
+  it('recovers the latest canonical managed Session even when the real workspace title differs', async () => {
+    const { managedInboxSessionIdOf, autoSelectProductWorkspace } = loadClientTestSurface()
+    expect(managedInboxSessionIdOf({ items: [
+      { dsh_session_id: '  managed-latest  ' }, { dsh_session_id: 'managed-older' },
+    ] })).toBe('managed-latest')
+
+    const calls: string[] = []
+    const workspaceState = {
+      phase: 'ready', archivedSessionIds: [],
+      items: [
+        { workspaceId: 'workspace-source', title: 'source', path: '/tmp/source', sessionIds: ['source-session'] },
+        { workspaceId: 'workspace-hub', title: 'decision-hub', path: '/tmp/decision-hub', sessionIds: ['managed-latest'] },
+      ],
+    }
+    const sessionState = {
+      phase: 'ready', current: 'source-session',
+      byId: {
+        'source-session': { id: 'source-session', blank: false, updatedAt: 300 },
+        'managed-latest': { id: 'managed-latest', blank: false, updatedAt: 200 },
+      },
+    }
+    const workspaces = { list: { getSnapshot: () => workspaceState, subscribe: (fn: () => void) => { fn(); return () => undefined } } }
+    const sessions = {
+      list: { getSnapshot: () => sessionState, subscribe: (fn: () => void) => { fn(); return () => undefined } },
+      refresh: async () => { calls.push('refresh') },
+      binding: (id: string) => { calls.push(`binding:${id}`); return id === 'managed-latest' ? { sessionId: id } : undefined },
+      open: (id: string) => { calls.push(`open:${id}`) },
+      create: async () => { calls.push('create'); return 'created' },
+    }
+    const fetchImpl = async () => ({
+      ok: true,
+      json: async () => ({ items: [{ dsh_session_id: 'managed-latest' }, { dsh_session_id: 'managed-older' }] }),
+    })
+
+    const dispose = autoSelectProductWorkspace(sessions, workspaces, fetchImpl)
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(calls).toEqual(['refresh', 'binding:managed-latest', 'open:managed-latest'])
     dispose()
   })
 
@@ -107,10 +182,12 @@ describe('Decision Hub DSH Client projection', () => {
         origin: 'transport', cause_code: 'deadline', retryable: true }],
     })
 
-    expect(detail).toContain('Gate: 拒绝')
-    expect(detail).toContain('证据不足 (17% hard)')
-    expect(detail).toContain('market.cross_asset: research_capability_timeout')
-    expect(detail).toContain('transport/deadline, 可重试')
+    expect(detail).toContain('报告拒绝')
+    expect(detail).toContain('必需证据不足 · 必需证据 17%')
+    expect(detail).toContain('1 项工具或数据限制')
+    expect(detail).not.toContain('market.cross_asset')
+    expect(detail).not.toContain('research_capability_timeout')
+    expect(detail).not.toContain('Critical evidence')
     expect(detail).not.toContain('{"')
   })
 
@@ -206,9 +283,9 @@ describe('Decision Hub DSH Client projection', () => {
 
     expect(researchReportUrl('run/one')).toBe('/api/decision-hub/report?run_id=run%2Fone')
     expect(model).toMatchObject({
-      title: 'Fed statement and BTC transmission', gate: '可发布',
+      title: 'Fed statement and BTC transmission', gate: '报告已保存',
       origin: '用户提交', priority: '高优先级',
-      coverage: '证据充分 · 100% hard', evidenceCount: 1, totalToolCalls: 6,
+      coverage: '必需证据检查通过 · 100% hard', evidenceCount: 1, totalToolCalls: 6,
     })
     expect(model.mainChain[0].statement).toBe('Rates repriced higher.')
     expect(model.oppositeChain[0].statement).toBe('The move was already priced.')
@@ -232,7 +309,7 @@ describe('Decision Hub DSH Client projection', () => {
       evidence: [], causal_case: null, horizons: [], total_tool_calls: 2, scheduled_recheck_at: null,
     })
 
-    expect(model.gate).toBe('拒绝')
+    expect(model.gate).toBe('报告拒绝')
     expect(model.gaps).toHaveLength(1)
     expect(model.failures[0]).toMatchObject({
       capability_id: 'web.search', error_code: 'research_capability_timeout', retryable: true,
@@ -259,14 +336,15 @@ describe('Decision Hub DSH Client projection', () => {
     expect(reportStateOf(link, null, null)).toBe('terminal_pending')
     const model = terminalReportModelOf(link, null)
     expect(model).toMatchObject({
-      status: 'failed', gate: '仅研究', coverage: '证据不足 · 67% hard',
+      status: 'failed', gate: '仅研究', coverage: '必需证据不足 · 67% hard',
     })
-    expect(model.stopReason).toContain('47 facts retained')
+    expect(model.stopReason).toContain('研究运行失败')
+    expect(model.technicalStopReason).toContain('47 facts retained')
     expect(model.failures[0].error_code).toBe('dsh_evidence_unattested')
 
     expect(reportStateOf(link, null, 'research_report_unavailable')).toBe('terminal_error')
     expect(terminalReportModelOf({ ...link, business: { ...link.business, stop_reason_detail: null } }, 'research_report_unavailable'))
-      .toMatchObject({ status: 'failed', stopReason: 'research_report_unavailable' })
+      .toMatchObject({ status: 'failed', technicalStopReason: 'research_report_unavailable' })
   })
 
   it('keeps refreshing a readable report until the Hub business reaches a terminal state', () => {
@@ -293,6 +371,21 @@ describe('Decision Hub DSH Client projection', () => {
     const source = readFileSync(resolve(process.cwd(), 'src/client/index.js'), 'utf8')
     expect(source).toContain("fetch('/api/decision-hub/inbox?limit=100'")
     expect(source).toContain("inboxViewRegistration(), props => createElement(ResearchInboxView")
+    expect(source).toContain("fetch('/api/decision-hub/data-jobs?limit=20'")
+    expect(source).not.toContain('decision_desk_url')
+  })
+
+  it('projects DataJob coverage and keeps partial source errors visible', () => {
+    const { dataJobModelOf } = loadClientTestSurface()
+    expect(dataJobModelOf({
+      job_id: 'datajob-1', status: 'partial', dataset_ids: ['btc.usd.ohlcv.1h'],
+      window_start_at: '2026-06-01T00:00:00Z', window_end_at: '2026-09-01T00:00:00Z',
+      attempt: 2, partition_refs: ['p1', 'p2'], coverage_manifest_ref: 'coverage://1',
+      errors: ['oi_historical_unavailable'], updated_at: '2026-09-09T00:00:00Z',
+    })).toMatchObject({
+      jobId: 'datajob-1', status: '部分完成', statusCode: 'partial', datasets: ['btc.usd.ohlcv.1h'],
+      attempt: 2, partitions: 2, coverage: 'coverage://1', errors: ['oi_historical_unavailable'],
+    })
   })
 
   it('maps canonical Inbox state without exposing raw JSON', () => {
@@ -347,6 +440,7 @@ describe('Decision Hub DSH Client projection', () => {
     expect(source).toContain("ctx.slots.inject('conversation.view'")
     expect(source).not.toContain("ctx.slots.inject('conversation.composer.dock'")
     expect(source).not.toContain('decision-hub-report-inline')
+    expect(source).toContain("id: 'decision-hub-action-summary'")
   })
 
   it('builds one deterministic retry command per failed source Run', () => {

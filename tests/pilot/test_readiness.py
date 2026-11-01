@@ -61,6 +61,9 @@ def test_complete_local_pilot_configuration_is_ready_without_live_claims(tmp_pat
         "bls-releases",
         "bea-news",
         "bls-calendar",
+        "fed-calendar",
+        "ecb-calendar",
+        "boj-calendar",
     )
     assert "provider_structured_output" in report.live_canaries_required
     assert "test-secret" not in report.model_dump_json()

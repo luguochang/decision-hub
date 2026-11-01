@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:decision-hub:executable-design:skill-workflow:1",
+  "title": "Offline design reference; not an installed workflow or executor",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "workflow_id", "version_id", "scope_id", "input_schema", "output_schema", "capability_catalog_hash", "required_capabilities", "nodes", "exports"],
+  "properties": {
+    "schema_version": {"const": "skill-workflow.v1"},
+    "workflow_id": {"type": "string", "minLength": 1},
+    "version_id": {"type": "string", "minLength": 1},
+    "scope_id": {"type": "string", "minLength": 1},
+    "input_schema": {"$ref": "#/$defs/schema_id"},
+    "output_schema": {"$ref": "#/$defs/schema_id"},
+    "capability_catalog_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "required_capabilities": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "nodes": {"type": "array", "minItems": 1, "maxItems": 128, "items": {"$ref": "#/$defs/node"}},
+    "exports": {"type": "object", "minProperties": 1, "additionalProperties": {"$ref": "#/$defs/binding"}}
+  },
+  "$defs": {
+    "schema_id": {"type": "string", "pattern": "^[A-Za-z0-9_.:-]+$", "minLength": 1},
+    "node_id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"},
+    "pointer": {"type": "string", "pattern": "^(?:/[A-Za-z_][A-Za-z0-9_]*)*$"},
+    "binding": {
+      "oneOf": [
+        {
+          "type": "object", "additionalProperties": false, "required": ["from", "pointer"],
+          "properties": {"from": {"const": "workflow_input"}, "pointer": {"$ref": "#/$defs/pointer"}}
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["from", "node_id", "pointer"],
+          "properties": {"from": {"const": "node_output"}, "node_id": {"$ref": "#/$defs/node_id"}, "pointer": {"$ref": "#/$defs/pointer"}}
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["from", "value"],
+          "properties": {"from": {"const": "literal"}, "value": {}}
+        }
+      ]
+    },
+    "node": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "op", "depends_on", "input_schema", "inputs", "output_schema", "capability_id", "component_ref"],
+      "properties": {
+        "id": {"$ref": "#/$defs/node_id"},
+        "op": {"enum": ["fact.select", "evidence.acquire", "component.compute", "case.retrieve", "hypothesis.check", "decision.compose", "monitor.propose"]},
+        "depends_on": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/node_id"}},
+        "input_schema": {"$ref": "#/$defs/schema_id"},
+        "inputs": {"type": "object", "additionalProperties": {"$ref": "#/$defs/binding"}},
+        "output_schema": {"$ref": "#/$defs/schema_id"},
+        "capability_id": {"type": ["string", "null"], "minLength": 1},
+        "component_ref": {"type": ["string", "null"], "minLength": 1}
+      },
+      "allOf": [
+        {"if": {"properties": {"op": {"const": "evidence.acquire"}}}, "then": {"properties": {"capability_id": {"type": "string"}, "component_ref": {"type": "null"}}}, "else": {"properties": {"capability_id": {"type": "null"}}}},
+        {"if": {"properties": {"op": {"const": "component.compute"}}}, "then": {"properties": {"component_ref": {"type": "string"}}}, "else": {"properties": {"component_ref": {"type": "null"}}}}
+      ]
+    }
+  }
+}

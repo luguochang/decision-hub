@@ -70,7 +70,9 @@ class FeedbackCreate(BaseModel):
         extra="forbid",
     )
     request_id: Annotated[str, Field(min_length=1)]
-    target_type: Literal["run", "memo", "experiment", "candidate", "experience", "failure_pattern"]
+    target_type: Literal[
+        "run", "report_revision", "memo", "experiment", "candidate", "experience", "failure_pattern"
+    ]
     target_id: Annotated[str, Field(min_length=1)]
     created_by: Annotated[str, Field(min_length=1)]
     verdict: Literal["useful", "not_useful", "incorrect", "needs_review"]
@@ -83,7 +85,9 @@ class Feedback(BaseModel):
     )
     feedback_id: Annotated[str, Field(min_length=1)]
     request_id: Annotated[str, Field(min_length=1)]
-    target_type: Literal["run", "memo", "experiment", "candidate", "experience", "failure_pattern"]
+    target_type: Literal[
+        "run", "report_revision", "memo", "experiment", "candidate", "experience", "failure_pattern"
+    ]
     target_id: Annotated[str, Field(min_length=1)]
     created_by: Annotated[str, Field(min_length=1)]
     verdict: Literal["useful", "not_useful", "incorrect", "needs_review"]
@@ -132,7 +136,7 @@ class EvaluationDatasetManifest(BaseModel):
     leakage_audit: Literal["passed", "failed"]
     authorization: Annotated[str, Field(min_length=1)]
     visibility: Literal["owner_only"]
-    source_mode: Literal["fixture", "prospective"]
+    source_mode: Literal["fixture", "reconstructed_fixture", "prospective"]
     window_start_at: AwareDatetime
     window_end_at: AwareDatetime
     event_family_counts: Annotated[
@@ -145,6 +149,7 @@ class CandidateVersion(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
+    execution_scope: Literal["directional_synthesis", "research_harness"] | None = None
     candidate_id: Annotated[str, Field(min_length=1)]
     candidate_type: Literal["strategy", "runtime", "profile", "doctrine", "provider_policy"]
     content_hash: Annotated[str, Field(pattern="^[a-f0-9]{64}$")]
@@ -163,6 +168,7 @@ class ExperimentManifest(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
+    execution_scope: Literal["directional_synthesis", "research_harness"] | None = None
     experiment_id: Annotated[str, Field(min_length=1)]
     dataset_id: Annotated[str, Field(min_length=1)]
     baseline_ref: Annotated[str, Field(min_length=1)]

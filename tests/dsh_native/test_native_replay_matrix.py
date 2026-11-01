@@ -437,8 +437,9 @@ def _fact_values(
         )
     if requirement_id == "expectation_pricing":
         return (
+            ("macro.policy_expectation", "level", 0.31, "probability", "baseline"),
             ("macro.policy_expectation", "level", 0.34, "probability", "t-5m"),
-            ("macro.policy_expectation", "delta", 0.03, "percentage_point", "t+1m"),
+            ("macro.policy_expectation", "delta", 0.03, "percentage_point", "t-5m"),
         )
     if requirement_id == "macro_transmission":
         if source_id == "exchange-yield":
@@ -614,15 +615,21 @@ def test_native_replay_matrix_projects_three_product_outcomes(
             host.submits[0].deterministic_request_id
             != host.submits[1].deterministic_request_id
         )
-        assert report.status == "publish"
-        assert run.status == "completed"
+        # Complete evidence acquisition does not authorize an uncalibrated
+        # directional artifact. The commit gate must retain it as research-only.
+        assert report.status == "research_only"
+        assert run.status == "degraded"
         assert result.final_coverage.status == "sufficient"
         assert result.stop_reason.code == "sufficient"
     else:
         assert report.status == "research_only"
         assert run.status == "degraded"
         assert result.final_coverage.status == "insufficient"
-        assert result.stop_reason.code in {"critical_data_unavailable", "round_budget"}
+        assert result.stop_reason.code in {
+            "critical_data_unavailable",
+            "round_budget",
+            "no_actionable_path",
+        }
 
     detail = ResearchQueryService(database, pack_root=PACK_ROOT).get(run_id)
     business = ResearchQueryService(database, pack_root=PACK_ROOT).business_status(run_id)

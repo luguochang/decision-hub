@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime, timedelta
+
+from sqlalchemy import text
+
 from packages.contracts_py.decision_hub_contracts.models import DecisionDeskSummary, InboxView
-from packages.kernel.decision_hub_kernel.persistence.db import Database, RunRecord
+from packages.kernel.decision_hub_kernel.persistence.db import ArtifactRecord, Database, RunRecord
 
 
 class DecisionDeskQueryService:
@@ -13,16 +17,15 @@ class DecisionDeskQueryService:
             pending = session.query(RunRecord).filter(RunRecord.status == "admitted").count()
             running = session.query(RunRecord).filter(RunRecord.status == "running").count()
             published = (
-                session.query(RunRecord)
-                .filter(RunRecord.status.in_(["completed", "degraded"]))
+                session.query(ArtifactRecord)
+                .filter(
+                    ArtifactRecord.gate_status.in_(["publish", "degraded"]),
+                    ArtifactRecord.created_at >= datetime.now(UTC) - timedelta(days=30),
+                )
                 .count()
             )
-            forecast_count = session.execute(
-                __import__("sqlalchemy").text("SELECT count(*) FROM forecasts")
-            ).scalar_one()
-            evaluated_count = session.execute(
-                __import__("sqlalchemy").text("SELECT count(*) FROM outcomes")
-            ).scalar_one()
+            forecast_count = session.execute(text("SELECT count(*) FROM forecasts")).scalar_one()
+            evaluated_count = session.execute(text("SELECT count(*) FROM outcomes")).scalar_one()
         return DecisionDeskSummary(
             inbox=InboxView(
                 pending_count=pending, running_count=running, latest=self.database.latest_runs()

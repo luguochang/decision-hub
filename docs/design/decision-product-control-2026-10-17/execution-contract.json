@@ -1,0 +1,380 @@
+{
+  "schema_version": "decision-product-execution.v1",
+  "baseline": "decision-product-control-2026-10-17.review-5",
+  "approval_ref": "2026-10-18 user: 按这个方案来，OKX永续的建议和纸面验证也按推荐方案。定个目标开始实施",
+  "phase": "handoff_documented_execution_paused_not_delivered",
+  "implementation_authorized": true,
+  "goal_status_observed": "paused",
+  "goal_status_observed_at": "2026-10-23T03:00:02Z",
+  "current_review_note": "最新交接以HANDOFF_2026-10-23.md和latest_runtime_checkpoint为准；未实现/隔离验证/正式上线分开。目标工具实查paused，未改完成、未新建目标。",
+  "scope": {
+    "surface": "pc",
+    "venue": "OKX",
+    "market": "linear_perpetual",
+    "instruments": [
+      "BTC-USDT-SWAP",
+      "ETH-USDT-SWAP"
+    ],
+    "horizons": [
+      "4h",
+      "24h",
+      "72h"
+    ],
+    "real_auto_trading": false
+  },
+  "engineering_pass_implies_predictive_gain": false,
+  "current_slice": "用户要求交接：仅整理事实、总控状态和未完成项；不合并、构建或新研究。49c保留运行，后续执行暂停。",
+  "task_states": {
+    "T01": "in_progress",
+    "T02": "in_progress",
+    "T03": "in_progress",
+    "T04": "in_progress",
+    "T05": "in_progress",
+    "T06": "in_progress",
+    "T07": "in_progress",
+    "T08": "in_progress",
+    "T09": "future_scope",
+    "T10": "future_scope"
+  },
+  "evidence_refs": [
+    "artifacts/decision-product-core-20261018/D1/plan-consistency.json",
+    "artifacts/decision-product-core-20261018/D1/source-baseline.json",
+    "artifacts/decision-product-core-20261018/D1/canonical-launch-binding.json",
+    "artifacts/decision-product-core-20261018/D1/startup-failure-01",
+    "artifacts/decision-product-core-20261018/D1/candidate-02-build-start.json",
+    "artifacts/decision-product-core-20261018/D1/candidate-02/build-execution.json",
+    "artifacts/decision-product-core-20261018/D1/BTC-01/command.json",
+    "artifacts/decision-product-core-20261018/D1/BTC-01/terminal/gate.json",
+    "artifacts/decision-product-core-20261018/D1/BTC-01/native-context-failure.json",
+    "E:\\project\\study\\codex\\dsh\\decision-hub\\artifacts\\decision-product-core-20261018\\D1/candidate-03/build-execution.json"
+  ],
+  "last_updated_at": "2026-10-23T03:14:51.620803+00:00",
+  "parallel_d2_latest": {
+    "location": "E:/project/study/codex/dsh/.worktrees/decision-hub-decision-settings-d2",
+    "candidate": 41,
+    "main_merged": {
+      "merge": 27,
+      "source_config_paths": 340,
+      "frozen_build_inputs": 384
+    },
+    "actual_pc": "BTC17 failed/provider_timeout; report0/PAPER0/ETH0",
+    "real_perpetual_runs_submitted": 17,
+    "real_perpetual_runs_failed": 14,
+    "real_perpetual_runs_degraded": 2,
+    "real_perpetual_runs_cancelled": 1,
+    "real_perpetual_runs_running": 0,
+    "next_iso": {
+      "account_A": "approved_staged_notMain; B/C waiting explicit source window",
+      "paper_software_history": "approved_staged_notMain",
+      "OKX_result_budget": "approved_staged_notMain",
+      "callback_short_writer": "single_prod_single_gate_ISO_in_progress; Main frozen"
+    }
+  },
+  "updated_at": "2026-10-23T03:14:51.620803+00:00",
+  "latest_checkpoint": {
+    "at": "2026-10-21T07:28:25.385876+08:00",
+    "phase": "candidate45_live_periodic_consent_saved_waiting_real_0000_slot",
+    "current_service_candidate": 45,
+    "supervisor_pid": 19392,
+    "frozen_inputs": 429,
+    "controlled_paths": 362,
+    "accepted_perpetual_acceptance_runs": 21,
+    "failed": 14,
+    "degraded": 4,
+    "cancelled": 2,
+    "running": 1,
+    "genuine_approved_finalized_reports": 2,
+    "pc_report_advice_passed": [
+      "BTC18",
+      "ETH02"
+    ],
+    "financial_qualified_reports": 0,
+    "paper_fills": 0,
+    "eth_acceptance": true,
+    "receipt_sha256": "f7ade4436058b46d67a7b0e3fd86ee827865f8327acf952e5164eb425b58c0ef",
+    "schedule_state": "active",
+    "schedule_state_version": 3,
+    "next_due_at": "2026-10-21T08:00:00+08:00",
+    "first_real_auto_run_seen": false,
+    "current_document": "artifacts/decision-product-core-20261018/D2/AUTO-45/operations.md",
+    "next": "observe actual00:00 periodic Run; normal PC pause future cycle once admitted; exact automatic identity -> one metadata observer -> sameRun report/advice; only eligibleopen PAPER",
+    "current_actual_run_id": "run_2579bc3d6f0049278ebe2b72d07222df",
+    "sole_run_observer": 5780
+  },
+  "task_progress": {
+    "T01": {
+      "state": "in_progress",
+      "verified": "BTC18/ETH02 genuine4h independent-reviewed PC reports retained;49c actual build/startup passed; latestETH72 real research endeddegraded beforeprepare/review/finalize.",
+      "remaining": "Cross-layer stability and repaired-version genuine completion; reuse existing local proofs."
+    },
+    "T02": {
+      "state": "in_progress",
+      "verified": "Latest actual Run13b596 terminaldegraded correctly; no permanent spinner proven; ISO actualprefix async relay race RED→GREEN sealed, notdeployed.",
+      "remaining": "Consolidate/release bridge fix, genuine success; clarify existing phase clocks rather than add conflicting limits."
+    },
+    "T03": {
+      "state": "in_progress",
+      "verified": "Calendar/agenda present; ISO PCE official source9direct+real archive/agenda pass; Main remains oldPCE unavailable.",
+      "remaining": "Important-event selection and separate advance preparation horizon; EventFamilyPack/Binding/registry and core-family actual/consensus/stages/probabilities/action."
+    },
+    "T04": {
+      "state": "in_progress",
+      "verified": "Main40/49c scenario implementation and controlled full-chain proofs retained; genuine4h BTC/ETH reports retained; newestETH72 failedbeforeindependentreview.",
+      "remaining": "Genuine eventp/conditionalq/rootcauses/pre-reviewedlongshort and usable24h72h; controlled fixtures not accepted as live success."
+    },
+    "T05": {
+      "state": "in_progress",
+      "verified": "Existing expiry-reminder PC and scoped condition-monitor proofs retained; schedulepausedv6.",
+      "remaining": "First usable automaticreport; actualcondition→notice→successor; formalPAPER lifecycle."
+    },
+    "T06": {
+      "state": "in_progress",
+      "verified": "BTC18 mature result PC passed; exact maturedexperience entered7completed genuine modelinvocations.",
+      "remaining": "Causal use/effect improvement notproven; formal settledPAPER outcome consumption missing."
+    },
+    "T07": {
+      "state": "in_progress",
+      "verified": "Originalsettings/ETH72 once-submit/sameRunprogress/materials/leave-return PC passed; newestRun endedlimitedresearchonly.",
+      "remaining": "Successful newreport/advice/PAPER/remaininghorizons and simplified usermanual; handoff nowwritten is statusguide, not completed productmanual."
+    },
+    "T08": {
+      "state": "in_progress",
+      "verified": "Main49c actual fullbuildpassed UI/Host andAPI/3fresh startup;409controlledpaths.3ISO incrementspackets sealed butnotmerged.",
+      "remaining": "Consolidated source/release and genuine repaired core chain; productnotdelivered."
+    },
+    "T09": {
+      "state": "future_scope",
+      "remaining": "gold/index packages after current crypto core"
+    },
+    "T10": {
+      "state": "future_scope",
+      "remaining": "Kronos independent later method package"
+    }
+  },
+  "historical_parallel_d2_before_current41": {
+    "location": "E:/project/study/codex/dsh/.worktrees/decision-hub-decision-settings-d2",
+    "main_merged": {
+      "merge": 23,
+      "source_config_paths": 315,
+      "frozen_build_inputs": 359
+    },
+    "core_direct_checks": "Main codegen0; PC typecheck0; observed session wire2passed; actual24h registered Tool/independent child/Graph/unique Action/signed report engineering gate0 with synthetic model content",
+    "actual_pc": false,
+    "real_perpetual_runs_submitted": 15,
+    "real_perpetual_runs_failed": 13,
+    "real_perpetual_runs_degraded": 2,
+    "candidate": 36,
+    "next_iso": "paper_input_guide_review_fix_inprogress_notMainmerged;observeexistingBTC15_only",
+    "current_status": "Build36passed2026-10-20T04:45:32.9635956Z/UI1Host1exit0/receipta9443cc46b535f34f8b8e48cb0441092f3b86e3f797a3b45b7cc842355c0c659. Old35standardstopconfirmedbyROstate;wrapperLASTEXITCODEfalseerrorrecorded. Normal36startup04:47:28.8016794Zsupervisor6696/sole16089completedexit0/API200+3freshnullerrors04:57:18.553491Z. Chromeoldidentityexpiredafterrestart/privateentryhashnavigationdidnotremountApp/fullreloadatnormalprivateentrybootstraprestored/nooutputtoken/grantuntil20:58local. BTC15singlePCclickaccepted04:59:29.774172Z Runrun_977c4bd0ea4145b9826c7c25de7adf1b;originalowner/account/BTC4h/v1/500/25/2500flat. Sole54656running05:00:13ZRunrunning/nativeadmittedseq0. Main359/315/final3approvedchangesfrozen;15accepted11failed2degraded1cancelled1running/report0fill0/BTC14failedpreserved. paper-input-guideISO4a448...independentreview1P1prepare-nosampling+2P2oldrevisionrefill/guide-notrefreshed,implementeronefixroundinprogress/notMainmerged;goalactive.",
+    "real_perpetual_runs_running": 0,
+    "real_perpetual_runs_cancelled": 1
+  },
+  "latest_runtime_checkpoint": {
+    "observed_at": "2026-10-23T03:14:51.620803+00:00",
+    "phase": "handoff_documented_execution_paused_not_delivered",
+    "product_delivered": false,
+    "goal_status_observed": "paused",
+    "current_service_candidate": "49c",
+    "supervisor_pid": 24492,
+    "controlled_paths": 409,
+    "frozen_input_files": 1920,
+    "source_manifest": "artifacts/decision-product-core-20261018/D2/merge-42/release-source-manifest.json",
+    "source_manifest_sha256": "c41585ad89feabbb6b7b7ba239dc86e1ee38e3de969d72aa00065fa830def6b8",
+    "build": {
+      "state": "passed",
+      "completed_at": "2026-10-23T01:19:40.6300489Z",
+      "ui_exit": 0,
+      "host_exit": 0,
+      "receipt_sha256": "2bc144fc4bdc3dcaa11766aea1927d71e9d8dfe32753baaad9a71d7138d567e6",
+      "result": "artifacts/decision-product-core-20261018/D1/candidate-49c-build-wrapper-result.json"
+    },
+    "normal_start": {
+      "invoked_at": "2026-10-23T01:19:42.2838277Z",
+      "startup_ready": true,
+      "latest_observed_at": "2026-10-23T01:31:59.206493+00:00",
+      "startup_observer_session": null,
+      "source": "artifacts/decision-product-core-20261018/D1/candidate-49c-startup-current.json",
+      "all3worker_errors_null": true
+    },
+    "actual_research_baseline": {
+      "accepted_runs": 25,
+      "failed": 17,
+      "degraded": 6,
+      "cancelled": 2,
+      "active": 0,
+      "independent_approved_reports": 2,
+      "formal_paper_fills": 0,
+      "pc_report_advice": [
+        "BTC18",
+        "ETH02"
+      ],
+      "new49c_model_submissions": 1
+    },
+    "event_scenario_source": {
+      "state": "Main40 merged and now built49c; genuine new-model PC result not accepted",
+      "controlled_full_case": "1P887.88s; native/Graph/SQL/publication/watch/signed GET/source all passed; model_invoked=false",
+      "pc_original_wire": "6P14.12s parser/cards/integrity and104.5s saved-read/abort/default behavior",
+      "evidence": "../.worktrees/decision-hub-decision-settings-d2/artifacts/d2-event-scenario-action-plans/task2-watch/coherent-source-result.json"
+    },
+    "paper_horizon_extension": {
+      "state": "ISO implemented and focused verified, not Main/deployed",
+      "scope": "8production+5tests+existing plan increment; ordinary and event24h/72h PAPER with original target deadline;4h wire retained",
+      "plan": "../.worktrees/decision-hub-decision-settings-d2/docs/design/decision-product-control-2026-10-17/PAPER_HORIZON_ALIGNMENT_FIX.md",
+      "packet": "../.worktrees/decision-hub-decision-settings-d2/artifacts/d2-paper-horizon-extension/packet.json",
+      "packet_sha256": "b51ce0f261ab65c160a57fb391ea850ad8bfbaaec2a829576224f60485c83a2e",
+      "proof": "normal queue3P,signedAPI3P,oldwire1P,eventreader12P,controlled event long consumer2P,PC43P; no genuine long-event model/financial effects claimed",
+      "graph_recipe_compatibility": "Read-only exact current481-key V2 and5old artifacts zero overlap with8production deltas; standard product source map includes all8, therefore new standard release still required. Postmerge genuine savedGET unverified."
+    },
+    "schedule": {
+      "state": "paused",
+      "state_version": 6,
+      "new_paid_job_not_automatically_enabled": true
+    },
+    "remaining_core": [
+      "Consolidate3sealedISO increments and shared-plan afterimage; retain latest22-row selection and prior sources; one necessary standard prepare/build/start, not yet executed.",
+      "Repaired-version genuine BTC24h/ETH72h native→prepare→independent review→sameRun PC readable probability/rootcauses/long-short conditions; currently not passed.",
+      "Calendar-driven important-event selection/advance preparation plus CPI/PCE/employment/FOMC typed family information and conditional plans; currentT03 not future asset scope.",
+      "Formal PAPER confirmation/fill/protection/exit/settlement/result and genuine next-research use of matured outcomes; formalfills0.",
+      "First usable automatic report; actual condition/notice/successor; remaining BTC/ETH4h24h72h matrix and final PC manual/handoff."
+    ],
+    "next_required_action": "Execution paused for user-requested handoff. Read HANDOFF_2026-10-23.md first. On an explicit later continuation use existing05 plan and sealed packets; do not blindly rerun old49c research/build or create a new goal.",
+    "prior_runtime_checkpoint": "artifacts/decision-product-core-20261018/D1/candidate-49c-prior-runtime-checkpoint.json",
+    "financial_qualification": "Not proven; no70percent success claim or genuine fills fabricated; no real orders",
+    "pc_submission": {
+      "instrument": "ETH-USDT-SWAP",
+      "horizon": "72h",
+      "request_count": 1,
+      "state": "terminal_degraded_research_only_no_independent_approved_report",
+      "new_account_created": false,
+      "settings_version": 1,
+      "paper_equity": "2500",
+      "max_notional": "500",
+      "max_planned_loss": "25",
+      "run_id": "run_13b596fd7295472d9db23713864d792d",
+      "request_id": "perpresearch_cb9f9cf354d4f29b86051d12ccc29f67eb8199c59dc58917e36242bc11c43175",
+      "identity_sha256": "d325bbf1923fbec033480e90f6587c4bb8a4b76ef877ea73be33fe1b46d4b1e4"
+    },
+    "current_actual_run_id": null,
+    "sole_run_observer": null,
+    "latest_observation": {
+      "at": "2026-10-23T02:07:00.991762+00:00",
+      "status": "degraded",
+      "native": [
+        {
+          "state": "failed",
+          "generation": 1,
+          "last_seq": 596,
+          "tool_calls_started": 18,
+          "error_code": "dsh_turn_error"
+        }
+      ],
+      "model_records": [
+        {
+          "kind": "model_finish",
+          "n": 29
+        },
+        {
+          "kind": "model_input",
+          "n": 29
+        }
+      ]
+    },
+    "event_agenda_current_run": {
+      "entry_count": 0,
+      "cpi": "no_upcoming_in_actual72h_window",
+      "nfp": "schedule_source_unavailable_or_invalid",
+      "fomc": "schedule_original_invalid; staged exact times unavailable",
+      "pce": "future schedule provider unavailable",
+      "meaning": "Do not demand or fabricate nineCPI branches when no qualifyingCPI in target window; normal-market ETH72 still required. Broader event families remain currentT03 scope."
+    },
+    "pc_actual_new_run_checks": {
+      "normal_private_entry": "passed",
+      "original_saved_settings_72h_submit_once": "passed",
+      "accepted_same_run_progress": "passed",
+      "on_demand_background_materials": "passed; actual12material/10calls snapshot with11accepted/4missing at09:47; not final research",
+      "leave_and_return": "passed; same paper/ETH/v1/72h/original Run restored, noPOST",
+      "screenshots": [
+        "artifacts/decision-product-core-20261018/D2/ETH-72H-02/pc-real-research-running.png",
+        "artifacts/decision-product-core-20261018/D2/ETH-72H-02/pc-real-materials-visible.png",
+        "artifacts/decision-product-core-20261018/D2/ETH-72H-02/pc-restored-original72h.png"
+      ],
+      "report_advice_paper_result": "not_passed; latestETH72 ended degraded before prepare/review/finalize, retained research-only artifact; formalfills0"
+    },
+    "multi_event_source_increment": {
+      "state": "ISO implemented;9direct passed;genuine official temporary-SQL ingestion/archive/agenda passed; not Main",
+      "official_sources": "BEA ICS200 only Personal Income and Outlays; Fed HTML200 real roundtrip passed/date-only; BLS ICS/employment403 retained",
+      "not_implemented": "EventFamilyPack/Binding/registry, multi-family actual/consensus/subjective scenario probability and stage execution still open in approvedT03; schedule source alone is not complete",
+      "no_native_rerun": true,
+      "packet": "../.worktrees/decision-hub-decision-settings-d2/artifacts/d2-event-family-sources/packet.json",
+      "packet_sha256": "da059e10a20466a4ae777e09d066c2de568e33dc6ab9c4c2db476aeea7affa9c",
+      "changed_paths": 11,
+      "formal_database_writes": 0,
+      "model_invoked": false,
+      "historical_pce_compatibility": "old null-source unavailable original preserved, direct RED to GREEN"
+    },
+    "actual_native_failure": {
+      "code": "research_provider_native_context_invalid",
+      "raw_turn_end_seq": 593,
+      "native_last_seq": 596,
+      "native_state": "failed",
+      "run_outer_state": "degraded",
+      "prepare_review_finalize_observed": [
+        0,
+        0,
+        0
+      ],
+      "cause_not_yet_located": false,
+      "source_frozen_inputs": 1920,
+      "changed_source_inputs": [],
+      "source_verification": "artifacts/decision-product-core-20261018/D2/ETH-72H-02/source-freeze-at-native-error.json",
+      "no_repeat_model": true,
+      "skill_load_itself_succeeded": true,
+      "outer_terminal_propagation_bug_proven": false,
+      "artifact_id": "art_ad19b776cb3b429d82a9167460c8bb9e",
+      "finished_at": "2026-10-23 02:06:50.692828",
+      "terminal_result_sha256": "8abe7fa6d82c9ff8133896ea42225678b49060c85c4e14d10181132da6216569",
+      "python_five_field_check": "29/29 existing ProviderInputOriginal scalar identities and row hashes match; Python399-416 candidate excluded; no rerun",
+      "source_not_yet_proven": "Exact original live throw-stack attribution and repaired deployed-model success not proven; local bridge-only fix is sealed ISO, Main unchanged.",
+      "reproduced_cause_scope": "Actual-prefix591(snapshot)/592(live) async append race proven in private retainedPreStep replay; original full-log canonical guard rejects valid inbox relay. Exact live inspect prefix/throw stack absent; unique live attribution not proven.",
+      "fix_packet": "../.worktrees/decision-hub-decision-settings-d2/artifacts/d2-native-context-diagnosis/packet.json",
+      "fix_packet_sha256": "21eb8f2cc72d5f5fe4a837214680b93164f142929f64dd92cdb2030b0f49061b",
+      "fix_deployed": false,
+      "finite_proof": "Actual private retainedPreStep591/592 RED→GREEN; stable1read, advancing2reads; rewritten-prefix/cancellation/original-deadline reject before append; original controller/budget/evidence retained."
+    },
+    "latest_terminal_run_id": "run_13b596fd7295472d9db23713864d792d",
+    "terminal_result": "artifacts/decision-product-core-20261018/D2/ETH-72H-02/terminal-result.json",
+    "combined_next_preflight": {
+      "path": "../.worktrees/decision-hub-decision-settings-d2/artifacts/d2-core-combined-next/preflight.json",
+      "two_packets_paths": 25,
+      "before_matches": 25,
+      "afterimage_matches": 25,
+      "financial_and02_unchanged": 6,
+      "preview_controlled_paths": 415,
+      "applied": false,
+      "sdk_fix_packet_pending": false,
+      "latest_combined_preflight_pending": true,
+      "shared_plan_afterimage_reconciliation_required": true,
+      "note": "Base25 was valid at its capture; native bridge plus later shared-plan append not yet integrated. No latest26-path source preflight, Main merge or build claimed."
+    },
+    "current_goal_turn_classification": "handoff: project not delivered; current49c retained running; goal tool paused; no new model/build/Main production writes. Facts, limitations, sealed ISO fixes and concrete remaining core steps documented.",
+    "handoff_document": "docs/design/decision-product-control-2026-10-17/HANDOFF_2026-10-23.md",
+    "handoff_snapshot": "artifacts/decision-product-core-20261018/D2/handoff-20261023/state-snapshot.json",
+    "next_retained_selection_scope": {
+      "state": "prepared_not_used_by_standard_prepare",
+      "parameters": "artifacts/decision-product-core-20261018/D1/next-selection-eth72-20261023/scope-preparation.json",
+      "rows": 22,
+      "sha256": "25651266a372b3aa494442c6d816577247427360557c9019e31303f632ed6cf2",
+      "original21rows_unchanged": true,
+      "formal_db_writes": 0,
+      "graph_hash_to_register": "51e00f40de74de0b1fd87130d714503c66b7525c9ba02234c08f5f445522a433",
+      "actual_prepare_build_archive_registration": false
+    },
+    "event_calendar_gap": {
+      "state": "approvedT03_not_fully_implemented",
+      "important_event_selection": false,
+      "advance_preparation_horizon_separate_from_market_target": false,
+      "family_paths": "Calendar already names CPI/jobs/FOMC; numerical scenario and realization path heavilyCPI. ISO PCE source only; family-specific actual/consensus/stage/scenario/action missing.",
+      "next_example_events_officially_checked": "FOMCOct27-28; BEAGDP/PCEOct29; dates outside current72h forecast window must remain in future preparation agenda."
+    }
+  }
+}

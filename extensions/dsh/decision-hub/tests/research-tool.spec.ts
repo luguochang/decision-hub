@@ -3,6 +3,7 @@ import {
   DEFAULT_RESEARCH_TOOL_TIMEOUT_MS,
   RESEARCH_TOOL_NAME,
   createResearchToolDefinition,
+  resolveResearchSessionId,
 } from '../src/research-tool.js'
 
 const SESSION_ID = 'dsh_f66aac8b72d82bc0de3b4940290d1d2607ac8cdc2db0c8a7ebacfc7686afb615'
@@ -26,10 +27,10 @@ function args(): Record<string, unknown> {
   }
 }
 
-function execution(agentId: string | null): never {
+function execution(agentId: string | null, callId = 'call-1'): never {
   return {
-    callId: 'call-1',
-    rootCallId: 'call-1',
+    callId,
+    rootCallId: callId,
     name: RESEARCH_TOOL_NAME,
     arguments: args(),
     signal: new AbortController().signal,
@@ -41,9 +42,23 @@ function execution(agentId: string | null): never {
 }
 
 describe('trusted Decision Hub research tool', () => {
+  it('walks DSH subagent lineage to the root research session', () => {
+    const root = { id: SESSION_ID }
+    const child = {
+      id: 'dsh_child_session',
+      session: { header: { parentSession: SESSION_ID } },
+      ctx: { agents: { get: vi.fn((id: string) => id === SESSION_ID ? root : undefined) } },
+    }
+    expect(resolveResearchSessionId(child)).toBe(SESSION_ID)
+  })
+
+  it('keeps a standalone agent id when DSH has no lineage metadata', () => {
+    expect(resolveResearchSessionId({ id: SESSION_ID })).toBe(SESSION_ID)
+  })
+
   it('keeps wrapper timeout above the Gateway capability deadline', () => {
-    expect(DEFAULT_RESEARCH_TOOL_TIMEOUT_MS).toBe(25_000)
-    expect(DEFAULT_RESEARCH_TOOL_TIMEOUT_MS).toBeGreaterThan(20_000)
+    expect(DEFAULT_RESEARCH_TOOL_TIMEOUT_MS).toBe(65_000)
+    expect(DEFAULT_RESEARCH_TOOL_TIMEOUT_MS).toBeGreaterThan(60_000)
   })
 
   it('keeps Session identity out of model arguments and injects exec.agent.id', async () => {
@@ -55,7 +70,7 @@ describe('trusted Decision Hub research tool', () => {
       })
       return Response.json({
         schema_version: 'research-capability-result.v1',
-        request_id: 'capability-request-1',
+        request_id: 'call-1',
         capability_id: 'market.cross_asset',
         provider: 'fred',
         evidence_candidates: [],
@@ -79,8 +94,37 @@ describe('trusted Decision Hub research tool', () => {
     expect(requests[0]!.body).toMatchObject({
       schema_version: 'research-capability-query.v1',
       research_session_id: SESSION_ID,
+      request_id: 'call-1',
     })
     expect(requests[0]!.headers.get('x-decision-hub-bridge-key')).toBe('test-bridge-secret')
+  })
+
+  it('derives a request id when the model omits it', async () => {
+    const requests: Array<{ body: Record<string, unknown> }> = []
+    const fetchImpl = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
+      requests.push({ body: JSON.parse(String(init?.body)) as Record<string, unknown> })
+      return Response.json({
+        schema_version: 'research-capability-result.v1',
+        request_id: 'call-1',
+        capability_id: 'market.cross_asset',
+        provider: 'fred',
+        evidence_candidates: [],
+        cost_usd: 0,
+        completed_at: '2026-09-01T10:00:01Z',
+      })
+    })
+    const definition = createResearchToolDefinition({
+      serviceUrl: 'http://127.0.0.1:8002/decision-hub/v1/research-capabilities/execute',
+      authKey: 'test-bridge-secret',
+      timeoutMs: 20_000,
+      fetchImpl,
+    })
+
+    const { request_id: _omitted, ...withoutRequestId } = args()
+    await definition.execute(withoutRequestId, execution(SESSION_ID))
+
+    expect(requests[0]!.body.request_id).toBe('call-1')
+    expect(definition.parameters).not.toMatchObject({ properties: { request_id: { required: true } } })
   })
 
   it('fails closed without an Agent and rejects a model-supplied Session field', async () => {
@@ -101,4 +145,56 @@ describe('trusted Decision Hub research tool', () => {
     )).rejects.toThrow()
     expect(fetchImpl).not.toHaveBeenCalled()
   })
+
+  it('isolates different tool calls even when the model repeats the run request id', async () => {
+    const requests: Array<Record<string, unknown>> = []
+    const fetchImpl = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
+      const body = JSON.parse(String(init?.body)) as Record<string, unknown>
+      requests.push(body)
+      return Response.json({
+        schema_version: 'research-capability-result.v1',
+        request_id: body.request_id, capability_id: body.capability_id,
+        provider: 'test', evidence_candidates: [], cost_usd: 0,
+        completed_at: '2026-09-01T10:00:01Z',
+      })
+    })
+    const definition = createResearchToolDefinition({
+      serviceUrl: 'http://127.0.0.1:8002/execute', authKey: 'test',
+      timeoutMs: 20_000, fetchImpl,
+    })
+    await definition.execute(args(), execution(SESSION_ID, 'call-spot'))
+    await definition.execute({ ...args(), capability_id: 'data.historical' }, execution(SESSION_ID, 'call-daily'))
+    expect(requests.map(item => item.request_id)).toEqual(['call-spot', 'call-daily'])
+  })
+
+  it.each([
+    { request_id: 'another-call', capability_id: 'market.cross_asset' },
+    { request_id: 'call-1', capability_id: 'market.crypto_derivatives' },
+  ])('rejects a successful response belonging to a different request: %o', async identity => {
+    const definition = createResearchToolDefinition({
+      serviceUrl: 'http://127.0.0.1:8002/execute', authKey: 'test', timeoutMs: 20_000,
+      fetchImpl: vi.fn(async () => Response.json({
+        schema_version: 'research-capability-result.v1', ...identity,
+        provider: 'test', evidence_candidates: [], cost_usd: 0,
+        completed_at: '2026-09-01T10:00:01Z',
+      })),
+    })
+    await expect(definition.execute(args(), execution(SESSION_ID))).rejects.toThrow(
+      'decision_hub_research_result_identity_mismatch',
+    )
+  })
+})
+
+
+it('passes real retained-document references through the registered executor', async () => {
+  let submitted: Record<string, unknown> = {}
+  const definition = createResearchToolDefinition({
+    serviceUrl: 'http://127.0.0.1:8037/decision-hub/v1/research-capabilities/execute', authKey: 'test-only', timeoutMs: 65000,
+    fetchImpl: async (_url, init) => {
+      submitted = JSON.parse(String(init?.body))
+      return Response.json({ schema_version: 'research-capability-result.v1', request_id: 'call-1', capability_id: 'document.readback', provider: 'saved-document', evidence_candidates: [], cost_usd: null, completed_at: '2026-09-01T10:00:01Z' })
+    },
+  })
+  await definition.execute({ ...args(), capability_id: 'document.readback', symbols: [], allowed_domains: [], evidence_ref: 'ev-retained', content_ref: 'sha256:' + 'a'.repeat(64) }, execution(SESSION_ID))
+  expect(submitted).toMatchObject({ research_session_id: SESSION_ID, evidence_ref: 'ev-retained', content_ref: 'sha256:' + 'a'.repeat(64) })
 })

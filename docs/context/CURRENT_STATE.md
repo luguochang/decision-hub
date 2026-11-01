@@ -1,5 +1,7 @@
 # 当前状态短上下文
 
+> 2026-10-17接续覆盖：[00当前总控](../design/decision-product-control-2026-10-17/00_MASTER_CONTROL.md)、[05任务](../design/decision-product-control-2026-10-17/05_IMPLEMENTATION_PLAN.md)、[12开发入口](../design/decision-product-control-2026-10-17/12_ENGINEERING_READINESS_AND_DELIVERY.md)。review-4及OKX范围已获批准，最新指令暂停实施并补审文档。下文是9月5日历史快照，不是当前第一执行入口；其完成记录按原版本保留。
+
 更新时间：2026-09-05（Asia/Shanghai）
 用途：Agent 恢复任务时的第一读入口。本文只投影已验证事实，不替代 ADR、Stage Charter、schema 或实现。
 

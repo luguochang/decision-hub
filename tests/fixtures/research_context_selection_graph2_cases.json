@@ -1,0 +1,1244 @@
+[
+  {
+    "name": "joint-prior-v1",
+    "value": {
+      "schema_version": "research-context-selection.v3",
+      "receipt_state": "context_selected",
+      "selection_id": "ctxsel_dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "run_id": "run-test",
+      "event_id": "evt-test",
+      "graph_round": 2,
+      "attempt_no": 1,
+      "attempt_basis": "next_round",
+      "parent_selection_id": null,
+      "task_anchor": {
+        "output_id": "task_a40b63443b8a90ba646d536839d6f99d",
+        "run_id": "run-test",
+        "role": "research_task_request",
+        "row_schema_version": "research-task-request.v2",
+        "payload_hash": "446ed459599ba6aa17c7ce3958b7ebf1b35892507fc3c7f42ddf4295df6ac33b",
+        "recorded_at": "2026-10-01T12:00:00+00:00",
+        "payload_hash_kind": "raw_run_role_output_payload_utf8.v1",
+        "original_task_request_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "original_task_request_hash_kind": "canonical_research_session_request.v1"
+      },
+      "prepared_bundle_identity": {
+        "schema_version": "research-prepared-bundle-identity.v1",
+        "run_id": "run-test",
+        "recorded_at": "2026-10-01T12:00:00+00:00",
+        "pack": {
+          "output_id": "pack_a40b63443b8a90ba646d536839d6f99d",
+          "run_id": "run-test",
+          "role": "research_request_pack",
+          "row_schema_version": "research-request-pack.v2",
+          "payload_hash": "07c0ddaf1c12909089e29ec3e17db390793cfc2c84167483022e80dba02b15e9",
+          "recorded_at": "2026-10-01T12:00:00+00:00"
+        },
+        "task": {
+          "output_id": "task_a40b63443b8a90ba646d536839d6f99d",
+          "run_id": "run-test",
+          "role": "research_task_request",
+          "row_schema_version": "research-task-request.v2",
+          "payload_hash": "446ed459599ba6aa17c7ce3958b7ebf1b35892507fc3c7f42ddf4295df6ac33b",
+          "recorded_at": "2026-10-01T12:00:00+00:00"
+        },
+        "compiled": {
+          "output_id": "compiled_a40b63443b8a90ba646d536839d6f99d",
+          "run_id": "run-test",
+          "role": "research_compiled_policy",
+          "row_schema_version": "research-compiled-policy-receipt.v1",
+          "payload_hash": "1456c684cf58f0641cbe828c66a06aef647f331a1db6009ab09c3fa8799905c9",
+          "recorded_at": "2026-10-01T12:00:00+00:00"
+        },
+        "bundle_hash_kind": "canonical_bundle_rows.v1",
+        "bundle_hash": "2f8507f5192e079dbd9d1bd4d75fc047485698a9d0b11a0e2a4aeb3872600bd9"
+      },
+      "execution_mode": "live",
+      "original_pit_cutoff_at": "2026-10-02T00:00:00.000002Z",
+      "live_selection_clock_at": "2026-10-02T00:00:00.000001Z",
+      "effective_eligibility_cutoff_at": "2026-10-02T00:00:00.000001Z",
+      "cutoff_basis": "live_clock_min_original_pit",
+      "decision_cutoff_before_selection": "2026-10-01T12:00:00Z",
+      "decision_cutoff_basis": "graph_state_declared",
+      "decision_basis_ref": {
+        "kind": "graph_round_admission",
+        "run_id": "run-test",
+        "graph_round": 1,
+        "row": {
+          "output_id": "graph-original-row",
+          "role": "research_graph_round:1",
+          "schema_version": "research-graph-round-admission.v1",
+          "payload_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "recorded_at": "2026-10-02T00:00:00Z"
+        }
+      },
+      "selector_identity": {
+        "time_rule_ref": "research-context.received-cutoff.v1",
+        "ranking_rules_ref": "research-context.relevance-authority-recency.v2",
+        "context_policy_source_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "producer_source_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "implementation_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+        "implementation_hash_kind": "canonical_context_selector_sources.v1"
+      },
+      "context_policy": {
+        "policy_id": "crypto_macro.research",
+        "policy_version": "v1",
+        "research_mode": "current_decision",
+        "requirement_ids": [
+          "event.identity"
+        ],
+        "max_parallel_tasks": 2,
+        "max_context_items": 12,
+        "max_excerpt_chars": 4000,
+        "max_evidence_rounds": 2,
+        "content_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+        "created_at": "2026-10-01T12:00:00Z"
+      },
+      "considered_inputs": [
+        {
+          "source_kind": "original_task_input",
+          "origin_basis": "frozen_task_declaration",
+          "input": {
+            "evidence_id": "evidence-test",
+            "kind": "official",
+            "authority": "official",
+            "source_id": "original-source",
+            "source_url": null,
+            "published_at": "2026-10-01T12:00:00Z",
+            "observed_at": "2026-10-01T12:00:00Z",
+            "received_at": "2026-10-01T12:00:00Z",
+            "content_hash": "e96e7ba0eca836ff047469626ccf8b1c3e6f5d6c828cd1310cb1273a4638043f",
+            "excerpt": "Controlled origi"
+          },
+          "input_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "input_hash_kind": "canonical_context_input.v1",
+          "task_anchor": {
+            "output_id": "task_a40b63443b8a90ba646d536839d6f99d",
+            "run_id": "run-test",
+            "role": "research_task_request",
+            "row_schema_version": "research-task-request.v2",
+            "payload_hash": "446ed459599ba6aa17c7ce3958b7ebf1b35892507fc3c7f42ddf4295df6ac33b",
+            "recorded_at": "2026-10-01T12:00:00+00:00",
+            "payload_hash_kind": "raw_run_role_output_payload_utf8.v1",
+            "original_task_request_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_task_request_hash_kind": "canonical_research_session_request.v1"
+          },
+          "row": null,
+          "row_hash": null,
+          "row_hash_kind": null
+        },
+        {
+          "source_kind": "same_run_evidence",
+          "origin_basis": "durable_evidence_declaration",
+          "input": {
+            "evidence_id": "evidence-test",
+            "kind": "official",
+            "authority": "official",
+            "source_id": "original-source",
+            "source_url": null,
+            "published_at": "2026-10-01T12:00:00Z",
+            "observed_at": "2026-10-01T12:00:00Z",
+            "received_at": "2026-10-01T12:00:00Z",
+            "content_hash": "e96e7ba0eca836ff047469626ccf8b1c3e6f5d6c828cd1310cb1273a4638043f",
+            "excerpt": "Controlled origi"
+          },
+          "input_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "input_hash_kind": "canonical_context_input.v1",
+          "task_anchor": null,
+          "row": {
+            "evidence_id": "evidence-test",
+            "run_id": "run-test",
+            "capability_id": "replay.research",
+            "requirement_id": "event.identity",
+            "research_session_id": "session-test",
+            "round": 1,
+            "kind": "official",
+            "authority": "official",
+            "source_id": "original-source",
+            "source_url": null,
+            "published_at": "2026-10-01T12:00:00Z",
+            "observed_at": "2026-10-01T12:00:00Z",
+            "received_at": "2026-10-01T12:00:00Z",
+            "content_hash": "e96e7ba0eca836ff047469626ccf8b1c3e6f5d6c828cd1310cb1273a4638043f",
+            "excerpt": "Controlled origi",
+            "content_ref": null,
+            "acquisition_receipt_id": null,
+            "source_content_hash": null,
+            "parser_ref": null,
+            "structured_payload_ref": null,
+            "tool_call_id": null,
+            "quality": "accepted",
+            "freshness_status": "fresh",
+            "conflict_group": null,
+            "accepted_at": "2026-10-01T12:00:00Z"
+          },
+          "row_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "row_hash_kind": "canonical_research_evidence_row_witness.v1"
+        }
+      ],
+      "inherited_exclusions": [],
+      "projected_request": {
+        "schema_version": "research-session-request.v1",
+        "request_id": "request-test",
+        "run_id": "run-test",
+        "event_id": "evt-test",
+        "trigger_snapshot_id": "snap-test",
+        "domain_pack_ref": "crypto_macro.v1",
+        "role_profile_ref": "profiles/manager.yaml",
+        "execution_mode": "live",
+        "research_mode": "current_decision",
+        "task_policy_ref": null,
+        "context_manifest": null,
+        "pit_cutoff_at": "2026-10-02T00:00:00.000002Z",
+        "current_round": 2,
+        "evidence_refs": [
+          "evidence-test"
+        ],
+        "input_evidence": [
+          {
+            "evidence_id": "evidence-test",
+            "kind": "official",
+            "authority": "official",
+            "source_id": "original-source",
+            "source_url": null,
+            "published_at": "2026-10-01T12:00:00Z",
+            "observed_at": "2026-10-01T12:00:00Z",
+            "received_at": "2026-10-01T12:00:00Z",
+            "content_hash": "e96e7ba0eca836ff047469626ccf8b1c3e6f5d6c828cd1310cb1273a4638043f",
+            "excerpt": "Controlled origi"
+          }
+        ],
+        "evidence_requirements": [
+          {
+            "requirement_id": "event.identity",
+            "description": "Identify the primary event, speaker or document, event time and revision status.",
+            "importance": "hard",
+            "source_priority": [
+              "official",
+              "verified_web"
+            ],
+            "allowed_fallbacks": [
+              "web.fetch",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "preferred_capabilities": [
+              "official.macro",
+              "web.fetch",
+              "web.search"
+            ],
+            "freshness_seconds": 604800,
+            "minimum_independent_sources": 1,
+            "authority_floor": "official",
+            "confidence_cap": 0.45,
+            "accepted_metric_families": [
+              "event.identity"
+            ],
+            "required_metric_families": [
+              "event.identity"
+            ],
+            "required_fields": [
+              "event_actor",
+              "event_time",
+              "revision_status"
+            ],
+            "required_event_offsets": [
+              "t0"
+            ],
+            "unit_policy": "field_map.v1",
+            "field_units": {
+              "event_actor": [
+                "text"
+              ],
+              "event_time": [
+                "datetime"
+              ],
+              "revision_status": [
+                "text"
+              ]
+            },
+            "minimum_venues": 1,
+            "venue_required": false,
+            "minimum_independence_groups": 1,
+            "allowed_delay_classes": [
+              "realtime",
+              "delayed"
+            ],
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#event_identity"
+          }
+        ],
+        "target_gaps": [],
+        "event_watch": null,
+        "event_window_samples": [],
+        "allowed_capabilities": [
+          "web.search",
+          "web.search.tavily",
+          "web.fetch",
+          "browser.readback",
+          "document.readback",
+          "data.historical",
+          "official.macro",
+          "market.crypto_derivatives",
+          "market.crypto_crowding",
+          "market.cross_asset",
+          "macro.cross_asset_intraday",
+          "macro.expectation_pricing",
+          "replay.research"
+        ],
+        "execution_budget": {
+          "max_evidence_rounds": 10,
+          "max_tool_calls": 100,
+          "max_subagents": 32,
+          "total_deadline_seconds": 1800,
+          "per_tool_timeout_seconds": 120,
+          "per_model_step_timeout_seconds": 600,
+          "max_structured_repairs": 3,
+          "max_estimated_cost_usd": 10.0
+        },
+        "deadline_at": "2026-10-01T12:30:00Z",
+        "output_schema_ref": "research-result.v1",
+        "repair_instructions": null
+      },
+      "current_full_request_hash": "3333333333333333333333333333333333333333333333333333333333333333",
+      "current_full_request_hash_kind": "canonical_research_session_request.v1",
+      "recorded_at": "2026-10-02T00:00:00.000003Z",
+      "selection_payload_hash": "4444444444444444444444444444444444444444444444444444444444444444",
+      "selection_payload_hash_kind": "canonical_context_selection.v3"
+    },
+    "expected_shape": true,
+    "expected_time_semantics": true,
+    "expected_issue_codes": []
+  },
+  {
+    "name": "joint-prior-v2",
+    "value": {
+      "schema_version": "research-context-selection.v3",
+      "receipt_state": "context_selected",
+      "selection_id": "ctxsel_dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "run_id": "run-test",
+      "event_id": "evt-test",
+      "graph_round": 2,
+      "attempt_no": 1,
+      "attempt_basis": "next_round",
+      "parent_selection_id": null,
+      "task_anchor": {
+        "output_id": "task_a40b63443b8a90ba646d536839d6f99d",
+        "run_id": "run-test",
+        "role": "research_task_request",
+        "row_schema_version": "research-task-request.v2",
+        "payload_hash": "446ed459599ba6aa17c7ce3958b7ebf1b35892507fc3c7f42ddf4295df6ac33b",
+        "recorded_at": "2026-10-01T12:00:00+00:00",
+        "payload_hash_kind": "raw_run_role_output_payload_utf8.v1",
+        "original_task_request_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "original_task_request_hash_kind": "canonical_research_session_request.v1"
+      },
+      "prepared_bundle_identity": {
+        "schema_version": "research-prepared-bundle-identity.v1",
+        "run_id": "run-test",
+        "recorded_at": "2026-10-01T12:00:00+00:00",
+        "pack": {
+          "output_id": "pack_a40b63443b8a90ba646d536839d6f99d",
+          "run_id": "run-test",
+          "role": "research_request_pack",
+          "row_schema_version": "research-request-pack.v2",
+          "payload_hash": "07c0ddaf1c12909089e29ec3e17db390793cfc2c84167483022e80dba02b15e9",
+          "recorded_at": "2026-10-01T12:00:00+00:00"
+        },
+        "task": {
+          "output_id": "task_a40b63443b8a90ba646d536839d6f99d",
+          "run_id": "run-test",
+          "role": "research_task_request",
+          "row_schema_version": "research-task-request.v2",
+          "payload_hash": "446ed459599ba6aa17c7ce3958b7ebf1b35892507fc3c7f42ddf4295df6ac33b",
+          "recorded_at": "2026-10-01T12:00:00+00:00"
+        },
+        "compiled": {
+          "output_id": "compiled_a40b63443b8a90ba646d536839d6f99d",
+          "run_id": "run-test",
+          "role": "research_compiled_policy",
+          "row_schema_version": "research-compiled-policy-receipt.v1",
+          "payload_hash": "1456c684cf58f0641cbe828c66a06aef647f331a1db6009ab09c3fa8799905c9",
+          "recorded_at": "2026-10-01T12:00:00+00:00"
+        },
+        "bundle_hash_kind": "canonical_bundle_rows.v1",
+        "bundle_hash": "2f8507f5192e079dbd9d1bd4d75fc047485698a9d0b11a0e2a4aeb3872600bd9"
+      },
+      "execution_mode": "live",
+      "original_pit_cutoff_at": "2026-10-02T00:00:00.000002Z",
+      "live_selection_clock_at": "2026-10-02T00:00:00.000001Z",
+      "effective_eligibility_cutoff_at": "2026-10-02T00:00:00.000001Z",
+      "cutoff_basis": "live_clock_min_original_pit",
+      "decision_cutoff_before_selection": "2026-10-01T12:00:00Z",
+      "decision_cutoff_basis": "graph_state_declared",
+      "decision_basis_ref": {
+        "kind": "graph_round_admission",
+        "run_id": "run-test",
+        "graph_round": 1,
+        "row": {
+          "output_id": "graph-original-row",
+          "role": "research_graph_round:1",
+          "schema_version": "research-graph-round-admission.v2",
+          "payload_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "recorded_at": "2026-10-02T00:00:00Z"
+        }
+      },
+      "selector_identity": {
+        "time_rule_ref": "research-context.received-cutoff.v1",
+        "ranking_rules_ref": "research-context.relevance-authority-recency.v2",
+        "context_policy_source_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "producer_source_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "implementation_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+        "implementation_hash_kind": "canonical_context_selector_sources.v1"
+      },
+      "context_policy": {
+        "policy_id": "crypto_macro.research",
+        "policy_version": "v1",
+        "research_mode": "current_decision",
+        "requirement_ids": [
+          "event.identity"
+        ],
+        "max_parallel_tasks": 2,
+        "max_context_items": 12,
+        "max_excerpt_chars": 4000,
+        "max_evidence_rounds": 2,
+        "content_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+        "created_at": "2026-10-01T12:00:00Z"
+      },
+      "considered_inputs": [
+        {
+          "source_kind": "original_task_input",
+          "origin_basis": "frozen_task_declaration",
+          "input": {
+            "evidence_id": "evidence-test",
+            "kind": "official",
+            "authority": "official",
+            "source_id": "original-source",
+            "source_url": null,
+            "published_at": "2026-10-01T12:00:00Z",
+            "observed_at": "2026-10-01T12:00:00Z",
+            "received_at": "2026-10-01T12:00:00Z",
+            "content_hash": "e96e7ba0eca836ff047469626ccf8b1c3e6f5d6c828cd1310cb1273a4638043f",
+            "excerpt": "Controlled origi"
+          },
+          "input_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "input_hash_kind": "canonical_context_input.v1",
+          "task_anchor": {
+            "output_id": "task_a40b63443b8a90ba646d536839d6f99d",
+            "run_id": "run-test",
+            "role": "research_task_request",
+            "row_schema_version": "research-task-request.v2",
+            "payload_hash": "446ed459599ba6aa17c7ce3958b7ebf1b35892507fc3c7f42ddf4295df6ac33b",
+            "recorded_at": "2026-10-01T12:00:00+00:00",
+            "payload_hash_kind": "raw_run_role_output_payload_utf8.v1",
+            "original_task_request_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_task_request_hash_kind": "canonical_research_session_request.v1"
+          },
+          "row": null,
+          "row_hash": null,
+          "row_hash_kind": null
+        },
+        {
+          "source_kind": "same_run_evidence",
+          "origin_basis": "durable_evidence_declaration",
+          "input": {
+            "evidence_id": "evidence-test",
+            "kind": "official",
+            "authority": "official",
+            "source_id": "original-source",
+            "source_url": null,
+            "published_at": "2026-10-01T12:00:00Z",
+            "observed_at": "2026-10-01T12:00:00Z",
+            "received_at": "2026-10-01T12:00:00Z",
+            "content_hash": "e96e7ba0eca836ff047469626ccf8b1c3e6f5d6c828cd1310cb1273a4638043f",
+            "excerpt": "Controlled origi"
+          },
+          "input_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "input_hash_kind": "canonical_context_input.v1",
+          "task_anchor": null,
+          "row": {
+            "evidence_id": "evidence-test",
+            "run_id": "run-test",
+            "capability_id": "replay.research",
+            "requirement_id": "event.identity",
+            "research_session_id": "session-test",
+            "round": 1,
+            "kind": "official",
+            "authority": "official",
+            "source_id": "original-source",
+            "source_url": null,
+            "published_at": "2026-10-01T12:00:00Z",
+            "observed_at": "2026-10-01T12:00:00Z",
+            "received_at": "2026-10-01T12:00:00Z",
+            "content_hash": "e96e7ba0eca836ff047469626ccf8b1c3e6f5d6c828cd1310cb1273a4638043f",
+            "excerpt": "Controlled origi",
+            "content_ref": null,
+            "acquisition_receipt_id": null,
+            "source_content_hash": null,
+            "parser_ref": null,
+            "structured_payload_ref": null,
+            "tool_call_id": null,
+            "quality": "accepted",
+            "freshness_status": "fresh",
+            "conflict_group": null,
+            "accepted_at": "2026-10-01T12:00:00Z"
+          },
+          "row_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "row_hash_kind": "canonical_research_evidence_row_witness.v1"
+        }
+      ],
+      "inherited_exclusions": [],
+      "projected_request": {
+        "schema_version": "research-session-request.v1",
+        "request_id": "request-test",
+        "run_id": "run-test",
+        "event_id": "evt-test",
+        "trigger_snapshot_id": "snap-test",
+        "domain_pack_ref": "crypto_macro.v1",
+        "role_profile_ref": "profiles/manager.yaml",
+        "execution_mode": "live",
+        "research_mode": "current_decision",
+        "task_policy_ref": null,
+        "context_manifest": null,
+        "pit_cutoff_at": "2026-10-02T00:00:00.000002Z",
+        "current_round": 2,
+        "evidence_refs": [
+          "evidence-test"
+        ],
+        "input_evidence": [
+          {
+            "evidence_id": "evidence-test",
+            "kind": "official",
+            "authority": "official",
+            "source_id": "original-source",
+            "source_url": null,
+            "published_at": "2026-10-01T12:00:00Z",
+            "observed_at": "2026-10-01T12:00:00Z",
+            "received_at": "2026-10-01T12:00:00Z",
+            "content_hash": "e96e7ba0eca836ff047469626ccf8b1c3e6f5d6c828cd1310cb1273a4638043f",
+            "excerpt": "Controlled origi"
+          }
+        ],
+        "evidence_requirements": [
+          {
+            "requirement_id": "event.identity",
+            "description": "Identify the primary event, speaker or document, event time and revision status.",
+            "importance": "hard",
+            "source_priority": [
+              "official",
+              "verified_web"
+            ],
+            "allowed_fallbacks": [
+              "web.fetch",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "preferred_capabilities": [
+              "official.macro",
+              "web.fetch",
+              "web.search"
+            ],
+            "freshness_seconds": 604800,
+            "minimum_independent_sources": 1,
+            "authority_floor": "official",
+            "confidence_cap": 0.45,
+            "accepted_metric_families": [
+              "event.identity"
+            ],
+            "required_metric_families": [
+              "event.identity"
+            ],
+            "required_fields": [
+              "event_actor",
+              "event_time",
+              "revision_status"
+            ],
+            "required_event_offsets": [
+              "t0"
+            ],
+            "unit_policy": "field_map.v1",
+            "field_units": {
+              "event_actor": [
+                "text"
+              ],
+              "event_time": [
+                "datetime"
+              ],
+              "revision_status": [
+                "text"
+              ]
+            },
+            "minimum_venues": 1,
+            "venue_required": false,
+            "minimum_independence_groups": 1,
+            "allowed_delay_classes": [
+              "realtime",
+              "delayed"
+            ],
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#event_identity"
+          }
+        ],
+        "target_gaps": [],
+        "event_watch": null,
+        "event_window_samples": [],
+        "allowed_capabilities": [
+          "web.search",
+          "web.search.tavily",
+          "web.fetch",
+          "browser.readback",
+          "document.readback",
+          "data.historical",
+          "official.macro",
+          "market.crypto_derivatives",
+          "market.crypto_crowding",
+          "market.cross_asset",
+          "macro.cross_asset_intraday",
+          "macro.expectation_pricing",
+          "replay.research"
+        ],
+        "execution_budget": {
+          "max_evidence_rounds": 10,
+          "max_tool_calls": 100,
+          "max_subagents": 32,
+          "total_deadline_seconds": 1800,
+          "per_tool_timeout_seconds": 120,
+          "per_model_step_timeout_seconds": 600,
+          "max_structured_repairs": 3,
+          "max_estimated_cost_usd": 10.0
+        },
+        "deadline_at": "2026-10-01T12:30:00Z",
+        "output_schema_ref": "research-result.v1",
+        "repair_instructions": null
+      },
+      "current_full_request_hash": "3333333333333333333333333333333333333333333333333333333333333333",
+      "current_full_request_hash_kind": "canonical_research_session_request.v1",
+      "recorded_at": "2026-10-02T00:00:00.000003Z",
+      "selection_payload_hash": "4444444444444444444444444444444444444444444444444444444444444444",
+      "selection_payload_hash_kind": "canonical_context_selection.v3"
+    },
+    "expected_shape": true,
+    "expected_time_semantics": true,
+    "expected_issue_codes": []
+  },
+  {
+    "name": "joint-prior-v3",
+    "value": {
+      "schema_version": "research-context-selection.v3",
+      "receipt_state": "context_selected",
+      "selection_id": "ctxsel_dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "run_id": "run-test",
+      "event_id": "evt-test",
+      "graph_round": 2,
+      "attempt_no": 1,
+      "attempt_basis": "next_round",
+      "parent_selection_id": null,
+      "task_anchor": {
+        "output_id": "task_a40b63443b8a90ba646d536839d6f99d",
+        "run_id": "run-test",
+        "role": "research_task_request",
+        "row_schema_version": "research-task-request.v2",
+        "payload_hash": "446ed459599ba6aa17c7ce3958b7ebf1b35892507fc3c7f42ddf4295df6ac33b",
+        "recorded_at": "2026-10-01T12:00:00+00:00",
+        "payload_hash_kind": "raw_run_role_output_payload_utf8.v1",
+        "original_task_request_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "original_task_request_hash_kind": "canonical_research_session_request.v1"
+      },
+      "prepared_bundle_identity": {
+        "schema_version": "research-prepared-bundle-identity.v1",
+        "run_id": "run-test",
+        "recorded_at": "2026-10-01T12:00:00+00:00",
+        "pack": {
+          "output_id": "pack_a40b63443b8a90ba646d536839d6f99d",
+          "run_id": "run-test",
+          "role": "research_request_pack",
+          "row_schema_version": "research-request-pack.v2",
+          "payload_hash": "07c0ddaf1c12909089e29ec3e17db390793cfc2c84167483022e80dba02b15e9",
+          "recorded_at": "2026-10-01T12:00:00+00:00"
+        },
+        "task": {
+          "output_id": "task_a40b63443b8a90ba646d536839d6f99d",
+          "run_id": "run-test",
+          "role": "research_task_request",
+          "row_schema_version": "research-task-request.v2",
+          "payload_hash": "446ed459599ba6aa17c7ce3958b7ebf1b35892507fc3c7f42ddf4295df6ac33b",
+          "recorded_at": "2026-10-01T12:00:00+00:00"
+        },
+        "compiled": {
+          "output_id": "compiled_a40b63443b8a90ba646d536839d6f99d",
+          "run_id": "run-test",
+          "role": "research_compiled_policy",
+          "row_schema_version": "research-compiled-policy-receipt.v1",
+          "payload_hash": "1456c684cf58f0641cbe828c66a06aef647f331a1db6009ab09c3fa8799905c9",
+          "recorded_at": "2026-10-01T12:00:00+00:00"
+        },
+        "bundle_hash_kind": "canonical_bundle_rows.v1",
+        "bundle_hash": "2f8507f5192e079dbd9d1bd4d75fc047485698a9d0b11a0e2a4aeb3872600bd9"
+      },
+      "execution_mode": "live",
+      "original_pit_cutoff_at": "2026-10-02T00:00:00.000002Z",
+      "live_selection_clock_at": "2026-10-02T00:00:00.000001Z",
+      "effective_eligibility_cutoff_at": "2026-10-02T00:00:00.000001Z",
+      "cutoff_basis": "live_clock_min_original_pit",
+      "decision_cutoff_before_selection": "2026-10-01T12:00:00Z",
+      "decision_cutoff_basis": "graph_state_declared",
+      "decision_basis_ref": {
+        "kind": "graph_round_admission",
+        "run_id": "run-test",
+        "graph_round": 1,
+        "row": {
+          "output_id": "graph-original-row",
+          "role": "research_graph_round:1",
+          "schema_version": "research-graph-round-admission.v3",
+          "payload_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "recorded_at": "2026-10-02T00:00:00Z"
+        }
+      },
+      "selector_identity": {
+        "time_rule_ref": "research-context.received-cutoff.v1",
+        "ranking_rules_ref": "research-context.relevance-authority-recency.v2",
+        "context_policy_source_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "producer_source_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "implementation_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+        "implementation_hash_kind": "canonical_context_selector_sources.v1"
+      },
+      "context_policy": {
+        "policy_id": "crypto_macro.research",
+        "policy_version": "v1",
+        "research_mode": "current_decision",
+        "requirement_ids": [
+          "event.identity"
+        ],
+        "max_parallel_tasks": 2,
+        "max_context_items": 12,
+        "max_excerpt_chars": 4000,
+        "max_evidence_rounds": 2,
+        "content_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+        "created_at": "2026-10-01T12:00:00Z"
+      },
+      "considered_inputs": [
+        {
+          "source_kind": "original_task_input",
+          "origin_basis": "frozen_task_declaration",
+          "input": {
+            "evidence_id": "evidence-test",
+            "kind": "official",
+            "authority": "official",
+            "source_id": "original-source",
+            "source_url": null,
+            "published_at": "2026-10-01T12:00:00Z",
+            "observed_at": "2026-10-01T12:00:00Z",
+            "received_at": "2026-10-01T12:00:00Z",
+            "content_hash": "e96e7ba0eca836ff047469626ccf8b1c3e6f5d6c828cd1310cb1273a4638043f",
+            "excerpt": "Controlled origi"
+          },
+          "input_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "input_hash_kind": "canonical_context_input.v1",
+          "task_anchor": {
+            "output_id": "task_a40b63443b8a90ba646d536839d6f99d",
+            "run_id": "run-test",
+            "role": "research_task_request",
+            "row_schema_version": "research-task-request.v2",
+            "payload_hash": "446ed459599ba6aa17c7ce3958b7ebf1b35892507fc3c7f42ddf4295df6ac33b",
+            "recorded_at": "2026-10-01T12:00:00+00:00",
+            "payload_hash_kind": "raw_run_role_output_payload_utf8.v1",
+            "original_task_request_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_task_request_hash_kind": "canonical_research_session_request.v1"
+          },
+          "row": null,
+          "row_hash": null,
+          "row_hash_kind": null
+        },
+        {
+          "source_kind": "same_run_evidence",
+          "origin_basis": "durable_evidence_declaration",
+          "input": {
+            "evidence_id": "evidence-test",
+            "kind": "official",
+            "authority": "official",
+            "source_id": "original-source",
+            "source_url": null,
+            "published_at": "2026-10-01T12:00:00Z",
+            "observed_at": "2026-10-01T12:00:00Z",
+            "received_at": "2026-10-01T12:00:00Z",
+            "content_hash": "e96e7ba0eca836ff047469626ccf8b1c3e6f5d6c828cd1310cb1273a4638043f",
+            "excerpt": "Controlled origi"
+          },
+          "input_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "input_hash_kind": "canonical_context_input.v1",
+          "task_anchor": null,
+          "row": {
+            "evidence_id": "evidence-test",
+            "run_id": "run-test",
+            "capability_id": "replay.research",
+            "requirement_id": "event.identity",
+            "research_session_id": "session-test",
+            "round": 1,
+            "kind": "official",
+            "authority": "official",
+            "source_id": "original-source",
+            "source_url": null,
+            "published_at": "2026-10-01T12:00:00Z",
+            "observed_at": "2026-10-01T12:00:00Z",
+            "received_at": "2026-10-01T12:00:00Z",
+            "content_hash": "e96e7ba0eca836ff047469626ccf8b1c3e6f5d6c828cd1310cb1273a4638043f",
+            "excerpt": "Controlled origi",
+            "content_ref": null,
+            "acquisition_receipt_id": null,
+            "source_content_hash": null,
+            "parser_ref": null,
+            "structured_payload_ref": null,
+            "tool_call_id": null,
+            "quality": "accepted",
+            "freshness_status": "fresh",
+            "conflict_group": null,
+            "accepted_at": "2026-10-01T12:00:00Z"
+          },
+          "row_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "row_hash_kind": "canonical_research_evidence_row_witness.v1"
+        }
+      ],
+      "inherited_exclusions": [],
+      "projected_request": {
+        "schema_version": "research-session-request.v1",
+        "request_id": "request-test",
+        "run_id": "run-test",
+        "event_id": "evt-test",
+        "trigger_snapshot_id": "snap-test",
+        "domain_pack_ref": "crypto_macro.v1",
+        "role_profile_ref": "profiles/manager.yaml",
+        "execution_mode": "live",
+        "research_mode": "current_decision",
+        "task_policy_ref": null,
+        "context_manifest": null,
+        "pit_cutoff_at": "2026-10-02T00:00:00.000002Z",
+        "current_round": 2,
+        "evidence_refs": [
+          "evidence-test"
+        ],
+        "input_evidence": [
+          {
+            "evidence_id": "evidence-test",
+            "kind": "official",
+            "authority": "official",
+            "source_id": "original-source",
+            "source_url": null,
+            "published_at": "2026-10-01T12:00:00Z",
+            "observed_at": "2026-10-01T12:00:00Z",
+            "received_at": "2026-10-01T12:00:00Z",
+            "content_hash": "e96e7ba0eca836ff047469626ccf8b1c3e6f5d6c828cd1310cb1273a4638043f",
+            "excerpt": "Controlled origi"
+          }
+        ],
+        "evidence_requirements": [
+          {
+            "requirement_id": "event.identity",
+            "description": "Identify the primary event, speaker or document, event time and revision status.",
+            "importance": "hard",
+            "source_priority": [
+              "official",
+              "verified_web"
+            ],
+            "allowed_fallbacks": [
+              "web.fetch",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "preferred_capabilities": [
+              "official.macro",
+              "web.fetch",
+              "web.search"
+            ],
+            "freshness_seconds": 604800,
+            "minimum_independent_sources": 1,
+            "authority_floor": "official",
+            "confidence_cap": 0.45,
+            "accepted_metric_families": [
+              "event.identity"
+            ],
+            "required_metric_families": [
+              "event.identity"
+            ],
+            "required_fields": [
+              "event_actor",
+              "event_time",
+              "revision_status"
+            ],
+            "required_event_offsets": [
+              "t0"
+            ],
+            "unit_policy": "field_map.v1",
+            "field_units": {
+              "event_actor": [
+                "text"
+              ],
+              "event_time": [
+                "datetime"
+              ],
+              "revision_status": [
+                "text"
+              ]
+            },
+            "minimum_venues": 1,
+            "venue_required": false,
+            "minimum_independence_groups": 1,
+            "allowed_delay_classes": [
+              "realtime",
+              "delayed"
+            ],
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#event_identity"
+          }
+        ],
+        "target_gaps": [],
+        "event_watch": null,
+        "event_window_samples": [],
+        "allowed_capabilities": [
+          "web.search",
+          "web.search.tavily",
+          "web.fetch",
+          "browser.readback",
+          "document.readback",
+          "data.historical",
+          "official.macro",
+          "market.crypto_derivatives",
+          "market.crypto_crowding",
+          "market.cross_asset",
+          "macro.cross_asset_intraday",
+          "macro.expectation_pricing",
+          "replay.research"
+        ],
+        "execution_budget": {
+          "max_evidence_rounds": 10,
+          "max_tool_calls": 100,
+          "max_subagents": 32,
+          "total_deadline_seconds": 1800,
+          "per_tool_timeout_seconds": 120,
+          "per_model_step_timeout_seconds": 600,
+          "max_structured_repairs": 3,
+          "max_estimated_cost_usd": 10.0
+        },
+        "deadline_at": "2026-10-01T12:30:00Z",
+        "output_schema_ref": "research-result.v1",
+        "repair_instructions": null
+      },
+      "current_full_request_hash": "3333333333333333333333333333333333333333333333333333333333333333",
+      "current_full_request_hash_kind": "canonical_research_session_request.v1",
+      "recorded_at": "2026-10-02T00:00:00.000003Z",
+      "selection_payload_hash": "4444444444444444444444444444444444444444444444444444444444444444",
+      "selection_payload_hash_kind": "canonical_context_selection.v3"
+    },
+    "expected_shape": false,
+    "expected_time_semantics": true,
+    "expected_issue_codes": []
+  },
+  {
+    "name": "joint-v2-prior-after-selection",
+    "value": {
+      "schema_version": "research-context-selection.v3",
+      "receipt_state": "context_selected",
+      "selection_id": "ctxsel_dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "run_id": "run-test",
+      "event_id": "evt-test",
+      "graph_round": 2,
+      "attempt_no": 1,
+      "attempt_basis": "next_round",
+      "parent_selection_id": null,
+      "task_anchor": {
+        "output_id": "task_a40b63443b8a90ba646d536839d6f99d",
+        "run_id": "run-test",
+        "role": "research_task_request",
+        "row_schema_version": "research-task-request.v2",
+        "payload_hash": "446ed459599ba6aa17c7ce3958b7ebf1b35892507fc3c7f42ddf4295df6ac33b",
+        "recorded_at": "2026-10-01T12:00:00+00:00",
+        "payload_hash_kind": "raw_run_role_output_payload_utf8.v1",
+        "original_task_request_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "original_task_request_hash_kind": "canonical_research_session_request.v1"
+      },
+      "prepared_bundle_identity": {
+        "schema_version": "research-prepared-bundle-identity.v1",
+        "run_id": "run-test",
+        "recorded_at": "2026-10-01T12:00:00+00:00",
+        "pack": {
+          "output_id": "pack_a40b63443b8a90ba646d536839d6f99d",
+          "run_id": "run-test",
+          "role": "research_request_pack",
+          "row_schema_version": "research-request-pack.v2",
+          "payload_hash": "07c0ddaf1c12909089e29ec3e17db390793cfc2c84167483022e80dba02b15e9",
+          "recorded_at": "2026-10-01T12:00:00+00:00"
+        },
+        "task": {
+          "output_id": "task_a40b63443b8a90ba646d536839d6f99d",
+          "run_id": "run-test",
+          "role": "research_task_request",
+          "row_schema_version": "research-task-request.v2",
+          "payload_hash": "446ed459599ba6aa17c7ce3958b7ebf1b35892507fc3c7f42ddf4295df6ac33b",
+          "recorded_at": "2026-10-01T12:00:00+00:00"
+        },
+        "compiled": {
+          "output_id": "compiled_a40b63443b8a90ba646d536839d6f99d",
+          "run_id": "run-test",
+          "role": "research_compiled_policy",
+          "row_schema_version": "research-compiled-policy-receipt.v1",
+          "payload_hash": "1456c684cf58f0641cbe828c66a06aef647f331a1db6009ab09c3fa8799905c9",
+          "recorded_at": "2026-10-01T12:00:00+00:00"
+        },
+        "bundle_hash_kind": "canonical_bundle_rows.v1",
+        "bundle_hash": "2f8507f5192e079dbd9d1bd4d75fc047485698a9d0b11a0e2a4aeb3872600bd9"
+      },
+      "execution_mode": "live",
+      "original_pit_cutoff_at": "2026-10-02T00:00:00.000002Z",
+      "live_selection_clock_at": "2026-10-02T00:00:00.000001Z",
+      "effective_eligibility_cutoff_at": "2026-10-02T00:00:00.000001Z",
+      "cutoff_basis": "live_clock_min_original_pit",
+      "decision_cutoff_before_selection": "2026-10-01T12:00:00Z",
+      "decision_cutoff_basis": "graph_state_declared",
+      "decision_basis_ref": {
+        "kind": "graph_round_admission",
+        "run_id": "run-test",
+        "graph_round": 1,
+        "row": {
+          "output_id": "graph-original-row",
+          "role": "research_graph_round:1",
+          "schema_version": "research-graph-round-admission.v2",
+          "payload_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "recorded_at": "2026-12-31T00:00:00Z"
+        }
+      },
+      "selector_identity": {
+        "time_rule_ref": "research-context.received-cutoff.v1",
+        "ranking_rules_ref": "research-context.relevance-authority-recency.v2",
+        "context_policy_source_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "producer_source_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "implementation_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+        "implementation_hash_kind": "canonical_context_selector_sources.v1"
+      },
+      "context_policy": {
+        "policy_id": "crypto_macro.research",
+        "policy_version": "v1",
+        "research_mode": "current_decision",
+        "requirement_ids": [
+          "event.identity"
+        ],
+        "max_parallel_tasks": 2,
+        "max_context_items": 12,
+        "max_excerpt_chars": 4000,
+        "max_evidence_rounds": 2,
+        "content_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+        "created_at": "2026-10-01T12:00:00Z"
+      },
+      "considered_inputs": [
+        {
+          "source_kind": "original_task_input",
+          "origin_basis": "frozen_task_declaration",
+          "input": {
+            "evidence_id": "evidence-test",
+            "kind": "official",
+            "authority": "official",
+            "source_id": "original-source",
+            "source_url": null,
+            "published_at": "2026-10-01T12:00:00Z",
+            "observed_at": "2026-10-01T12:00:00Z",
+            "received_at": "2026-10-01T12:00:00Z",
+            "content_hash": "e96e7ba0eca836ff047469626ccf8b1c3e6f5d6c828cd1310cb1273a4638043f",
+            "excerpt": "Controlled origi"
+          },
+          "input_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "input_hash_kind": "canonical_context_input.v1",
+          "task_anchor": {
+            "output_id": "task_a40b63443b8a90ba646d536839d6f99d",
+            "run_id": "run-test",
+            "role": "research_task_request",
+            "row_schema_version": "research-task-request.v2",
+            "payload_hash": "446ed459599ba6aa17c7ce3958b7ebf1b35892507fc3c7f42ddf4295df6ac33b",
+            "recorded_at": "2026-10-01T12:00:00+00:00",
+            "payload_hash_kind": "raw_run_role_output_payload_utf8.v1",
+            "original_task_request_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_task_request_hash_kind": "canonical_research_session_request.v1"
+          },
+          "row": null,
+          "row_hash": null,
+          "row_hash_kind": null
+        },
+        {
+          "source_kind": "same_run_evidence",
+          "origin_basis": "durable_evidence_declaration",
+          "input": {
+            "evidence_id": "evidence-test",
+            "kind": "official",
+            "authority": "official",
+            "source_id": "original-source",
+            "source_url": null,
+            "published_at": "2026-10-01T12:00:00Z",
+            "observed_at": "2026-10-01T12:00:00Z",
+            "received_at": "2026-10-01T12:00:00Z",
+            "content_hash": "e96e7ba0eca836ff047469626ccf8b1c3e6f5d6c828cd1310cb1273a4638043f",
+            "excerpt": "Controlled origi"
+          },
+          "input_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "input_hash_kind": "canonical_context_input.v1",
+          "task_anchor": null,
+          "row": {
+            "evidence_id": "evidence-test",
+            "run_id": "run-test",
+            "capability_id": "replay.research",
+            "requirement_id": "event.identity",
+            "research_session_id": "session-test",
+            "round": 1,
+            "kind": "official",
+            "authority": "official",
+            "source_id": "original-source",
+            "source_url": null,
+            "published_at": "2026-10-01T12:00:00Z",
+            "observed_at": "2026-10-01T12:00:00Z",
+            "received_at": "2026-10-01T12:00:00Z",
+            "content_hash": "e96e7ba0eca836ff047469626ccf8b1c3e6f5d6c828cd1310cb1273a4638043f",
+            "excerpt": "Controlled origi",
+            "content_ref": null,
+            "acquisition_receipt_id": null,
+            "source_content_hash": null,
+            "parser_ref": null,
+            "structured_payload_ref": null,
+            "tool_call_id": null,
+            "quality": "accepted",
+            "freshness_status": "fresh",
+            "conflict_group": null,
+            "accepted_at": "2026-10-01T12:00:00Z"
+          },
+          "row_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "row_hash_kind": "canonical_research_evidence_row_witness.v1"
+        }
+      ],
+      "inherited_exclusions": [],
+      "projected_request": {
+        "schema_version": "research-session-request.v1",
+        "request_id": "request-test",
+        "run_id": "run-test",
+        "event_id": "evt-test",
+        "trigger_snapshot_id": "snap-test",
+        "domain_pack_ref": "crypto_macro.v1",
+        "role_profile_ref": "profiles/manager.yaml",
+        "execution_mode": "live",
+        "research_mode": "current_decision",
+        "task_policy_ref": null,
+        "context_manifest": null,
+        "pit_cutoff_at": "2026-10-02T00:00:00.000002Z",
+        "current_round": 2,
+        "evidence_refs": [
+          "evidence-test"
+        ],
+        "input_evidence": [
+          {
+            "evidence_id": "evidence-test",
+            "kind": "official",
+            "authority": "official",
+            "source_id": "original-source",
+            "source_url": null,
+            "published_at": "2026-10-01T12:00:00Z",
+            "observed_at": "2026-10-01T12:00:00Z",
+            "received_at": "2026-10-01T12:00:00Z",
+            "content_hash": "e96e7ba0eca836ff047469626ccf8b1c3e6f5d6c828cd1310cb1273a4638043f",
+            "excerpt": "Controlled origi"
+          }
+        ],
+        "evidence_requirements": [
+          {
+            "requirement_id": "event.identity",
+            "description": "Identify the primary event, speaker or document, event time and revision status.",
+            "importance": "hard",
+            "source_priority": [
+              "official",
+              "verified_web"
+            ],
+            "allowed_fallbacks": [
+              "web.fetch",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "preferred_capabilities": [
+              "official.macro",
+              "web.fetch",
+              "web.search"
+            ],
+            "freshness_seconds": 604800,
+            "minimum_independent_sources": 1,
+            "authority_floor": "official",
+            "confidence_cap": 0.45,
+            "accepted_metric_families": [
+              "event.identity"
+            ],
+            "required_metric_families": [
+              "event.identity"
+            ],
+            "required_fields": [
+              "event_actor",
+              "event_time",
+              "revision_status"
+            ],
+            "required_event_offsets": [
+              "t0"
+            ],
+            "unit_policy": "field_map.v1",
+            "field_units": {
+              "event_actor": [
+                "text"
+              ],
+              "event_time": [
+                "datetime"
+              ],
+              "revision_status": [
+                "text"
+              ]
+            },
+            "minimum_venues": 1,
+            "venue_required": false,
+            "minimum_independence_groups": 1,
+            "allowed_delay_classes": [
+              "realtime",
+              "delayed"
+            ],
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#event_identity"
+          }
+        ],
+        "target_gaps": [],
+        "event_watch": null,
+        "event_window_samples": [],
+        "allowed_capabilities": [
+          "web.search",
+          "web.search.tavily",
+          "web.fetch",
+          "browser.readback",
+          "document.readback",
+          "data.historical",
+          "official.macro",
+          "market.crypto_derivatives",
+          "market.crypto_crowding",
+          "market.cross_asset",
+          "macro.cross_asset_intraday",
+          "macro.expectation_pricing",
+          "replay.research"
+        ],
+        "execution_budget": {
+          "max_evidence_rounds": 10,
+          "max_tool_calls": 100,
+          "max_subagents": 32,
+          "total_deadline_seconds": 1800,
+          "per_tool_timeout_seconds": 120,
+          "per_model_step_timeout_seconds": 600,
+          "max_structured_repairs": 3,
+          "max_estimated_cost_usd": 10.0
+        },
+        "deadline_at": "2026-10-01T12:30:00Z",
+        "output_schema_ref": "research-result.v1",
+        "repair_instructions": null
+      },
+      "current_full_request_hash": "3333333333333333333333333333333333333333333333333333333333333333",
+      "current_full_request_hash_kind": "canonical_research_session_request.v1",
+      "recorded_at": "2026-10-02T00:00:00.000003Z",
+      "selection_payload_hash": "4444444444444444444444444444444444444444444444444444444444444444",
+      "selection_payload_hash_kind": "canonical_context_selection.v3"
+    },
+    "expected_shape": true,
+    "expected_time_semantics": false,
+    "expected_issue_codes": [
+      "context_selection_graph_prior_after_selection"
+    ]
+  }
+]

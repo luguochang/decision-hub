@@ -1,4 +1,7 @@
-version: discovery-policy.v1
+version: discovery-policy.v5
+include_legacy_baseline: false
+max_daily_research: 12
+max_study_research_per_hour: 2
 source_ids:
   - fed-press
   - fed-speeches
@@ -20,3 +23,28 @@ high_impact_terms:
   - tariff
   - sanctions
   - war
+# Official national release families are source-scoped literal title prefixes.
+# Regional-only GDP/PCE and site boilerplate do not match these prefixes.
+source_title_prefixes:
+  bea-news:
+    - "gross domestic product,"
+    - "gross domestic product ("
+    - "gdp ("
+    - "personal income and outlays,"
+    - "u.s. international trade in goods and services,"
+    - "international trade in goods and services,"
+    - "u.s. international transactions,"
+    - "international transactions,"
+  # National monthly-price releases only; the selector also requires an exact
+  # English month and four-digit year after the fixed name and dash.
+  # Regional, methodology and explanatory titles do not satisfy that shape.
+  bls-releases:
+    - "consumer price index -"
+    - "consumer price index –"
+    - "consumer price index —"
+    - "producer price indexes -"
+    - "producer price indexes –"
+    - "producer price indexes —"
+    - "producer price index -"
+    - "producer price index –"
+    - "producer price index —"

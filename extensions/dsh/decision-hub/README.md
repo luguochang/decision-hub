@@ -1,6 +1,6 @@
 # Decision Hub DSH Plugin
 
-本包是 Decision Hub 在固定 DeepSeek Harness Web 中的官方扩展边界。Host 端只调用公开 `webServer` 和 `sessionController`，不实现第二套 Session、Agent Loop、队列或业务账本。
+本包是 Decision Hub 在固定 DeepSeek Harness Web 中的官方扩展边界。Host 端通过公开 Web、Session、工作区服务与 `llm/stream` 模型流钩子接入，不实现第二套 Session、Agent Loop、队列或业务账本。
 
 ## Host 职责
 
@@ -74,3 +74,21 @@ build identity 由构建生成文件和 Host readiness 共同提供，测试必�
 ```
 
 验收脚本输出的 `BROWSER_URL` 是本次进程唯一的 canonical 地址，首次打开后由 DSH 建立本地浏览器认证。直接打开裸 `/`、旧进程端口或没有本次 token 的新浏览器会得到官方 `401 dsh web authentication required`，应重新使用启动日志中的完整地址。replay 页面现在会明确显示只读提示并拦截输入；这不会改变官方 Session/Trajectory/JSONL，也不会把回放脚本改成 live。
+
+
+## 主研究模型提交绑定
+
+Host现在依赖公开`llm`服务。Hub拥有的主会话在`llm/stream`委派前调用`PUT /v1/dsh/sessions/{run_id}/model-binding`，等待Hub固定/核对Provider路由、模型、推理强度、温度、输出上限及停止序列哈希。同Run的后续步骤和恢复不能静默更换这些参数；旧任务缺执行前方法凭据时不补造。
+
+数据库保存的是提交钩子见到的参数，不是完整端点或已挂载预设证明。子研究、压缩和标题调用仍使用各自策略，未包含在这项主会话绑定内。系统提示、消息、端点及密钥不进入绑定记录；`provider_configuration_attested`与正式候选部署状态仍为false。
+
+拒绝通过公开finish/error流协议返回限定错误码，避免普通中间件异常被DSH归为UNKNOWN。Host终态保留模型配置变化/凭据不可用等原因，Desk失败页提供中文解释。只在核验通过后委派next；下游流与消费错误不由绑定控制捕获或改写。
+
+验证：插件测试覆盖落库等待、拒绝后零派发、回执身份、未知错误不泄露、辅助调用范围与终态错误码；`tools.ops.audit_model_dispatch`只读比较已保存绑定与同Session归档请求头。完整方法、端点身份和候选部署继续按ADR-20260930推进。
+
+
+## Run权限限定的模型目录
+
+`research-tool`在公开`system-prompt/assemble`中，按可信根Session读取鉴权catalog，并替换已可见工具的说明与capability_id枚举。不能在共享preset的ctx.agent或agent/pre-step完成首次绑定：前者可能不存在，后者晚于首次工具快照。过滤后的角色不获得额外工具；诊断无agent不查目录；权限缺失/目录不可用不会退回全局目录。缓存按agent区分，工具执行继续走原网关授权。
+
+运行后用`tools.ops.audit_dsh_catalog`核对根及已发现子角色归档，每轮都需通过；说明中出现目录或一轮通过不代表整个Run通过。真实失败及最终验收见执行台账W7.2q。此能力不证明完整方法部署、Provider配置或子模型身份。

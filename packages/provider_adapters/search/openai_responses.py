@@ -63,6 +63,7 @@ class OpenAIResponsesWebSearchTransport:
         model: str,
         provider_id: str = "openai-compatible-responses-web-search",
         estimated_cost_per_call_usd: float = 0.01,
+        allow_locator_only: bool = False,
         clock: Callable[[], datetime] | None = None,
     ) -> None:
         if not model.strip():
@@ -73,6 +74,10 @@ class OpenAIResponsesWebSearchTransport:
         self._model = model
         self._provider_id = provider_id
         self._estimated_cost_per_call_usd = estimated_cost_per_call_usd
+        # Some OpenAI-compatible gateways expose action.sources but omit the
+        # message url_citation spans.  Those URLs are useful as locators only;
+        # the caller must fetch them before they can become factual evidence.
+        self._allow_locator_only = allow_locator_only
         self._clock = clock or (lambda: datetime.now(UTC))
 
     @classmethod
@@ -92,17 +97,19 @@ class OpenAIResponsesWebSearchTransport:
             "OPENAI_BASE_URL",
             "SUB2API_BASE_URL",
         )
-        model = _first_nonempty(
-            "DECISION_HUB_SEARCH_MODEL",
-            "DECISION_HUB_MODEL",
-        ) or "gpt-5.5"
+        model = (
+            _first_nonempty(
+                "DECISION_HUB_SEARCH_MODEL",
+                "DECISION_HUB_MODEL",
+            )
+            or "gpt-6.1-sol"
+        )
         provider_id = os.getenv(
             "DECISION_HUB_SEARCH_PROVIDER_ID",
             "openai-compatible-responses-web-search",
         )
-        estimated_cost = float(
-            os.getenv("DECISION_HUB_SEARCH_ESTIMATED_COST_PER_CALL_USD", "0.01")
-        )
+        estimated_cost = float(os.getenv("DECISION_HUB_SEARCH_ESTIMATED_COST_PER_CALL_USD", "0.01"))
+        allow_locator_only = _env_bool("DECISION_HUB_SEARCH_ALLOW_LOCATOR_ONLY")
 
         from openai import AsyncOpenAI
 
@@ -112,6 +119,7 @@ class OpenAIResponsesWebSearchTransport:
             model=model,
             provider_id=provider_id,
             estimated_cost_per_call_usd=estimated_cost,
+            allow_locator_only=allow_locator_only,
         )
 
     async def search(self, query: SearchQuery) -> SearchResult:
@@ -135,6 +143,7 @@ class OpenAIResponsesWebSearchTransport:
                     f"Query: {query.query}"
                 ),
                 tools=[tool],
+                tool_choice="required",
                 include=["web_search_call.action.sources"],
                 reasoning={"effort": "low"},
                 max_output_tokens=768,
@@ -148,8 +157,11 @@ class OpenAIResponsesWebSearchTransport:
                     "web search completed without explicit action.sources",
                     retryable=True,
                 )
+            bindings = _citation_bindings(payload, sources)
+            if not bindings and self._allow_locator_only:
+                bindings = _locator_bindings(sources)
             evidence = _canonical_evidence(
-                bindings=_citation_bindings(payload, sources),
+                bindings=bindings,
                 observed_at=completed_at,
                 max_results=query.max_results,
             )
@@ -219,9 +231,7 @@ def _sources(payload: Mapping[str, object]) -> tuple[list[Mapping[str, object]],
         if not isinstance(sources, Sequence) or isinstance(sources, (str, bytes)):
             continue
         found.extend(
-            cast(Mapping[str, object], source)
-            for source in sources
-            if isinstance(source, Mapping)
+            cast(Mapping[str, object], source) for source in sources if isinstance(source, Mapping)
         )
     return found, call_count
 
@@ -332,8 +342,7 @@ def _normalized_url(value: str) -> str:
     query_items = [
         (key, item)
         for key, item in parse_qsl(parsed.query, keep_blank_values=True)
-        if not key.lower().startswith("utm_")
-        and key.lower() not in _TRACKING_QUERY_KEYS
+        if not key.lower().startswith("utm_") and key.lower() not in _TRACKING_QUERY_KEYS
     ]
     return urlunsplit(
         (
@@ -378,13 +387,16 @@ def _canonical_evidence(
             source_url=normalized_url,
             published_at=None,
         )
-        evidence_id = "search_" + hashlib.sha256(
-            json.dumps(
-                {"content_hash": content_hash, "url": normalized_url},
-                sort_keys=True,
-                separators=(",", ":"),
-            ).encode()
-        ).hexdigest()[:32]
+        evidence_id = (
+            "search_"
+            + hashlib.sha256(
+                json.dumps(
+                    {"content_hash": content_hash, "url": normalized_url},
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ).encode()
+            ).hexdigest()[:32]
+        )
         result.append(
             SearchEvidence.model_validate(
                 {
@@ -404,9 +416,54 @@ def _canonical_evidence(
     return result
 
 
+def _locator_bindings(
+    sources: Sequence[Mapping[str, object]],
+) -> list[_CitationBinding]:
+    """Turn unbound provider sources into explicit fetch-required locators.
+
+    This is intentionally not a citation fallback.  The snippet tells every
+    downstream consumer that the URL is a locator and that the page must be
+    fetched before using it for a claim.  The normal evidence policy keeps
+    ``search_derived`` below accepted factual evidence until that fetch occurs.
+    """
+
+    bindings: list[_CitationBinding] = []
+    seen: set[str] = set()
+    for source in sources:
+        raw_url = source.get("url")
+        if not isinstance(raw_url, str) or not raw_url.strip():
+            raise ValueError("web search source URL is missing")
+        normalized_url = _normalized_url(raw_url)
+        if normalized_url in seen:
+            continue
+        seen.add(normalized_url)
+        raw_title = source.get("title")
+        title = (
+            raw_title.strip()
+            if isinstance(raw_title, str) and raw_title.strip()
+            else normalized_url
+        )
+        bindings.append(
+            _CitationBinding(
+                source_url=normalized_url,
+                title=title,
+                excerpts=(
+                    "Locator only; fetch this URL before using it as factual evidence: "
+                    f"{normalized_url}",
+                ),
+            )
+        )
+    return bindings
+
+
 def _first_nonempty(*names: str) -> str | None:
     for name in names:
         value = os.getenv(name)
         if value:
             return value
     return None
+
+
+def _env_bool(name: str) -> bool:
+    value = os.getenv(name, "")
+    return value.strip().casefold() in {"1", "true", "yes", "on"}

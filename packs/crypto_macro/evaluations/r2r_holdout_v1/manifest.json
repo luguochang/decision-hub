@@ -1,0 +1,37 @@
+{
+  "authorization": "owner:r2-r-06",
+  "created_at": "2026-09-09T00:00:00Z",
+  "cutoff_rule": "published_at <= observed_at <= received_at",
+  "dataset_id": "crypto_macro.r2r_holdout.v1",
+  "event_family_counts": {
+    "central_bank_speech": 1,
+    "geopolitical_shock": 1,
+    "inflation_release": 2,
+    "labor_release": 1,
+    "monetary_policy_decision": 1
+  },
+  "fixture_hashes": {
+    "cases/fomc_cut_50bp_20240918.json": "d918414e61220e559c9359ff30a71890f6f8ed7846e957f785a1032d0ff27a8d",
+    "cases/israel_strikes_iran_20241026.json": "36be4e16d3786ca4d0c73f15d234fbcffef90287e17c31b364a80c60ec6cde2b",
+    "cases/powell_stanford_20240403.json": "e9a1b3106d585461e09e0542bd86d79aec4d68303e2a097d3e7d49f4e82f0097",
+    "cases/us_cpi_20250212.json": "e19563d3a4d5ca9b4a9bc680138c3288749cd4056f72f3047e4ad49708dc1951",
+    "cases/us_jobs_20250307.json": "4625e8ae7f21d76afc12f6a389a89c408731e2e76f1b7e101c17ffadf0356ae4",
+    "cases/us_pce_20250228.json": "4e950ebba5fb30c8580eeefb88eac72da4632ed229a45cc397317452b1d7b843"
+  },
+  "fixture_refs": [
+    "cases/fomc_cut_50bp_20240918.json",
+    "cases/israel_strikes_iran_20241026.json",
+    "cases/powell_stanford_20240403.json",
+    "cases/us_cpi_20250212.json",
+    "cases/us_jobs_20250307.json",
+    "cases/us_pce_20250228.json"
+  ],
+  "label_rule": "outcomes.available_at > received_at",
+  "leakage_audit": "passed",
+  "source_mode": "fixture",
+  "split": "holdout",
+  "visibility": "owner_only",
+  "window_start_at": "2024-04-03T16:10:02+00:00",
+  "window_end_at": "2025-03-07T13:35:00+00:00",
+  "manifest_hash": "471d32b488e12b71a4531d8a410c006be4e58ae25144b9db3acad708163f18bb"
+}

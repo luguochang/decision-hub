@@ -14,6 +14,9 @@ required_capabilities:
 allowed_tools:
   - web.search
   - web.fetch
+  - browser.readback
+  - document.readback
+  - data.historical
   - official.macro
   - market.crypto_derivatives
   - market.crypto_crowding

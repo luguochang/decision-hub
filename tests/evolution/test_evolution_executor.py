@@ -49,6 +49,19 @@ from tools.replay.run_fixture import run_fixture
 NOW = datetime(2026, 8, 28, 12, 0, tzinfo=UTC)
 
 
+def _independent_test_fixtures(tmp_path: Path) -> Path:
+    """Synthetic distinct texts only for runtime/recovery unit tests, not live evidence."""
+    root = Path(__file__).parents[2]
+    for stage in ("replay", "holdout", "shadow"):
+        relative = Path("fixtures/evolution") / stage / "powell-higher-for-longer.json"
+        payload = json.loads((root / relative).read_text(encoding="utf-8"))
+        payload["observation"]["text"] += f" Synthetic independent {stage} unit case."
+        target = tmp_path / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(payload), encoding="utf-8")
+    return tmp_path
+
+
 class ProposalRuntime(FakeAgentRuntime):
     async def execute(self, request: AgentRequest) -> AgentResult:
         result = await super().execute(request)
@@ -58,6 +71,8 @@ class ProposalRuntime(FakeAgentRuntime):
             role=request.role,
             payload={
                 "proposal_id": "proposal-1",
+                "execution_scope": "directional_synthesis",
+                "execution_rules": ["examine_counter_evidence"],
                 "candidate_type": "strategy",
                 "version": "candidate.v1",
                 "parent_version": "baseline.v1",
@@ -166,7 +181,7 @@ def test_executor_reuses_supervisor_and_evaluation_without_promoting(
         clock=lambda: NOW,
     )
     runtime = FakeAgentRuntime()
-    root = Path(__file__).parents[2]
+    root = _independent_test_fixtures(tmp_path)
     plans = FixtureEvaluationPlanFactory(
         {
             "replay": [
@@ -202,16 +217,18 @@ def test_executor_reuses_supervisor_and_evaluation_without_promoting(
     completed = asyncio.run(executor.tick("evolution-worker", lease_seconds=30))
 
     assert completed is not None
-    assert completed.status == "pending_owner_review"
-    assert completed.stage == "review"
-    assert len(completed.experiment_refs) == 3
-    assert len(completed.result_refs) == 3
+    assert completed.status == "waiting_inputs"
+    assert completed.stage == "shadow"
+    assert completed.last_error_code == "prospective_evaluation_required"
+    assert len(completed.experiment_refs) == 2
+    assert len(completed.result_refs) == 2
     assert completed.candidate_id is not None
     assert (tmp_path / "artifacts/candidates" / f"{completed.candidate_id}.json").is_file()
     assert assets.active_pointer("crypto_macro.v1").candidate_id == "baseline"  # type: ignore[union-attr]
     overview = assets.overview()
-    assert len(overview.experiments) == 3
-    assert len(overview.results) == 6
+    assert len(overview.experiments) == 2
+    assert len(overview.results) == 4
+    assert all(dataset.source_mode == "fixture" for dataset in overview.datasets)
     baseline_report = next(
         Path(ref)
         for result in overview.results
@@ -254,7 +271,7 @@ def test_executor_restart_reuses_candidate_experiment_and_raw_reports(
         clock=lambda: current,
     )
     runtime = FakeAgentRuntime()
-    root = Path(__file__).parents[2]
+    root = _independent_test_fixtures(tmp_path)
     runner = FailOnceEvaluationRunner(tmp_path / "recovery-evaluations")
     executor = EvolutionJobExecutor(
         jobs=jobs,
@@ -296,12 +313,13 @@ def test_executor_restart_reuses_candidate_experiment_and_raw_reports(
 
     recovered = asyncio.run(executor.tick("evolution-worker-b", lease_seconds=30))
 
-    assert recovered is not None and recovered.status == "pending_owner_review"
+    assert recovered is not None and recovered.status == "waiting_inputs"
+    assert recovered.last_error_code == "prospective_evaluation_required"
     assert recovered.candidate_id == candidate_id
     overview = assets.overview()
     assert len(overview.candidates) == 2
-    assert len(overview.experiments) == 3
-    assert len(overview.results) == 6
+    assert len(overview.experiments) == 2
+    assert len(overview.results) == 4
     candidate_files = list((tmp_path / "recovery-artifacts/candidates").glob("*.json"))
     assert len(candidate_files) == 1
 
@@ -325,6 +343,7 @@ def test_plan_factory_reads_promoted_candidate_as_next_baseline_without_restart(
         )
     )
     first_proposal = CandidateProposal(
+        execution_scope="directional_synthesis", execution_rules=["examine_counter_evidence"],
         proposal_id="first-proposal",
         candidate_type="strategy",
         version="promoted.v1",
@@ -337,6 +356,7 @@ def test_plan_factory_reads_promoted_candidate_as_next_baseline_without_restart(
     candidate_id, content_hash, content_ref = artifacts.persist(first_job, first_proposal)
     promoted = assets.register_candidate(
         CandidateVersion(
+            execution_scope="directional_synthesis",
             candidate_id=candidate_id,
             candidate_type="strategy",
             content_hash=content_hash,
@@ -358,7 +378,7 @@ def test_plan_factory_reads_promoted_candidate_as_next_baseline_without_restart(
         pointer.candidate_id = current.candidate_id
         pointer.generation = 2
 
-    root = Path(__file__).parents[2]
+    root = _independent_test_fixtures(tmp_path)
     factory = FixtureEvaluationPlanFactory(
         {
             "replay": [root / "fixtures/evolution/replay/powell-higher-for-longer.json"],
@@ -388,6 +408,7 @@ def test_plan_factory_reads_promoted_candidate_as_next_baseline_without_restart(
         }
     )
     next_candidate = CandidateVersion(
+        execution_scope="directional_synthesis",
         candidate_id="next-candidate",
         candidate_type="strategy",
         content_hash=hashlib.sha256(b"next-candidate").hexdigest(),
@@ -420,7 +441,7 @@ def test_plan_factory_reads_promoted_candidate_as_next_baseline_without_restart(
             )
         )
     )
-    assert "Add real-yield confirmation." in str(result.payload["summary"])
+    assert "Examine supplied counter-evidence" in str(result.payload["summary"])
 
 
 def test_experience_service_only_uses_traceable_evaluation_lineage(
@@ -439,6 +460,7 @@ def test_experience_service_only_uses_traceable_evaluation_lineage(
         assert evaluation is not None
         evaluation_id = evaluation.evaluation_id
     proposal = CandidateProposal(
+        execution_scope="directional_synthesis", execution_rules=["examine_counter_evidence"],
         proposal_id="experience-proposal",
         candidate_type="strategy",
         version="candidate.experience.v1",

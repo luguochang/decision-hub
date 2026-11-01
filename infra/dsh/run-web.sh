@@ -2,6 +2,7 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+export DECISION_HUB_SKILL_DIR="${DECISION_HUB_SKILL_DIR:-$repo_root/packs/crypto_macro/skills}"
 cache_root="${DSH_UPSTREAM_CACHE:-$repo_root/.cache/dsh-upstream}"
 source_dir="$cache_root/source"
 web_home="${DSH_WEB_HOME:-$repo_root/data/dsh-web}"
@@ -53,10 +54,16 @@ source "$repo_root/infra/dsh/home-lock.sh"
 dsh_acquire_home_lock "$web_home"
 
 expected_pnpm="$(node -e "const p=require(process.argv[1]); process.stdout.write(p.pnpm)" "$repo_root/infra/dsh/upstream.lock.json")"
+repo_pnpm="$(node -e "const p=require(process.argv[1]); const value=p.packageManager ?? ''; if(!value.startsWith('pnpm@')) process.exit(1); process.stdout.write(value.slice('pnpm@'.length))" "$repo_root/package.json")" || {
+  echo "repository package.json must exact-pin packageManager to pnpm@<version>" >&2
+  exit 1
+}
 if command -v corepack >/dev/null 2>&1; then
   pnpm_runner=(corepack "pnpm@$expected_pnpm")
+  repo_pnpm_runner=(corepack "pnpm@$repo_pnpm")
 else
   pnpm_runner=(npx --yes "pnpm@$expected_pnpm")
+  repo_pnpm_runner=(npx --yes "pnpm@$repo_pnpm")
 fi
 dsh_cli=(node "$source_dir/apps/cli/lib/bin.js")
 
@@ -105,12 +112,31 @@ fi
 
 # Build the plugin before it is installed into the profile. The upstream
 # client-modules host serves the packaged `./client` export and fails loudly
-# when that artifact is absent or stale.
-"${pnpm_runner[@]}" --dir "$plugin_dir" build
-
-# Use the official profile-plugin command. It updates only the DSH profile
-# manifest under DSH_HOME; the pinned upstream source tree remains untouched.
-"${dsh_cli[@]}" plugin --profile web add "$plugin_dir"
+# when that artifact is absent or stale. The profile keeps a live link to this
+# worktree, so an already-installed plugin does not need a second pnpm
+# mutation on every Web restart. Re-running `pnpm add` is fragile on
+# Windows/WSL because pnpm can reject an otherwise valid profile when the
+# virtual-store length was created by the other platform.
+"${repo_pnpm_runner[@]}" --dir "$plugin_dir" build
+plugin_manifest="$web_home/profiles/web/package.json"
+plugin_installed=false
+if [[ -f "$plugin_manifest" ]]; then
+  if node - "$plugin_manifest" <<'NODE'
+const fs = require('node:fs')
+const [manifestPath] = process.argv.slice(2)
+const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+const spec = manifest.dependencies?.['@decision-hub/dsh-plugin']
+process.exit(typeof spec === 'string' && spec.length > 0 ? 0 : 1)
+NODE
+  then
+    plugin_installed=true
+  fi
+fi
+if [[ "$plugin_installed" != true ]]; then
+  # Use the official profile-plugin command. It updates only the DSH profile
+  # manifest under DSH_HOME; the pinned upstream source tree remains untouched.
+  "${dsh_cli[@]}" plugin --profile web add "$plugin_dir"
+fi
 
 # The upstream replay adapter is test-support code, not part of the shipped
 # Web dependency closure. An explicit replay run may install it into the
@@ -188,4 +214,15 @@ fi
 args+=(--host "$host" --port "$port" --no-open)
 
 cd "$source_dir"
-exec "${dsh_cli[@]}" "${args[@]}"
+case "$(uname -s)" in
+  MINGW*|MSYS*|CYGWIN*)
+    # Keep the MSYS shell (and its Windows PID signature) alive so another
+    # Git Bash process can distinguish this live owner from a stale lock.
+    dsh_exit=0
+    "${dsh_cli[@]}" "${args[@]}" || dsh_exit=$?
+    exit "$dsh_exit"
+    ;;
+  *)
+    exec "${dsh_cli[@]}" "${args[@]}"
+    ;;
+esac

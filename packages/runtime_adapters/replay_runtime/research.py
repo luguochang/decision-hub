@@ -89,6 +89,8 @@ def _bind_result(
         item.evidence_id: research_evidence_instance_id(
             content_hash=item.content_hash,
             research_session_id=session_id,
+            content_ref=item.content_ref,
+            acquisition_receipt_id=item.acquisition_receipt_id,
         )
         for item in template.evidence_candidates
     }

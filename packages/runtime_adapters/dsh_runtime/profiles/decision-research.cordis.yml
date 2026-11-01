@@ -25,9 +25,30 @@
       structured result.
     workspaceContext: false
     skills:
-      enabled: false
+      enabled: true
     toolBash: false
     toolJobs: false
+
+- id: skill
+  name: '@deepseek-ai/dsh-skill'
+
+- id: skill-filesystem
+  name: '@deepseek-ai/dsh-skill-filesystem'
+  config:
+    customSkillDirs:
+      - !!js process.env.DECISION_HUB_SKILL_DIR ?? './packs/crypto_macro/skills'
+
+- id: tool-skill
+  name: '@deepseek-ai/dsh-tool-skill'
+
+- id: goal
+  name: '@deepseek-ai/dsh-goal'
+
+- id: command-goal
+  name: '@deepseek-ai/dsh-command-goal'
+
+- id: tool-goal
+  name: '@deepseek-ai/dsh-tool-goal'
 
 - id: sessions
   name: '@deepseek-ai/dsh-session-persistence-jsonl'
@@ -51,7 +72,44 @@
   config:
     provider: spawn
     toolName: subagent
-    enableRunInBackground: false
+    backgroundMode: continuable
+    modelSelectionSettings: true
+    persona: >-
+      You are a Decision Hub research specialist. Execute only the role declared
+      by the parent. Acquire and return typed observations, source URLs,
+      observed/published timestamps, contradictions, and explicit missing
+      requirements. Do not synthesize a trade decision, mutate Hub state,
+      install plugins, use a shell, or delegate further work.
+    toolFilter:
+      allow:
+        - decision_hub_research
+        - web_fetch
+        - skill
+        - todo_write
+    # Direct children are depth 1 in DSH; recursion is prevented by the
+    # child tool allowlist, which contains no subagent tool.
+    maxDepth: 1
+
+- id: tool-subagent-reviewer
+  name: '@deepseek-ai/dsh-tool-subagent'
+  config:
+    provider: spawn
+    toolName: subagent_reviewer
+    backgroundMode: one-shot
+    persona: >-
+      You are an independent Decision Hub evidence reviewer. Review only the
+      evidence locators and facts in the delegated prompt. Challenge the
+      proposed causal claim and return only a JSON object with schema_version
+      independent-review-receipt.v1, role independent_reviewer, target_claim,
+      evidence_refs, challenge, resolution (accepted, bounded,
+      requires_new_evidence, or rejected), and limitations. Do not perform
+      research or delegate further work.
+    toolFilter:
+      allow: []
+    maxDepth: 1
+
+- id: tool-subagent-report
+  name: '@deepseek-ai/dsh-tool-subagent-report'
 
 - id: tool-todo
   name: '@deepseek-ai/dsh-tool-todo'

@@ -185,7 +185,7 @@ def test_runtime_maps_timeout_to_product_error(
     assert raised.value.error_code == "provider_timeout"
 
 
-def test_runtime_maps_rate_limit_and_server_errors(
+def test_runtime_maps_provider_failures(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     class FailingAgent:
@@ -201,11 +201,15 @@ def test_runtime_maps_rate_limit_and_server_errors(
     class ServerError(Exception):
         status_code = 503
 
+    class ConnectionError(Exception):
+        pass
+
     monkeypatch.setenv("DECISION_HUB_LLM_ENABLED", "1")
     monkeypatch.setenv("OPENAI_API_KEY", "temporary-test-secret")
     failures = (
         (RateLimitError("slow down"), "provider_rate_limited"),
         (ServerError("down"), "provider_unavailable"),
+        (ConnectionError("Connection error."), "provider_transport_error"),
     )
     for error, code in failures:
         def build_failing_agent(

@@ -52,3 +52,25 @@ build/
 .cache/dsh-upstream/
 data/dsh-web/
 data/dsh-live/
+
+# Source acquisition raw DOM/network/screenshot/trace artifacts are local
+# evidence inputs and must never be committed with the worker source.
+apps/source_acquisition_worker/data/
+
+# Local test/run evidence and caches. These hold large research outputs,
+# mirrored source trees and paths beyond the Windows 260-char limit.
+artifacts/
+evidence/
+.cache/
+
+# Build-generated source snapshots for historical report readers
+# (109,818 files, only 2,866 distinct contents as of 2026-11-01).
+# They are produced by infra/dsh/build-product.ps1 and pair with local data/.
+# Keep the hand-maintained candidates/ and registries/ under version control.
+packages/kernel/research_recipe_versions/*
+!packages/kernel/research_recipe_versions/candidates/
+!packages/kernel/research_recipe_versions/registries/
+packages/kernel/market_component_versions/
+
+# 60MB archive duplicating the extracted docs/ui/Decision_Hub_UI_Design_Package_V2/.
+docs/ui/*.zip

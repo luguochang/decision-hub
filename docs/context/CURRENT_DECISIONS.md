@@ -1,5 +1,7 @@
 # 当前有效决策索引
 
+> 2026-10-17适用说明：本页保留9月5日决策快照，当前产品/暂停和变更范围见[00](../design/decision-product-control-2026-10-17/00_MASTER_CONTROL.md)及[继承ADR](../decisions/ADR-20261017-decision-product-baseline-and-document-authority.md)。旧身份、PIT、原件、权限、账本边界继续有效；旧阶段/模型/范围不能覆盖用户后续明确要求。
+
 更新时间：2026-09-05
 用途：只列当前仍有效的结论和权威引用。决策正文只写在 ADR/架构/schema 中，不在这里重复推理历史。
 

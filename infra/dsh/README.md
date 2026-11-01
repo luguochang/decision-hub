@@ -10,6 +10,16 @@
 
 ## 命令
 
+Windows 当前模型选择由同一启动参数控制：
+
+```powershell
+pwsh -NoProfile -File infra/dsh/run-product.ps1 -ResearchModel gpt-6.1-sol
+```
+
+`ResearchModel` 默认 `gpt-6.1-sol`，同时传给 DSH 和 Operations。启动器在取得独占启动权并核对正式构建回执后，将同一私有 `DSH_HOME` 的 `codexai` 模型登记、未来会话默认值，以及 `.env` 中两个旧 `gpt-5.5` 的 MODEL/SEARCH_MODEL 值迁移到所选模型；其它 Provider、凭据、路由、已冻结 Task 与历史原件保持。当前128000上下文/8192每请求输出是现有配置限额，不代表新模型或账户路线的能力上限。兼容推理默认使用 medium，配置中不会向新模型发送 off/none/minimal。
+
+本地登记及模型列表不证明账户可以真正推理；正常启动后还须完成真实 Provider 验证。已经固定的旧 Task 不会被静默改模型重新执行。`web.search` 的 canary 状态保持原流程，不因模型迁移变成 passed；文本 canary 当前选型示例为 `$env:DECISION_HUB_MODEL='gpt-6.1-sol'`，历史 canary 实绩保留原模型与结果。
+
 ```bash
 ./infra/dsh/fetch-upstream.sh
 ./infra/dsh/build-upstream.sh
@@ -22,10 +32,11 @@
 ```
 
 `run-product.sh` 是产品启动入口：它先用 `--build --force-recreate` 从当前工作树构建并启动
-Hub API、realtime/evolution worker 和 research MCP，然后在宿主机启动官方 DSH Web。只有
+Hub API、realtime/research/priority/historical/document worker 和 research MCP，然后在宿主机启动官方 DSH Web。Decision
+Desk 是用户查看研究结果和操作建议的业务入口，DSH Web 是内部研究/轨迹控制台。只有
 包含 `hub_reachable` 与 build identity 的 Host readiness 通过后，启动器才单独构建并启动
 research worker。事件可以提前进入 durable 队列，但不会在 Agent Harness 尚未双向就绪时被消费。
-启动器最后只输出一个用户入口。通用 `/health/ready` 通过后还必须验证 canonical
+启动器最后会同时输出 `DECISION_DESK_URL`（业务入口）和 `DSH_TRAJECTORY_URL`（调试入口）。通用 `/health/ready` 通过后还必须验证 canonical
 `research-inbox-view.v1`；旧镜像即使健康也不能冒充当前产品版本。
 `stop-product.sh` 只停止同一 Compose 项目的服务，保留 SQLite、DSH Session 和
 通知 outbox 数据卷。
@@ -34,15 +45,18 @@ research worker。事件可以提前进入 durable 队列，但不会在 Agent H
 `decision-hub-product-<port>`，并在每次启动时用当前环境强制重建五个服务；research worker
 位于 DSH readiness 消费屏障之后。这样不会把
 旧的 DSH Host URL、旧 Provider 或旧 capability allowlist 留在容器里。启动日志中的
-`DSH_URL` 是唯一用户入口；旧端口或不带 `?token=...` 的裸 URL 不属于当前产品实例。
+`DSH_URL`/`DSH_TRAJECTORY_URL` 只用于查看 DSH 原生对话和轨迹；业务用户应打开
+`DECISION_DESK_URL`。旧端口或不带 `?token=...` 的裸 DSH URL 不属于当前产品实例。
 需要并行隔离实例时显式设置 `DECISION_HUB_COMPOSE_PROJECT`，并同时设置独立的 API、MCP
 和 DSH 端口，禁止复用另一个实例的项目名。
 
-产品 live 启动默认启用已经通过独立 contract/replay/live canary 的只读 capability：
-`official.macro`、`market.cross_asset`、`market.crypto_derivatives`、`web.fetch` 和
-`web.search`（DSH native discovery）；明确拒绝 `replay.research`。`web.search.tavily`
-仍只在显式加入 allowlist 且配置新 secret 后作为按需 fallback 启用。失败仍按稳定错误
-进入 provenance，不能替代 typed source。回放只能通过隔离验收命令启动。若存在 gitignored 的
+产品 live 启动只允许通过 capability allowlist 注入只读工具。当前 Windows
+`run-product.ps1` 的默认 allowlist 是 `official.macro`、`market.cross_asset`、
+`market.crypto_derivatives`、`market.crypto_crowding`、`web.fetch`、`browser.readback` 和
+`data.historical`；`web.search` 只有在 search canary 通过后才可加入，当前实例状态为
+`not_run`，因此不能在 UI 或交接文档中宣称已完成全网搜索。明确拒绝
+`replay.research`。`web.search.tavily` 仍只在显式加入 allowlist 且配置新 secret 后作为按需
+fallback 启用。失败仍按稳定错误进入 provenance，不能替代 typed source。回放只能通过隔离验收命令启动。若存在 gitignored 的
 `data/dsh-live/.env`，启动器通过 Compose 官方 `--env-file` 参数把同一份 Provider
 配置注入 Research MCP，不执行该文件、不打印密钥。任何新增 capability 仍须逐项通过
 contract/replay/live canary 后才能加入 `DECISION_HUB_RESEARCH_CAPABILITIES`。
@@ -54,11 +68,14 @@ Session 导航仍完全由 DSH 官方 Workspace/Session Controller 所有。
 
 ## 用户操作闭环
 
-1. 执行 `./infra/dsh/run-product.sh`，保持该终端进程运行。
-2. 打开日志打印的完整 `DSH_URL`（包含 `?token=...`）；不要打开旧端口或裸端口。
-3. 进入 `Crypto Macro Trader` 后点击 DSH 原生的 `新建会话`。
-4. 在新会话的输入框写研究目标；此时插件显示 `建立研究任务`，点击一次提交。
-5. 等待通常 1--3 分钟，在同一页面查看 `对话`、`轨迹` 和 `研究报告`。
+Windows 本机真实产品启动、研究报告端到端验收与故障复现命令见
+[`Windows 本机完整产品启动与研究验收`](../../docs/runbooks/windows-product-live-acceptance.md)。
+
+1. 执行 `./infra/dsh/run-product.sh`（Windows 使用 `./infra/dsh/run-product.ps1`），保持该终端进程运行。
+2. Windows 打开启动器打印的 `DECISION_DESK_LOCAL_ENTRY` 本机入口文件。它仍进入同一个 PC 产品页面，并自动连接签名身份；无需手填口令。其他启动方式沿用 `DECISION_DESK_URL`，Windows 裸地址也保留阅读入口。
+3. 在 Decision Desk 点击“获取最新操作建议”，提交空白说明即可触发固定 BTC/宏观研究模板；只有需要限定标的或时间范围时才填写补充说明。
+4. 等待研究完成，在结果页查看方向、行动候选、证据、根因链、反方和复核限制。
+5. 需要排查模型实际查了什么时，再打开 `DSH_TRAJECTORY_URL`，查看 DSH 原生对话/轨迹；它不是第二套业务入口，也不单独产生一份可发布结论。
 
 已关联正式 Run 的旧会话中，输入框是 DSH 普通续聊；它不会把每条聊天自动创建成新的 Hub
 Run。要开始新的业务研究，回到 `新建会话`；要对失败 Run 进行幂等补跑，使用报告页的
@@ -139,3 +156,11 @@ data/dsh-live/                       本机 live DSH_HOME、Provider 设置和 S
 success/partial_failure/insufficient_or_stale 三场景、callback gap、Web restart、版本不兼容
 fail-closed 和 locked rollback。浏览器 1280x720 与 375x812 无横向溢出；该结论只证明
 官方 Web 工程闭环，不证明 live source、预测准确率、收益或 DSH Promotion。
+
+## 仓位、风险设置的本机身份
+
+正常启动会在 `data/product-local/private-settings/` 创建 `Decision Hub.url` 与 `owner-launch.json`，仅当前 Windows 用户可读写。日志只打印本机入口文件路径，不打印其每次启动生成的凭据。打开该入口仍进入现有 PC 产品；页面立即清除地址片段中的凭据，随后使用 HttpOnly / SameSite=strict 签名会话与 Origin / CSRF 校验。
+
+身份固定为既有 PC 默认 owner，重启只轮换会话凭据，不改变已保存设置的归属。本机会话最长 8 小时，页面显示到期时间；到期后重新打开同一个本机入口即可连接。入口文件包含当前启动的私有凭据，应和私有启动配置一起排除在共享材料与普通导出之外。
+
+“我的仓位与风险设置”位于 `#/settings`，从首页及管理页可达。保存后回读原件；仅表示设置已保存、比较待更新。用户自报与已核验模拟账户分别保存，未知余额不补默认值。设置重评、建议发布、监控和模拟成交须各自完成真实处理后核对。

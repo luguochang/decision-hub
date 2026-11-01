@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="568" height="130" viewBox="0 0 568 130" fill="none">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="65" x2="568" y2="65" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset=".38" stop-color="#f3f8ff"/><stop offset="1" stop-color="#e4efff"/></linearGradient>
+    <radialGradient id="globe" cx="0" cy="0" r="1" gradientTransform="translate(394 31) rotate(53) scale(132 125)" gradientUnits="userSpaceOnUse"><stop stop-color="#fbfdff"/><stop offset=".62" stop-color="#c6dff8"/><stop offset="1" stop-color="#b7d4f4" stop-opacity=".35"/></radialGradient>
+    <linearGradient id="mountain" x1="375" y1="92" x2="375" y2="130" gradientUnits="userSpaceOnUse"><stop stop-color="#c1d6ee"/><stop offset="1" stop-color="#e9f2ff"/></linearGradient>
+    <clipPath id="world"><circle cx="410" cy="96" r="92"/></clipPath>
+  </defs>
+  <path fill="url(#sky)" d="M0 0h568v130H0z"/>
+  <circle cx="410" cy="96" r="94" stroke="#fff" stroke-width="3" opacity=".6"/>
+  <circle cx="410" cy="96" r="92" fill="url(#globe)"/>
+  <g clip-path="url(#world)" stroke="#fff" stroke-opacity=".5" stroke-width=".8">
+    <ellipse cx="410" cy="96" rx="63" ry="92"/><ellipse cx="410" cy="96" rx="31" ry="92"/>
+    <ellipse cx="410" cy="96" rx="92" ry="27"/><ellipse cx="410" cy="96" rx="92" ry="58"/>
+    <path d="M318 96h184M410 4v184"/>
+  </g>
+  <path d="m357 37 15-8 8 6 2 13 12 5-4 10-12-1-6 15-10-8-9 3-8-15 5-9zm64-18 18 8 6 10 19 5 7 15-13 10-20-4-8 11-15-9 4-14-8-9zm-33 67 19-8 17 13-7 10-2 21-9 9-12-11-1-19z" fill="#f9fcff" opacity=".58" clip-path="url(#world)"/>
+  <path d="m136 130 69-35 22 12 40-22 29 23 32-13 40 35zm274 0 47-31 19 10 33-22 22 18 37-27v52z" fill="url(#mountain)" opacity=".63"/>
+  <path d="m86 130 88-18 28 8 33-9 39 19zm215 0 53-15 26 7 35-13 30 15 37-10 35 16z" fill="#d6e5f7" opacity=".7"/>
+</svg>

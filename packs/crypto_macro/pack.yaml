@@ -14,6 +14,9 @@ capability_refs:
   - web.search
   - web.search.tavily
   - web.fetch
+  - browser.readback
+  - document.readback
+  - data.historical
   - official.macro
   - market.crypto_derivatives
   - market.crypto_crowding
@@ -23,11 +26,21 @@ capability_refs:
   - replay.research
 horizons: [30m, 24h, 72h]
 execution_budget:
-  max_evidence_rounds: 3
-  max_tool_calls: 24
-  max_subagents: 6
-  total_deadline_seconds: 480
-  per_tool_timeout_seconds: 20
-  per_model_step_timeout_seconds: 150
-  max_structured_repairs: 1
-  max_estimated_cost_usd: 1.0
+  schema_version: research-execution-budget.v2
+  # Registered trial: acquisition 900s / closing 900s; no assurance of completion.
+  closing_reserve_seconds: 900
+  # Use the contract ceiling for evidence/tool fan-out. The wall-clock and
+  # spend values remain explicit so a long research run is observable rather
+  # than silently cut off by an arbitrary one-round default.
+  max_evidence_rounds: 10
+  max_tool_calls: 100
+  max_subagents: 32
+  # Give the evidence pass enough time to finish the reviewer and one bounded
+  # synthesis repair. Identity, spend, call, and no-trading gates remain in
+  # force; this only removes the premature nine-minute cutoff that interrupted
+  # a valid run immediately after a schema correction.
+  total_deadline_seconds: 1800
+  per_tool_timeout_seconds: 120
+  per_model_step_timeout_seconds: 600
+  max_structured_repairs: 3
+  max_estimated_cost_usd: 10.0

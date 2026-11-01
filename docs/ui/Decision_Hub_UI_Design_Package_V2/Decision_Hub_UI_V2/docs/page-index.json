@@ -1,0 +1,306 @@
+[
+  {
+    "id": "home",
+    "title": "研究指挥台",
+    "description": "获取建议、事件、任务与选中报告的统一工作台",
+    "entry": "工作台；侧栏 Research",
+    "interaction": "输入可选关注点、打开当前任务、事件和报告",
+    "return_rule": "报告等深层返回 home 并保持 Run"
+  },
+  {
+    "id": "compose",
+    "title": "获取最新操作建议",
+    "description": "空输入使用固定 BTC / 宏观研究模板",
+    "entry": "首页主行动；报告重新研究",
+    "interaction": "填写或留空；开始分析；显示原范围",
+    "return_rule": "返回来源页，保留草稿"
+  },
+  {
+    "id": "submitting",
+    "title": "提交中",
+    "description": "输入保留、按钮锁定、同一意图幂等提交",
+    "entry": "提交中；评审目录",
+    "interaction": "只读输入，按钮锁定；登记同一意图",
+    "return_rule": "可查看任务；没有第二次创建"
+  },
+  {
+    "id": "queued",
+    "title": "研究已排队",
+    "description": "Run 已创建；离开页面不取消任务",
+    "entry": "已创建 Run",
+    "interaction": "显示入账与等待 Worker；可离开",
+    "return_rule": "返回来源；离开不取消"
+  },
+  {
+    "id": "researching",
+    "title": "正在研究",
+    "description": "轮次、工具数与最近活动，不伪造完成百分比",
+    "entry": "Worker 研究中",
+    "interaction": "轮次、工具数、最近活动；查看技术详情",
+    "return_rule": "离开保留 Run；完成不强制抢焦点"
+  },
+  {
+    "id": "failed",
+    "title": "研究失败",
+    "description": "错误来源、错误码、可重试性及原输入",
+    "entry": "提交或来源失败",
+    "interaction": "error code / origin / retryability；保留修改后输入",
+    "return_rule": "重试生成关联记录；失败旧记录保留"
+  },
+  {
+    "id": "runs",
+    "title": "Research Runs",
+    "description": "搜索、状态筛选、证据覆盖、父子任务",
+    "entry": "侧栏与报告返回",
+    "interaction": "关键词、状态、触发类型筛选；父子任务",
+    "return_rule": "打开报告再返回保留筛选 URL"
+  },
+  {
+    "id": "calendar-all",
+    "title": "宏观事件 · 全部",
+    "description": "事件账本与来源采集状态分离",
+    "entry": "工作台；侧栏",
+    "interaction": "市场 / 重要性 / 关键词；事件抽屉",
+    "return_rule": "关闭抽屉恢复当前条件"
+  },
+  {
+    "id": "calendar-upcoming",
+    "title": "宏观事件 · 即将发生",
+    "description": "示例风险窗口与发布时间",
+    "entry": "日历范围标签",
+    "interaction": "同一账本的未来风险窗口；来源状态",
+    "return_rule": "范围在 URL；不创造历史实际值"
+  },
+  {
+    "id": "calendar-history",
+    "title": "宏观事件 · 历史发布",
+    "description": "尚未采集历史发布；不是未来事件的复制",
+    "entry": "日历范围标签",
+    "interaction": "真实 0 项空态、覆盖范围、来源问题",
+    "return_rule": "返回全部 / 工作台"
+  },
+  {
+    "id": "event",
+    "title": "事件详情抽屉",
+    "description": "来源、前值、预期、实际、意外、版本记录",
+    "entry": "指定 event_id",
+    "interaction": "查看各数值、来源、观察时间和版本",
+    "return_rule": "关闭 / Esc 返回来源日历及筛选"
+  },
+  {
+    "id": "report",
+    "title": "研究报告",
+    "description": "方向、行动候选、概率和权限分别呈现",
+    "entry": "指定 run_id；完成后",
+    "interaction": "查看方向、周期候选、依据、限制；重新研究",
+    "return_rule": "返回来源任务列表或工作台"
+  },
+  {
+    "id": "report-incomplete",
+    "title": "结论不完整",
+    "description": "研究已结束；synthesis_incomplete 明确提示",
+    "entry": "synthesis_incomplete Run",
+    "interaction": "提示论证不完整；看缺口和父任务",
+    "return_rule": "父子任务双向返回；不覆写旧报告"
+  },
+  {
+    "id": "technical",
+    "title": "技术详情",
+    "description": "八类结构化审计模块，不展示私有逐字思维链",
+    "entry": "当前 Run 报告",
+    "interaction": "八模块折叠；证据、图谱、技术排查",
+    "return_rule": "返回同 Run 报告及滚动位置"
+  },
+  {
+    "id": "evidence",
+    "title": "证据详情抽屉",
+    "description": "来源身份、质量、时间及证据关联",
+    "entry": "报告 / 技术页 / 图谱证据 ID",
+    "interaction": "真实对应 ID；来源和关联节点",
+    "return_rule": "关闭 / Esc 返回原节点或原报告"
+  },
+  {
+    "id": "graph",
+    "title": "全屏分析链路",
+    "description": "分组、缩放、平移、适配与小地图",
+    "entry": "报告全屏分析链路",
+    "interaction": "缩放、Fit、拖拽、Mini Map、搜索、筛选、分组、列表",
+    "return_rule": "退出 / Esc 返回报告原滚动和焦点"
+  },
+  {
+    "id": "graph-node",
+    "title": "图谱节点检查器",
+    "description": "节点、关系与证据在同一 Run 下联动",
+    "entry": "图谱节点",
+    "interaction": "节点检查器；证据打开；定位当前节点",
+    "return_rule": "关闭检查器保留图谱；退出回报告"
+  },
+  {
+    "id": "library",
+    "title": "研究资料库",
+    "description": "资料版本、审核状态与关联 Run",
+    "entry": "工作台；侧栏资料研究",
+    "interaction": "资料状态、版本与关联任务；上传入口",
+    "return_rule": "回工作台；指定资料保持 doc_id"
+  },
+  {
+    "id": "upload",
+    "title": "上传资料",
+    "description": "支持格式、元数据、隐私与文件校验",
+    "entry": "资料库上传",
+    "interaction": "文件格式与必填字段校验；隐私模式提案",
+    "return_rule": "返回资料库；本地仅处理元数据"
+  },
+  {
+    "id": "document-uploading",
+    "title": "资料上传中",
+    "description": "本地模拟进度；没有实际上传",
+    "entry": "提交上传；评审预览",
+    "interaction": "模拟上传进度与元数据",
+    "return_rule": "回资料库，不丢文档条目"
+  },
+  {
+    "id": "document-parsing",
+    "title": "资料解析中",
+    "description": "结构提取进度与原文保留提示",
+    "entry": "上传完成；重试",
+    "interaction": "结构提取状态；原文保留",
+    "return_rule": "解析完成再进入审核，不提前通过"
+  },
+  {
+    "id": "document-quality",
+    "title": "资料质量不足",
+    "description": "硬缺口阻止资料进入研究",
+    "entry": "质量门不足",
+    "interaction": "硬缺口与具体块；回到审核定位",
+    "return_rule": "不允许直接接入研究"
+  },
+  {
+    "id": "document-review",
+    "title": "语义修正审核",
+    "description": "逐条接受 / 拒绝，敏感语义变化明确阻断",
+    "entry": "解析完成；资料详情",
+    "interaction": "原文 / 建议；逐条接受拒绝；敏感变化阻断",
+    "return_rule": "保存草稿；返回不覆盖原文"
+  },
+  {
+    "id": "document-confirm",
+    "title": "确认审核范围",
+    "description": "全部差异已处理；显式确认后生成新版本",
+    "entry": "差异全部处理",
+    "interaction": "确认审核范围与显式勾选",
+    "return_rule": "Esc / 继续核对回当前版本审核"
+  },
+  {
+    "id": "document-confirmed",
+    "title": "质量复检中",
+    "description": "人工确认不能绕过质量门",
+    "entry": "人工确认后",
+    "interaction": "新版本进入独立质量复检",
+    "return_rule": "确认不等于质量门直接通过"
+  },
+  {
+    "id": "document-ready",
+    "title": "可用于研究",
+    "description": "版本已确认且质量门通过",
+    "entry": "质量门通过",
+    "interaction": "结合此版本发起新研究；查看版本",
+    "return_rule": "携带 doc 和 version，不能混用未确认版本"
+  },
+  {
+    "id": "document-linked",
+    "title": "资料已连接",
+    "description": "资料到新 Run 以及新 Run 到资料的双向入口",
+    "entry": "资料接入研究",
+    "interaction": "打开关联 Run；看被引用版本",
+    "return_rule": "资料到报告、报告到资料双向链接"
+  },
+  {
+    "id": "document-failed",
+    "title": "资料解析失败",
+    "description": "文件保留；恢复与重试入口",
+    "entry": "解析异常",
+    "interaction": "错误码、重试和保留的文件信息",
+    "return_rule": "重试同文档处理；不静默丢失"
+  },
+  {
+    "id": "home-loading",
+    "title": "工作台加载中",
+    "description": "按 worker、日历、任务分别反馈",
+    "entry": "首页资源未读完",
+    "interaction": "分别显示 worker / 日历 / runs 读取",
+    "return_rule": "避免空白大卡或假报告"
+  },
+  {
+    "id": "home-unknown",
+    "title": "服务状态未知",
+    "description": "未知不渲染成健康",
+    "entry": "心跳未确认",
+    "interaction": "明确未知；查看服务与来源",
+    "return_rule": "未知状态也携带到状态详情"
+  },
+  {
+    "id": "home-degraded",
+    "title": "来源降级",
+    "description": "来源、影响范围、最后成功与下次检查",
+    "entry": "部分来源失败",
+    "interaction": "来源、受影响范围、最后成功、下次检查",
+    "return_rule": "可查看详情或重新研究；不等于授权"
+  },
+  {
+    "id": "home-empty",
+    "title": "暂无研究任务",
+    "description": "下一步明确，不填入假报告",
+    "entry": "真实无任务",
+    "interaction": "原因说明；可发起研究或上传资料",
+    "return_rule": "不把演示报告当空态数据"
+  },
+  {
+    "id": "sources",
+    "title": "服务与数据源",
+    "description": "运行健康与来源质量独立显示",
+    "entry": "顶栏健康状态",
+    "interaction": "Worker、来源、采集缺口分别显示",
+    "return_rule": "返回来源页与健康上下文"
+  },
+  {
+    "id": "states",
+    "title": "组件与状态规范",
+    "description": "颜色、图标、控件、反馈及状态边界",
+    "entry": "左下评审入口",
+    "interaction": "令牌、图标、反馈、危险操作确认样例",
+    "return_rule": "只用于交付评审，不是业务功能堆叠"
+  },
+  {
+    "id": "dsh",
+    "title": "DSH · 技术轨迹",
+    "description": "内部只读排查；带当前 Run 返回",
+    "entry": "当前 Run 技术页",
+    "interaction": "内部提示；日志筛选和选中详情",
+    "return_rule": "携带同一 Run 返回 Hub 技术页"
+  },
+  {
+    "id": "dsh-conversation",
+    "title": "DSH · 对话摘要",
+    "description": "公开运行摘要，不暴露逐字思维链",
+    "entry": "DSH 页签",
+    "interaction": "公开运行摘要；不含逐字思维链",
+    "return_rule": "保持 Run / Session 映射上下文"
+  },
+  {
+    "id": "dsh-research",
+    "title": "DSH · 主动研究",
+    "description": "子任务与失败记录",
+    "entry": "DSH 页签",
+    "interaction": "子任务、状态、失败与运行摘要",
+    "return_rule": "技术内容不变成第二份用户建议"
+  },
+  {
+    "id": "dsh-report",
+    "title": "DSH · 原生报告",
+    "description": "技术原生记录不代替 Hub 用户结论",
+    "entry": "DSH 页签",
+    "interaction": "原生技术记录占位；打开 Hub 报告",
+    "return_rule": "不把 Session JSONL 当 Evidence"
+  }
+]

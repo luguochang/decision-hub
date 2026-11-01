@@ -20,4 +20,8 @@ properties:
   scheduled_at: {type: [string, 'null'], format: date-time}
   source_url: {type: [string, 'null'], format: uri}
   revision_of: {type: [string, 'null']}
+  macro_event:
+    anyOf:
+      - {$ref: 'macro_calendar.schema.yaml#/$defs/macro_event_payload'}
+      - {type: 'null'}
   content_hash: {type: string, pattern: '^[a-f0-9]{64}$'}

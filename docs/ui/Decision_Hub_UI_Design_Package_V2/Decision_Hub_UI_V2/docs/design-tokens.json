@@ -1,0 +1,70 @@
+{
+  "version": "2.1",
+  "basis": "source/tokens.css is the executable visual source of truth",
+  "colors": {
+    "brand": "#2563eb",
+    "brandBright": "#2563ff",
+    "brandHover": "#1d4ed8",
+    "canvas": "#f3f8ff",
+    "surface": "#ffffff",
+    "ink": "#122247",
+    "secondary": "#516585",
+    "muted": "#637593",
+    "border": "#dfe9f7",
+    "success": "#087a55",
+    "successSoft": "#eafaf4",
+    "warning": "#9c5907",
+    "warningSoft": "#fff5e5",
+    "error": "#bc3049",
+    "errorSoft": "#fff0f3",
+    "purple": "#703cd2",
+    "purpleSoft": "#f2edff"
+  },
+  "spacing": [
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    32
+  ],
+  "radii": {
+    "control": 8,
+    "card": 12,
+    "modal": 16
+  },
+  "layout": {
+    "sidebar": 208,
+    "topbar": 60,
+    "desktopReview": [
+      1440,
+      1080
+    ],
+    "mobileReview": [
+      390,
+      844
+    ]
+  },
+  "type": {
+    "family": [
+      "Segoe UI",
+      "PingFang SC",
+      "Microsoft YaHei",
+      "Noto Sans CJK SC",
+      "sans-serif"
+    ],
+    "h1": 28,
+    "h2": 19,
+    "h3": 15,
+    "body": 14,
+    "secondary": 12,
+    "bodyLineHeight": 1.6
+  },
+  "rules": [
+    "状态颜色必须同时有文本或图形",
+    "未校准不显示百分比或绿色正常",
+    "图表样例不是实时价格",
+    "所有动态值必须来自已标明的样例或后端数据"
+  ]
+}

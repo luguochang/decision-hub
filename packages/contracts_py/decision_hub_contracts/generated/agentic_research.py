@@ -3,9 +3,13 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import AnyUrl, AwareDatetime, BaseModel, ConfigDict, Field
+
+from packages.contracts_py.decision_hub_contracts.execution_budget_v2_contract_base import (
+    ExecutionBudgetV2Contract,
+)
 
 
 class AgenticResearchContracts(BaseModel):
@@ -124,6 +128,22 @@ class ExecutionBudget(BaseModel):
     max_estimated_cost_usd: Annotated[float, Field(ge=0.0)]
 
 
+class ExecutionBudgetV2(ExecutionBudgetV2Contract):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    max_evidence_rounds: Annotated[int, Field(ge=1, le=10)]
+    max_tool_calls: Annotated[int, Field(ge=1, le=100)]
+    max_subagents: Annotated[int, Field(ge=0, le=32)]
+    total_deadline_seconds: Annotated[int, Field(ge=1, le=3600)]
+    per_tool_timeout_seconds: Annotated[int, Field(ge=1, le=600)]
+    per_model_step_timeout_seconds: Annotated[int, Field(ge=1, le=600)]
+    max_structured_repairs: Annotated[int, Field(ge=0, le=5)]
+    max_estimated_cost_usd: Annotated[float, Field(ge=0.0)]
+    schema_version: Literal["research-execution-budget.v2"]
+    closing_reserve_seconds: Annotated[int, Field(ge=1, le=3599)]
+
+
 type DomainPackRef = Annotated[str, Field(min_length=1)]
 
 
@@ -162,7 +182,7 @@ class DomainPackManifest(BaseModel):
     role_profile_refs: Annotated[list[RoleProfileRef], Field(min_length=1)]
     capability_refs: Annotated[list[CapabilityRef], Field(min_length=1)]
     horizons: Annotated[list[Literal["30m", "24h", "72h"]], Field(max_length=3, min_length=3)]
-    execution_budget: ExecutionBudget
+    execution_budget: ExecutionBudget | ExecutionBudgetV2
 
 
 type Domain = Annotated[str, Field(min_length=1)]
@@ -360,6 +380,10 @@ class EvidenceCandidate(BaseModel):
     received_at: AwareDatetime
     content_hash: Annotated[str, Field(pattern="^[a-f0-9]{64}$")]
     excerpt: Annotated[str, Field(max_length=4000, min_length=1)]
+    content_ref: Annotated[str | None, Field(max_length=2048)] = None
+    acquisition_receipt_id: Annotated[str | None, Field(max_length=128)] = None
+    source_content_hash: Annotated[str | None, Field(pattern="^[a-f0-9]{64}$")] = None
+    parser_ref: Annotated[str | None, Field(max_length=256)] = None
     structured_payload_ref: str | None
     tool_call_id: str | None
     research_session_id: Annotated[str, Field(min_length=1)]
@@ -399,11 +423,39 @@ class ResearchCapabilityQuery(BaseModel):
     observed_at: AwareDatetime
     requested_observed_at: AwareDatetime | None = None
     cutoff_at: AwareDatetime
+    deadline_at: AwareDatetime | None = None
     event_id: Annotated[str | None, Field(max_length=128)] = None
     event_at: AwareDatetime | None = None
     window_start_at: AwareDatetime | None = None
     window_end_at: AwareDatetime | None = None
     requested_event_offsets: Annotated[list[RequestedEventOffset] | None, Field(max_length=20)] = []
+    evidence_ref: Annotated[str | None, Field(max_length=128)] = None
+    content_ref: Annotated[str | None, Field(max_length=2048)] = None
+
+
+class ResearchCapabilityInvocation(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["research-capability-invocation.v1"]
+    request_id: Annotated[str, Field(min_length=1)]
+    capability_id: Annotated[str, Field(min_length=1)]
+    requirement_id: Annotated[str, Field(min_length=1)]
+    query: Annotated[str, Field(max_length=2000, min_length=1)]
+    target_url: AnyUrl | None
+    symbols: Annotated[list[Symbol], Field(max_length=20)]
+    fields: Annotated[list[FieldModel], Field(max_length=50)]
+    allowed_domains: Annotated[list[AllowedDomain], Field(max_length=100)]
+    max_results: Annotated[int, Field(ge=1, le=20)]
+    max_cost_usd: Annotated[float | None, Field(ge=0.0)]
+    research_session_id: Annotated[str, Field(min_length=1)]
+    event_id: Annotated[str | None, Field(max_length=128)] = None
+    event_at: AwareDatetime | None = None
+    window_start_at: AwareDatetime | None = None
+    window_end_at: AwareDatetime | None = None
+    requested_event_offsets: Annotated[list[RequestedEventOffset] | None, Field(max_length=20)] = []
+    evidence_ref: Annotated[str | None, Field(max_length=128)] = None
+    content_ref: Annotated[str | None, Field(max_length=2048)] = None
 
 
 class FactEnvelope(BaseModel):
@@ -435,6 +487,76 @@ class FactEnvelope(BaseModel):
     attributes: dict[str, float | str | bool | None]
 
 
+class RawCaptureView(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    capture_id: str
+    url: str
+    body_ref: str | None
+    body_hash: str | None
+    status_code: int | None
+    byte_count: Annotated[int, Field(ge=0)]
+    media_type: str
+    started_at: AwareDatetime
+    completed_at: AwareDatetime
+
+
+class RunInputView(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    run_id: str
+    fact_id: str
+    use_mode: Literal["fresh", "reused", "legacy"]
+    as_of: AwareDatetime
+    adopted_at: AwareDatetime
+
+
+class FactVersionView(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    structured_payload_ref: str | None = None
+    fact_version_id: str
+    semantic_key: str
+    market: str
+    scope_instrument: str
+    known_at: AwareDatetime
+    recorded_at: AwareDatetime
+    fact: FactEnvelope
+    parsed_version_id: str
+    archive_status: Literal[
+        "captured", "reference_only", "legacy_unarchived", "unarchived", "missing"
+    ]
+    parser_version: str
+    content_ref: str | None
+    acquisition_receipt_id: str | None
+    raw_captures: list[RawCaptureView]
+    run_inputs: Annotated[list[RunInputView] | None, Field(validate_default=True)] = []
+
+
+class FactVersionListView(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    items: list[FactVersionView]
+    total: Annotated[int, Field(ge=0)]
+    limit: Annotated[int, Field(ge=1, le=100)]
+    offset: Annotated[int, Field(ge=0)]
+    as_of: AwareDatetime
+
+
+class ArchivedInputView(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: Literal["coverage_manifest", "historical_partition", "event_window", "original_text"]
+    ref: str
+    verified: bool
+    payload: dict[str, Any]
+
+
 class ResearchRunQueued(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -444,6 +566,9 @@ class ResearchRunQueued(BaseModel):
     run_id: Annotated[str, Field(max_length=128, min_length=1)]
     status: Literal["queued"]
     status_url: Annotated[str, Field(max_length=2048, min_length=1)]
+
+
+type ManualReworkFlag = Annotated[str, Field(min_length=1)]
 
 
 type FailureCountsAdditionalProperty = Annotated[int, Field(ge=1)]
@@ -469,6 +594,9 @@ class ResearchRuntimeSummary(BaseModel):
     estimated_cost_usd: Annotated[float | None, Field(ge=0.0)]
     p95_latency_ms: Annotated[int | None, Field(ge=0)]
     failure_counts: dict[str, FailureCountsAdditionalProperty]
+    citation_support_mean: Annotated[float | None, Field(ge=0.0, le=1.0)] = 0
+    quality_success_count: Annotated[int | None, Field(ge=0)] = 0
+    manual_rework_count: Annotated[int | None, Field(ge=0)] = 0
 
 
 type QueryAliase = Annotated[str, Field(max_length=2000, min_length=1)]
@@ -482,6 +610,7 @@ class ResearchEvaluationCapabilityFixture(BaseModel):
     requirement_id: Annotated[str, Field(min_length=1)]
     query_aliases: Annotated[list[QueryAliase], Field(min_length=1)]
     evidence_candidates: Annotated[list[EvidenceCandidate], Field(max_length=20, min_length=1)]
+    facts: Annotated[list[FactEnvelope] | None, Field(max_length=200, validate_default=True)] = []
 
 
 class ResearchEvaluationOutcomeLabel(BaseModel):
@@ -596,6 +725,71 @@ class ResearchTask(BaseModel):
     priority: Annotated[int, Field(ge=1, le=100)]
 
 
+class ResearchTaskPolicy(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    policy_id: Annotated[str, Field(min_length=1)]
+    policy_version: Annotated[str, Field(min_length=1)]
+    research_mode: Literal["historical_review", "current_decision"]
+    requirement_ids: Annotated[list[RequirementId], Field(min_length=1)]
+    max_parallel_tasks: Annotated[int, Field(ge=1, le=2)]
+    max_context_items: Annotated[int, Field(ge=1, le=50)]
+    max_excerpt_chars: Annotated[int, Field(ge=1000, le=4000)]
+    max_evidence_rounds: Annotated[int, Field(ge=1, le=10)]
+    content_hash: Annotated[str, Field(pattern="^[a-f0-9]{64}$")]
+    created_at: AwareDatetime
+
+
+class ContextExclusion(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    evidence_ref: Annotated[str, Field(min_length=1)]
+    reason: Annotated[str, Field(min_length=1)]
+
+
+type SelectedInput = Annotated[str, Field(min_length=1)]
+
+
+type EffectiveInput = Annotated[str, Field(min_length=1)]
+
+
+class ResearchContextManifest(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    manifest_id: Annotated[str, Field(min_length=1)]
+    policy_ref: Annotated[str, Field(min_length=1)]
+    revision: Annotated[int, Field(ge=1)]
+    selected_inputs: list[SelectedInput]
+    effective_inputs: list[EffectiveInput]
+    excluded_inputs: Annotated[list[ContextExclusion], Field(max_length=50)]
+    rules_ref: Annotated[str, Field(min_length=1)]
+    tool_versions: dict[str, str]
+    data_versions: dict[str, str]
+    input_fingerprint: Annotated[str, Field(pattern="^[a-f0-9]{64}$")]
+    created_at: AwareDatetime
+
+
+type Limitation = Annotated[str, Field(min_length=1)]
+
+
+class ResearchReview(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    review_id: Annotated[str, Field(min_length=1)]
+    role: Literal["independent_reviewer", "data_reviewer", "policy_reviewer"]
+    target_claim: Annotated[str, Field(min_length=1)]
+    evidence_refs: Annotated[list[EvidenceRef], Field(min_length=1)]
+    result_hash: Annotated[str, Field(pattern="^[a-f0-9]{64}$")]
+    challenge: Annotated[str, Field(min_length=1)]
+    resolution: Literal["accepted", "bounded", "requires_new_evidence", "rejected"]
+    limitations: list[Limitation]
+    created_at: AwareDatetime
+
+
 class ResearchPlan(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -612,14 +806,24 @@ class ErrorProvenance(BaseModel):
         extra="forbid",
     )
     error_code: Annotated[str, Field(min_length=1)]
-    origin: Literal["provider", "transport", "mcp", "dsh", "gateway", "pit", "orchestration"]
+    origin: Literal[
+        "provider",
+        "transport",
+        "mcp",
+        "dsh",
+        "gateway",
+        "pit",
+        "orchestration",
+        "source_registry",
+        "storage",
+    ]
     cause_code: str | None
     capability_id: str | None
     tool_call_id: str | None
     retryable: bool
     deadline_ms: Annotated[int | None, Field(ge=0)]
     provider_attempts: Annotated[
-        list[ProviderAttempt] | None, Field(max_length=20, validate_default=True)
+        list[ProviderAttempt], Field(max_length=20, validate_default=True)
     ] = []
 
 
@@ -633,7 +837,7 @@ class CausalLink(BaseModel):
     link_id: Annotated[str, Field(min_length=1)]
     claim_type: Literal["fact", "inference", "scenario"]
     statement: Annotated[str, Field(min_length=1)]
-    evidence_refs: list[EvidenceRef]
+    evidence_refs: Annotated[list[EvidenceRef], Field(min_length=1)]
     confirmation: Annotated[str, Field(min_length=1)]
     invalidation: Annotated[str, Field(min_length=1)]
     affected_horizons: Annotated[list[Literal["30m", "24h", "72h"]], Field(min_length=1)]
@@ -689,6 +893,10 @@ class ResearchStopReason(BaseModel):
         "round_budget",
         "permission_denied",
         "critical_data_unavailable",
+        "no_progress",
+        "no_actionable_path",
+        "synthesis_incomplete",
+        "mixed",
         "runtime_unavailable",
         "cancelled",
     ]
@@ -730,6 +938,9 @@ class ResearchSessionRequest(BaseModel):
     domain_pack_ref: Annotated[str, Field(min_length=1)]
     role_profile_ref: Annotated[str, Field(min_length=1)]
     execution_mode: Literal["live", "replay"]
+    research_mode: Literal["historical_review", "current_decision"] | None = "current_decision"
+    task_policy_ref: Annotated[str | None, Field(min_length=1)] = None
+    context_manifest: ResearchContextManifest | None = None
     pit_cutoff_at: AwareDatetime
     current_round: Annotated[int, Field(ge=1, le=10)]
     evidence_refs: Annotated[list[EvidenceRef], Field(min_length=1)]
@@ -741,7 +952,7 @@ class ResearchSessionRequest(BaseModel):
         list[EventWindowSample] | None, Field(max_length=32, validate_default=True)
     ] = []
     allowed_capabilities: Annotated[list[AllowedCapability], Field(min_length=1)]
-    execution_budget: ExecutionBudget
+    execution_budget: ExecutionBudget | ExecutionBudgetV2
     deadline_at: AwareDatetime
     output_schema_ref: Annotated[str, Field(min_length=1)]
     repair_instructions: Annotated[str | None, Field(max_length=4000)]
@@ -792,6 +1003,7 @@ class ResearchTraceEvent(BaseModel):
     status: Literal["running", "succeeded", "failed", "degraded", "denied"]
     error_code: str | None
     error: ErrorProvenance | None = None
+    error_verification: Literal["legacy_provider_attempts_unverifiable"] | None = None
 
 
 class ResearchRunView(BaseModel):
@@ -827,10 +1039,25 @@ class ResearchRunView(BaseModel):
         "done",
     ]
     runtime_id: Annotated[str, Field(min_length=1)]
-    profile_ref: Annotated[str, Field(min_length=1)]
+    profile_ref: Annotated[str | None, Field(min_length=1)]
+    research_profile: Literal["perpetual_decision_v2"] | None = None
     current_round: Annotated[int, Field(ge=0)]
-    budget: ExecutionBudget
+    budget: ExecutionBudget | ExecutionBudgetV2 | None
+    budget_basis: Literal["saved_request", "unavailable", "invalid"] | None = "unavailable"
     coverage: CoverageAssessment | None
+    coverage_basis: (
+        Literal[
+            "saved_result",
+            "saved_request",
+            "saved_task_request",
+            "saved_checkpoint",
+            "round_request_only",
+            "unavailable",
+            "invalid",
+        ]
+        | None
+    ) = None
+    coverage_cutoff_at: AwareDatetime | None = None
     current_action: str | None
     stop_reason: ResearchStopReason | None
     failure: ErrorProvenance | None = None
@@ -840,6 +1067,323 @@ class ResearchRunView(BaseModel):
     parent_run_id: str | None
     created_at: AwareDatetime
     updated_at: AwareDatetime
+
+
+type BlockingGapId = Annotated[str, Field(min_length=1)]
+
+
+type WarningCode = Annotated[str, Field(min_length=1)]
+
+
+type SupportingEvidenceRef = Annotated[str, Field(min_length=1)]
+
+
+type ParametersAdditionalProperty = Annotated[int, Field(ge=1)]
+
+
+class ResearchStrategyReceipt(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["strategy-receipt.v1"]
+    strategy_version: Annotated[str, Field(min_length=1)]
+    data_hash: Annotated[str, Field(pattern="^[a-f0-9]{64}$")]
+    bar_count: Annotated[int, Field(ge=1)]
+    as_of: Annotated[str, Field(min_length=1)]
+    parameters: dict[str, ParametersAdditionalProperty]
+    features: dict[str, float]
+    outlook: Literal["bullish", "bearish", "range", "unresolved"]
+    action_candidate: Annotated[str, Field(max_length=500, min_length=1)]
+    trigger: Annotated[str, Field(max_length=1000, min_length=1)]
+    counter_case: Annotated[str, Field(max_length=1000, min_length=1)]
+    invalidation: Annotated[str, Field(max_length=1000, min_length=1)]
+    rationale: Annotated[str, Field(max_length=2000, min_length=1)]
+    evidence_refs: list[EvidenceRef]
+    probability: Annotated[float | None, Field(ge=0.0, le=1.0)]
+    probability_status: Literal["unavailable", "uncalibrated", "calibrated"]
+
+
+type MissingImpactItem = Annotated[str, Field(min_length=1)]
+
+
+class ResearchOutlook(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["research-outlook.v1"]
+    horizon: Literal["7d"]
+    outlook: Literal["bullish", "bearish", "range", "unresolved"]
+    basis: Literal["rule_based", "statistical", "hybrid"]
+    action_candidate: Annotated[str, Field(max_length=500, min_length=1)]
+    trigger: Annotated[str, Field(max_length=1000, min_length=1)]
+    counter_case: Annotated[str, Field(max_length=1000, min_length=1)]
+    rationale: Annotated[str, Field(max_length=2000, min_length=1)]
+    invalidation: Annotated[str, Field(max_length=1000, min_length=1)]
+    evidence_refs: list[EvidenceRef]
+    missing_impact: list[MissingImpactItem]
+    probability: Annotated[float | None, Field(ge=0.0, le=1.0)]
+    probability_status: Literal["unavailable", "uncalibrated", "calibrated"]
+    strategy_status: Literal["baseline_only", "unvalidated", "calibrated", "rejected"]
+    execution_permission: Literal[False]
+    strategy_receipt: ResearchStrategyReceipt | None
+
+
+class ResearchMarketView(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["market-view.v1"]
+    horizon: Literal["7d"]
+    direction: Literal["bullish", "bearish", "range", "unresolved"]
+    basis: Literal["rule_based", "composite", "calibrated"]
+    rationale: Annotated[str, Field(max_length=2000, min_length=1)]
+    evidence_refs: list[EvidenceRef]
+    probability: Annotated[float | None, Field(ge=0.0, le=1.0)]
+    probability_status: Literal["unavailable", "uncalibrated", "calibrated"]
+    action_candidate: Annotated[str, Field(max_length=500, min_length=1)]
+    counter_case: Annotated[str, Field(max_length=1000, min_length=1)]
+    invalidation: Annotated[str, Field(max_length=1000, min_length=1)]
+    missing_impact: list[MissingImpactItem]
+
+
+type Reason = Annotated[str, Field(min_length=1)]
+
+
+class ResearchExecutionView(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["execution-view.v1"]
+    status: Literal["blocked", "manual_review", "authorized"]
+    action_candidate: Annotated[str, Field(max_length=500, min_length=1)]
+    reasons: list[Reason]
+    blocking_gap_ids: list[BlockingGapId]
+    trade_authorized: bool
+
+
+type ToolCallRef = Annotated[str, Field(min_length=1)]
+
+
+class ResearchProcessStep(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    step_id: Annotated[str, Field(min_length=1)]
+    order: Annotated[int, Field(ge=1)]
+    kind: Literal["intake", "plan", "acquire", "assess", "review", "replan", "synthesize", "gate"]
+    label: Annotated[str, Field(max_length=200, min_length=1)]
+    status: Literal["waiting", "running", "completed", "limited", "failed"]
+    objective: Annotated[str, Field(max_length=1000, min_length=1)]
+    outcome: Annotated[str, Field(max_length=2000, min_length=1)]
+    evidence_refs: list[EvidenceRef]
+    tool_call_refs: list[ToolCallRef]
+    warning_codes: list[WarningCode]
+    occurred_at: AwareDatetime | None
+
+
+class DecisionGraphNode(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    node_id: Annotated[str, Field(min_length=1)]
+    node_type: Literal[
+        "trigger",
+        "evidence",
+        "coverage",
+        "causal_claim",
+        "horizon",
+        "action",
+        "gate",
+        "invalidation",
+        "review",
+        "stop",
+        "assumption",
+    ]
+    label: Annotated[str, Field(max_length=200, min_length=1)]
+    status: Literal[
+        "confirmed", "supporting", "opposing", "derived", "unresolved", "blocked", "scheduled"
+    ]
+    summary: Annotated[str, Field(max_length=2000, min_length=1)]
+    evidence_refs: list[EvidenceRef]
+
+
+class DecisionGraphEdge(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    edge_id: Annotated[str, Field(min_length=1)]
+    from_node: Annotated[str, Field(min_length=1)]
+    to_node: Annotated[str, Field(min_length=1)]
+    relation: Literal[
+        "supports",
+        "contradicts",
+        "derived_from",
+        "gates",
+        "invalidates",
+        "reviews",
+        "follows",
+        "bounded_by",
+    ]
+    label: Annotated[str, Field(max_length=300, min_length=1)]
+
+
+class DecisionGraph(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["decision-graph.v1"]
+    graph_status: Literal["causal", "bounded_fallback", "unavailable"]
+    generation_mode: Literal["causal_case", "evidence_projection", "rule_projection"]
+    nodes: Annotated[list[DecisionGraphNode], Field(max_length=200)]
+    edges: Annotated[list[DecisionGraphEdge], Field(max_length=400)]
+    stop_reason: Annotated[str | None, Field(max_length=1000)]
+
+
+type GapId = Annotated[str, Field(min_length=1)]
+
+
+class ResearchClaimTransition(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["claim-transition.v1"]
+    transition_id: Annotated[str, Field(min_length=1)]
+    round: Annotated[int, Field(ge=1)]
+    from_direction: Literal["bullish", "bearish", "range", "unresolved"] | None
+    to_direction: Literal["bullish", "bearish", "range", "unresolved"] | None
+    changed: bool
+    reason: Annotated[str, Field(max_length=2000, min_length=1)]
+    evidence_refs: list[EvidenceRef]
+    gap_ids: list[GapId]
+    created_at: AwareDatetime
+
+
+type Claim = Annotated[str, Field(min_length=1)]
+
+
+type TransitionId = Annotated[str, Field(min_length=1)]
+
+
+class ResearchRolePacket(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["role-packet.v1"]
+    packet_id: Annotated[str, Field(min_length=1)]
+    role: Literal[
+        "manager",
+        "market_structure",
+        "derivatives_crowding",
+        "macro_calendar",
+        "cross_asset_risk",
+        "narrative_source_critic",
+        "counter_thesis",
+        "data_quality",
+        "reviewer",
+        "synthesizer",
+    ]
+    round: Annotated[int, Field(ge=1)]
+    status: Literal["sufficient", "partial", "blocked"]
+    claims: Annotated[list[Claim], Field(max_length=20)]
+    evidence_refs: list[EvidenceRef]
+    gap_ids: list[GapId]
+    transition_ids: list[TransitionId]
+    conclusion: Annotated[str, Field(max_length=2000, min_length=1)]
+    created_at: AwareDatetime
+
+
+type ChangedField = Annotated[str, Field(min_length=1)]
+
+
+class ResearchRunComparisonView(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["research-run-comparison-view.v1"]
+    run_id: Annotated[str, Field(min_length=1)]
+    previous_run_id: str | None
+    same_event: bool
+    current_status: Annotated[str, Field(min_length=1)]
+    previous_status: str | None
+    current_evidence_count: Annotated[int, Field(ge=0)]
+    previous_evidence_count: Annotated[int | None, Field(ge=0)]
+    current_graph_status: Literal["causal", "bounded_fallback", "unavailable"]
+    previous_graph_status: Literal["causal", "bounded_fallback", "unavailable"] | None
+    current_direction: str | None
+    previous_direction: str | None
+    changed_fields: list[ChangedField]
+    compared_at: AwareDatetime
+
+
+class ResearchNativeExecutionFailure(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["research-native-execution-failure.v1"]
+    run_id: Annotated[str, Field(min_length=1)]
+    dsh_session_id: Annotated[str, Field(min_length=1)]
+    generation: Annotated[int, Field(ge=1)]
+    error_code: Annotated[str, Field(max_length=128, min_length=1)]
+    terminal_at: AwareDatetime
+
+
+class NativeResultRef(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    output_id: Annotated[str, Field(min_length=1)]
+    payload_hash: Annotated[str, Field(pattern="^[a-f0-9]{64}$")]
+
+
+class ResearchAuthenticatedNativeFailure(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["research-authenticated-native-failure.v1"]
+    run_id: Annotated[str, Field(min_length=1)]
+    event_id: Annotated[str, Field(min_length=1)]
+    dsh_session_id: Annotated[str, Field(min_length=1)]
+    generation: Annotated[int, Field(ge=1)]
+    request_id: Annotated[str, Field(min_length=1)]
+    request_hash: Annotated[str, Field(pattern="^[a-f0-9]{64}$")]
+    prompt_hash: Annotated[str, Field(pattern="^[a-f0-9]{64}$")]
+    upstream_identity_hash: Annotated[str, Field(pattern="^[a-f0-9]{64}$")]
+    error_code: Literal["skill_callback_transport_timeout", "native_execution_failed"]
+    occurred_at: AwareDatetime
+    recorded_at: AwareDatetime
+    original_output_id: Annotated[str, Field(min_length=1)]
+    original_payload_hash: Annotated[str, Field(pattern="^[a-f0-9]{64}$")]
+    native_result_ref: NativeResultRef | None = None
+    source: Literal["authenticated_host_terminal"]
+    authentication_source: Literal["dsh_callback_secret"]
+
+
+type CoveredGeneration = Annotated[int, Field(ge=1)]
+
+
+type UncoveredGeneration = Annotated[int, Field(ge=1)]
+
+
+class ResearchNativeFailureCoverage(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["research-native-failure-coverage.v1"]
+    run_id: Annotated[str, Field(min_length=1)]
+    current_generation: Annotated[int | None, Field(ge=1)]
+    status: Literal["complete", "incomplete", "unknown"]
+    earliest_status: Literal["authenticated_failure", "no_failure", "unknown"]
+    covered_generations: Annotated[list[CoveredGeneration], Field(max_length=100)]
+    uncovered_generations: Annotated[list[UncoveredGeneration], Field(max_length=100)]
+    reason: Literal[
+        "complete",
+        "missing_link",
+        "missing_or_invalid_original",
+        "historical_binding_unavailable",
+        "current_not_terminal",
+        "generation_range_unavailable",
+        "read_unconfirmed",
+    ]
 
 
 class ResearchRunCommand(BaseModel):
@@ -865,6 +1409,18 @@ class ResearchRunCommandResult(BaseModel):
     created_at: AwareDatetime
 
 
+class ResearchRunCommandReceipt(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["research-run-command-receipt.v1"]
+    request_id: Annotated[str, Field(min_length=1)]
+    owner_id: Annotated[str, Field(min_length=1)]
+    source_run_id: Annotated[str, Field(min_length=1)]
+    command: ResearchRunCommand
+    result: ResearchRunCommandResult
+
+
 class ResearchCapabilityResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -878,7 +1434,7 @@ class ResearchCapabilityResult(BaseModel):
     cost_usd: Annotated[float | None, Field(ge=0.0)]
     completed_at: AwareDatetime
     provider_attempts: Annotated[
-        list[ProviderAttempt] | None, Field(max_length=20, validate_default=True)
+        list[ProviderAttempt], Field(max_length=20, validate_default=True)
     ] = []
 
 
@@ -914,6 +1470,7 @@ class ToolInvocation(BaseModel):
     )
     tool_call_id: Annotated[str, Field(min_length=1)]
     capability_id: Annotated[str, Field(min_length=1)]
+    requirement_id: Annotated[str | None, Field(min_length=1)] = None
     tool_name: Annotated[str, Field(min_length=1)]
     query_summary: Annotated[str, Field(max_length=1000, min_length=1)]
     started_at: AwareDatetime
@@ -955,6 +1512,20 @@ class ResearchRound(BaseModel):
     finished_at: AwareDatetime
 
 
+class ResearchRoundView(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    round: Annotated[int, Field(ge=1)]
+    plan: ResearchPlan
+    tool_invocations: list[ToolInvocation]
+    tool_results: list[ToolResultSummary]
+    new_evidence_refs: list[NewEvidenceRef]
+    coverage: CoverageAssessment | None
+    started_at: AwareDatetime
+    finished_at: AwareDatetime
+
+
 class ResearchSessionResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -976,6 +1547,10 @@ class ResearchSessionResult(BaseModel):
     horizons: Annotated[list[HorizonDecision], Field(max_length=3)]
     stop_reason: ResearchStopReason
     synthesis_failure_code: Annotated[str | None, Field(max_length=128)] = None
+    context_manifest: ResearchContextManifest | None = None
+    reviews: Annotated[
+        list[ResearchReview] | None, Field(max_length=10, validate_default=True)
+    ] = []
     total_tool_calls: Annotated[int, Field(ge=0)]
     total_subagents: Annotated[int, Field(ge=0)]
     total_tokens: Annotated[int | None, Field(ge=0)]
@@ -984,24 +1559,73 @@ class ResearchSessionResult(BaseModel):
     finished_at: AwareDatetime
 
 
+class ResearchActionSummary(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["research-action-summary.v1"]
+    recommendation: Literal[
+        "do_not_trade", "wait_for_confirmation", "manual_review_required", "unavailable"
+    ]
+    headline: Annotated[str, Field(max_length=500, min_length=1)]
+    rationale: Annotated[str, Field(max_length=2000, min_length=1)]
+    reliability: Literal["unavailable", "low", "limited", "reviewable"]
+    trade_authorized: Literal[False]
+    artifact_status: Literal["pending", "saved", "limited", "rejected"]
+    data_status: Literal["insufficient", "partial", "sufficient"]
+    accepted_evidence_count: Annotated[int, Field(ge=0)]
+    stale_evidence_count: Annotated[int, Field(ge=0)]
+    rejected_evidence_count: Annotated[int, Field(ge=0)]
+    blocking_gap_ids: list[BlockingGapId]
+    warning_codes: list[WarningCode]
+    supporting_evidence_refs: list[SupportingEvidenceRef]
+    next_review_at: AwareDatetime | None
+    research_outlook: ResearchOutlook | None = None
+    market_view: ResearchMarketView | None = None
+    execution_view: ResearchExecutionView | None = None
+
+
 class ResearchRunDetailView(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     schema_version: Literal["research-run-detail-view.v1"]
     run: ResearchRunView
+    research_focus: Annotated[
+        str | None,
+        Field(
+            description="Full saved user focus for a Desk snapshot request; empty means the default template, null means unavailable or not applicable."
+        ),
+    ] = None
+    native_execution_failure: ResearchNativeExecutionFailure | None = None
+    first_native_failure: ResearchAuthenticatedNativeFailure | None = None
+    current_authenticated_native_failure: ResearchAuthenticatedNativeFailure | None = None
+    native_failure_coverage: ResearchNativeFailureCoverage | None = None
     trigger_snapshot: ResearchSnapshotManifest | None
     decision_snapshot: ResearchSnapshotManifest | None
     evidence: list[EvidenceCandidate]
-    rounds: list[ResearchRound]
+    rounds: list[ResearchRoundView]
     causal_case: CausalCase | None
     horizons: Annotated[list[HorizonDecision], Field(max_length=3)]
     trace: list[ResearchTraceEvent]
+    action_summary: ResearchActionSummary
+    process_steps: Annotated[list[ResearchProcessStep], Field(max_length=100, min_length=1)]
     total_tool_calls: Annotated[int, Field(ge=0)]
     total_subagents: Annotated[int, Field(ge=0)]
     total_tokens: Annotated[int | None, Field(ge=0)]
     estimated_cost_usd: Annotated[float | None, Field(ge=0.0)]
     scheduled_recheck_at: AwareDatetime | None
+    decision_graph: DecisionGraph | None = None
+    context_manifest: ResearchContextManifest | None = None
+    reviews: Annotated[
+        list[ResearchReview] | None, Field(max_length=10, validate_default=True)
+    ] = []
+    role_packets: Annotated[
+        list[ResearchRolePacket] | None, Field(max_length=20, validate_default=True)
+    ] = []
+    claim_transitions: Annotated[
+        list[ResearchClaimTransition] | None, Field(max_length=50, validate_default=True)
+    ] = []
 
 
 class ResearchRuntimeCaseReport(BaseModel):
@@ -1032,6 +1656,9 @@ class ResearchRuntimeCaseReport(BaseModel):
     total_tokens: Annotated[int | None, Field(ge=0)]
     estimated_cost_usd: Annotated[float | None, Field(ge=0.0)]
     failure_code: str | None
+    citation_support_ratio: Annotated[float | None, Field(ge=0.0, le=1.0)] = 0
+    quality_success: bool | None = False
+    manual_rework_flags: list[ManualReworkFlag] | None = []
 
 
 class ResearchRuntimeComparison(BaseModel):

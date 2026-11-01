@@ -15,10 +15,16 @@ from packages.evals.research_dataset import (
     ResearchEvaluationDataset,
     load_research_evaluation_dataset,
 )
-from packages.evals.research_runtime import CaseScopedDshResearchRuntime
+from packages.evals.research_runtime import (
+    CaseScopedDshResearchRuntime,
+    CaseScopedDshWebResearchRuntime,
+)
 from packages.kernel.decision_hub_kernel.application.evolution import EvolutionAssetService
 from packages.kernel.decision_hub_kernel.persistence.db import Database
-from packages.runtime_adapters.dsh_runtime import DshRuntimeConfig
+from packages.runtime_adapters.dsh_runtime import (
+    DshRuntimeConfig,
+    DshWebHostConfig,
+)
 from packages.runtime_adapters.fixed_research_runtime import FixedResearchRuntime
 from packages.runtime_adapters.langgraph_agent.provider_config import ProviderConfig
 from packages.runtime_adapters.langgraph_agent.runtime import LangGraphAgentRuntime
@@ -45,6 +51,21 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--deadline-seconds", type=int, default=180)
     parser.add_argument("--max-cost-usd", type=float, default=1.0)
+    parser.add_argument(
+        "--candidate-runtime",
+        choices=("dsh", "dsh-web", "dsh-web-graph"),
+        default="dsh",
+        help=(
+            "use the SDK runtime, the direct official DSH Web Host runtime, or "
+            "the official Host through the product LangGraph/review path"
+        ),
+    )
+    parser.add_argument(
+        "--research-mcp-port",
+        type=int,
+        default=8002,
+        help="fixed loopback port configured in the DSH Web research tool",
+    )
     return parser.parse_args()
 
 
@@ -90,7 +111,7 @@ def _budget(deadline_seconds: int, max_cost_usd: float) -> ExecutionBudget:
         max_subagents=6,
         total_deadline_seconds=deadline_seconds,
         per_tool_timeout_seconds=min(20, deadline_seconds),
-        per_model_step_timeout_seconds=min(60, deadline_seconds),
+        per_model_step_timeout_seconds=min(240, deadline_seconds),
         max_structured_repairs=1,
         max_estimated_cost_usd=max_cost_usd,
     )
@@ -111,18 +132,30 @@ async def run(args: argparse.Namespace) -> dict[str, object]:
     )
     budget = _budget(args.deadline_seconds, args.max_cost_usd)
     provider = ProviderConfig.from_env()
-    dsh_config = DshRuntimeConfig.from_env().model_copy(
-        update={
-            "workspace": ROOT,
-            "session_root": output_dir / "dsh-sessions",
-            "request_timeout_seconds": min(float(args.deadline_seconds), 600.0),
-        }
-    )
     baseline = FixedResearchRuntime(LangGraphAgentRuntime(provider_config=provider))
-    candidate = CaseScopedDshResearchRuntime(
-        {case.case_id: path for case, path in zip(dataset.cases, dataset.case_paths, strict=True)},
-        config=dsh_config,
-    )
+    case_paths = {
+        case.case_id: path
+        for case, path in zip(dataset.cases, dataset.case_paths, strict=True)
+    }
+    if args.candidate_runtime in {"dsh-web", "dsh-web-graph"}:
+        evaluation_database = Database(args.database_url)
+        evaluation_database.initialize()
+        candidate = CaseScopedDshWebResearchRuntime(
+            case_paths,
+            database=evaluation_database,
+            host_config=DshWebHostConfig.from_env(),
+            research_mcp_port=args.research_mcp_port,
+            product_graph=args.candidate_runtime == "dsh-web-graph",
+        )
+    else:
+        dsh_config = DshRuntimeConfig.from_env().model_copy(
+            update={
+                "workspace": ROOT,
+                "session_root": output_dir / "dsh-sessions",
+                "request_timeout_seconds": min(float(args.deadline_seconds), 600.0),
+            }
+        )
+        candidate = CaseScopedDshResearchRuntime(case_paths, config=dsh_config)
     try:
         comparison = await ResearchComparisonRunner(
             dataset, budget=budget, output_dir=output_dir

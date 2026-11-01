@@ -10,9 +10,12 @@ from typing import Any, Literal
 import pytest
 
 from packages.contracts_py.decision_hub_contracts import (
+    CoverageAssessment,
     EvidenceRequirement,
     ExecutionBudget,
+    HorizonDecision,
     ResearchInputEvidence,
+    ResearchReview,
     ResearchSessionRequest,
     ResearchSessionResult,
 )
@@ -27,10 +30,87 @@ from packages.kernel.decision_hub_kernel.application.research_observability impo
 from packages.kernel.decision_hub_kernel.persistence.db import Database, RunRecord, SnapshotRecord
 from packages.kernel.decision_hub_kernel.ports.runtime import AgentExecutionError
 from packages.orchestration.langgraph.graphs.agentic_research_graph import (
+    _can_close_direction_view,
+    _fail_closed_horizon,
     attempts_from_result,
     build_agentic_research_graph,
     initial_research_state,
+    should_continue_after_round,
 )
+
+
+def test_bounded_research_keeps_directional_hypothesis_but_caps_execution_value() -> None:
+    horizon = HorizonDecision.model_validate(_horizons()[1] | {"action": "long"})
+
+    capped = _fail_closed_horizon(horizon, "no_actionable_path")
+
+    assert capped.action == "long"
+    assert capped.subjective_probability == 0.5
+    assert capped.probability_status == "uncalibrated"
+    assert "execution is suppressed" in (capped.confidence_cap_reason or "")
+
+
+def test_snapshot_direction_view_closes_when_only_execution_gap_remains() -> None:
+    request = _request()
+    base_requirement = request.evidence_requirements[0]
+    request = request.model_copy(
+        update={
+            "evidence_requirements": [
+                base_requirement.model_copy(
+                    update={
+                        "requirement_id": "crypto_spot_confirmation",
+                        "importance": "hard",
+                    }
+                ),
+                base_requirement.model_copy(
+                    update={
+                        "requirement_id": "derivatives_crowding",
+                        "importance": "soft",
+                    }
+                ),
+                base_requirement.model_copy(
+                    update={
+                        "requirement_id": "market_regime_context",
+                        "importance": "hard",
+                    }
+                ),
+            ]
+        }
+    )
+    state = initial_research_state(request)
+    state.update(
+        {
+            "coverage": {
+                "status": "sufficient",
+                "covered_requirement_ids": [
+                    "crypto_spot_confirmation",
+                    "market_regime_context",
+                ],
+                "gaps": [
+                    {
+                        "requirement_id": "derivatives_crowding",
+                        "importance": "soft",
+                        "reason_code": "tool_unavailable",
+                        "query_hint": "funding and open interest",
+                        "attempted_capabilities": ["market.crypto_derivatives"],
+                        "blocks_directional_output": False,
+                    }
+                ],
+                "conflicts": [],
+                "hard_coverage_ratio": 1.0,
+                "soft_coverage_ratio": 0.0,
+                "assessed_at": NOW.isoformat(),
+            },
+            "loop_should_continue": True,
+            "current_thesis": "Daily trend remains bullish.",
+            "current_horizon_actions": {"24h": "long"},
+        }
+    )
+
+    assert _can_close_direction_view(
+        state, request, CoverageAssessment.model_validate(state["coverage"])
+    ) is True
+    assert should_continue_after_round(state) is False
 
 NOW = datetime(2026, 8, 29, 12, 0, tzinfo=UTC)
 
@@ -213,7 +293,16 @@ def _result(
                     "required_capabilities": ["replay.research"],
                     "created_at": NOW.isoformat(),
                 },
-                "tool_invocations": [],
+                "tool_invocations": [{
+                    "tool_call_id": f"call-{request.current_round}",
+                    "capability_id": request.evidence_requirements[0].preferred_capabilities[0],
+                    "requirement_id": request.evidence_requirements[0].requirement_id,
+                    "tool_name": "research_capability_execute", "query_summary": "verify",
+                    "started_at": NOW.isoformat(),
+                    "finished_at": (NOW + timedelta(seconds=1)).isoformat(),
+                    "status": "succeeded", "attempt": 1, "latency_ms": 1000,
+                    "cost_usd": 0, "error_code": None,
+                }],
                 "tool_results": [],
                 "new_evidence_refs": [],
                 "coverage": coverage,
@@ -287,14 +376,145 @@ def _candidate(
     }
 
 
+def _causal_case(
+    *,
+    thesis: str,
+    unresolved_questions: list[str],
+    evidence_id: str = "evidence-official",
+) -> dict[str, Any]:
+    return {
+        "case_id": f"case-{hashlib.sha256(thesis.encode()).hexdigest()[:8]}",
+        "thesis": thesis,
+        "main_chain": [
+            {
+                "link_id": "main-1",
+                "claim_type": "inference",
+                "statement": thesis,
+                "evidence_refs": [evidence_id],
+                "confirmation": "The observed reaction persists.",
+                "invalidation": "The observed reaction reverses.",
+                "affected_horizons": ["24h"],
+            }
+        ],
+        "opposite_chain": [
+            {
+                "link_id": "opposite-1",
+                "claim_type": "scenario",
+                "statement": "The event was already priced.",
+                "evidence_refs": [evidence_id],
+                "confirmation": "The reaction reverses.",
+                "invalidation": "The reaction persists.",
+                "affected_horizons": ["24h"],
+            }
+        ],
+        "unresolved_questions": unresolved_questions,
+        "evidence_refs": [evidence_id],
+    }
+
+
+def _horizons(evidence_id: str = "evidence-official") -> list[dict[str, Any]]:
+    return [
+        {
+            "horizon": horizon,
+            "action": "no_trade",
+            "subjective_probability": 0.5,
+            "probability_status": "uncalibrated",
+            "evidence_refs": [evidence_id],
+            "trigger": f"{horizon}: the stated mechanism receives fresh confirmation.",
+            "invalidation": f"{horizon}: the observed reaction reverses.",
+            "expires_at": (NOW + timedelta(hours=4)).isoformat(),
+            "next_review_at": (NOW + timedelta(minutes=10)).isoformat(),
+            "missing_facts": [],
+            "confidence_cap_reason": "No kernel calibration receipt.",
+        }
+        for horizon in ("30m", "24h", "72h")
+    ]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("defect", ["ref_order_and_duplicates", "blank_trigger"])
+async def test_graph_rejects_non_independent_or_blank_horizon_contract(
+    tmp_path: Path, defect: str,
+) -> None:
+    database = _database(tmp_path)
+
+    def result_factory(request: ResearchSessionRequest, _count: int) -> ResearchSessionResult:
+        horizons = _horizons("evidence-a")
+        for item, refs in zip(horizons, (["evidence-a", "evidence-b"],
+                                        ["evidence-b", "evidence-a"],
+                                        ["evidence-a", "evidence-b", "evidence-a"]), strict=True):
+            item.update({"evidence_refs": refs, "trigger": "Fresh confirmation.",
+                         "invalidation": "Contrary evidence."})
+        if defect == "blank_trigger":
+            for index, item in enumerate(horizons):
+                item["trigger"] = " "
+                item["next_review_at"] = (NOW + timedelta(minutes=10 + index)).isoformat()
+        payload = _result(request, candidates=[
+            _candidate(evidence_id="evidence-a"),
+            _candidate(evidence_id="evidence-b",
+                       published_at=(NOW - timedelta(seconds=5)).isoformat()),
+        ], horizons=horizons)
+        payload["causal_case"] = _causal_case(
+            thesis="The verified event is restrictive.", unresolved_questions=[],
+            evidence_id="evidence-a",
+        )
+        return ResearchSessionResult.model_validate(payload)
+
+    graph = build_agentic_research_graph(
+        FakeResearchHarness(result_factory), ResearchEvidenceService(database)
+    )
+    try:
+        state = await graph.ainvoke(initial_research_state(_request()))
+        final = ResearchSessionResult.model_validate(state["final_result"])
+        assert final.final_coverage.hard_coverage_ratio == 1.0
+        assert final.status == "degraded"
+        assert final.stop_reason.code == "critical_data_unavailable"
+        assert final.horizons == []
+        assert {item.evidence_id for item in final.evidence_candidates
+                if item.quality == "accepted"} == {"evidence-a", "evidence-b"}
+        assert state["decision_snapshot_id"].startswith("snap_dec_")
+    finally:
+        database.engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_graph_preserves_horizons_with_real_time_distinction(tmp_path: Path) -> None:
+    database = _database(tmp_path)
+
+    def result_factory(request: ResearchSessionRequest, _count: int) -> ResearchSessionResult:
+        horizons = _horizons()
+        for index, item in enumerate(horizons):
+            item.update({"trigger": "Fresh confirmation.", "invalidation": "Contrary evidence.",
+                         "next_review_at": (NOW + timedelta(minutes=10 + index)).isoformat()})
+        payload = _result(request, candidates=[_candidate()], horizons=horizons)
+        payload["causal_case"] = _causal_case(
+            thesis="The verified event is restrictive.", unresolved_questions=[],
+        )
+        return ResearchSessionResult.model_validate(payload)
+
+    graph = build_agentic_research_graph(
+        FakeResearchHarness(result_factory), ResearchEvidenceService(database)
+    )
+    try:
+        state = await graph.ainvoke(initial_research_state(_request()))
+        final = ResearchSessionResult.model_validate(state["final_result"])
+        assert final.final_coverage.hard_coverage_ratio == 1.0
+        assert final.status == "completed"
+        assert [item.horizon for item in final.horizons] == ["30m", "24h", "72h"]
+        assert {item.subjective_probability for item in final.horizons} == {0.5}
+        assert state["decision_cutoff_at"] == NOW.isoformat()
+    finally:
+        database.engine.dispose()
+
+
 def test_attempt_lineage_uses_requirement_id_after_task_reordering() -> None:
     request = _request().model_copy(
         update={
             "evidence_requirements": [
                 _request().evidence_requirements[0],
-                _request().evidence_requirements[0].model_copy(
-                    update={"requirement_id": "macro_transmission"}
-                ),
+                _request()
+                .evidence_requirements[0]
+                .model_copy(update={"requirement_id": "macro_transmission"}),
             ]
         }
     )
@@ -314,12 +534,32 @@ def test_attempt_lineage_uses_requirement_id_after_task_reordering() -> None:
             "capability_id": "official.macro",
         },
     ]
+    calls = payload["rounds"][0]["tool_invocations"]
+    calls[:] = [
+        {**calls[0], "requirement_id": "macro_transmission", "capability_id": "market.cross_asset"},
+        {**calls[0], "requirement_id": "event_identity", "capability_id": "official.macro"},
+    ]
     result = ResearchSessionResult.model_validate(payload)
 
     assert attempts_from_result(result, request) == {
         "macro_transmission": ["market.cross_asset"],
         "event_identity": ["official.macro"],
     }
+
+
+def test_planned_but_uncalled_requirement_does_not_exhaust_its_capability() -> None:
+    base = _request()
+    request = base.model_copy(update={"evidence_requirements": [
+        base.evidence_requirements[0],
+        base.evidence_requirements[0].model_copy(update={"requirement_id": "derivatives_crowding"}),
+    ]})
+    payload = _result(request, candidates=[], horizons=[])
+    tasks = payload["rounds"][0]["plan"]["tasks"]
+    tasks.append({**tasks[0], "task_id": "derivatives", "requirement_id": "derivatives_crowding"})
+    result = ResearchSessionResult.model_validate(payload)
+    assert attempts_from_result(result, request) == {"event_identity": ["replay.research"]}
+    payload["rounds"][0]["tool_invocations"] = []
+    assert attempts_from_result(ResearchSessionResult.model_validate(payload), request) == {}
 
 
 @pytest.mark.asyncio
@@ -329,25 +569,31 @@ async def test_graph_continues_after_missing_hard_evidence_and_freezes_snapshot(
     database = _database(tmp_path)
 
     # Return real contract instances from the fake to exercise the graph boundary.
-    harness = FakeResearchHarness(
-        lambda request, count: ResearchSessionResult.model_validate(
-            _result(
-                request,
-                candidates=[
-                    _candidate(
-                        authority="verified_web",
-                        kind="web",
-                        source_id="web-feed",
-                        round=1,
-                        evidence_id="evidence-stale",
-                    )
-                ]
-                if count == 1
-                else [_candidate(round=2)],
-                horizons=[],
-            )
+    def complete_after_fallback(
+        request: ResearchSessionRequest, count: int
+    ) -> ResearchSessionResult:
+        evidence_id = "evidence-stale" if count == 1 else "evidence-official"
+        payload = _result(
+            request,
+            candidates=[
+                _candidate(
+                    authority="verified_web" if count == 1 else "official",
+                    kind="web" if count == 1 else "official",
+                    source_id="web-feed" if count == 1 else "official-feed",
+                    round=count,
+                    evidence_id=evidence_id,
+                )
+            ],
+            horizons=_horizons(evidence_id),
         )
-    )
+        payload["causal_case"] = _causal_case(
+            thesis="The event is restrictive.",
+            unresolved_questions=[],
+            evidence_id=evidence_id,
+        )
+        return ResearchSessionResult.model_validate(payload)
+
+    harness = FakeResearchHarness(complete_after_fallback)
     graph = build_agentic_research_graph(harness, ResearchEvidenceService(database))
     result = await graph.ainvoke(initial_research_state(_request()))
     assert len(harness.requests) == 2
@@ -356,6 +602,257 @@ async def test_graph_continues_after_missing_hard_evidence_and_freezes_snapshot(
     assert result["final_result"]["final_coverage"]["status"] == "sufficient"
     assert result["decision_snapshot_id"].startswith("snap_dec_")
     assert result["final_result"]["stop_reason"]["code"] == "sufficient"
+
+
+@pytest.mark.asyncio
+async def test_reviewer_requires_new_evidence_creates_visible_plan_revision(
+    tmp_path: Path,
+) -> None:
+    database = _database(tmp_path)
+    observability = ResearchObservabilityService(database, clock=lambda: NOW)
+
+    def reviewer_then_revision(
+        request: ResearchSessionRequest, count: int
+    ) -> ResearchSessionResult:
+        payload = _result(
+            request,
+            candidates=[_candidate()] if count == 1 else [],
+            horizons=_horizons(),
+        )
+        payload["causal_case"] = _causal_case(
+            thesis="The event is restrictive.", unresolved_questions=[]
+        )
+        if count == 1:
+            payload["reviews"] = [
+                ResearchReview(
+                    review_id="review-needs-new-evidence",
+                    role="independent_reviewer",
+                    target_claim="The event is restrictive.",
+                    evidence_refs=["evidence-official"],
+                    result_hash="f" * 64,
+                    challenge="The fixed result lacks an independent price response.",
+                    resolution="requires_new_evidence",
+                    limitations=["Need an independent event-window source."],
+                    created_at=(NOW + timedelta(seconds=1)).isoformat(),
+                ).model_dump(mode="json")
+            ]
+        return ResearchSessionResult.model_validate(payload)
+
+    harness = FakeResearchHarness(reviewer_then_revision)
+    graph = build_agentic_research_graph(
+        harness,
+        ResearchEvidenceService(database),
+        trace_sink=observability,
+    )
+
+    result = await graph.ainvoke(initial_research_state(_request()))
+
+    assert len(harness.requests) == 2
+    assert harness.requests[1].current_round == 2
+    assert "Target only these declared requirement IDs: event_identity" in (
+        harness.requests[1].repair_instructions or ""
+    )
+    assert "old thesis, new thesis" in (harness.requests[1].repair_instructions or "")
+    assert result["final_result"]["status"] == "completed"
+    replans = [
+        item for item in observability.list_trace("run-graph-1") if item.event_type == "replan"
+    ]
+    assert len(replans) == 1
+    assert replans[0].reference_type == "review"
+    assert replans[0].reference_id == "review-needs-new-evidence"
+
+
+@pytest.mark.asyncio
+async def test_canonical_causal_gap_continues_after_coverage_is_sufficient(
+    tmp_path: Path,
+) -> None:
+    database = _database(tmp_path)
+    base = _request()
+    requirement = base.evidence_requirements[0].model_copy(
+        update={"allowed_fallbacks": ["official.macro"]}
+    )
+    request = base.model_copy(
+        update={
+            "evidence_requirements": [requirement],
+            "allowed_capabilities": ["replay.research", "official.macro"],
+        }
+    )
+
+    def causal_gap_then_resolved(
+        round_request: ResearchSessionRequest, count: int
+    ) -> ResearchSessionResult:
+        payload = _result(
+            round_request,
+            candidates=[_candidate()] if count == 1 else [],
+            horizons=_horizons(),
+        )
+        payload["causal_case"] = _causal_case(
+            thesis="The event is restrictive.",
+            unresolved_questions=["event_identity"] if count == 1 else [],
+        )
+        return ResearchSessionResult.model_validate(payload)
+
+    harness = FakeResearchHarness(causal_gap_then_resolved)
+    graph = build_agentic_research_graph(harness, ResearchEvidenceService(database))
+    result = await graph.ainvoke(initial_research_state(request))
+
+    assert len(harness.requests) == 2
+    assert [item.requirement_id for item in harness.requests[1].evidence_requirements] == [
+        "event_identity"
+    ]
+    assert harness.requests[1].evidence_requirements[0].preferred_capabilities == ["official.macro"]
+    assert result["loop_reason_code"] == "sufficient"
+
+
+@pytest.mark.asyncio
+async def test_free_form_causal_question_is_retained_without_inventing_a_requirement(
+    tmp_path: Path,
+) -> None:
+    database = _database(tmp_path)
+
+    def free_form_gap(round_request: ResearchSessionRequest, _count: int) -> ResearchSessionResult:
+        payload = _result(round_request, candidates=[_candidate()], horizons=_horizons())
+        payload["causal_case"] = _causal_case(
+            thesis="The event is restrictive.",
+            unresolved_questions=["Need more context about market sentiment."],
+        )
+        return ResearchSessionResult.model_validate(payload)
+
+    harness = FakeResearchHarness(free_form_gap)
+    graph = build_agentic_research_graph(harness, ResearchEvidenceService(database))
+    result = await graph.ainvoke(initial_research_state(_request()))
+
+    assert len(harness.requests) == 1
+    assert result["loop_unmapped_inquiries"] == ["Need more context about market sentiment."]
+    assert result["final_result"]["stop_reason"]["code"] == "sufficient"
+
+
+@pytest.mark.asyncio
+async def test_full_coverage_cannot_complete_without_causal_case_and_three_horizons(
+    tmp_path: Path,
+) -> None:
+    database = _database(tmp_path)
+    harness = FakeResearchHarness(
+        lambda request, _count: ResearchSessionResult.model_validate(
+            _result(request, candidates=[_candidate()], horizons=[])
+        )
+    )
+    graph = build_agentic_research_graph(harness, ResearchEvidenceService(database))
+
+    result = await graph.ainvoke(initial_research_state(_request()))
+
+    assert result["final_result"]["final_coverage"]["status"] == "sufficient"
+    assert result["final_result"]["status"] == "degraded"
+    assert result["final_result"]["stop_reason"]["code"] == "synthesis_incomplete"
+
+
+@pytest.mark.asyncio
+async def test_claims_cannot_cite_unaccepted_or_unknown_evidence(tmp_path: Path) -> None:
+    database = _database(tmp_path)
+
+    def invalid_refs(request: ResearchSessionRequest, _count: int) -> ResearchSessionResult:
+        payload = _result(request, candidates=[_candidate()], horizons=_horizons("invented-ref"))
+        payload["causal_case"] = _causal_case(
+            thesis="Unsupported claim.",
+            unresolved_questions=[],
+            evidence_id="invented-ref",
+        )
+        return ResearchSessionResult.model_validate(payload)
+
+    graph = build_agentic_research_graph(
+        FakeResearchHarness(invalid_refs), ResearchEvidenceService(database)
+    )
+
+    result = await graph.ainvoke(initial_research_state(_request()))
+
+    assert result["final_result"]["stop_reason"]["code"] == "synthesis_incomplete"
+    assert "invented-ref" in result["final_result"]["stop_reason"]["detail"]
+
+
+@pytest.mark.asyncio
+async def test_reviewer_round_may_explicitly_change_the_thesis_and_records_delta(
+    tmp_path: Path,
+) -> None:
+    database = _database(tmp_path)
+    observability = ResearchObservabilityService(database, clock=lambda: NOW)
+
+    def changed_thesis(round_request: ResearchSessionRequest, count: int) -> ResearchSessionResult:
+        payload = _result(
+            round_request,
+            candidates=[_candidate()] if count == 1 else [],
+            horizons=[],
+        )
+        payload["causal_case"] = _causal_case(
+            thesis=(
+                "The event is restrictive." if count == 1 else "The reaction was already priced."
+            ),
+            unresolved_questions=[],
+        )
+        if count == 1:
+            payload["reviews"] = [
+                ResearchReview(
+                    review_id="review-change-thesis",
+                    role="independent_reviewer",
+                    target_claim="The event is restrictive.",
+                    evidence_refs=["evidence-official"],
+                    result_hash="f" * 64,
+                    challenge="The market reaction may already have been priced.",
+                    resolution="requires_new_evidence",
+                    limitations=[],
+                    created_at=(NOW + timedelta(seconds=1)).isoformat(),
+                ).model_dump(mode="json")
+            ]
+        return ResearchSessionResult.model_validate(payload)
+
+    harness = FakeResearchHarness(changed_thesis)
+    graph = build_agentic_research_graph(
+        harness,
+        ResearchEvidenceService(database),
+        trace_sink=observability,
+    )
+    result = await graph.ainvoke(initial_research_state(_request()))
+
+    assert result["synthesis_revision"] == 2
+    assert "thesis changed" in result["decision_delta_summary"]
+    assert "The reaction was already priced" in result["decision_delta_summary"]
+    round_events = [
+        item
+        for item in observability.list_trace("run-graph-1")
+        if item.event_type == "round_completed"
+    ]
+    assert any("thesis changed" in item.summary for item in round_events)
+
+
+@pytest.mark.asyncio
+async def test_two_rounds_without_information_gain_trip_no_progress_breaker(
+    tmp_path: Path,
+) -> None:
+    database = _database(tmp_path)
+    base = _request()
+    request = base.model_copy(
+        update={
+            "evidence_requirements": [
+                base.evidence_requirements[0].model_copy(
+                    update={"allowed_fallbacks": ["official.macro", "web.fetch"]}
+                )
+            ],
+            "allowed_capabilities": ["replay.research", "official.macro", "web.fetch"],
+            "execution_budget": base.execution_budget.model_copy(update={"max_evidence_rounds": 4}),
+        }
+    )
+    harness = FakeResearchHarness(
+        lambda round_request, _count: ResearchSessionResult.model_validate(
+            _result(round_request, candidates=[], horizons=[])
+        )
+    )
+    graph = build_agentic_research_graph(harness, ResearchEvidenceService(database))
+    result = await graph.ainvoke(initial_research_state(request))
+
+    assert len(harness.requests) == 2
+    assert result["loop_reason_code"] == "no_progress"
+    assert result["no_progress_rounds"] == 2
+    assert result["final_result"]["stop_reason"]["code"] == "no_progress"
+    assert "Two consecutive rounds" in result["final_result"]["stop_reason"]["detail"]
 
 
 @pytest.mark.asyncio
@@ -445,9 +942,7 @@ async def test_retryable_continuation_failure_keeps_last_attested_round_as_degra
     assert final["stop_reason"]["code"] == "critical_data_unavailable"
     assert "provider_timeout" in final["stop_reason"]["detail"]
     assert len(final["rounds"]) == 1
-    assert [item["evidence_id"] for item in final["evidence_candidates"]] == [
-        "evidence-official"
-    ]
+    assert [item["evidence_id"] for item in final["evidence_candidates"]] == ["evidence-official"]
     assert final["total_tool_calls"] == 1
     failure = next(
         item
@@ -474,8 +969,33 @@ async def test_graph_bounded_stop_does_not_accept_model_sufficiency_without_evid
     result = await graph.ainvoke(initial_research_state(_request()))
     assert len(harness.requests) == 1
     assert result["final_result"]["status"] == "degraded"
-    assert result["final_result"]["stop_reason"]["code"] == "critical_data_unavailable"
+    assert result["final_result"]["stop_reason"]["code"] == "no_actionable_path"
     assert result["final_result"]["final_coverage"]["status"] == "insufficient"
+
+
+def test_retryable_provider_error_cannot_reopen_closed_research_loop() -> None:
+    """A closed route must finalize even when an earlier provider call was retryable."""
+
+    state = initial_research_state(_request())
+    state.update(
+        {
+            "coverage": {
+                "status": "insufficient",
+                "covered_requirement_ids": [],
+                "gaps": [],
+                "conflicts": [],
+                "hard_coverage_ratio": 0.0,
+                "soft_coverage_ratio": 0.0,
+                "assessed_at": NOW.isoformat(),
+            },
+            "loop_should_continue": False,
+            "loop_reason_code": "no_actionable_path",
+            "retryable_failures": 3,
+            "current_round": 1,
+        }
+    )
+
+    assert should_continue_after_round(state) is False
 
 
 @pytest.mark.asyncio
@@ -630,9 +1150,7 @@ async def test_replay_rejects_evidence_received_after_historical_cutoff(
 ) -> None:
     database = _database(tmp_path)
 
-    def future_evidence(
-        request: ResearchSessionRequest, _count: int
-    ) -> ResearchSessionResult:
+    def future_evidence(request: ResearchSessionRequest, _count: int) -> ResearchSessionResult:
         candidate = _candidate()
         candidate["observed_at"] = (NOW + timedelta(seconds=1)).isoformat()
         candidate["received_at"] = (NOW + timedelta(seconds=2)).isoformat()

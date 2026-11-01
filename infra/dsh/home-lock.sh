@@ -5,7 +5,30 @@
 
 dsh_process_start_signature() {
   local pid="$1"
-  ps -p "$pid" -o lstart= 2>/dev/null | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
+  local signature
+  # procps (Linux/WSL) exposes the full start time through `-o lstart=`.
+  # MSYS2's `ps` does not implement `-o`; its stable WINPID + STIME pair is
+  # sufficient to distinguish a live owner from a reused shell PID.
+  signature="$(ps -p "$pid" -o lstart= 2>/dev/null | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+  if [[ -n "$signature" ]]; then
+    printf '%s\n' "$signature"
+    return 0
+  fi
+  ps -p "$pid" 2>/dev/null | awk 'NR == 2 { print $4 "|" $7 }'
+}
+
+dsh_windows_signature_is_live() {
+  local signature="$1"
+  local winpid
+  local started
+  [[ "$signature" == *"|"* ]] || return 1
+  winpid="${signature%%|*}"
+  started="${signature#*|}"
+  [[ "$winpid" =~ ^[1-9][0-9]*$ && -n "$started" ]] || return 1
+  # Separate MSYS2 shells cannot signal each other's synthetic PID, but ps -W
+  # exposes the shared Windows PID and start time used in our fallback signature.
+  ps -W 2>/dev/null | awk -v pid="$winpid" -v started="$started" \
+    'NR > 1 && $4 == pid && $7 == started { found = 1 } END { exit !found }'
 }
 
 dsh_read_lock_value() {
@@ -56,6 +79,8 @@ dsh_acquire_home_lock() {
     live_start=""
     if [[ "$owner_pid" =~ ^[1-9][0-9]*$ ]] && kill -0 "$owner_pid" 2>/dev/null; then
       live_start="$(dsh_process_start_signature "$owner_pid")"
+    elif dsh_windows_signature_is_live "$owner_start"; then
+      live_start="$owner_start"
     fi
     if [[ -n "$live_start" && "$live_start" == "$owner_start" && "$owner_home" == "$canonical_home" ]]; then
       echo "DSH Web already owns DSH_WEB_HOME $canonical_home (pid $owner_pid); use a different DSH_WEB_HOME or stop the existing instance" >&2

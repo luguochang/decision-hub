@@ -266,6 +266,8 @@ def _fact(
         "provider_id": candidate.source_id,
         "pricing_kind": "policy_expectation",
     }
+    if query.event_id is not None:
+        attributes["event_id"] = query.event_id
     payload_schema_ref = "macro.policy-expectation.v1"
     payload_hash = research_fact_payload_hash(
         requirement_id=query.requirement_id,

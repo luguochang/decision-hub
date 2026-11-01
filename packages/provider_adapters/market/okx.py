@@ -1,18 +1,18 @@
 from __future__ import annotations
 
+import math
 from collections.abc import Awaitable, Callable
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
-import httpx
-
 from packages.kernel.decision_hub_kernel.ports.sources import MarketQuote, PriceWindow
+from packages.provider_adapters.research.raw_capture import CapturingAsyncClient
 
 Fetcher = Callable[[str], Awaitable[dict[str, object]]]
 
 
 async def _fetch(url: str) -> dict[str, object]:
-    async with httpx.AsyncClient(timeout=10) as client:
+    async with CapturingAsyncClient(timeout=10) as client:
         response = await client.get(url)
         response.raise_for_status()
         payload = response.json()
@@ -48,9 +48,12 @@ class OKXPublicMarketAdapter:
         else:
             quality, benchmark = "unavailable", "none"
         now = datetime.now(UTC)
+        # A requested sample slot must never replace the provider's actual clock.
+        ticker_ms = _float(row.get("ts"))
+        ticker_at = datetime.fromtimestamp(ticker_ms / 1000, UTC) if ticker_ms else now
         return MarketQuote(
             instrument=instrument,
-            observed_at=observed_at or now,
+            observed_at=ticker_at,
             received_at=now,
             bid=bid,
             ask=ask,
@@ -69,6 +72,10 @@ class OKXPublicMarketAdapter:
         Public OKX candles are not a guaranteed historical execution record, so the returned
         window is explicitly marked estimated and is never treated as a high-confidence fill.
         """
+        emitted_at = emitted_at.replace(tzinfo=UTC) if emitted_at.tzinfo is None else emitted_at
+        expires_at = expires_at.replace(tzinfo=UTC) if expires_at.tzinfo is None else expires_at
+        if expires_at <= emitted_at:
+            return None
         entry_payload = await self.fetcher(
             f"{self.base_url}/api/v5/market/history-candles?instId={instrument}"
             f"&bar=1m&after={int(emitted_at.timestamp() * 1000)}&limit=1"
@@ -77,46 +84,52 @@ class OKXPublicMarketAdapter:
             f"{self.base_url}/api/v5/market/history-candles?instId={instrument}"
             f"&bar=1m&after={int(expires_at.timestamp() * 1000)}&limit=1"
         )
-        entry_data = entry_payload.get("data")
-        exit_data = exit_payload.get("data")
-        if not isinstance(entry_data, list) or not isinstance(exit_data, list):
-            return None
-        entry_row = entry_data[0] if entry_data else None
-        exit_row = exit_data[0] if exit_data else None
-        if not isinstance(entry_row, list) or not isinstance(exit_row, list):
-            return None
         now = datetime.now(UTC)
-        entry_price = _float(entry_row[4]) if len(entry_row) >= 5 else None
-        exit_price = _float(exit_row[4]) if len(exit_row) >= 5 else None
-        if entry_price is None or exit_price is None:
+        entry = _closed_candle(entry_payload, instrument, emitted_at, now)
+        exit_quote = _closed_candle(exit_payload, instrument, expires_at, now)
+        if entry is None or exit_quote is None:
             return None
         return PriceWindow(
-            entry=MarketQuote(
-                instrument=instrument,
-                observed_at=emitted_at,
-                received_at=now,
-                last=entry_price,
-                source_id=self.source_id,
-                quality_status="estimated",
-                benchmark="vwap_1m",
-            ),
-            exit=MarketQuote(
-                instrument=instrument,
-                observed_at=expires_at,
-                received_at=now,
-                last=exit_price,
-                source_id=self.source_id,
-                quality_status="estimated",
-                benchmark="vwap_1m",
-            ),
+            entry=entry,
+            exit=exit_quote,
             quality_status="estimated",
         )
+
+
+def _closed_candle(payload, instrument, boundary, now) -> MarketQuote | None:
+    if str(payload.get("code", "0")) != "0":
+        return None
+    rows = payload.get("data")
+    row = rows[0] if isinstance(rows, list) and rows else None
+    if not isinstance(row, list) or len(row) != 9 or str(row[8]) != "1":
+        return None
+    price, opened_ms = _float(row[4]), _float(row[0])
+    if price is None or price <= 0 or opened_ms is None:
+        return None
+    try:
+        closed_at = datetime.fromtimestamp(opened_ms / 1000, UTC) + timedelta(minutes=1)
+    except (ValueError, OSError, OverflowError):
+        return None
+    # OKX `after` returns an older opening timestamp. The completed close
+    # must be the first minute boundary at/after the requested instant.
+    if not boundary <= closed_at < boundary + timedelta(minutes=1) or closed_at > now:
+        return None
+    return MarketQuote(
+        instrument=instrument,
+        observed_at=closed_at,
+        received_at=now,
+        last=price,
+        source_id="okx-public",
+        quality_status="estimated",
+        benchmark="close_1m",
+    )
 
 
 def _float(value: Any) -> float | None:
     if value in (None, "", "null"):
         return None
     try:
-        return float(str(value))
+        number = float(str(value))
+        return number if math.isfinite(number) and number >= 0 else None
     except (TypeError, ValueError):
         return None

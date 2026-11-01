@@ -13,6 +13,7 @@ from packages.kernel.decision_hub_kernel.application.steps import RunStepService
 from packages.kernel.decision_hub_kernel.decision.gate import evaluate_gate
 from packages.kernel.decision_hub_kernel.persistence.db import (
     Database,
+    ObservationRecord,
     RunRecord,
     RunStatus,
 )
@@ -51,9 +52,7 @@ def build_decision_graph(
     def freeze(state: DecisionState) -> dict[str, object]:
         handle = steps.start(state["run_id"], "freeze_snapshot")
         try:
-            snapshot_id, _ = snapshots.freeze_for_run(
-                state["run_id"], state["event_id"]
-            )
+            snapshot_id, _ = snapshots.freeze_for_run(state["run_id"], state["event_id"])
             database.record_run_event(
                 state["run_id"], 2, "snapshot.frozen", {"snapshot_id": snapshot_id}
             )
@@ -83,9 +82,28 @@ def build_decision_graph(
         started = time.perf_counter()
         try:
             candidate = database.get_role_output(state["candidate_output_id"])
-            gate = evaluate_gate(candidate)
+            # The named ``fixture`` source is the deliberately untrusted
+            # deterministic safety fixture: it must remain research-only. The
+            # other R0 compatibility sources retain their historical report
+            # contract; the product research.v1 path applies the stricter
+            # receipt gate in CommitDecisionService.commit_research_result.
+            with database.session() as session:
+                source = (
+                    session.query(ObservationRecord.source_id)
+                    .filter(ObservationRecord.event_id == state["event_id"])
+                    .first()
+                )
+            directional_value_validated = bool(source and source[0] != "fixture")
+            gate = evaluate_gate(
+                candidate,
+                directional_value_validated=directional_value_validated,
+            )
             artifact_id = commit.commit(
-                state["run_id"], state["event_id"], candidate, gate
+                state["run_id"],
+                state["event_id"],
+                candidate,
+                gate,
+                expected_lease_owner=state.get("lease_owner"),
             )
             with database.session() as session:
                 run = session.get(RunRecord, state["run_id"])

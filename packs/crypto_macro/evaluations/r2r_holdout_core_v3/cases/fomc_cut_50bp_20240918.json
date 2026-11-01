@@ -1,0 +1,969 @@
+{
+  "schema_version": "research-evaluation-case.v1",
+  "case_id": "fomc_cut_50bp_20240918",
+  "event_family": "monetary_policy_decision",
+  "input_text": "The FOMC lowered the federal funds target range by 50 basis points to 4.75-5.00 percent.",
+  "trigger_evidence": {
+    "evidence_id": "trigger_fomc_cut_50bp_20240918",
+    "kind": "transcript",
+    "authority": "unverified",
+    "source_id": "evaluation-catalog",
+    "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20240918a.htm",
+    "published_at": "2024-09-18T18:00:00Z",
+    "observed_at": "2024-09-18T18:00:00Z",
+    "received_at": "2024-09-18T18:00:02Z",
+    "content_hash": "024ee9fa9d1cf2c6d38e88adf554c8906df6b1ab16d0abe097b3ab92acd6e18e",
+    "excerpt": "The FOMC lowered the federal funds target range by 50 basis points to 4.75-5.00 percent."
+  },
+  "evidence_requirements": [
+    {
+      "requirement_id": "event_identity",
+      "description": "Identify the primary event, speaker or document, event time and revision status.",
+      "importance": "hard",
+      "source_priority": [
+        "official",
+        "verified_web"
+      ],
+      "authority_floor": "official",
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "freshness_seconds": 604800,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "confidence_cap": 0.45,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "policy_or_data_delta",
+      "description": "Establish what changed relative to prior wording, prior value or consensus.",
+      "importance": "hard",
+      "source_priority": [
+        "official",
+        "audited_aggregator",
+        "verified_web"
+      ],
+      "authority_floor": "official",
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "freshness_seconds": 86400,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "confidence_cap": 0.5,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "expectation_pricing",
+      "description": "Observe policy expectations, rates repricing or credible positioning evidence.",
+      "importance": "hard",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "macro.expectation_pricing",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 900,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "macro.expectation_pricing",
+        "market.cross_asset",
+        "web.search",
+        "web.search.tavily"
+      ],
+      "confidence_cap": 0.55,
+      "accepted_metric_families": [
+        "macro.policy_expectation"
+      ],
+      "required_metric_families": [
+        "macro.policy_expectation"
+      ],
+      "required_fields": [
+        "level",
+        "delta"
+      ],
+      "required_event_offsets": [
+        "baseline",
+        "t-5m"
+      ],
+      "unit_policy": "field_map.v1",
+      "field_units": {
+        "level": [
+          "probability",
+          "percent",
+          "bps",
+          "yield_percent"
+        ],
+        "delta": [
+          "percentage_point",
+          "bps"
+        ]
+      },
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [
+        "realtime"
+      ],
+      "semantic_policy_ref": "crypto_macro.fact_semantics.v1#expectation_pricing"
+    },
+    {
+      "requirement_id": "macro_transmission",
+      "description": "Observe the rates and USD transmission path relevant to the event.",
+      "importance": "hard",
+      "source_priority": [
+        "official",
+        "exchange",
+        "audited_aggregator"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "macro.cross_asset_intraday",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 600,
+      "minimum_independent_sources": 2,
+      "allowed_fallbacks": [
+        "macro.cross_asset_intraday",
+        "market.cross_asset",
+        "web.search",
+        "web.search.tavily"
+      ],
+      "confidence_cap": 0.55,
+      "accepted_metric_families": [
+        "macro.rates",
+        "macro.usd"
+      ],
+      "required_metric_families": [
+        "macro.rates",
+        "macro.usd"
+      ],
+      "required_fields": [
+        "level",
+        "event_return"
+      ],
+      "required_event_offsets": [
+        "t-5m",
+        "t+1m"
+      ],
+      "unit_policy": "field_map.v1",
+      "field_units": {
+        "level": [
+          "yield_percent",
+          "index"
+        ],
+        "event_return": [
+          "bps",
+          "percent"
+        ]
+      },
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 2,
+      "allowed_delay_classes": [
+        "realtime"
+      ],
+      "semantic_policy_ref": "crypto_macro.fact_semantics.v1#macro_transmission"
+    },
+    {
+      "requirement_id": "cross_asset_confirmation",
+      "description": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation.",
+      "importance": "soft",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ],
+      "authority_floor": "verified_web",
+      "preferred_capabilities": [
+        "macro.cross_asset_intraday",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 600,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "macro.cross_asset_intraday",
+        "market.cross_asset",
+        "web.search",
+        "web.search.tavily"
+      ],
+      "confidence_cap": 0.65,
+      "accepted_metric_families": [
+        "cross_asset.equity",
+        "cross_asset.volatility",
+        "cross_asset.commodity",
+        "cross_asset.credit"
+      ],
+      "required_metric_families": [],
+      "required_fields": [
+        "level",
+        "event_return"
+      ],
+      "required_event_offsets": [
+        "t-5m",
+        "t+1m"
+      ],
+      "unit_policy": "field_map.v1",
+      "field_units": {
+        "level": [
+          "price",
+          "index",
+          "spread_bps"
+        ],
+        "event_return": [
+          "percent",
+          "bps"
+        ]
+      },
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [
+        "realtime"
+      ],
+      "semantic_policy_ref": "crypto_macro.fact_semantics.v1#cross_asset_confirmation"
+    },
+    {
+      "requirement_id": "crypto_spot_confirmation",
+      "description": "Observe BTC spot reaction, volume and the event-time comparison window.",
+      "importance": "hard",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "freshness_seconds": 600,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [],
+      "confidence_cap": 0.5,
+      "accepted_metric_families": [
+        "crypto.spot"
+      ],
+      "required_metric_families": [
+        "crypto.spot"
+      ],
+      "required_fields": [
+        "price",
+        "volume",
+        "event_return"
+      ],
+      "required_event_offsets": [
+        "t-5m",
+        "t+1m"
+      ],
+      "unit_policy": "field_map.v1",
+      "field_units": {
+        "price": [
+          "usd",
+          "usdt"
+        ],
+        "volume": [
+          "btc",
+          "usd",
+          "usdt"
+        ],
+        "event_return": [
+          "percent"
+        ]
+      },
+      "minimum_venues": 1,
+      "venue_required": true,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [
+        "realtime"
+      ],
+      "semantic_policy_ref": "crypto_macro.fact_semantics.v1#crypto_spot_confirmation"
+    },
+    {
+      "requirement_id": "derivatives_crowding",
+      "description": "Observe funding, open interest, basis and available liquidation or flow evidence.",
+      "importance": "hard",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "market.crypto_derivatives",
+        "market.crypto_crowding"
+      ],
+      "freshness_seconds": 600,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "market.crypto_crowding"
+      ],
+      "confidence_cap": 0.5,
+      "accepted_metric_families": [
+        "crypto.derivatives"
+      ],
+      "required_metric_families": [
+        "crypto.derivatives"
+      ],
+      "required_fields": [
+        "funding_rate",
+        "open_interest",
+        "open_interest_delta",
+        "basis",
+        "crowding_signal"
+      ],
+      "required_event_offsets": [
+        "t-5m",
+        "t+1m"
+      ],
+      "unit_policy": "field_map.v1",
+      "field_units": {
+        "funding_rate": [
+          "rate"
+        ],
+        "open_interest": [
+          "contracts",
+          "btc",
+          "usd",
+          "usdt"
+        ],
+        "open_interest_delta": [
+          "percent"
+        ],
+        "basis": [
+          "rate",
+          "percent"
+        ],
+        "crowding_signal": [
+          "contracts",
+          "btc",
+          "usd",
+          "usdt",
+          "ratio"
+        ]
+      },
+      "minimum_venues": 1,
+      "venue_required": true,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [
+        "realtime"
+      ],
+      "semantic_policy_ref": "crypto_macro.fact_semantics.v1#derivatives_crowding"
+    },
+    {
+      "requirement_id": "counter_thesis",
+      "description": "Build the strongest evidence-backed alternative transmission chain.",
+      "importance": "soft",
+      "source_priority": [
+        "official",
+        "exchange",
+        "verified_web"
+      ],
+      "authority_floor": "verified_web",
+      "preferred_capabilities": [
+        "official.macro",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 86400,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "confidence_cap": 0.7,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    }
+  ],
+  "expected_hard_requirement_ids": [
+    "event_identity",
+    "policy_or_data_delta",
+    "expectation_pricing",
+    "macro_transmission",
+    "crypto_spot_confirmation",
+    "derivatives_crowding"
+  ],
+  "archived_capability_fixtures": [
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "event_identity",
+      "query_aliases": [
+        "fomc_cut_50bp_20240918:event_identity",
+        "Verify event identity for fomc_cut_50bp_20240918"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_af94dde6cf8d1c0633c46358617127d6",
+          "requirement_id": "event_identity",
+          "kind": "official",
+          "authority": "official",
+          "source_id": "federalreserve.gov",
+          "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20240918a.htm",
+          "published_at": "2024-09-18T18:00:00Z",
+          "observed_at": "2024-09-18T18:00:01Z",
+          "received_at": "2024-09-18T18:00:02Z",
+          "content_hash": "af94dde6cf8d1c0633c46358617127d61ec474769a129eccd5b5b0144d229e15",
+          "excerpt": "The Federal Reserve published its September 18, 2024 monetary policy decision.",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:fomc_cut_50bp_20240918:event_identity",
+          "research_session_id": "archive:fomc_cut_50bp_20240918",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ]
+    },
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "policy_or_data_delta",
+      "query_aliases": [
+        "fomc_cut_50bp_20240918:policy_or_data_delta",
+        "Verify policy or data delta for fomc_cut_50bp_20240918"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_b799af99928b328f97f99ffeb469b003",
+          "requirement_id": "policy_or_data_delta",
+          "kind": "official",
+          "authority": "official",
+          "source_id": "federalreserve.gov",
+          "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20240918a.htm",
+          "published_at": "2024-09-18T18:00:00Z",
+          "observed_at": "2024-09-18T18:00:01Z",
+          "received_at": "2024-09-18T18:00:02Z",
+          "content_hash": "b799af99928b328f97f99ffeb469b0034ae5561e3e36405f441cc9b5dfb4b73f",
+          "excerpt": "The Committee lowered the target range for the federal funds rate by one-half percentage point to 4.75 to 5 percent.",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:fomc_cut_50bp_20240918:policy_or_data_delta",
+          "research_session_id": "archive:fomc_cut_50bp_20240918",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ]
+    },
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "crypto_spot_confirmation",
+      "query_aliases": [
+        "fomc_cut_50bp_20240918:crypto_spot_confirmation",
+        "Acquire typed crypto_spot_confirmation event-window evidence for fomc_cut_50bp_20240918"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_32ec3165789359dbb09dd8a63edea50f",
+          "requirement_id": "crypto_spot_confirmation",
+          "kind": "market",
+          "authority": "exchange",
+          "source_id": "binance-vision",
+          "source_url": "https://data.binance.vision/data/spot/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2024-09-18.zip",
+          "published_at": "2024-09-18T18:01:00Z",
+          "observed_at": "2024-09-18T18:01:00Z",
+          "received_at": "2024-09-18T18:01:01Z",
+          "content_hash": "32ec3165789359dbb09dd8a63edea50f30349cbe16da22a3e60a4be262570e74",
+          "excerpt": "{\"archive\":\"Binance Vision\",\"case_id\":\"fomc_cut_50bp_20240918\",\"event_window\":{\"t+1m\":{\"price\":\"60607.17000000\",\"volume\":\"68522742.80379300\"},\"t-5m\":{\"price\":\"60099.99000000\",\"volume\":\"1077217.46170700\"}},\"reconstruction_mode\":\"reconstructed_history\",\"source_hashes\":[\"6cc682a8483485ecf587d2461d28e28e3f76f76f5dcb166d1f0a184f030131d7\"]}",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": "binance-vision://05886e4ca3134b1cf39a5be15a5c567d15d75252e07d03f59840648478ba76a8",
+          "tool_call_id": "archive:fomc_cut_50bp_20240918:crypto_spot_confirmation",
+          "research_session_id": "archive:fomc_cut_50bp_20240918",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ],
+      "facts": [
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_89436d679c2a94da9a153576c0390177",
+          "evidence_id": "archive_32ec3165789359dbb09dd8a63edea50f",
+          "requirement_id": "crypto_spot_confirmation",
+          "metric_family": "crypto.spot",
+          "field": "price",
+          "instrument": "BTCUSDT",
+          "venue": "binance",
+          "value": "60099.99000000",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2024-09-18T17:55:00Z",
+          "received_at": "2024-09-18T17:55:01Z",
+          "published_at": "2024-09-18T17:55:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "af7b2696a272dfe938dad458929ef1c7243844d1683cc9e87319b6567ca02091",
+          "attributes": {
+            "archive_hash": "05886e4ca3134b1cf39a5be15a5c567d15d75252e07d03f59840648478ba76a8",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_23b62e797d8ca62a7c87262f0c2ea784",
+          "evidence_id": "archive_32ec3165789359dbb09dd8a63edea50f",
+          "requirement_id": "crypto_spot_confirmation",
+          "metric_family": "crypto.spot",
+          "field": "volume",
+          "instrument": "BTCUSDT",
+          "venue": "binance",
+          "value": "1077217.46170700",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2024-09-18T17:55:00Z",
+          "received_at": "2024-09-18T17:55:01Z",
+          "published_at": "2024-09-18T17:55:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "675637bb7ec55e1ed6fac433e852baef1ef772c73111e0db92797d729b031382",
+          "attributes": {
+            "archive_hash": "05886e4ca3134b1cf39a5be15a5c567d15d75252e07d03f59840648478ba76a8",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_509af57443338f779df417cbbfb40e65",
+          "evidence_id": "archive_32ec3165789359dbb09dd8a63edea50f",
+          "requirement_id": "crypto_spot_confirmation",
+          "metric_family": "crypto.spot",
+          "field": "price",
+          "instrument": "BTCUSDT",
+          "venue": "binance",
+          "value": "60607.17000000",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2024-09-18T18:01:00Z",
+          "received_at": "2024-09-18T18:01:01Z",
+          "published_at": "2024-09-18T18:01:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "5c240bcc1c807c89c3fe28da844dc2017a39e0bc2383aadf9cf48221c130cb10",
+          "attributes": {
+            "archive_hash": "05886e4ca3134b1cf39a5be15a5c567d15d75252e07d03f59840648478ba76a8",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_95c795332296e159a7f82ed4b6f57ebc",
+          "evidence_id": "archive_32ec3165789359dbb09dd8a63edea50f",
+          "requirement_id": "crypto_spot_confirmation",
+          "metric_family": "crypto.spot",
+          "field": "volume",
+          "instrument": "BTCUSDT",
+          "venue": "binance",
+          "value": "68522742.80379300",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2024-09-18T18:01:00Z",
+          "received_at": "2024-09-18T18:01:01Z",
+          "published_at": "2024-09-18T18:01:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "3367f9ef02d22bc08f232f88c88d6a3e51cf306ffb76d46c261d525830ab0cc8",
+          "attributes": {
+            "archive_hash": "05886e4ca3134b1cf39a5be15a5c567d15d75252e07d03f59840648478ba76a8",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_4247828981c71cb9c08604a512e0481c",
+          "evidence_id": "archive_32ec3165789359dbb09dd8a63edea50f",
+          "requirement_id": "crypto_spot_confirmation",
+          "metric_family": "crypto.spot",
+          "field": "event_return",
+          "instrument": "BTCUSDT",
+          "venue": "binance",
+          "value": "0.843893651230224830320271300",
+          "unit": "percent",
+          "window_start_at": "2024-09-18T17:55:00Z",
+          "window_end_at": "2024-09-18T18:01:00Z",
+          "event_offset": "t+1m",
+          "observed_at": "2024-09-18T18:01:00Z",
+          "received_at": "2024-09-18T18:01:01Z",
+          "published_at": "2024-09-18T18:01:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "e48afebf39bd132591cb0af5e392d080f58f633edacc704673b5edf6432bdec0",
+          "attributes": {
+            "archive_hash": "05886e4ca3134b1cf39a5be15a5c567d15d75252e07d03f59840648478ba76a8",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        }
+      ]
+    },
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "derivatives_crowding",
+      "query_aliases": [
+        "fomc_cut_50bp_20240918:derivatives_crowding",
+        "Acquire typed derivatives_crowding event-window evidence for fomc_cut_50bp_20240918"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_5fa83e7fc7cbe129028557b4223e06cb",
+          "requirement_id": "derivatives_crowding",
+          "kind": "market",
+          "authority": "exchange",
+          "source_id": "binance-vision",
+          "source_url": "https://data.binance.vision/data/futures/um/daily/metrics/BTCUSDT/BTCUSDT-metrics-2024-09-18.zip",
+          "published_at": "2024-09-18T18:01:00Z",
+          "observed_at": "2024-09-18T18:01:00Z",
+          "received_at": "2024-09-18T18:01:01Z",
+          "content_hash": "5fa83e7fc7cbe129028557b4223e06cbc47d69f07bbccb6aa54f103e391c14cd",
+          "excerpt": "{\"archive\":\"Binance Vision\",\"case_id\":\"fomc_cut_50bp_20240918\",\"event_window\":{\"t+1m\":{\"basis\":\"0.00006837\",\"crowding_signal\":\"1.51717368\",\"funding_rate\":\"0.00004648\",\"open_interest\":\"4943140359.9656000000000000\"},\"t-5m\":{\"basis\":\"-0.00042993\",\"crowding_signal\":\"1.53075701\",\"funding_rate\":\"0.00004648\",\"open_interest\":\"4913201325.0560000000000000\"}},\"reconstruction_mode\":\"reconstructed_history\",\"source_hashes\":[\"2b04e76a9eee2031f82783d8e9385e0d7c490576ca2b585f15249b859ebcd9cc\",\"d0b6d4366c70c39c8a8262d11d3ada029b493480a4d10d3919a5db6e8e5e1d49\",\"6ef23b02392b481ef9c3855434bf3644289fb6e228b4f7d9a0dfc6d3cdff1116\"]}",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": "binance-vision://36903dd450742106c735449a5d6badb3348b905bbfc51688fc78d1bd6b0b7289",
+          "tool_call_id": "archive:fomc_cut_50bp_20240918:derivatives_crowding",
+          "research_session_id": "archive:fomc_cut_50bp_20240918",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ],
+      "facts": [
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_4fd2891198cc3412da74cefa7c2f8cda",
+          "evidence_id": "archive_5fa83e7fc7cbe129028557b4223e06cb",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "funding_rate",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "0.00004648",
+          "unit": "rate",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2024-09-18T17:55:00Z",
+          "received_at": "2024-09-18T17:55:01Z",
+          "published_at": "2024-09-18T17:55:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "01bb2ec6755a18b37da4d486b25a041f49998da75d45fe4b251fb49dbc2a5a7f",
+          "attributes": {
+            "archive_hash": "36903dd450742106c735449a5d6badb3348b905bbfc51688fc78d1bd6b0b7289",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_072dfbd09fe0915546d78710219b92ae",
+          "evidence_id": "archive_5fa83e7fc7cbe129028557b4223e06cb",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "open_interest",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "4913201325.0560000000000000",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2024-09-18T17:55:00Z",
+          "received_at": "2024-09-18T17:55:01Z",
+          "published_at": "2024-09-18T17:55:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "6811710f5f4f06a26fba4d6f3b03e303a5dbf8826ecf21f9a24323cb7f298a89",
+          "attributes": {
+            "archive_hash": "36903dd450742106c735449a5d6badb3348b905bbfc51688fc78d1bd6b0b7289",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_3f133d46c98eb2880a062157a93cc9cc",
+          "evidence_id": "archive_5fa83e7fc7cbe129028557b4223e06cb",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "basis",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "-0.00042993",
+          "unit": "rate",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2024-09-18T17:55:00Z",
+          "received_at": "2024-09-18T17:55:01Z",
+          "published_at": "2024-09-18T17:55:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "d183e32e8df19627ff75ab2314903f6e9556051c8035a1b77fa1b038f1ab5e9b",
+          "attributes": {
+            "archive_hash": "36903dd450742106c735449a5d6badb3348b905bbfc51688fc78d1bd6b0b7289",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_6b30b62bf1785b46ca029e05840e3945",
+          "evidence_id": "archive_5fa83e7fc7cbe129028557b4223e06cb",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "crowding_signal",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "1.53075701",
+          "unit": "ratio",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2024-09-18T17:55:00Z",
+          "received_at": "2024-09-18T17:55:01Z",
+          "published_at": "2024-09-18T17:55:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "fb1ed82e11824da08ed8874a20230ed9e8828815bbf45847c6fdbd0f8949ca4e",
+          "attributes": {
+            "archive_hash": "36903dd450742106c735449a5d6badb3348b905bbfc51688fc78d1bd6b0b7289",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_41e746d65bee1bb0808535ff6708308c",
+          "evidence_id": "archive_5fa83e7fc7cbe129028557b4223e06cb",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "funding_rate",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "0.00004648",
+          "unit": "rate",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2024-09-18T18:01:00Z",
+          "received_at": "2024-09-18T18:01:01Z",
+          "published_at": "2024-09-18T18:01:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "202abbc784f78d5ffa3520eb7fe81b8df22be99ce539a072662bacc278679f35",
+          "attributes": {
+            "archive_hash": "36903dd450742106c735449a5d6badb3348b905bbfc51688fc78d1bd6b0b7289",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_5b34de92e8ae3911645ae915e4ba4621",
+          "evidence_id": "archive_5fa83e7fc7cbe129028557b4223e06cb",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "open_interest",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "4943140359.9656000000000000",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2024-09-18T18:01:00Z",
+          "received_at": "2024-09-18T18:01:01Z",
+          "published_at": "2024-09-18T18:01:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "72813ea01515bd825805f39783f933aa7a60699729793ef1377d8012ab0a564e",
+          "attributes": {
+            "archive_hash": "36903dd450742106c735449a5d6badb3348b905bbfc51688fc78d1bd6b0b7289",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_58adf78a06867022c06f8f73e821f70b",
+          "evidence_id": "archive_5fa83e7fc7cbe129028557b4223e06cb",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "basis",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "0.00006837",
+          "unit": "rate",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2024-09-18T18:01:00Z",
+          "received_at": "2024-09-18T18:01:01Z",
+          "published_at": "2024-09-18T18:01:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "b5783f631b34f4e8c3bb727741592d10253db14d1127028bab21f3bb1f8ab3c1",
+          "attributes": {
+            "archive_hash": "36903dd450742106c735449a5d6badb3348b905bbfc51688fc78d1bd6b0b7289",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_2c26412ccf7abe9864bb67be70e7cc61",
+          "evidence_id": "archive_5fa83e7fc7cbe129028557b4223e06cb",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "crowding_signal",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "1.51717368",
+          "unit": "ratio",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2024-09-18T18:01:00Z",
+          "received_at": "2024-09-18T18:01:01Z",
+          "published_at": "2024-09-18T18:01:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "52266bafdf877f04bf360c896db9d0df6709326ecf984e90640a182596290131",
+          "attributes": {
+            "archive_hash": "36903dd450742106c735449a5d6badb3348b905bbfc51688fc78d1bd6b0b7289",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_7e5c80a9b654dd9c533292bac6993d17",
+          "evidence_id": "archive_5fa83e7fc7cbe129028557b4223e06cb",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "open_interest_delta",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "0.609359009103067010080281700",
+          "unit": "percent",
+          "window_start_at": "2024-09-18T17:55:00Z",
+          "window_end_at": "2024-09-18T18:01:00Z",
+          "event_offset": "t+1m",
+          "observed_at": "2024-09-18T18:01:00Z",
+          "received_at": "2024-09-18T18:01:01Z",
+          "published_at": "2024-09-18T18:01:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "f5c6472cdb90c3dabfa748f46a1cfdc0da2d3b4c12c3894c771f18ec56f9eb8a",
+          "attributes": {
+            "archive_hash": "36903dd450742106c735449a5d6badb3348b905bbfc51688fc78d1bd6b0b7289",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        }
+      ]
+    }
+  ],
+  "cutoff_at": "2024-09-18T18:05:00Z",
+  "outcome_available_at": null,
+  "outcome_labels": [],
+  "source_refs": [
+    "https://www.federalreserve.gov/newsevents/pressreleases/monetary20240918a.htm",
+    "https://data.binance.vision/data/spot/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2024-09-18.zip",
+    "https://data.binance.vision/data/futures/um/daily/metrics/BTCUSDT/BTCUSDT-metrics-2024-09-18.zip",
+    "https://data.binance.vision/data/futures/um/daily/premiumIndexKlines/BTCUSDT/1m/BTCUSDT-1m-2024-09-18.zip",
+    "https://data.binance.vision/data/futures/um/monthly/fundingRate/BTCUSDT/BTCUSDT-fundingRate-2024-09.zip"
+  ]
+}

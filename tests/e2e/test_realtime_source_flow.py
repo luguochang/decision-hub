@@ -74,6 +74,9 @@ def test_source_poll_reuses_r0_chain_and_duplicate_poll_reuses_run(tmp_path: Pat
         source_connectors=[RealtimeFixtureSource()],
         sources_enabled=True,
     )
+    # This case explicitly exercises the preserved legacy R0 compatibility path.
+    # Production source discovery uses research.v1 only.
+    app.state.source_ingestion.strategy_selector = lambda _manifest, _envelope: ("baseline.v1",)
     client = TestClient(app)
 
     first = client.post("/v1/sources/realtime-fixture/poll")

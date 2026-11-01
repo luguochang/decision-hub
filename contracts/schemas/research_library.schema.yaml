@@ -1,0 +1,268 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/research-library.schema.json
+title: ResearchLibraryContracts
+type: object
+additionalProperties: false
+required: [schema_version]
+properties:
+  schema_version: {type: string, const: research-library-contracts.v1}
+$defs:
+  research_family:
+    type: string
+    enum: [crypto_macro, cn_equity, cross_asset]
+  document_visibility:
+    type: string
+    enum: [private, shared]
+  privacy_mode:
+    type: string
+    enum: [local_only, remote_allowed]
+  document_status:
+    type: string
+    enum: [received, parsing, parsed, correcting, review, ready, failed, archived]
+  correction_status:
+    type: string
+    enum: [not_requested, running, ready, needs_review, accepted, rejected, failed]
+  claim_status:
+    type: string
+    enum: [candidate, accepted, rejected, superseded]
+  claim_type:
+    type: string
+    enum: [fact_claim, opinion, forecast, scenario, rumor]
+  stance:
+    type: string
+    enum: [bullish, bearish, neutral, mixed, unknown]
+  quality_status:
+    type: string
+    enum: [ready_for_correction, needs_review, blocked_low_quality, failed]
+  document_upload:
+    type: object
+    additionalProperties: false
+    required: [schema_version, title, source_type, market_scopes, privacy_mode, visibility]
+    properties:
+      schema_version: {type: string, const: document-upload.v1}
+      title: {type: string, minLength: 1, maxLength: 512}
+      source_type: {type: string, enum: [private_file, public_web, official, social_media]}
+      source_profile_id: {type: [string, 'null'], maxLength: 256, default: null}
+      author: {type: [string, 'null'], maxLength: 256, default: null}
+      published_at: {type: [string, 'null'], format: date-time, default: null}
+      market_scopes: {type: array, minItems: 1, maxItems: 8, uniqueItems: true, items: {$ref: '#/$defs/research_family'}}
+      instrument_scopes: {type: array, maxItems: 32, uniqueItems: true, items: {type: string, minLength: 1, maxLength: 128}, default: []}
+      privacy_mode: {$ref: '#/$defs/privacy_mode'}
+      visibility: {$ref: '#/$defs/document_visibility'}
+      supersedes_version_id: {type: [string, 'null'], maxLength: 128, default: null}
+      notes: {type: [string, 'null'], maxLength: 4000, default: null}
+  document_upload_policy:
+    type: object
+    additionalProperties: false
+    required: [schema_version, max_file_size_bytes]
+    properties:
+      schema_version: {type: string, const: document-upload-policy.v1}
+      max_file_size_bytes: {type: integer, const: 20971520}
+  document_upload_intent:
+    type: object
+    additionalProperties: false
+    required: [schema_version, owner_id, file_name, file_size_bytes, file_sha256, metadata]
+    properties:
+      schema_version: {type: string, const: document-upload-intent.v1}
+      owner_id: {type: string, minLength: 1, maxLength: 128}
+      file_name: {type: string, minLength: 1, maxLength: 512}
+      file_size_bytes: {type: integer, minimum: 0}
+      file_sha256: {type: string, pattern: '^[0-9a-f]{64}$'}
+      metadata: {$ref: '#/$defs/document_upload'}
+  document_upload_receipt:
+    type: object
+    additionalProperties: false
+    required: [schema_version, request_id, intent, version, deduplicated, created_at]
+    properties:
+      schema_version: {type: string, const: document-upload-receipt.v1}
+      request_id: {type: string, minLength: 1, maxLength: 128}
+      intent: {$ref: '#/$defs/document_upload_intent'}
+      version: {$ref: '#/$defs/research_document_version'}
+      deduplicated: {type: boolean}
+      created_at: {type: string, format: date-time}
+  document_quality:
+    type: object
+    additionalProperties: false
+    required: [layout_coverage, text_readability, table_integrity, image_coverage, numeric_suspicion, encoding_errors, locator_completeness, quality_status, issues]
+    properties:
+      layout_coverage: {type: number, minimum: 0, maximum: 1}
+      text_readability: {type: number, minimum: 0, maximum: 1}
+      table_integrity: {type: number, minimum: 0, maximum: 1}
+      image_coverage: {type: number, minimum: 0, maximum: 1}
+      numeric_suspicion: {type: integer, minimum: 0}
+      encoding_errors: {type: integer, minimum: 0}
+      locator_completeness: {type: number, minimum: 0, maximum: 1}
+      quality_status: {$ref: '#/$defs/quality_status'}
+      issues: {type: array, maxItems: 100, uniqueItems: true, items: {type: string, minLength: 1, maxLength: 512}}
+  document_block:
+    type: object
+    additionalProperties: false
+    required: [schema_version, block_id, version_id, block_type, page_no, content, content_hash, locator, confidence, has_numeric_content, needs_review]
+    properties:
+      schema_version: {type: string, const: document-block.v1}
+      block_id: {type: string, minLength: 1, maxLength: 128}
+      version_id: {type: string, minLength: 1, maxLength: 128}
+      block_type: {type: string, enum: [heading, paragraph, table, figure, image, footnote, unknown]}
+      page_no: {type: integer, minimum: 1}
+      content: {type: string, maxLength: 100000}
+      content_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      locator: {type: string, minLength: 1, maxLength: 2048}
+      bbox: {type: [array, 'null'], minItems: 4, maxItems: 4, items: {type: number}, default: null}
+      confidence: {type: number, minimum: 0, maximum: 1}
+      has_numeric_content: {type: boolean}
+      needs_review: {type: boolean}
+  document_parse_receipt:
+    type: object
+    additionalProperties: false
+    required: [schema_version, version_id, parser_ref, parser_mode, original_file_hash, parsed_bundle_ref, page_count, block_count, quality, errors, completed_at]
+    properties:
+      schema_version: {type: string, const: document-parse-receipt.v1}
+      version_id: {type: string, minLength: 1, maxLength: 128}
+      parser_ref: {type: string, minLength: 1, maxLength: 256}
+      parser_mode: {type: string, enum: [mineru_local, docling_local, paddleocr_local, pypdf_text, remote_api, replay]}
+      original_file_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      parsed_bundle_ref: {type: string, minLength: 1, maxLength: 2048}
+      page_count: {type: integer, minimum: 0}
+      block_count: {type: integer, minimum: 0}
+      quality: {$ref: '#/$defs/document_quality'}
+      errors: {type: array, maxItems: 100, uniqueItems: true, items: {type: string, minLength: 1, maxLength: 512}}
+      completed_at: {type: string, format: date-time}
+  research_document:
+    type: object
+    additionalProperties: false
+    required: [schema_version, document_id, title, source_type, source_profile_id, author, market_scopes, instrument_scopes, privacy_mode, visibility, created_at, latest_version_id, version_count]
+    properties:
+      schema_version: {type: string, const: research-document.v1}
+      document_id: {type: string, pattern: '^doc_[A-Za-z0-9_-]+$'}
+      title: {type: string, minLength: 1, maxLength: 512}
+      source_type: {type: string, enum: [private_file, public_web, official, social_media]}
+      source_profile_id: {type: [string, 'null'], maxLength: 256}
+      author: {type: [string, 'null'], maxLength: 256}
+      market_scopes: {type: array, minItems: 1, maxItems: 8, uniqueItems: true, items: {$ref: '#/$defs/research_family'}}
+      instrument_scopes: {type: array, maxItems: 32, uniqueItems: true, items: {type: string, minLength: 1, maxLength: 128}}
+      privacy_mode: {$ref: '#/$defs/privacy_mode', default: local_only}
+      visibility: {$ref: '#/$defs/document_visibility'}
+      created_at: {type: string, format: date-time}
+      latest_version_id: {type: [string, 'null'], maxLength: 128}
+      version_count: {type: integer, minimum: 0}
+  research_document_version:
+    type: object
+    additionalProperties: false
+    required: [schema_version, version_id, document_id, original_file_ref, original_file_hash, status, correction_status, published_at, observed_at, received_at, supersedes_version_id, parse_receipt_ref, corrected_content_ref, block_count, claim_count, quality, created_at]
+    properties:
+      schema_version: {type: string, const: research-document-version.v1}
+      version_id: {type: string, pattern: '^docver_[A-Za-z0-9_-]+$'}
+      document_id: {type: string, pattern: '^doc_[A-Za-z0-9_-]+$'}
+      original_file_ref: {type: string, minLength: 1, maxLength: 2048}
+      original_file_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      status: {$ref: '#/$defs/document_status'}
+      correction_status: {$ref: '#/$defs/correction_status'}
+      published_at: {type: [string, 'null'], format: date-time}
+      observed_at: {type: string, format: date-time}
+      received_at: {type: string, format: date-time}
+      supersedes_version_id: {type: [string, 'null'], maxLength: 128}
+      parse_receipt_ref: {type: [string, 'null'], maxLength: 2048}
+      corrected_content_ref: {type: [string, 'null'], maxLength: 2048}
+      block_count: {type: integer, minimum: 0}
+      claim_count: {type: integer, minimum: 0}
+      quality: {$ref: '#/$defs/document_quality'}
+      created_at: {type: string, format: date-time}
+  correction_change:
+    type: object
+    additionalProperties: false
+    required: [schema_version, change_id, page_no, block_id, original, corrected, reason, confidence, requires_user_confirmation, accepted]
+    properties:
+      schema_version: {type: string, const: document-correction-change.v1}
+      change_id: {type: string, minLength: 1, maxLength: 128}
+      page_no: {type: integer, minimum: 1}
+      block_id: {type: string, minLength: 1, maxLength: 128}
+      original: {type: string, maxLength: 20000}
+      corrected: {type: string, maxLength: 20000}
+      reason: {type: string, minLength: 1, maxLength: 1000}
+      confidence: {type: string, enum: [high, medium, low]}
+      requires_user_confirmation: {type: boolean}
+      accepted: {type: boolean}
+  document_correction:
+    type: object
+    additionalProperties: false
+    required: [schema_version, correction_id, version_id, correction_model_ref, prompt_ref, corrected_content_ref, quality_status, changes, unresolved_fragments, created_at, accepted_at]
+    properties:
+      schema_version: {type: string, const: document-correction.v1}
+      correction_id: {type: string, pattern: '^corr_[A-Za-z0-9_-]+$'}
+      version_id: {type: string, pattern: '^docver_[A-Za-z0-9_-]+$'}
+      correction_model_ref: {type: string, minLength: 1, maxLength: 256}
+      prompt_ref: {type: string, minLength: 1, maxLength: 256}
+      corrected_content_ref: {type: [string, 'null'], maxLength: 2048}
+      quality_status: {$ref: '#/$defs/quality_status'}
+      changes: {type: array, maxItems: 500, items: {$ref: '#/$defs/correction_change'}}
+      unresolved_fragments: {type: array, maxItems: 200, items: {type: object, additionalProperties: false, required: [page_no, block_id, text, reason], properties: {page_no: {type: integer, minimum: 1}, block_id: {type: string, minLength: 1}, text: {type: string, maxLength: 20000}, reason: {type: string, minLength: 1, maxLength: 1000}}}}
+      created_at: {type: string, format: date-time}
+      accepted_at: {type: [string, 'null'], format: date-time}
+  analyst_claim:
+    type: object
+    additionalProperties: false
+    required: [schema_version, claim_id, version_id, claim_type, stance, claim_text, supporting_quote, locator_refs, market_scope, instrument_scope, horizon, conditions, invalidation_conditions, status, attribution_confidence, requires_independent_evidence, created_at, reviewed_at]
+    properties:
+      schema_version: {type: string, const: analyst-claim.v1}
+      claim_id: {type: string, pattern: '^claim_[A-Za-z0-9_-]+$'}
+      version_id: {type: string, pattern: '^docver_[A-Za-z0-9_-]+$'}
+      claim_type: {$ref: '#/$defs/claim_type'}
+      stance: {$ref: '#/$defs/stance'}
+      claim_text: {type: string, minLength: 1, maxLength: 4000}
+      supporting_quote: {type: string, minLength: 1, maxLength: 4000}
+      locator_refs: {type: array, minItems: 1, maxItems: 32, uniqueItems: true, items: {type: string, minLength: 1, maxLength: 2048}}
+      market_scope: {$ref: '#/$defs/research_family'}
+      instrument_scope: {type: array, maxItems: 32, uniqueItems: true, items: {type: string, minLength: 1, maxLength: 128}}
+      horizon: {type: [string, 'null'], maxLength: 64}
+      conditions: {type: array, maxItems: 32, items: {type: string, minLength: 1, maxLength: 1000}}
+      invalidation_conditions: {type: array, maxItems: 32, items: {type: string, minLength: 1, maxLength: 1000}}
+      status: {$ref: '#/$defs/claim_status'}
+      attribution_confidence: {type: string, enum: [high, medium, low, unknown]}
+      requires_independent_evidence: {type: boolean}
+      created_at: {type: string, format: date-time}
+      reviewed_at: {type: [string, 'null'], format: date-time}
+  claim_review_command:
+    type: object
+    additionalProperties: false
+    required: [schema_version, request_id, decision, reason]
+    properties:
+      schema_version: {type: string, const: claim-review-command.v1}
+      request_id: {type: string, minLength: 8, maxLength: 256}
+      decision: {type: string, enum: [accept, reject, supersede]}
+      reason: {type: string, minLength: 1, maxLength: 2000}
+  research_request:
+    type: object
+    additionalProperties: false
+    required: [schema_version, research_family, instrument_scope, focus, library_context_mode, selected_version_ids]
+    properties:
+      schema_version: {type: string, const: research-request.v1}
+      research_family: {$ref: '#/$defs/research_family'}
+      instrument_scope: {type: array, minItems: 1, maxItems: 32, uniqueItems: true, items: {type: string, minLength: 1, maxLength: 128}}
+      focus: {type: string, minLength: 1, maxLength: 4000}
+      horizon: {type: [string, 'null'], maxLength: 64}
+      library_context_mode: {type: string, enum: [none, auto, selected]}
+      allow_remote_library_content: {type: boolean, default: false}
+      selected_version_ids: {type: array, maxItems: 32, uniqueItems: true, items: {type: string, pattern: '^docver_[A-Za-z0-9_-]+$'}}
+  library_context_input:
+    type: object
+    additionalProperties: false
+    required: [version_id, evidence_id, excerpt, excerpt_hash, original_file_hash, locator_refs]
+    properties:
+      version_id: {type: string, pattern: '^docver_[A-Za-z0-9_-]+$'}
+      evidence_id: {type: string, minLength: 1, maxLength: 256}
+      excerpt: {type: string, minLength: 1, maxLength: 4000}
+      excerpt_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      original_file_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+      locator_refs: {type: array, maxItems: 100, items: {type: string, minLength: 1, maxLength: 2048}}
+  research_run_scope:
+    type: object
+    additionalProperties: false
+    required: [schema_version, run_id, research_family, library_context_mode, selected_version_ids]
+    properties:
+      schema_version: {type: string, const: research-run-scope.v1}
+      run_id: {type: string, minLength: 1, maxLength: 128}
+      research_family: {$ref: '#/$defs/research_family'}
+      library_context_mode: {type: string, enum: [none, auto, selected]}
+      allow_remote_library_content: {type: boolean, default: false}
+      selected_version_ids: {type: array, maxItems: 32, uniqueItems: true, items: {type: string, pattern: '^docver_[A-Za-z0-9_-]+$'}}
+      context_inputs: {type: array, maxItems: 12, default: [], items: {$ref: "#/$defs/library_context_input"}}

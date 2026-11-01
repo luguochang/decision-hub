@@ -1,0 +1,147 @@
+{
+  "schema_version": "research-gate-policy.v2",
+  "policy_id": "crypto_macro.prepared.gate",
+  "policy_version": "2.0.0",
+  "horizon_contract_version": "research-horizon-contract.v1",
+  "rules": [
+    {
+      "rule_id": "pit",
+      "rule_version": "1.0.0",
+      "category": "evidence",
+      "phase": "finalization",
+      "applies_to": [
+        "event",
+        "current_snapshot",
+        "historical_review"
+      ],
+      "blocking_for": [
+        "research_completeness",
+        "research_publication"
+      ],
+      "params": {
+        "input_basis": "frozen_task_snapshot_lineage"
+      }
+    },
+    {
+      "rule_id": "frozen-hard-coverage",
+      "rule_version": "1.0.0",
+      "category": "evidence",
+      "phase": "finalization",
+      "applies_to": [
+        "event",
+        "current_snapshot",
+        "historical_review"
+      ],
+      "blocking_for": [
+        "research_completeness",
+        "research_publication"
+      ],
+      "params": {
+        "requirements_basis": "frozen_task",
+        "freshness_basis": "frozen_requirement",
+        "reject_open_hard_conflicts": true
+      }
+    },
+    {
+      "rule_id": "citation-membership",
+      "rule_version": "1.0.0",
+      "category": "evidence",
+      "phase": "finalization",
+      "applies_to": [
+        "event",
+        "current_snapshot",
+        "historical_review"
+      ],
+      "blocking_for": [
+        "research_completeness",
+        "research_publication"
+      ],
+      "params": {
+        "input_basis": "accepted_run_evidence_or_original_input"
+      }
+    },
+    {
+      "rule_id": "citation-authority",
+      "rule_version": "1.0.0",
+      "category": "evidence",
+      "phase": "finalization",
+      "applies_to": [
+        "event",
+        "current_snapshot",
+        "historical_review"
+      ],
+      "blocking_for": [
+        "research_completeness",
+        "research_publication"
+      ],
+      "params": {
+        "input_basis": "frozen_registry_and_execution_attestation"
+      }
+    },
+    {
+      "rule_id": "citation-precision-review",
+      "rule_version": "1.0.0",
+      "category": "evidence",
+      "phase": "finalization",
+      "applies_to": [
+        "event",
+        "current_snapshot",
+        "historical_review"
+      ],
+      "blocking_for": [
+        "research_completeness",
+        "research_publication"
+      ],
+      "params": {
+        "proof_basis": "claim_locator_semantic_receipt"
+      }
+    },
+    {
+      "rule_id": "gap-to-tool-continuation",
+      "rule_version": "1.0.0",
+      "category": "agent_trajectory",
+      "phase": "finalization",
+      "applies_to": [
+        "event",
+        "current_snapshot",
+        "historical_review"
+      ],
+      "blocking_for": [
+        "research_completeness",
+        "research_publication"
+      ],
+      "params": {
+        "input_basis": "durable_requests_coverage_reservations"
+      }
+    },
+    {
+      "rule_id": "bounded-stop-consistency",
+      "rule_version": "1.0.0",
+      "category": "agent_trajectory",
+      "phase": "finalization",
+      "applies_to": [
+        "event",
+        "current_snapshot",
+        "historical_review"
+      ],
+      "blocking_for": [
+        "research_completeness",
+        "research_publication"
+      ],
+      "params": {
+        "input_basis": "original_budget_and_verified_cancel",
+        "unknown_usage": "not_available"
+      }
+    }
+  ],
+  "kernel_safeguards": {
+    "pit_required": true,
+    "hard_coverage_required": true,
+    "open_hard_conflicts_rejected": true,
+    "native_independent_review_required": true,
+    "directional_calibration_required": true,
+    "execution_permission_required": true,
+    "existing_kernel_gate_required": true,
+    "probability_cap": 0.65
+  }
+}

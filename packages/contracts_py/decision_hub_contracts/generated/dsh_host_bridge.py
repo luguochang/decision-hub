@@ -15,6 +15,27 @@ class DshHostBridgeContracts(BaseModel):
     schema_version: Literal["dsh-host-bridge.v1"]
 
 
+class DshModelDispatchBinding(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["dsh-model-dispatch-binding.v1"]
+    run_id: Annotated[str, Field(max_length=128, min_length=1)]
+    dsh_session_id: Annotated[str, Field(max_length=256, min_length=1)]
+    execution_session_id: Annotated[str | None, Field(max_length=256, min_length=1)] = None
+    parent_session_id: Annotated[str | None, Field(max_length=256, min_length=1)] = None
+    request_hash: Annotated[str, Field(pattern="^[a-f0-9]{64}$")]
+    generation: Annotated[int, Field(ge=1)]
+    plugin_build_hash: Annotated[str, Field(pattern="^[a-f0-9]{64}$")]
+    purpose: Literal["conversation", "compaction", "session-title"]
+    provider: Annotated[str, Field(max_length=256, min_length=1)]
+    model: Annotated[str, Field(max_length=256, min_length=1)]
+    reasoning_effort: Annotated[str | None, Field(max_length=128)]
+    temperature: float | None
+    max_tokens: Annotated[int | None, Field(ge=1)]
+    stop_sequences_hash: Annotated[str | None, Field(pattern="^[a-f0-9]{64}$")]
+
+
 class DshResearchIntake(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -121,6 +142,8 @@ class DshSessionStatus(BaseModel):
     last_seq: Annotated[int, Field(ge=0)]
     observed_at: AwareDatetime
     error_code: Annotated[str | None, Field(max_length=128)]
+    model_step_timeout_ms: Annotated[int | None, Field(ge=1000, le=600000)] = None
+    model_step_timeout_source: Literal["submission", "durable_link", "legacy_default"] | None = None
 
 
 class DshBridgeError(BaseModel):
@@ -149,6 +172,81 @@ class DshSessionCompletion(BaseModel):
     error: DshBridgeError | None
 
 
+class DshInstructionChange(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    action: Literal["set"]
+    scope: Annotated[str, Field(max_length=4096, min_length=1)]
+    path: Annotated[str, Field(max_length=4096, min_length=1)]
+    digest: Annotated[str, Field(pattern="^[a-f0-9]{40}$")]
+
+
+class DshInstructionSource(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: Literal["agent-instructions"]
+    form: Literal["instructions"]
+    baseline: Literal[True]
+    baselineIdentity: Annotated[str, Field(max_length=4096, min_length=1)]
+    changes: Annotated[list[DshInstructionChange], Field(max_length=4096)]
+
+
+class DshInstructionText(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["text"]
+    text: Annotated[str, Field(max_length=1048576, min_length=1)]
+
+
+class DshInstructionMessage(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    role: Literal["user"]
+    id: Annotated[str, Field(max_length=256, min_length=1)]
+    source: DshInstructionSource
+    content: Annotated[list[DshInstructionText], Field(max_length=1, min_length=1)]
+
+
+class DshInstructionEvent(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    seq: Annotated[int, Field(ge=0, le=9007199254740991)]
+    time: Annotated[float, Field(ge=0.0)]
+    type: Literal["user/message"]
+    data: DshInstructionMessage
+
+
+class DshReviewerInstructionBinding(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    reviewer_call_id: Annotated[str, Field(max_length=256, min_length=1)]
+    reviewer_call_seq: Annotated[int, Field(ge=1, le=9007199254740991)]
+    reviewer_generation: Annotated[int, Field(ge=1, le=9007199254740991)]
+    reviewer_request_id: Annotated[str, Field(max_length=256, min_length=1)]
+    parent_prefix_last_seq: Annotated[int, Field(ge=0, le=9007199254740991)]
+    parent_prefix_sha256: Annotated[str, Field(pattern="^[a-f0-9]{64}$")]
+    baseline_event: DshInstructionEvent
+
+
+class DshReviewerInstructionBindings(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_version: Literal["dsh-reviewer-instruction-bindings.v1"]
+    run_id: Annotated[str, Field(max_length=128, min_length=1)]
+    dsh_session_id: Annotated[str, Field(max_length=256, min_length=1)]
+    generation: Annotated[int, Field(ge=1, le=9007199254740991)]
+    request_id: Annotated[str, Field(max_length=256, min_length=1)]
+    request_hash: Annotated[str, Field(pattern="^[a-f0-9]{64}$")]
+    bindings: Annotated[list[DshReviewerInstructionBinding], Field(max_length=100, min_length=1)]
+
+
 class DshSessionResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -160,11 +258,12 @@ class DshSessionResult(BaseModel):
     last_seq: Annotated[int, Field(ge=0)]
     final_response: Annotated[str, Field(max_length=1048576)]
     finish_reason: Annotated[str | None, Field(max_length=128)]
-    events_json: Annotated[str, Field(max_length=8388608, min_length=2)]
+    events_json: Annotated[str, Field(min_length=2)]
     started_at: AwareDatetime
     finished_at: AwareDatetime
     trace_ref: Annotated[str, Field(max_length=2048, min_length=1)]
     result_hash: Annotated[str, Field(pattern="^[a-f0-9]{64}$")]
+    reviewer_instruction_bindings: DshReviewerInstructionBindings | None = None
 
 
 class DshRunSessionLinkView(BaseModel):
@@ -180,6 +279,7 @@ class DshRunSessionLinkView(BaseModel):
     upstream_identity: DshUpstreamIdentity
     deadline_at: AwareDatetime | None
     max_tool_calls: Annotated[int | None, Field(ge=1, le=100)]
+    model_step_timeout_ms: Annotated[int | None, Field(ge=1000, le=600000)] = None
     tool_calls_started: Annotated[int, Field(ge=0)]
     accepted_at: AwareDatetime | None
     last_seen_at: AwareDatetime | None
@@ -199,7 +299,17 @@ class DshBusinessFailure(BaseModel):
     )
     capability_id: Annotated[str, Field(max_length=256, min_length=1)]
     error_code: Annotated[str, Field(max_length=128, min_length=1)]
-    origin: Literal["provider", "transport", "mcp", "dsh", "gateway", "pit", "orchestration"]
+    origin: Literal[
+        "provider",
+        "transport",
+        "mcp",
+        "dsh",
+        "gateway",
+        "pit",
+        "orchestration",
+        "source_registry",
+        "storage",
+    ]
     cause_code: Annotated[str | None, Field(max_length=128)]
     retryable: bool
 

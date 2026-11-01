@@ -12,8 +12,10 @@
   "dependencies": {
     "@decision-hub/contracts-ts": "workspace:*",
     "@tanstack/react-query": "^5.66.0",
+    "@xyflow/react": "12.8.6",
     "echarts": "^5.6.0",
     "echarts-for-react": "^3.0.2",
+    "elkjs": "0.10.2",
     "lucide-react": "^0.468.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

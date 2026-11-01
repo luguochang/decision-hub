@@ -1,0 +1,24 @@
+{
+  "kind": "historical_actual_prefix_and_provider_originals_with_synthetic_registry_io_facade",
+  "run_id": "run_13b596fd7295472d9db23713864d792d",
+  "closed_source_manifest": "D:\\DecisionHub-v3-development\\evidence\\legacy-native-fixture\\177d5889-6a0a-47c7-abf4-f73ba31530f7\\manifest.json",
+  "closed_source_manifest_sha256": "b109ec5dff99506b71aa088ac45e4342bd798fc3984f217447091ae0f462946c",
+  "original_packet_sha256": "21eb8f2cc72d5f5fe4a837214680b93164f142929f64dd92cdb2030b0f49061b",
+  "raw_sha256": "9c89436a9dc661a31b3a455d60d3c38f0d99b1c32a8c5e8457586ba430b7dceb",
+  "raw_bytes": 4414151,
+  "gzip_sha256": "5bc32681c40f53f97fa0a419dc9df3379542f178eda55f7c00653708dddd8240",
+  "gzip_bytes": 585524,
+  "gzip_mtime": 0,
+  "archive_sha256": [
+    "169fef9437dbc9902e84d99abdeea435e98024748bbfd16a5b545e24b73907a2",
+    "7f5ecc465a27bd88b124e456b5ab3b85bb6d3d8ec4af5974e7f5bf72f91ab6e0",
+    "3fd724f7031b60f254c43151e2a843343e64566d4ef055c66167dddb75dbc421"
+  ],
+  "provider_original_count": 39,
+  "limits": [
+    "No true SDK Session in this prototype replay",
+    "Token meter is an integer stand-in",
+    "Original actual failure throw stack was not retained",
+    "Historical running link is a facade, not a live status"
+  ]
+}

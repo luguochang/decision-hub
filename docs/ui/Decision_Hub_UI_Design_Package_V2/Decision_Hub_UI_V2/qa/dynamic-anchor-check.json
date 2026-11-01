@@ -1,0 +1,20 @@
+[
+  {
+    "scene": "home",
+    "main_exists": true,
+    "skip_focused_main": true,
+    "hash_unchanged": true
+  },
+  {
+    "scene": "report",
+    "main_exists": true,
+    "skip_focused_main": true,
+    "hash_unchanged": true
+  },
+  {
+    "scene": "graph",
+    "main_exists": true,
+    "skip_focused_main": true,
+    "hash_unchanged": true
+  }
+]

@@ -1,0 +1,66 @@
+[
+  {
+    "name": "hero-landscape",
+    "source": "references/01_home.png",
+    "source_size": [
+      1448,
+      1086
+    ],
+    "bbox_xyxy": [
+      880,
+      61,
+      1448,
+      191
+    ],
+    "output": "assets/backgrounds/hero-landscape.png",
+    "use": "production-decoration"
+  },
+  {
+    "name": "logo-reference",
+    "source": "references/01_home.png",
+    "source_size": [
+      1448,
+      1086
+    ],
+    "bbox_xyxy": [
+      18,
+      17,
+      53,
+      53
+    ],
+    "output": "assets/reference-crops/logo-reference.png",
+    "use": "reference-only-not-interactive"
+  },
+  {
+    "name": "cta-reference",
+    "source": "references/01_home.png",
+    "source_size": [
+      1448,
+      1086
+    ],
+    "bbox_xyxy": [
+      243,
+      318,
+      599,
+      421
+    ],
+    "output": "assets/reference-crops/cta-reference.png",
+    "use": "reference-only-not-interactive"
+  },
+  {
+    "name": "evidence-reference",
+    "source": "references/01_home.png",
+    "source_size": [
+      1448,
+      1086
+    ],
+    "bbox_xyxy": [
+      858,
+      320,
+      1136,
+      420
+    ],
+    "output": "assets/reference-crops/evidence-reference.png",
+    "use": "reference-only-not-interactive"
+  }
+]

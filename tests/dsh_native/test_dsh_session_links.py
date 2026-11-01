@@ -237,6 +237,81 @@ def test_stale_status_is_ignored_and_terminal_is_immutable() -> None:
         )
 
 
+def test_failed_terminal_can_be_enriched_with_a_recovered_partial_result() -> None:
+    service, run_id, submit = reserved(database())
+    failed = DshSessionCompletion(
+        schema_version="dsh-session-completion.v1",
+        run_id=run_id,
+        dsh_session_id=submit.deterministic_session_id,
+        terminal_status="failed",
+        generation=1,
+        last_seq=12,
+        trace_ref=f"dsh://sessions/{submit.deterministic_session_id}?last_seq=12",
+        result_ref=None,
+        result_hash=None,
+        completed_at=NOW + timedelta(seconds=20),
+        error=DshBridgeError(
+            code="dsh_turn_error", message="provider failed", retryable=False
+        ),
+    )
+    service.complete(failed)
+
+    recovered = service.complete(
+        failed.model_copy(
+            update={
+                "result_ref": f"dsh-host://runs/{run_id}/result",
+                "result_hash": RESULT_HASH,
+            }
+        )
+    )
+
+    assert recovered.state == "failed"
+    assert recovered.error_code == "dsh_turn_error"
+    assert recovered.result_ref == f"dsh-host://runs/{run_id}/result"
+    assert recovered.result_hash == RESULT_HASH
+    with pytest.raises(ValueError, match="dsh_terminal_conflict"):
+        service.complete(
+            failed.model_copy(
+                update={
+                    "result_ref": f"dsh-host://runs/{run_id}/other-result",
+                    "result_hash": "e" * 64,
+                }
+            )
+        )
+
+
+def test_cancelled_terminal_can_be_enriched_with_a_recovered_partial_result() -> None:
+    service, run_id, submit = reserved(database())
+    cancelled = DshSessionCompletion(
+        schema_version="dsh-session-completion.v1",
+        run_id=run_id,
+        dsh_session_id=submit.deterministic_session_id,
+        terminal_status="cancelled",
+        generation=1,
+        last_seq=12,
+        trace_ref=f"dsh://sessions/{submit.deterministic_session_id}?last_seq=12",
+        result_ref=None,
+        result_hash=None,
+        completed_at=NOW + timedelta(seconds=20),
+        error=None,
+    )
+    service.complete(cancelled)
+
+    recovered = service.complete(
+        cancelled.model_copy(
+            update={
+                "result_ref": f"dsh-host://runs/{run_id}/result",
+                "result_hash": RESULT_HASH,
+            }
+        )
+    )
+
+    assert recovered.state == "cancelled"
+    assert recovered.error_code is None
+    assert recovered.result_ref == f"dsh-host://runs/{run_id}/result"
+    assert recovered.result_hash == RESULT_HASH
+
+
 def test_callback_api_requires_secret_and_preserves_idempotency(tmp_path: Path) -> None:
     db = database(tmp_path / "callback.sqlite3")
     app = create_app(db, source_connectors=[], dsh_callback_secret="bridge-secret")
@@ -338,3 +413,37 @@ def test_status_callback_projects_non_terminal_progress(tmp_path: Path) -> None:
     assert response.status_code == 200
     assert response.json()["state"] == "running"
     assert response.json()["last_seq"] == 7
+
+
+def test_model_step_budget_survives_restart_and_rejects_drift(tmp_path):
+    path = tmp_path / "watchdog.sqlite3"
+    db = database(path)
+    run_id, _ = RunService(db, clock=lambda: NOW).create("watchdog-test")
+    submit = submit_for(run_id).model_copy(update={"model_step_timeout_ms": 600_000})
+    first = DshSessionLinkService(db, clock=lambda: NOW).reserve(submit, identity())
+    assert first.model_step_timeout_ms == 600_000
+    db.engine.dispose()
+    restarted = DshSessionLinkService(database(path), clock=lambda: NOW)
+    assert restarted.get(run_id).model_step_timeout_ms == 600_000
+    assert restarted.get_by_session(first.dsh_session_id).model_step_timeout_ms == 600_000
+    with pytest.raises(ValueError, match="dsh_model_step_budget_conflict"):
+        restarted.reserve(submit.model_copy(update={"model_step_timeout_ms": 150_000}), identity())
+    assert restarted.get(run_id).model_step_timeout_ms == 600_000
+    restarted.complete(completed(run_id, submit.deterministic_session_id))
+    with pytest.raises(ValueError, match="dsh_model_step_budget_conflict"):
+        restarted.reserve(submit_for(run_id, generation=2), identity())
+    next_turn = submit_for(run_id, generation=2).model_copy(
+        update={"model_step_timeout_ms": 600_000}
+    )
+    assert restarted.reserve(next_turn, identity()).model_step_timeout_ms == 600_000
+
+
+def test_legacy_unknown_model_step_budget_is_not_retroactively_attested():
+    from packages.kernel.decision_hub_kernel.persistence.db import DshSessionLinkRecord
+
+    db = database()
+    service, run_id, submit = reserved(db)
+    with db.session() as session:
+        session.get(DshSessionLinkRecord, run_id).model_step_timeout_ms = None
+    assert service.get(run_id).model_step_timeout_ms is None
+    assert service.reserve(submit, identity()).model_step_timeout_ms is None

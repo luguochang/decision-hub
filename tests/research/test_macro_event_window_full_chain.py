@@ -14,6 +14,7 @@ from packages.contracts_py.decision_hub_contracts import (
     EvidenceRequirement,
     ResearchCapabilityManifest,
     ResearchCapabilityQuery,
+    ResearchEvaluationCapabilityFixture,
 )
 from packages.kernel.decision_hub_kernel.application.dsh_sessions import DshSessionLinkService
 from packages.kernel.decision_hub_kernel.application.event_watch import EventWatchService
@@ -30,15 +31,21 @@ from packages.kernel.decision_hub_kernel.application.run import RunService
 from packages.kernel.decision_hub_kernel.decision.sufficiency import assess_evidence_sufficiency
 from packages.kernel.decision_hub_kernel.persistence.db import Database
 from packages.kernel.decision_hub_kernel.ports.research import ResearchCapabilityAdapter
+from packages.provider_adapters.historical import PortaraMacroEventWindowLoader
 from packages.provider_adapters.macro_market import (
     ExpectationPricingResearchAdapter,
     IntradayMacroResearchAdapter,
 )
-from packages.provider_adapters.research import CryptoMacroFactPack
+from packages.provider_adapters.research import (
+    CryptoMacroFactPack,
+    ReplayResearchCapabilityAdapter,
+)
+from packages.provider_adapters.research.replay import ReplayResearchFixture
 from packages.provider_adapters.routing import ProviderCapabilityRouter
 from packages.workbench_adapters.durable_research_gateway import (
     DurableResearchCapabilityGateway,
 )
+from tools.research_evaluation.build_core_replay_dataset import macro_fixture
 
 ROOT = Path(__file__).resolve().parents[2]
 EVENT_AT = datetime(2026, 9, 4, 12, 0, tzinfo=UTC)
@@ -97,6 +104,29 @@ def _manifest(
     )
 
 
+def _replay_manifest() -> ResearchCapabilityManifest:
+    return ResearchCapabilityManifest.model_validate(
+        {
+            "schema_version": "research-capability-manifest.v1",
+            "capability_id": "replay.research",
+            "version": "1.0.0-test",
+            "kind": "replay",
+            "implementation_ref": "adapter://runtime/replay-research",
+            "input_schema_ref": "research-capability-query.v1",
+            "output_schema_ref": "research-capability-result.v1",
+            "permissions": ["fixture:read"],
+            "allowed_domains": [],
+            "timeout_seconds": 5,
+            "cost_policy_ref": "no-external-cost.v1",
+            "freshness_policy_ref": "fixture-pit.v1",
+            "license_status": "approved",
+            "audit_status": "approved",
+            "replay_policy": "deterministic",
+            "secret_policy": "none",
+        }
+    )
+
+
 def _setup(tmp_path: Path, requirement: EvidenceRequirement):
     database = Database(f"sqlite+pysqlite:///{tmp_path / 'macro-chain.sqlite3'}")
     database.create_all()
@@ -146,6 +176,8 @@ async def _execute(
     allowed_domains: list[str],
     symbols: list[str],
     fields: list[str],
+    requested_event_offsets: tuple[str, ...] = OFFSETS,
+    query_event_id: str | None = "event-macro-chain",
 ):
     requirement = _requirement(requirement_id)
     database, run_id, session_id, watches, requirements = _setup(tmp_path, requirement)
@@ -189,8 +221,8 @@ async def _execute(
             mode="live",
             observed_at=NOW,
             cutoff_at=NOW,
-            event_id="event-macro-chain",
-            requested_event_offsets=list(OFFSETS),
+            event_id=query_event_id,
+            requested_event_offsets=list(requested_event_offsets),
         )
     )
     evidence = ResearchEvidenceService(database).list_run_evidence(run_id)
@@ -238,13 +270,13 @@ def _expectation_fetcher(*, missing_baseline: bool = False):
     async def fetch(_url: str) -> Mapping[str, object]:
         points = [
             {
-                "timestamp": (EVENT_AT - timedelta(minutes=5)).isoformat(),
-                "event_offset": "t-5m",
+                "timestamp": (EVENT_AT - timedelta(hours=24)).isoformat(),
+                "event_offset": "baseline",
                 "values": {"level": "0.34", "delta": "0"},
             },
             {
-                "timestamp": (EVENT_AT + timedelta(minutes=1)).isoformat(),
-                "event_offset": "t+1m",
+                "timestamp": (EVENT_AT - timedelta(minutes=5)).isoformat(),
+                "event_offset": "t-5m",
                 "values": {"level": "0.41", "delta": "0.07"},
             },
         ]
@@ -280,6 +312,97 @@ async def test_realtime_intraday_macro_full_chain_is_semantically_sufficient(
     assert len(evidence) == 4
     assert {fact.metric_family for fact in facts} == {"macro.rates", "macro.usd"}
     assert {fact.event_offset for fact in facts} == set(OFFSETS)
+    assert coverage.status == "sufficient"
+
+
+@pytest.mark.asyncio
+async def test_portara_replay_crosses_durable_gateway_and_pack_gate(
+    tmp_path: Path,
+) -> None:
+    rate_path = tmp_path / "USY02Y.txt"
+    usd_path = tmp_path / "DXA.txt"
+    rate_path.write_text(
+        "Date,Time,Open,High,Low,Close,Volume\n"
+        "20260904,0655,4.10,4.10,4.10,4.10,1\n"
+        "20260904,0701,4.04,4.04,4.04,4.04,1\n",
+        encoding="utf-8",
+    )
+    usd_path.write_text(
+        "Date,Time,Open,High,Low,Close,Volume\n"
+        "20260904,0655,100.00,100.00,100.00,100.00,1\n"
+        "20260904,0701,99.80,99.80,99.80,99.80,1\n",
+        encoding="utf-8",
+    )
+    archived = ResearchEvaluationCapabilityFixture.model_validate(
+        macro_fixture(
+            "durable-gateway-macro",
+            PortaraMacroEventWindowLoader(
+                us2y_path=rate_path,
+                dxy_path=usd_path,
+            ).load(EVENT_AT),
+        )
+    )
+    requirement = _requirement("macro_transmission")
+    database, run_id, session_id, watches, requirements = _setup(tmp_path, requirement)
+    adapter = ReplayResearchCapabilityAdapter(
+        capability_id="replay.research",
+        fixtures={},
+        requirement_fixtures={
+            "macro_transmission": ReplayResearchFixture(
+                evidence_candidates=tuple(archived.evidence_candidates),
+                facts=tuple(archived.facts or ()),
+            )
+        },
+    )
+    gateway = DurableResearchCapabilityGateway(
+        ResearchCapabilityGatewayService(
+            [_replay_manifest()],
+            [adapter],
+            enabled_capabilities=["replay.research"],
+            clock=lambda: NOW,
+        ),
+        DshSessionLinkService(database, clock=lambda: NOW),
+        ResearchEvidenceService(database),
+        ResearchObservabilityService(database, clock=lambda: NOW),
+        requirements=requirements,
+        event_watches=watches,
+        clock=lambda: NOW,
+    )
+
+    await gateway.execute(
+        ResearchCapabilityQuery(
+            schema_version="research-capability-query.v1",
+            request_id="portara-durable-gateway",
+            capability_id="replay.research",
+            requirement_id="macro_transmission",
+            query="wording does not select the archived fixture",
+            target_url=None,
+            symbols=[],
+            fields=[],
+            allowed_domains=[],
+            max_results=20,
+            max_cost_usd=0,
+            research_session_id=session_id,
+            round=1,
+            mode="replay",
+            observed_at=NOW,
+            cutoff_at=NOW,
+            event_id="event-macro-chain",
+            requested_event_offsets=list(OFFSETS),
+        )
+    )
+
+    evidence = ResearchEvidenceService(database).list_run_evidence(run_id)
+    facts = ResearchFactStore(database).list_run_facts(run_id)
+    coverage = assess_evidence_sufficiency(
+        [requirement], evidence, facts=facts, cutoff_at=NOW
+    )
+    assert len(evidence) == 2
+    assert len(facts) == 8
+    assert {item.source_id for item in evidence} == {
+        "tullett-prebon-usy02y-via-portara",
+        "iceus-dx-via-portara",
+    }
     assert coverage.status == "sufficient"
 
 
@@ -327,10 +450,11 @@ async def test_realtime_expectation_full_chain_is_semantically_sufficient(tmp_pa
         allowed_domains=["pricing.example"],
         symbols=["SEP26"],
         fields=["level", "delta"],
+        requested_event_offsets=("baseline", "t-5m"),
     )
 
     assert {fact.metric_family for fact in facts} == {"macro.policy_expectation"}
-    assert {fact.event_offset for fact in facts} == set(OFFSETS)
+    assert {fact.event_offset for fact in facts} == {"baseline", "t-5m"}
     assert coverage.status == "sufficient"
 
 

@@ -1,0 +1,40 @@
+{
+  "schema_version": "history-asset-refresh-reply.v2",
+  "owner_authenticated": true,
+  "asset": "BTC",
+  "outcome": "committed_verified",
+  "committed": true,
+  "automatic_retry": false,
+  "forecast_id": "hforecast2_4cc86e57e1144eb6497fa1d4596d81f90b90784fa9549642",
+  "cutoff_at": "2026-10-09T15:37:00Z",
+  "horizon_seconds": 86400,
+  "target": "24h_path_mae",
+  "financial_qualified": false,
+  "historical_pit_verified": false,
+  "fixture_mode": true,
+  "frequencies": [
+    {
+      "threshold": "0.02",
+      "baseline_n": 60,
+      "conditional_n": 30,
+      "probabilities": {
+        "baseline_long": "0.9918032786885245901639344262",
+        "baseline_short": "0.9918032786885245901639344262",
+        "conditional_long": "0.9838709677419354838709677419",
+        "conditional_short": "0.9838709677419354838709677419"
+      }
+    },
+    {
+      "threshold": "0.05",
+      "baseline_n": 60,
+      "conditional_n": 30,
+      "probabilities": {
+        "baseline_long": "0.008196721311475409836065573770",
+        "baseline_short": "0.008196721311475409836065573770",
+        "conditional_long": "0.01612903225806451612903225806",
+        "conditional_short": "0.01612903225806451612903225806"
+      }
+    }
+  ],
+  "user_message": "已保存并重新读取未来24小时路径逆向损失频率估计；尚未获得金融交付资格。"
+}

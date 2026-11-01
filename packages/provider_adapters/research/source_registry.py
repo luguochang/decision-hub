@@ -46,9 +46,21 @@ class ResearchSourceRegistry:
         contract: ResearchSourceRegistryContract,
         *,
         requirement_aliases: Mapping[str, str] | None = None,
+        excluded_paths: Mapping[str, tuple[str, ...]] | None = None,
+        exact_path_sources: tuple[str, ...] = (),
     ) -> None:
         self.contract = contract
         self.entries = tuple(contract.sources)
+        # Owned Pack locator configuration; public SourcePolicy DTO stays closed.
+        self._excluded_paths = {key: tuple(paths) for key, paths in (excluded_paths or {}).items()}
+        self._exact_path_sources = frozenset(exact_path_sources)
+        known = {source.source_ref for source in self.entries}
+        if (set(self._excluded_paths) - known or self._exact_path_sources - known
+                or any(not path.startswith("/") or "?" in path or "#" in path
+                       for paths in self._excluded_paths.values() for path in paths)):
+            raise ResearchSourceRegistryError(
+                "research_source_path_scope_invalid", "Owned exact path configuration is invalid",
+            )
         self._by_ref: dict[str, ResearchSourcePolicy] = {}
         self._canonical_by_requirement: dict[str, str] = {}
         self._pack_by_requirement: dict[str, str] = {}
@@ -83,6 +95,19 @@ class ResearchSourceRegistry:
             )
         try:
             payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+            excluded_paths: dict[str, tuple[str, ...]] = {}
+            exact_path_sources: list[str] = []
+            for source in payload["sources"]:
+                excluded = source.pop("excluded_paths", [])
+                exact = source.pop("match_paths_exactly", False)
+                if (not isinstance(excluded, list)
+                        or any(not isinstance(path, str) for path in excluded)
+                        or type(exact) is not bool):
+                    raise ValueError("source_path_configuration")
+                if excluded:
+                    excluded_paths[source["source_ref"]] = tuple(excluded)
+                if exact:
+                    exact_path_sources.append(source["source_ref"])
             contract = ResearchSourceRegistryContract.model_validate(payload)
         except Exception as exc:
             raise ResearchSourceRegistryError(
@@ -95,12 +120,60 @@ class ResearchSourceRegistry:
                 "research_source_requirement_alias_invalid",
                 "source manifest requirement aliases are invalid",
             ) from exc
-        return cls(contract, requirement_aliases=aliases)
+        return cls(
+            contract, requirement_aliases=aliases, excluded_paths=excluded_paths,
+            exact_path_sources=tuple(exact_path_sources),
+        )
 
     def canonical_requirement_id(self, requirement_id: str) -> str:
         """Resolve either a Pack-local or canonical ID without guessing syntax."""
 
         return self._canonical_by_requirement.get(requirement_id, requirement_id)
+
+    def query_sources(self, usage: Usage, *, path_scope=None) -> list[dict]:
+        """Describe the same approved policy and aliases used by require()."""
+        rows = []
+        for source in self.entries:
+            if (
+                source.license_status != "approved"
+                or source.audit_status != "approved"
+                or not getattr(source, f"allow_{usage}")
+            ):
+                continue
+            requirements = set(source.requirement_ids)
+            requirements.update(
+                alias
+                for alias, pack in self._pack_by_requirement.items()
+                if pack in source.requirement_ids
+            )
+            for domain in source.domains:
+                paths = list(source.allowed_paths)
+                if path_scope is not None:
+                    prefix = path_scope.get(domain.removeprefix("www."))
+                    if prefix is None:
+                        continue
+                    paths = sorted(
+                        {
+                            max(path, prefix, key=len)
+                            for path in paths
+                            if path.startswith(prefix) or prefix.startswith(path)
+                        }
+                    )
+                    if not paths:
+                        continue
+                rows.append(
+                    {
+                        "source_ref": source.source_ref,
+                        "domains": [domain],
+                        "allowed_paths": paths,
+                        "requirement_ids": sorted(requirements),
+                        **({"excluded_paths": list(self._excluded_paths[source.source_ref])}
+                           if source.source_ref in self._excluded_paths else {}),
+                        **({"match_paths_exactly": True}
+                           if source.source_ref in self._exact_path_sources else {}),
+                    }
+                )
+        return rows
 
     def classify_locator(self, url: str) -> SourceLocatorDecision:
         matches = self._matches(url)
@@ -168,7 +241,9 @@ class ResearchSourceRegistry:
             source
             for source in self.entries
             if any(_domain_matches(host, domain) for domain in source.domains)
-            and any(_path_matches(path, prefix) for prefix in source.allowed_paths)
+            and path not in self._excluded_paths.get(source.source_ref, ())
+            and (path in source.allowed_paths if source.source_ref in self._exact_path_sources
+                 else any(_path_matches(path, prefix) for prefix in source.allowed_paths))
         ]
 
 

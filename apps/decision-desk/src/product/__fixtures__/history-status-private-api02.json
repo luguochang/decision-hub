@@ -1,0 +1,88 @@
+{
+  "schema_version": "history-product-status.v2",
+  "available": true,
+  "owner_authenticated": true,
+  "identity_origin": "history_signed_session",
+  "as_of": "2026-10-09T15:51:47.880722Z",
+  "historical_pit_verified": false,
+  "financial_qualified": false,
+  "data": {
+    "cutoff_count": 90,
+    "known_asof": null,
+    "scopes": [
+      {
+        "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+        "asset_label": "比特币",
+        "raw_complete_days": null,
+        "first_known_complete_days": null,
+        "missing_days": null,
+        "excluded_days": null,
+        "quality": "unavailable"
+      },
+      {
+        "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+        "asset_label": "以太坊",
+        "raw_complete_days": null,
+        "first_known_complete_days": null,
+        "missing_days": null,
+        "excluded_days": null,
+        "quality": "unavailable"
+      }
+    ],
+    "current_originals_verified": false,
+    "proof_label": "已保存的元数据快照；本次页面刷新未重新核验原始响应或模型"
+  },
+  "collection": null,
+  "models": [
+    {
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "state": "verification_required",
+      "joint_days": 60,
+      "low_days": 30,
+      "high_days": 30,
+      "count_gate_met": true,
+      "method_qualified": false,
+      "model_id": "hfit2_0c91b8a3bc7904dab275128822aaeb79daa85dad3c04d14a",
+      "model_hash": "64156ca152ee080118353a85a437df350572a50609e479f06d9a297e0c7e383b",
+      "model_known_at": "2026-10-09T15:36:46.327917Z",
+      "blocked_reason_label": "模型已保存；生成未来结果时将重新核验全部原件"
+    },
+    {
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "state": "not_fitted",
+      "joint_days": null,
+      "low_days": null,
+      "high_days": null,
+      "count_gate_met": false,
+      "method_qualified": false,
+      "model_id": null,
+      "model_hash": null,
+      "model_known_at": null,
+      "blocked_reason_label": "尚无服务器授予的模型"
+    }
+  ],
+  "forecast": {
+    "state": "verification_required",
+    "forecast_id": "hforecast2_4cc86e57e1144eb6497fa1d4596d81f90b90784fa9549642",
+    "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+    "cutoff_at": "2026-10-09T15:37:00Z",
+    "threshold": null,
+    "baseline_n": null,
+    "conditional_n": null,
+    "probabilities": null,
+    "blocked_reason_label": "快状态不生成预测；可信生产器需真实模型和最新31条已收盘分钟原件"
+  },
+  "excluded_windows": {
+    "total": 0,
+    "offset": 0,
+    "limit": 30,
+    "items": []
+  },
+  "actions": {
+    "can_reconcile": false,
+    "can_fit": false,
+    "can_forecast": false,
+    "can_refresh": false
+  },
+  "user_message": "历史原件、首次获知、样本分组和未来预测分别核验；当前未通过历史PIT与金融交付资格。"
+}

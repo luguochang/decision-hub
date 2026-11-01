@@ -2,16 +2,33 @@ from __future__ import annotations
 
 import uuid
 from collections.abc import Callable
+from contextlib import nullcontext
 from datetime import datetime, timedelta
 from typing import Any, cast
 
 from pydantic import BaseModel, ConfigDict
-from sqlalchemy import and_, or_, update
+from sqlalchemy import and_, or_, text, update
+from sqlalchemy.dialects.sqlite import insert
+from sqlalchemy.orm import Session
 
+from packages.kernel.decision_hub_kernel.application.market_scope import require_research_scope
+from packages.kernel.decision_hub_kernel.application.research_run_scope import (
+    SpotAdmissionResolver,
+    freeze_run_spot_admission_in_session,
+    require_run_research_scope_in_session,
+)
+from packages.kernel.decision_hub_kernel.application.study import (
+    bind_run_study,
+    ensure_occurrence,
+    study_for_event,
+)
 from packages.kernel.decision_hub_kernel.persistence.db import (
     Database,
+    DshSessionLinkRecord,
     RunRecord,
     RunStatus,
+    StudyOccurrenceRecord,
+    StudyRecord,
     utcnow,
 )
 
@@ -35,9 +52,18 @@ class RunClaim(BaseModel):
 
 
 class RunService:
-    def __init__(self, database: Database, *, clock: Callable[[], datetime] = utcnow) -> None:
+    def __init__(
+        self,
+        database: Database,
+        *,
+        clock: Callable[[], datetime] = utcnow,
+        spot_admission_resolver: SpotAdmissionResolver | None = None,
+        perpetual_admission_resolver: Callable[[Session, StudyRecord, datetime], Any] | None = None,
+    ) -> None:
         self.database = database
         self.clock = clock
+        self.spot_admission_resolver = spot_admission_resolver
+        self.perpetual_admission_resolver = perpetual_admission_resolver
 
     def create(
         self,
@@ -49,6 +75,8 @@ class RunService:
         parent_run_id: str | None = None,
         admission_origin: str = "manual",
         priority: int | None = None,
+        study_id: str | None = None,
+        session: Session | None = None,
     ) -> tuple[str, bool]:
         expected_priority = RUN_ADMISSION_PRIORITIES.get(admission_origin)
         if expected_priority is None:
@@ -56,30 +84,83 @@ class RunService:
         if priority is not None and priority != expected_priority:
             raise ValueError("run_priority_origin_mismatch")
         effective_priority = expected_priority
-        if idempotency_key:
-            with self.database.session() as session:
-                existing = (
-                    session.query(RunRecord).filter_by(idempotency_key=idempotency_key).first()
-                )
-                if existing:
-                    return existing.run_id, False
         run_id = f"run_{uuid.uuid4().hex}"
         now = self.clock()
         if available_at is not None and available_at.tzinfo is None:
             raise ValueError("run_available_at_timezone_required")
-        with self.database.session() as session:
+        owns_transaction = session is None
+        with self.database.session() if session is None else nullcontext(session) as session:
+            if owns_transaction and (
+                admission_origin != "manual" or strategy_version == "research.v1"
+            ):
+                session.execute(text("BEGIN IMMEDIATE"))
+            if idempotency_key:
+                existing = (
+                    session.query(RunRecord).filter_by(idempotency_key=idempotency_key).first()
+                )
+                if existing:
+                    if (
+                        existing.event_id != event_id
+                        or existing.strategy_version != strategy_version
+                        or (study_id is not None and existing.study_id != study_id)
+                    ):
+                        raise ValueError("run_idempotency_scope_mismatch")
+                    if strategy_version == "research.v1":
+                        require_run_research_scope_in_session(session, existing)
+                    return existing.run_id, False
             if parent_run_id is not None:
                 parent = session.get(RunRecord, parent_run_id)
                 if parent is None:
                     raise ValueError("parent_run_not_found")
                 if parent.event_id != event_id:
                     raise ValueError("parent_run_event_mismatch")
-            session.add(
-                RunRecord(
+                parent_study = bind_run_study(session, parent, now, legacy=not parent.study_id)
+                if study_id is not None and study_id != parent_study:
+                    raise ValueError("parent_study_mismatch")
+                study_id = parent_study
+            if study_id is None:
+                study_id = study_for_event(session, event_id, now)
+            study = session.get(StudyRecord, study_id)
+            if study is None:
+                raise ValueError("study_not_found")
+            current_spot = None
+            current_perpetual = None
+            if strategy_version == "research.v1":
+                if (self.perpetual_admission_resolver is not None
+                    and study.market == "crypto" and study.instrument in {"BTC-USDT-SWAP", "ETH-USDT-SWAP"}
+                    and study.horizon_scope in {"4h", "24h", "72h"} and study.identity_basis == "exact_perpetual_decision_v2"):
+                    from .perpetual_research_entry import authorize_perpetual_new_run_in_session
+                    current_perpetual = self.perpetual_admission_resolver(session, study, now)
+                    run_id = authorize_perpetual_new_run_in_session(session, study, current_perpetual, at=now)
+                elif (
+                    study.market == "crypto"
+                    and study.instrument in {"BTC-USDT", "ETH-USDT"}
+                    and self.spot_admission_resolver is not None
+                ):
+                    current_spot = self.spot_admission_resolver(session, study, now)
+                else:
+                    require_research_scope(study)
+            if study.status != "active" and admission_origin != "manual":
+                raise ValueError("study_not_active")
+            occurrence_id = ensure_occurrence(session, event_id, now)
+            session.execute(
+                insert(StudyOccurrenceRecord)
+                .values(
+                    study_id=study_id,
+                    occurrence_id=occurrence_id,
+                    linked_at=now,
+                )
+                .on_conflict_do_nothing()
+            )
+            inserted = session.execute(
+                insert(RunRecord)
+                .values(
                     run_id=run_id,
                     event_id=event_id,
+                    study_id=study_id,
                     idempotency_key=idempotency_key,
                     strategy_version=strategy_version,
+                    runtime_version="pending" if strategy_version == "research.v1" else "fake.v1",
                     available_at=available_at,
                     parent_run_id=parent_run_id,
                     admission_origin=admission_origin,
@@ -87,12 +168,33 @@ class RunService:
                     created_at=now,
                     updated_at=now,
                 )
+                .on_conflict_do_nothing(index_elements=["idempotency_key"])
             )
+            if int(getattr(inserted, "rowcount", 0)) != 1:
+                existing = session.query(RunRecord).filter_by(idempotency_key=idempotency_key).one()
+                if (
+                    existing.event_id != event_id
+                    or existing.strategy_version != strategy_version
+                    or existing.study_id != study_id
+                ):
+                    raise ValueError("run_idempotency_scope_mismatch")
+                if strategy_version == "research.v1":
+                    require_run_research_scope_in_session(session, existing)
+                return existing.run_id, False
+            if current_spot is not None:
+                created_run = session.get(RunRecord, run_id)
+                assert created_run is not None
+                freeze_run_spot_admission_in_session(
+                    session, run=created_run, study=study, current=current_spot
+                )
+            if current_perpetual is not None:
+                from .perpetual_research_entry import install_perpetual_new_run_in_session
+                created_run = session.get(RunRecord, run_id, populate_existing=True)
+                assert created_run is not None
+                install_perpetual_new_run_in_session(session, created_run, study, current_perpetual, at=now)
         return run_id, True
 
-    def for_event(
-        self, event_id: str, *, strategy_version: str | None = None
-    ) -> str | None:
+    def for_event(self, event_id: str, *, strategy_version: str | None = None) -> str | None:
         with self.database.session() as session:
             query = session.query(RunRecord).filter_by(event_id=event_id)
             if strategy_version is not None:
@@ -139,11 +241,7 @@ class RunService:
                 lease_expires_at=now + timedelta(seconds=lease_seconds),
             )
         with self.database.session() as session:
-            result = session.execute(
-                update(RunRecord)
-                .where(*predicates)
-                .values(**values)
-            )
+            result = session.execute(update(RunRecord).where(*predicates).values(**values))
             claimed = cast(Any, result).rowcount
         return claimed == 1
 
@@ -153,6 +251,7 @@ class RunService:
         strategy_version: str,
         worker_id: str,
         lease_seconds: int,
+        min_priority: int | None = None,
     ) -> RunClaim | None:
         if not strategy_version:
             raise ValueError("run_strategy_required")
@@ -162,11 +261,13 @@ class RunService:
             raise ValueError("run_lease_invalid")
         now = self.clock()
         expires = now + timedelta(seconds=lease_seconds)
+        priority_filter = () if min_priority is None else (RunRecord.priority >= min_priority,)
         with self.database.session() as session:
             candidates = (
                 session.query(RunRecord)
                 .filter(
                     RunRecord.strategy_version == strategy_version,
+                    *priority_filter,
                     or_(RunRecord.available_at.is_(None), RunRecord.available_at <= now),
                     or_(
                         RunRecord.status == RunStatus.admitted.value,
@@ -191,6 +292,7 @@ class RunService:
                     .where(
                         RunRecord.run_id == candidate.run_id,
                         RunRecord.strategy_version == strategy_version,
+                        *priority_filter,
                         or_(
                             RunRecord.status == RunStatus.admitted.value,
                             and_(
@@ -238,7 +340,7 @@ class RunService:
             return int(getattr(changed, "rowcount", 0)) == 1
 
     def admitted_targets(
-        self, *, strategy_version: str | None = None
+        self, *, strategy_version: str | None = None, recover_expired: bool = False
     ) -> list[tuple[str, str]]:
         """Return durable event/run pairs that still need their first execution.
 
@@ -247,7 +349,16 @@ class RunService:
         scheduler behavior.
         """
         with self.database.session() as session:
-            query = session.query(RunRecord).filter(RunRecord.status == RunStatus.admitted.value)
+            eligible = RunRecord.status == RunStatus.admitted.value
+            if recover_expired:
+                eligible = or_(
+                    eligible,
+                    and_(
+                        RunRecord.status == RunStatus.running.value,
+                        RunRecord.lease_expires_at <= self.clock(),
+                    ),
+                )
+            query = session.query(RunRecord).filter(eligible)
             query = query.filter(
                 or_(RunRecord.available_at.is_(None), RunRecord.available_at <= self.clock())
             )
@@ -259,6 +370,61 @@ class RunService:
                 RunRecord.run_id.asc(),
             ).all()
             return [(row.event_id, row.run_id) for row in rows]
+
+    def fail_if_owned(
+        self,
+        run_id: str,
+        worker_id: str | None,
+        *,
+        error_code: str,
+        require_current_lease: bool = False,
+    ) -> bool:
+        now = self.clock()
+        lease_guard = (RunRecord.lease_expires_at > now,) if require_current_lease else ()
+        with self.database.session() as session:
+            changed = session.execute(
+                update(RunRecord)
+                .where(
+                    RunRecord.run_id == run_id,
+                    RunRecord.lease_owner == worker_id,
+                    RunRecord.status == RunStatus.running.value,
+                    RunRecord.artifact_id.is_(None),
+                    *lease_guard,
+                )
+                .values(
+                    status=RunStatus.failed.value,
+                    error_code=error_code,
+                    updated_at=now,
+                    finished_at=now,
+                    lease_owner=None,
+                    lease_expires_at=None,
+                )
+            )
+            if int(getattr(changed, "rowcount", 0)) != 1:
+                return False
+            # The Worker owns the Run terminal CAS.  If native execution has
+            # not already reached a terminal state, close its durable Link in
+            # the same transaction so a failed Run cannot remain "running".
+            # An authenticated native terminal is immutable and is therefore
+            # never rewritten by a later product/mapping failure.
+            session.execute(
+                update(DshSessionLinkRecord)
+                .where(
+                    DshSessionLinkRecord.run_id == run_id,
+                    DshSessionLinkRecord.terminal_at.is_(None),
+                    DshSessionLinkRecord.state.not_in(
+                        ("completed", "failed", "cancelled")
+                    ),
+                )
+                .values(
+                    state="failed",
+                    error_code=error_code,
+                    terminal_at=now,
+                    last_seen_at=now,
+                    updated_at=now,
+                )
+            )
+            return True
 
     def set_status(self, run_id: str, status: RunStatus, *, error_code: str | None = None) -> None:
         with self.database.session() as session:

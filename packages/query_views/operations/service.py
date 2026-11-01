@@ -22,6 +22,9 @@ EXPECTED_SERVICES: tuple[tuple[str, str], ...] = (
     ("hub-api", "api"),
     ("hub-realtime-worker", "realtime_worker"),
     ("hub-research-worker", "research_worker"),
+    ("hub-research-priority-worker", "research_worker"),
+    ("hub-documents", "documents_worker"),
+    ("hub-historical-worker", "historical_worker"),
     ("hub-evolution-worker", "evolution_worker"),
 )
 

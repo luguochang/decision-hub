@@ -20,18 +20,24 @@ async function filesUnder(root) {
   return files
 }
 
+const generatedIdentity = resolve(packageRoot, 'src/generated-build-identity.ts')
 const inputs = [
-  ...(await filesUnder(resolve(packageRoot, 'src/host'))),
-  resolve(packageRoot, 'src/index.ts'),
-  resolve(packageRoot, 'src/research-tool.ts'),
-  resolve(packageRoot, 'src/synthesis-tool.ts'),
-  resolve(packageRoot, 'src/client/index.js'),
+  ...(await filesUnder(resolve(packageRoot, 'src'))),
+  ...(await filesUnder(resolve(repoRoot, 'packages/contracts_ts/src'))),
   resolve(packageRoot, 'package.json'),
   resolve(packageRoot, 'cordis.patch.yml'),
+  resolve(packageRoot, 'scripts/generate-build-identity.mjs'),
+  resolve(packageRoot, 'scripts/build-client.mjs'),
+  resolve(packageRoot, 'vite.host.config.ts'),
+  resolve(packageRoot, 'tsconfig.json'),
+  resolve(repoRoot, 'package.json'),
+  resolve(repoRoot, 'pnpm-lock.yaml'),
+  resolve(repoRoot, 'pnpm-workspace.yaml'),
+  resolve(repoRoot, 'packages/contracts_ts/package.json'),
   resolve(repoRoot, 'infra/dsh/presets/decision-research/agent.cordis.yml'),
   resolve(repoRoot, 'infra/dsh/presets/decision-research/preset.yml'),
   resolve(repoRoot, 'infra/dsh/upstream.lock.json'),
-].filter((path, index, values) => values.indexOf(path) === index)
+].filter((path, index, values) => path !== generatedIdentity && values.indexOf(path) === index)
   .sort((left, right) => relative(repoRoot, left).localeCompare(relative(repoRoot, right)))
 
 const hash = createHash('sha256')
@@ -50,5 +56,5 @@ const output = [
   `export const PLUGIN_BUILD_INPUTS = ${JSON.stringify(relativeInputs)} as const;`,
   '',
 ].join('\n')
-await writeFile(resolve(packageRoot, 'src/generated-build-identity.ts'), output, 'utf8')
+await writeFile(generatedIdentity, output, 'utf8')
 console.log(JSON.stringify({ buildHash, inputs: relativeInputs }, null, 2))

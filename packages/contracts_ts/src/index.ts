@@ -1,4 +1,61 @@
 import { z } from 'zod'
+export {
+  researchFactoryEventSourceSchema, researchFactoryStudySourceSchema, researchFactoryStudySourceV2Schema, researchFactoryScopeSourceV2Schema,
+  researchFactoryTriggerSourceSchema, researchFactoryLibraryScopeSourceSchema,
+  researchFactoryScopeSourceSchema, researchPackEvidenceRequirementSchema,
+  researchPackEvidencePolicyV3Schema, researchPackEvidenceResourceSchema,
+  researchInstructionFileSchema, researchFrozenRoleInstructionsSchema,
+  researchInstructionsSnapshotV2Schema, researchPackDefinitionV2Schema,
+  researchRequestPackReceiptV2Schema, researchTaskReceiptV2Schema,
+  researchCompiledPolicyReceiptV1Schema,
+  researchLibraryContextInputReceiptSchema,
+} from './generated/r2'
+export type {
+  ResearchFactoryEventSource, ResearchFactoryStudySource, ResearchFactoryStudySourceV2, ResearchFactoryScopeSourceV2,
+  ResearchFactoryTriggerSource, ResearchFactoryLibraryScopeSource,
+  ResearchFactoryScopeSource, ResearchPackEvidenceRequirement,
+  ResearchPackEvidencePolicyV3, ResearchPackEvidenceResource,
+  ResearchInstructionFile, ResearchFrozenRoleInstructions,
+  ResearchInstructionsSnapshotV2, ResearchPackDefinitionV2,
+  ResearchRequestPackReceiptV2, ResearchTaskReceiptV2,
+  ResearchCompiledPolicyReceiptV1,
+  ResearchLibraryContextInputReceipt,
+} from './generated/r2'
+export {
+  researchGatePolicySchema, researchRubricPolicySchema, researchKernelSafeguardsSchema,
+  researchTaskScopeSchema, researchTaskScopeV2Schema, researchPolicyResourceSchema, researchRoleRubricBindingSchema,
+  researchCompiledPolicySchema, researchCompiledRuleSchema, researchPolicyCodeIdentitySchema,
+  researchPolicyMethodBindingSchema, researchPolicyCheckReceiptSchema, researchPolicyCheckItemSchema,
+  researchPolicyEvidenceRefSchema,
+} from './generated/r2'
+export type {
+  ResearchGatePolicy, ResearchRubricPolicy, ResearchKernelSafeguards,
+  ResearchTaskScope, ResearchTaskScopeV2, ResearchPolicyResource, ResearchRoleRubricBinding,
+  ResearchCompiledPolicy, ResearchCompiledRule, ResearchPolicyCodeIdentity,
+  ResearchPolicyMethodBinding, ResearchPolicyCheckReceipt, ResearchPolicyCheckItem,
+  ResearchPolicyEvidenceRef,
+} from './generated/r2'
+export {
+  usageCollectionViewSchema,
+  researchUsageSnapshotSchema, researchUsageSnapshotPageSchema,
+  researchUsageViewSchema,
+  researchMarketCatalogSchema,
+  eventAssetViewSchema,
+  reportDeliveryPageSchema, readReceiptViewSchema, studyTrackingReceiptSchema,
+  analyticalOutlookListViewSchema, analyticalOutlookDetailViewSchema,
+  analyticalCohortListViewSchema, publicationSeparationViewSchema,
+  factVersionListViewSchema, factVersionViewSchema, archivedInputViewSchema,
+  studyListViewSchema, studyTimelineViewSchema,
+  sourceHistoryViewSchema, rawCaptureViewSchema, coverageManifestSchema,
+} from './generated/r2'
+export type {
+  UsageCollectionView,
+  ResearchUsageSnapshot, ResearchUsageSnapshotPage,
+  ResearchUsageView,
+  ResearchMarketScope, ResearchMarketCatalog,
+  AnalyticalOutlookView, AnalyticalOutlookDetailView, AnalyticalCohortView,
+  FactVersionView, StudyView, StudyTimelineView,
+} from './generated/r2'
 import {
   evidenceLineageSchema,
   orchestrationLineageSchema,
@@ -44,10 +101,14 @@ export {
   dshSessionPromptSchema,
   dshSessionResultSchema,
   dshSessionStatusSchema,
+  dshModelDispatchBindingSchema,
   dshSessionSubmitSchema,
   dshUpstreamIdentitySchema,
   causalCaseSchema,
   causalLinkSchema,
+  decisionGraphSchema,
+  decisionGraphEdgeSchema,
+  decisionGraphNodeSchema,
   conflictItemSchema,
   coverageAssessmentSchema,
   domainPackManifestSchema,
@@ -55,17 +116,23 @@ export {
   evidenceGapSchema,
   evidenceRequirementSchema,
   executionBudgetSchema,
+  executionBudgetV2Schema,
   horizonDecisionSchema,
   productExtensionManifestSchema,
   errorProvenanceSchema,
+  researchCapabilityInvocationSchema,
   researchCapabilityQuerySchema,
   researchCapabilityManifestSchema,
   researchCapabilityResultSchema,
   researchInputEvidenceSchema,
   researchPlanSchema,
+  researchActionSummarySchema,
+  researchProcessStepSchema,
   researchRoundSchema,
   researchRunCommandSchema,
   researchRunCommandResultSchema,
+  researchRunCommandReceiptSchema,
+  researchRunComparisonViewSchema,
   researchRunDetailViewSchema,
   researchRunQueuedSchema,
   researchRunViewSchema,
@@ -78,6 +145,20 @@ export {
   roleProfileSchema,
   toolInvocationSchema,
   toolResultSummarySchema,
+  analystClaimSchema,
+  claimReviewCommandSchema,
+  documentBlockSchema,
+  documentCorrectionSchema,
+  documentParseReceiptSchema,
+  documentQualitySchema,
+  documentUploadSchema,
+  documentUploadIntentSchema,
+  documentUploadReceiptSchema,
+  documentUploadPolicySchema,
+  researchDocumentSchema,
+  researchDocumentVersionSchema,
+  researchRequestSchema,
+  researchRunScopeSchema,
 } from './generated/r2'
 
 export type {
@@ -94,10 +175,14 @@ export type {
   DshSessionPrompt,
   DshSessionResult,
   DshSessionStatus,
+  DshModelDispatchBinding,
   DshSessionSubmit,
   DshUpstreamIdentity,
   CausalCase,
   CausalLink,
+  DecisionGraph,
+  DecisionGraphEdge,
+  DecisionGraphNode,
   ConflictItem,
   CoverageAssessment,
   DomainPackManifest,
@@ -105,6 +190,7 @@ export type {
   EvidenceGap,
   EvidenceRequirement,
   ExecutionBudget,
+  ExecutionBudgetV2,
   HorizonDecision,
   ProductExtensionManifest,
   ProviderAttempt,
@@ -112,9 +198,13 @@ export type {
   ResearchCapabilityManifest,
   ResearchInputEvidence,
   ResearchPlan,
+  ResearchActionSummary,
+  ResearchProcessStep,
   ResearchRound,
   ResearchRunCommand,
   ResearchRunCommandResult,
+  ResearchRunCommandReceipt,
+  ResearchRunComparisonView,
   ResearchRunDetailView,
   ResearchRunQueued,
   ResearchRunView,
@@ -127,6 +217,20 @@ export type {
   RoleProfile,
   ToolInvocation,
   ToolResultSummary,
+  AnalystClaim,
+  ClaimReviewCommand,
+  DocumentBlock,
+  DocumentCorrection,
+  DocumentParseReceipt,
+  DocumentQuality,
+  DocumentUpload,
+  DocumentUploadIntent,
+  DocumentUploadReceipt,
+  DocumentUploadPolicy,
+  ResearchDocument,
+  ResearchDocumentVersion,
+  ResearchRequest,
+  ResearchRunScope,
 } from './generated/r2'
 
 export {
@@ -202,7 +306,19 @@ export const marketQuoteSchema = z.object({
   bid: z.number().nullable(), ask: z.number().nullable(), last: z.number().nullable(),
   volume: z.number().nullable(), source_id: z.string(),
   quality_status: z.enum(['observed', 'estimated', 'unavailable']),
-  benchmark: z.enum(['first_executable', 'vwap_1m', 'last', 'none']),
+  benchmark: z.enum(['first_executable', 'vwap_1m', 'close_1m', 'last', 'none']),
+})
+export const macroEventViewSchema = z.object({
+  schema_version: z.literal('macro-event-view.v1'), macro_event_id: z.string().min(1),
+  family: z.string().min(1), scheduled_at: z.string().nullable(), source_id: z.string().min(1),
+  scheduled_date: z.string().nullable().optional(),
+  time_precision: z.enum(['exact', 'date', 'unknown']).optional(),
+  source_timezone: z.string().nullable().optional(),
+  invalidated_at: z.string().nullable().optional(), correction_ref: z.string().nullable().optional(),
+  source_url: z.string().nullable(), source_authority: z.string().min(1), unit: z.string().nullable(),
+  prior_value: z.number().nullable(), consensus_value: z.number().nullable(), actual_value: z.number().nullable(),
+  surprise: z.number().nullable(), surprise_z: z.number().nullable(), revision_flag: z.boolean(),
+  status: z.enum(['scheduled', 'released', 'revised', 'cancelled']), updated_at: z.string(),
 })
 export const notificationMessageSchema = z.object({
   artifact_id: z.string(), channel: z.string(), dedupe_key: z.string(),
@@ -227,6 +343,39 @@ export const forecastSchema = z.object({
   forecast_id: z.string(), artifact_id: z.string(), instrument: z.string(), horizon: z.string(),
   direction: directionSchema, probability: z.number().min(0).max(1), trigger: z.string(),
   invalidation: z.string(), expires_at: z.string(),
+})
+export const forecastAuditViewSchema = z.object({
+  schema_version: z.literal('forecast-audit-view.v1'), forecast_id: z.string().min(1),
+  horizon: z.string().min(1), forecast_direction: directionSchema,
+  strategy_version: z.string().nullable(), forecasted_at: z.string().nullable(), as_of: z.string().nullable(),
+  input_snapshot_id: z.string().nullable(), input_fingerprint: z.string().regex(/^[a-f0-9]{64}$/).nullable(),
+  evidence_cutoff_at: z.string().nullable(), feature_snapshot: z.record(z.number()),
+  trailing_direction: z.enum(['bullish', 'bearish', 'flat', 'unavailable']),
+  same_as_trailing_trend: z.boolean().nullable(), forecasted_before_outcome: z.boolean().nullable(),
+  immutable_snapshot: z.boolean(),
+})
+export const strategyCalibrationViewSchema = z.object({
+  schema_version: z.literal('strategy-calibration-view.v1'), receipt_id: z.string().min(1),
+  strategy_version: z.string().min(1), horizon: z.string().min(1),
+  dataset_hash: z.string().regex(/^[a-f0-9]{64}$/), sample_count: z.number().int().nonnegative(),
+  evaluated_sample_count: z.number().int().nonnegative(), fold_count: z.number().int().nonnegative(),
+  accuracy: z.number().min(0).max(1), accuracy_lower_bound: z.number().min(0).max(1),
+  brier_score: z.number().min(0).max(1), baseline_brier_score: z.number().min(0).max(1),
+  log_loss: z.number().nonnegative(), net_return_pct: z.number(), max_drawdown_pct: z.number().nonnegative(),
+  coverage_ratio: z.number().min(0).max(1), max_regime_share: z.number().min(0).max(1),
+  passed: z.boolean(), failure_reasons: z.array(z.string()), evaluated_at: z.string(),
+})
+export const reviewScheduleViewSchema = z.object({
+  schema_version: z.literal('review-schedule-view.v1'), review_plan_id: z.string().min(1),
+  parent_run_id: z.string().min(1), horizon: z.enum(['30m', '24h', '72h']),
+  trigger_type: z.enum(['next_review', 'macro_event', 'invalidation_evidence', 'outcome_due']),
+  trigger_ref: z.string().min(1), trigger_at: z.string(),
+  status: z.enum(['planned', 'admitted', 'completed', 'skipped', 'failed']),
+  child_run_id: z.string().nullable(), failure_code: z.string().nullable(), updated_at: z.string(),
+  replacement_run_id: z.string().nullable().optional(),
+  replacement_review_plan_id: z.string().nullable().optional(),
+  retry_of_plan_id: z.string().nullable().optional(),
+  retry_attempt: z.number().int().min(0).max(2).optional(),
 })
 
 export const runViewSchema = z.object({
@@ -287,6 +436,9 @@ export const runInspectorSchema = z.object({
 }).strict()
 
 export type Forecast = z.infer<typeof forecastSchema>
+export type ForecastAuditView = z.infer<typeof forecastAuditViewSchema>
+export type StrategyCalibrationView = z.infer<typeof strategyCalibrationViewSchema>
+export type ReviewScheduleView = z.infer<typeof reviewScheduleViewSchema>
 export type GateStatus = z.infer<typeof gateStatusSchema>
 export type RunView = z.infer<typeof runViewSchema>
 export type ArtifactView = z.infer<typeof artifactViewSchema>
@@ -297,6 +449,7 @@ export type RunInspector = z.infer<typeof runInspectorSchema>
 export type SourceManifest = z.infer<typeof sourceManifestSchema>
 export type SourceHealth = z.infer<typeof sourceHealthSchema>
 export type MarketQuote = z.infer<typeof marketQuoteSchema>
+export type MacroEventView = z.infer<typeof macroEventViewSchema>
 export type NotificationMessage = z.infer<typeof notificationMessageSchema>
 export type ProductHealth = z.infer<typeof productHealthSchema>
 export type PilotReadinessCheck = z.infer<typeof pilotReadinessCheckSchema>
@@ -325,6 +478,7 @@ export type {
   PromotionReviewRequest,
   ResearchMemo,
   ResearchMemoCreate,
+  ResearchCapabilityInvocation,
   ResearchCapabilityQuery,
   ResearchCapabilityResult,
   ResearchSnapshotManifest,
@@ -355,4 +509,258 @@ export type {
   ResearchValueEvaluation,
   ResearchVersionLineage,
   SourceAttemptView,
+} from './generated/r2'
+
+export {
+  researchBundlePackRowIdentitySchema,
+  researchBundleTaskRowIdentitySchema,
+  researchBundleCompiledRowIdentitySchema,
+  researchPreparedBundleIdentitySchema,
+  researchExecutionMethodDefinitionV2Schema,
+  researchExecutionMethodReceiptV2Schema,
+  researchExecutionRequestReceiptV2Schema,
+  researchExecutionPromptV2Schema,
+  researchExecutionPromptIntegrityV2Schema,
+} from './generated/r2'
+
+export type {
+  ResearchBundlePackRowIdentity,
+  ResearchBundleTaskRowIdentity,
+  ResearchBundleCompiledRowIdentity,
+  ResearchPreparedBundleIdentity,
+  ResearchExecutionMethodDefinitionV2,
+  ResearchExecutionMethodReceiptV2,
+  ResearchExecutionRequestReceiptV2,
+  ResearchExecutionPromptV2,
+  ResearchExecutionPromptIntegrityV2,
+} from './generated/r2'
+
+
+export {
+  researchContextTaskAnchorV1Schema,
+  researchContextSelectorIdentityV1Schema,
+  researchContextDeclaredPriorRefV1Schema,
+  researchContextEvidenceRowDeclarationV1Schema,
+  researchContextInputWitnessV1Schema,
+  researchContextSelectionRowIdentityV1Schema,
+  researchContextExecutionRowIdentityV1Schema,
+  researchContextIntegrityRowIdentityV1Schema,
+  researchContextSelectionReceiptV1Schema,
+  researchContextSelectionExecutionLinkV1Schema,
+} from './generated/r2'
+
+export type {
+  ResearchContextTaskAnchorV1,
+  ResearchContextSelectorIdentityV1,
+  ResearchContextDeclaredPriorRefV1,
+  ResearchContextEvidenceRowDeclarationV1,
+  ResearchContextInputWitnessV1,
+  ResearchContextSelectionRowIdentityV1,
+  ResearchContextExecutionRowIdentityV1,
+  ResearchContextIntegrityRowIdentityV1,
+  ResearchContextSelectionReceiptV1,
+  ResearchContextSelectionExecutionLinkV1,
+} from './generated/r2'
+
+
+export {
+  researchContextSelectorIdentityV2Schema,
+  researchContextSelectionReceiptV2Schema,
+} from './generated/r2'
+export type {
+  ResearchContextSelectorIdentityV2,
+  ResearchContextSelectionReceiptV2,
+} from './generated/r2'
+
+
+export {
+  researchContextGraphRowRefV3Schema,
+  researchContextGraphPriorRefV3Schema,
+  researchContextSelectionReceiptV3Schema,
+} from './generated/r2'
+export type {
+  ResearchContextGraphRowRefV3,
+  ResearchContextGraphPriorRefV3,
+  ResearchContextSelectionReceiptV3,
+} from './generated/r2'
+
+export {
+  researchContextExecutionRowIdentityV3Schema,
+  researchContextSelectionExecutionLinkV2Schema,
+  researchContextSelectionRowIdentityV3Schema,
+  researchExecutionMethodDefinitionV3Schema,
+  researchExecutionMethodReceiptV3Schema,
+  researchExecutionRequestReceiptV3Schema,
+  researchRequiredContextSelectionBindingV1Schema,
+} from './generated/r2'
+export type {
+  ResearchContextExecutionRowIdentityV3,
+  ResearchContextSelectionExecutionLinkV2,
+  ResearchContextSelectionRowIdentityV3,
+  ResearchExecutionMethodDefinitionV3,
+  ResearchExecutionMethodReceiptV3,
+  ResearchExecutionRequestReceiptV3,
+  ResearchRequiredContextSelectionBindingV1,
+} from './generated/r2'
+
+export { readCommandReceiptSchema } from './generated/r2'
+export type { ReadCommandReceipt } from './generated/r2'
+
+export {
+  revisionFeedbackEvaluationSchema,
+  revisionFeedbackEvaluationBasisSchema,
+  revisionFeedbackEvaluationBindingSchema,
+  revisionFeedbackSourceWitnessSchema,
+} from './generated/r2'
+export type {
+  RevisionFeedbackEvaluation,
+  RevisionFeedbackEvaluationBasis,
+  RevisionFeedbackEvaluationBinding,
+  RevisionFeedbackSourceWitness,
+} from './generated/r2'
+
+export { harnessComparisonCatalogSchema, harnessComparisonViewSchema, harnessComparisonStartSchema, harnessOwnerSessionPairSchema, harnessOwnerSessionReplySchema, type HarnessComparisonCatalog, type HarnessComparisonView, type HarnessComparisonStart, type HarnessOwnerSessionPair, type HarnessOwnerSessionReply } from "./generated/r2"
+export { harnessComparisonCancelSchema, type HarnessComparisonCancel } from "./generated/r2"
+
+export { studyReportComparisonViewSchema, type StudyReportComparisonView } from './generated/r2'
+export { notificationEnvelopeV2Schema, type NotificationEnvelopeV2 } from './generated/r2'
+
+export {
+  riskScopeSchema, riskScopesViewSchema, riskQuoteViewSchema, riskObservedWindowSchema,
+  riskResearchRefSchema, riskMonitorStatusSchema, riskAlertViewSchema, riskSummaryViewSchema,
+  riskTimelinePointSchema, riskMissingRangeSchema, riskTimelineViewSchema,
+  riskReceiptCommandSchema, riskReceiptViewSchema, riskMonitorCommandSchema,
+  riskMonitorCommandReceiptSchema,
+} from './generated/r2'
+export type {
+  RiskScope, RiskScopesView, RiskQuoteView, RiskObservedWindow, RiskResearchRef,
+  RiskMonitorStatus, RiskAlertView, RiskSummaryView, RiskTimelinePoint, RiskMissingRange,
+  RiskTimelineView, RiskReceiptCommand, RiskReceiptView, RiskMonitorCommand,
+  RiskMonitorCommandReceipt,
+} from './generated/r2'
+
+export { studyEffectTrackingCommandSchema, studyEffectTrackingPlanRefSchema, studyEffectTrackingMissingWindowSchema, studyEffectTrackingReceiptSchema, studyEffectTrackingRequestStatusSchema, studyEffectTrackingWindowStatusSchema, studyEffectTrackingGroupSchema, studyEffectTrackingStatusSchema } from './generated/r2'
+export type { StudyEffectTrackingCommand, StudyEffectTrackingPlanRef, StudyEffectTrackingMissingWindow, StudyEffectTrackingReceipt, StudyEffectTrackingRequestStatus, StudyEffectTrackingWindowStatus, StudyEffectTrackingGroup, StudyEffectTrackingStatus } from './generated/r2'
+export { riskResearchCommandSchema, riskResearchRequestSchema, riskResearchStatusSchema, riskResearchOwnerReceiptSchema } from './generated/r2'
+export type { RiskResearchCommand, RiskResearchRequest, RiskResearchStatus, RiskResearchOwnerReceipt } from './generated/r2'
+
+export {
+  researchProviderCallbackAckSchema, researchProviderCallbackReferenceSchema,
+  researchProviderFinishRecordedSchema, researchProviderFinishSubmitSchema,
+  researchProviderHostScopeSchema, researchProviderInputRecordedSchema,
+  researchProviderInputRefSchema, researchProviderInputSubmitSchema,
+  researchProviderToolEmissionRecordedSchema, researchProviderToolEmissionSubmitSchema,
+} from './generated/r2'
+export type {
+  ResearchProviderCallbackAck, ResearchProviderCallbackReference,
+  ResearchProviderFinishRecorded, ResearchProviderFinishSubmit, ResearchProviderHostScope,
+  ResearchProviderInputRecorded, ResearchProviderInputRef, ResearchProviderInputSubmit,
+  ResearchProviderToolEmissionRecorded, ResearchProviderToolEmissionSubmit,
+} from './generated/r2'
+
+export { independentReviewIssueV2Schema, independentReviewReceiptV2Schema } from './generated/r2'
+export type { IndependentReviewIssueV2, IndependentReviewReceiptV2 } from './generated/r2'
+
+export { researchDecisionSynthesisV1Schema } from './generated/r2'
+export type { ResearchDecisionSynthesisV1 } from './generated/r2'
+
+export { researchSkillHypothesisOutputV1Schema } from './generated/r2'
+
+export {
+  instrumentContractV1Schema, accountSnapshotV2Schema, positionContextV2Schema, utilityPolicyV2Schema,
+  decisionSourceRefV1Schema,
+  perpetualNativeToolSchemas,
+  decisionSettingsValuesV1Schema, decisionSettingsCommandV1Schema, decisionSettingsRevisionV1Schema,
+  decisionSettingsPartitionV1Schema, decisionSettingsCurrentViewV1Schema, decisionSettingsSaveReceiptV1Schema,
+  actionComparisonV2Schema, decisionMethodInputsV1Schema,
+  decisionActionContextV2Schema, actionCandidateV2Schema, actionCandidateSetV2Schema,
+  pendingPublicationTargetV1Schema, publicationBoundTargetV1Schema, publicationAnchorRuleV1Schema,
+  publicationAnchorReceiptV1Schema, publicationObservationReceiptV1Schema, frozenForecastV1Schema,
+  actionDomainVariableV1Schema, actionComparisonAllowedDomainV1Schema,
+  researchDecisionSynthesisV2Schema, actionReviewRequestV2Schema, actionReviewAuthorizationV2Schema,
+  actionComparisonDerivationV1Schema, decisionPublicationBindingsV2Schema,
+  decisionSnapshotV2Schema, decisionOpportunityV2Schema, decisionMethodInputsV2Schema, actionPlanRevisionV2Schema,
+  createPerpetualPaperAccountV1Schema, paperAccountSummaryV1Schema,
+  paperAccountCreationReceiptV1Schema, paperAccountListV1Schema,
+  perpetualResearchCommandV1Schema, perpetualResearchReceiptV1Schema, perpetualResearchCommandV2Schema, perpetualResearchReceiptV2Schema,
+  perpetualResearchCommandV3Schema, perpetualResearchReceiptV3Schema,
+  decisionCausalLinkV1Schema, decisionCausalAnalysisV1Schema, decisionReviewOriginalV1Schema, decisionReviewOriginalsV1Schema,
+} from './generated/r2'
+export type {
+  InstrumentContractV1, AccountSnapshotV2, PositionContextV2, UtilityPolicyV2,
+  DecisionSourceRefV1,
+  DecisionSettingsValuesV1, DecisionSettingsCommandV1, DecisionSettingsRevisionV1,
+  DecisionSettingsPartitionV1, DecisionSettingsCurrentViewV1, DecisionSettingsSaveReceiptV1,
+  ActionComparisonV2, DecisionMethodInputsV1,
+  DecisionActionContextV2, ActionCandidateV2, ActionCandidateSetV2,
+  PendingPublicationTargetV1, PublicationBoundTargetV1, PublicationAnchorRuleV1,
+  PublicationAnchorReceiptV1, PublicationObservationReceiptV1, FrozenForecastV1,
+  ActionDomainVariableV1, ActionComparisonAllowedDomainV1,
+  ResearchDecisionSynthesisV2, ActionReviewRequestV2, ActionReviewAuthorizationV2,
+  ActionComparisonDerivationV1, DecisionPublicationBindingsV2,
+  DecisionSnapshotV2, DecisionOpportunityV2, DecisionMethodInputsV2, ActionPlanRevisionV2,
+  CreatePerpetualPaperAccountV1, PaperAccountSummaryV1,
+  PaperAccountCreationReceiptV1, PaperAccountListV1,
+  PerpetualResearchCommandV1, PerpetualResearchReceiptV1, PerpetualResearchCommandV2, PerpetualResearchReceiptV2,
+  PerpetualResearchCommandV3, PerpetualResearchReceiptV3,
+  DecisionCausalLinkV1, DecisionCausalAnalysisV1, DecisionReviewOriginalV1, DecisionReviewOriginalsV1,
+} from './generated/r2'
+
+export { researchSkillLoadResponseV1Schema, researchSkillLoadResponseV2Schema, researchMethodViewV2Schema } from './generated/r2'
+export type { ResearchSkillLoadResponseV1, ResearchSkillLoadResponseV2, ResearchMethodViewV2, ResearchMethodTrialProvenance } from './generated/r2'
+export { researchSkillSelectedDeliveryV1Schema, researchSkillSelectedDeliveryLegacyV1Schema, researchSkillSelectedDeliveryResponseV1Schema, researchSkillSelectedProviderInputV1Schema, researchSkillLoadedDetailsV2Schema, researchSkillRecordRequestV2Schema, researchSkillSelectionV3Schema, researchSkillGenerationBindingV2Schema } from './generated/r2'
+export type { ResearchSkillSelectedDeliveryV1, ResearchSkillSelectedDeliveryLegacyV1, ResearchSkillSelectedDeliveryResponseV1, ResearchSkillSelectedProviderInputV1, ResearchSkillLoadedDetailsV2, ResearchSkillRecordRequestV2, ResearchSkillSelectionV3, ResearchSkillGenerationBindingV2 } from './generated/r2'
+
+export { perpetualSynthesisDraftV1Schema, perpetualPrepareArgumentsV1Schema, perpetualFinalizeArgumentsV1Schema, perpetualPreparationWitnessV1Schema, perpetualPreparationResultV1Schema, decisionModelAssumptionV1Schema, draftDecisionReferenceV1Schema } from './generated/r2'
+export type { PerpetualSynthesisDraftV1, PerpetualPrepareArgumentsV1, PerpetualFinalizeArgumentsV1, PerpetualPreparationWitnessV1, PerpetualPreparationResultV1, DecisionModelAssumptionV1, DraftDecisionReferenceV1 } from './generated/r2'
+
+export { perpetualReviewFindingsV1Schema } from './generated/r2'
+export type { PerpetualReviewFindingsV1 } from './generated/r2'
+export { perpetualReviewFindingsV2Schema } from './generated/r2'
+export type { PerpetualReviewFindingsV2 } from './generated/r2'
+
+export { eventAgendaEntryV1Schema, eventAgendaCoverageV1Schema, eventAgendaSnapshotV1Schema } from './generated/r2'
+export type { EventAgendaEntryV1, EventAgendaCoverageV1, EventAgendaSnapshotV1 } from './generated/r2'
+
+export { perpetualPlanWatchCommandV1Schema, perpetualPlanWatchReceiptV1Schema, perpetualPlanReviewTriggerV1Schema } from './generated/r2'
+export type { PerpetualPlanWatchCommandV1, PerpetualPlanWatchReceiptV1, PerpetualPlanReviewTriggerV1 } from './generated/r2'
+
+export { perpetualResearchClosureReceiptV1Schema } from './generated/r2'
+export type { PerpetualResearchClosureReceiptV1 } from './generated/r2'
+
+export {
+  actionReviewAuthorizationV3Schema, actionReviewRequestV3Schema, researchDecisionSynthesisV3Schema,
+  perpetualSynthesisDraftV2Schema, perpetualPrepareArgumentsV2Schema,
+  perpetualPreparationWitnessV2Schema, perpetualPreparationResultV2Schema,
+  eventScenarioActionBranchDraftV1Schema, eventScenarioActionBranchV1Schema,
+  eventScenarioActionPlanDraftV1Schema, eventScenarioActionPlanV1Schema,
+  eventScenarioApplicabilityDomainV1Schema, eventScenarioAuthoredOriginalV1Schema,
+  eventScenarioBranchComparisonV1Schema, eventScenarioBranchReviewScopeV1Schema,
+  eventScenarioConditionEvaluationV1Schema, eventScenarioDomainValueV1Schema,
+  eventScenarioIdentityV1Schema, eventScenarioManifestOriginalV1Schema,
+  eventScenarioMarginalDistributionV1Schema, eventScenarioMetricComparisonV1Schema,
+  eventScenarioMetricValueV1Schema, eventScenarioPlanReviewDomainV1Schema,
+  eventScenarioPredicateClauseV1Schema, eventScenarioPredicateDefinitionV1Schema,
+  eventScenarioPredicateV1Schema, eventScenarioPreparationManifestV1Schema,
+  eventScenarioQuoteV1Schema, eventScenarioRealizationV1Schema,
+  eventScenarioReviewScopeV1Schema, eventScenarioSelectionInputsV1Schema,
+  scenarioBranchSelectionV1Schema,
+} from './generated/r2'
+export type {
+  ActionReviewAuthorizationV3, ActionReviewRequestV3, ResearchDecisionSynthesisV3,
+  PerpetualSynthesisDraftV2, PerpetualPrepareArgumentsV2,
+  PerpetualPreparationWitnessV2, PerpetualPreparationResultV2,
+  EventScenarioActionBranchDraftV1, EventScenarioActionBranchV1,
+  EventScenarioActionPlanDraftV1, EventScenarioActionPlanV1,
+  EventScenarioApplicabilityDomainV1, EventScenarioAuthoredOriginalV1,
+  EventScenarioBranchComparisonV1, EventScenarioBranchReviewScopeV1,
+  EventScenarioConditionEvaluationV1, EventScenarioDomainValueV1,
+  EventScenarioIdentityV1, EventScenarioManifestOriginalV1,
+  EventScenarioMarginalDistributionV1, EventScenarioMetricComparisonV1,
+  EventScenarioMetricValueV1, EventScenarioPlanReviewDomainV1,
+  EventScenarioPredicateClauseV1, EventScenarioPredicateDefinitionV1,
+  EventScenarioPredicateV1, EventScenarioPreparationManifestV1,
+  EventScenarioQuoteV1, EventScenarioRealizationV1,
+  EventScenarioReviewScopeV1, EventScenarioSelectionInputsV1,
+  ScenarioBranchSelectionV1,
 } from './generated/r2'

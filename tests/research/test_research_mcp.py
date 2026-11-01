@@ -99,7 +99,7 @@ def _manifest() -> ResearchCapabilityManifest:
     )
 
 
-def _server(*, enabled: bool = True, bridge_key: str | None = None):
+def _server(*, enabled: bool = True, bridge_key: str | None = None, baseline_service=None):
     adapter = ReplayResearchCapabilityAdapter(
         capability_id="replay.research", fixtures={QUERY: [_candidate()]}
     )
@@ -108,7 +108,7 @@ def _server(*, enabled: bool = True, bridge_key: str | None = None):
         [adapter],
         enabled_capabilities=["replay.research"] if enabled else [],
     )
-    return build_research_mcp_server(gateway, bridge_key=bridge_key)
+    return build_research_mcp_server(gateway, bridge_key=bridge_key, baseline_service=baseline_service)
 
 
 def _arguments(query: str = QUERY) -> dict[str, object]:

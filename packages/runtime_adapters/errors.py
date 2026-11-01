@@ -52,6 +52,25 @@ def map_runtime_error(
             origin="transport",
             cause_code="timeout",
         )
+    if any(
+        marker in text
+        for marker in (
+            "connection error",
+            "connection reset",
+            "connection refused",
+            "connecterror",
+            "network error",
+        )
+    ):
+        return AgentExecutionError(
+            "provider_transport_error",
+            "provider connection failed",
+            retryable=True,
+            provider_id=provider_id,
+            model=model,
+            origin="transport",
+            cause_code=type(error).__name__.lower(),
+        )
     if isinstance(status, int) and status >= 500:
         return AgentExecutionError(
             "provider_unavailable",

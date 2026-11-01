@@ -41,6 +41,19 @@ class CandidateProposal(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
+    execution_scope: Literal["directional_synthesis", "research_harness"] | None = None
+    execution_rules: Annotated[
+        list[
+            Literal[
+                "cite_frozen_evidence",
+                "separate_missing_evidence",
+                "examine_counter_evidence",
+                "abstain_on_conflicting_evidence",
+            ]
+        ]
+        | None,
+        Field(min_length=1),
+    ] = None
     proposal_id: Annotated[str, Field(min_length=1)]
     candidate_type: Literal["strategy", "runtime", "profile", "doctrine", "provider_policy"]
     version: Annotated[str, Field(min_length=1)]
@@ -126,6 +139,7 @@ class EvolutionJob(BaseModel):
         "queued",
         "running",
         "retry_wait",
+        "waiting_inputs",
         "pending_owner_review",
         "completed",
         "failed",
@@ -152,7 +166,14 @@ class ServiceHeartbeat(BaseModel):
         extra="forbid",
     )
     service_id: Annotated[str, Field(min_length=1)]
-    role: Literal["api", "realtime_worker", "research_worker", "evolution_worker"]
+    role: Literal[
+        "api",
+        "realtime_worker",
+        "research_worker",
+        "documents_worker",
+        "historical_worker",
+        "evolution_worker",
+    ]
     instance_id: Annotated[str | None, Field(min_length=1)]
     version: Annotated[str | None, Field(min_length=1)]
     mode: Annotated[str | None, Field(min_length=1)]
@@ -183,6 +204,7 @@ class EvolutionJobCounts(BaseModel):
     queued: Annotated[int, Field(ge=0)]
     running: Annotated[int, Field(ge=0)]
     retry_wait: Annotated[int, Field(ge=0)]
+    waiting_inputs: Annotated[int | None, Field(ge=0)] = 0
     pending_owner_review: Annotated[int, Field(ge=0)]
     completed: Annotated[int, Field(ge=0)]
     failed: Annotated[int, Field(ge=0)]

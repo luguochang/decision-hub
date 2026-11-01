@@ -26,6 +26,7 @@ from packages.kernel.decision_hub_kernel.application.research_evidence import (
     research_evidence_content_hash,
     research_evidence_instance_id,
 )
+from packages.provider_adapters.research.raw_capture import CapturingAsyncClient
 
 JsonFetcher = Callable[[str], Awaitable[Mapping[str, object]]]
 
@@ -42,7 +43,7 @@ class _SeriesPoint:
 
 async def fetch_json(url: str) -> Mapping[str, object]:
     try:
-        async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
+        async with CapturingAsyncClient(timeout=15, follow_redirects=True) as client:
             response = await client.get(url)
             response.raise_for_status()
             payload = response.json()
@@ -57,7 +58,9 @@ async def fetch_json(url: str) -> Mapping[str, object]:
     except httpx.HTTPStatusError as exc:
         status = exc.response.status_code
         raise ResearchCapabilityError(
-            "provider_rate_limited" if status == 429 else "provider_upstream_unavailable"
+            "provider_rate_limited"
+            if status == 429
+            else "provider_upstream_unavailable"
             if status >= 500
             else "provider_request_rejected",
             f"intraday macro provider returned HTTP {status}",
@@ -96,6 +99,7 @@ class IntradayMacroResearchAdapter:
     capability_id = "macro.cross_asset_intraday"
     supported_modes = frozenset({"live"})
     supported_fields = frozenset({"level", "event_return"})
+    symbols_required = True
 
     def __init__(
         self,
@@ -267,9 +271,7 @@ def _points(
             continue
         typed_item = cast(Mapping[str, object], item)
         timestamp = (
-            typed_item.get("timestamp")
-            or typed_item.get("observed_at")
-            or typed_item.get("time")
+            typed_item.get("timestamp") or typed_item.get("observed_at") or typed_item.get("time")
         )
         if not isinstance(timestamp, str):
             continue
@@ -289,9 +291,7 @@ def _points(
         independence_group = (
             _optional_nonempty_string(typed_item.get("independence_group")) or source_id
         )
-        source_url = (
-            _optional_nonempty_string(typed_item.get("source_url")) or default_source_url
-        )
+        source_url = _optional_nonempty_string(typed_item.get("source_url")) or default_source_url
         event_offset = _optional_nonempty_string(typed_item.get("event_offset"))
         output.append(
             _SeriesPoint(
@@ -367,6 +367,8 @@ def _fact(
         "provider_id": candidate.source_id,
         "proxy_kind": "intraday_series",
     }
+    if query.event_id is not None:
+        attributes["event_id"] = query.event_id
     payload_schema_ref = "macro.intraday-series.v1"
     payload_hash = research_fact_payload_hash(
         requirement_id=query.requirement_id,

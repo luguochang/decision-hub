@@ -1,0 +1,1795 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.local/contracts/research_learning.schema.json",
+  "title": "ResearchLearningContractsV1",
+  "$defs": {
+    "original_ref": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "BehaviorOriginalRef",
+          "type": "string"
+        },
+        "hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "hash"
+      ],
+      "title": "OriginalRef",
+      "type": "object"
+    },
+    "learning_protocol": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-learning-protocol.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "registered_at": {
+          "format": "date-time",
+          "title": "Registered At",
+          "type": "string"
+        },
+        "scope_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Scope Id",
+          "type": "string"
+        },
+        "horizon": {
+          "enum": [
+            "30m",
+            "24h",
+            "72h"
+          ],
+          "title": "Horizon",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "parent_manifest": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "evaluation_protocol": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "source_method": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "parent_basis": {
+          "enum": [
+            "registered_template",
+            "consumed_in_source"
+          ],
+          "title": "Parent Basis",
+          "type": "string"
+        },
+        "allowed_resource_paths": {
+          "items": {
+            "enum": [
+              "SKILL.md",
+              "workflow.json"
+            ],
+            "type": "string"
+          },
+          "title": "Allowed Resource Paths",
+          "type": "array"
+        },
+        "allowed_operations": {
+          "items": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Allowed Operations",
+          "type": "array"
+        },
+        "allowed_capabilities": {
+          "items": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Allowed Capabilities",
+          "type": "array"
+        },
+        "max_attempts": {
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Max Attempts",
+          "type": "integer"
+        },
+        "financial_qualified": {
+          "const": false,
+          "title": "Financial Qualified",
+          "type": "boolean"
+        },
+        "payload_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Payload Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "registered_at",
+        "scope_id",
+        "horizon",
+        "target",
+        "parent_manifest",
+        "evaluation_protocol",
+        "source_method",
+        "parent_basis",
+        "allowed_resource_paths",
+        "allowed_operations",
+        "allowed_capabilities",
+        "max_attempts",
+        "financial_qualified",
+        "payload_hash"
+      ],
+      "title": "LearningProtocol",
+      "type": "object"
+    },
+    "learning_source_identity": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-learning-source-identity.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "portfolio": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "scope_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Scope Id",
+          "type": "string"
+        },
+        "horizon": {
+          "enum": [
+            "30m",
+            "24h",
+            "72h"
+          ],
+          "title": "Horizon",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "method": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "evaluation_protocol": {
+          "$ref": "#/$defs/original_ref"
+        }
+      },
+      "required": [
+        "schema_version",
+        "source",
+        "portfolio",
+        "scope_id",
+        "horizon",
+        "target",
+        "method",
+        "evaluation_protocol"
+      ],
+      "title": "LearningSourceIdentity",
+      "type": "object"
+    },
+    "learning_binding": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-learning-binding.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "job_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Job Id",
+          "type": "string"
+        },
+        "trigger_key": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Trigger Key",
+          "type": "string"
+        },
+        "protocol": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "source_kind": {
+          "enum": [
+            "action_outcome",
+            "execution_observation"
+          ],
+          "title": "Source Kind",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "source_snapshot": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "source_available_at": {
+          "format": "date-time",
+          "title": "Source Available At",
+          "type": "string"
+        },
+        "frozen_at": {
+          "format": "date-time",
+          "title": "Frozen At",
+          "type": "string"
+        },
+        "scope_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Scope Id",
+          "type": "string"
+        },
+        "horizon": {
+          "enum": [
+            "30m",
+            "24h",
+            "72h"
+          ],
+          "title": "Horizon",
+          "type": "string"
+        },
+        "parent_manifest": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "financial_qualified": {
+          "const": false,
+          "title": "Financial Qualified",
+          "type": "boolean"
+        },
+        "payload_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Payload Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "job_id",
+        "trigger_key",
+        "protocol",
+        "source_kind",
+        "source",
+        "source_snapshot",
+        "source_available_at",
+        "frozen_at",
+        "scope_id",
+        "horizon",
+        "parent_manifest",
+        "financial_qualified",
+        "payload_hash"
+      ],
+      "title": "LearningBinding",
+      "type": "object"
+    },
+    "learning_stage_receipt": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-learning-stage.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "job_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Job Id",
+          "type": "string"
+        },
+        "binding": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "phase": {
+          "enum": [
+            "context",
+            "dispatch",
+            "reflection",
+            "package",
+            "trial",
+            "consumed",
+            "comparison"
+          ],
+          "title": "Phase",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "previous": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/original_ref"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "job_attempt": {
+          "minimum": 1,
+          "title": "Job Attempt",
+          "type": "integer"
+        },
+        "recorded_at": {
+          "format": "date-time",
+          "title": "Recorded At",
+          "type": "string"
+        },
+        "payload_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Payload Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "job_id",
+        "binding",
+        "phase",
+        "payload",
+        "previous",
+        "job_attempt",
+        "recorded_at",
+        "payload_hash"
+      ],
+      "title": "LearningStageReceipt",
+      "type": "object"
+    },
+    "resource_change": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "enum": [
+            "SKILL.md",
+            "workflow.json"
+          ],
+          "title": "Path",
+          "type": "string"
+        },
+        "before_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Before Hash",
+          "type": "string"
+        },
+        "after_body": {
+          "minLength": 1,
+          "title": "After Body",
+          "type": "string"
+        },
+        "affected_nodes": {
+          "items": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Affected Nodes",
+          "type": "array"
+        },
+        "rationale": {
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "before_hash",
+        "after_body",
+        "affected_nodes",
+        "rationale"
+      ],
+      "title": "ResourceChange",
+      "type": "object"
+    },
+    "reflection_hypothesis": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "claim": {
+          "minLength": 1,
+          "title": "Claim",
+          "type": "string"
+        },
+        "supporting_refs": {
+          "items": {
+            "$ref": "#/$defs/original_ref"
+          },
+          "title": "Supporting Refs",
+          "type": "array"
+        },
+        "counter_refs": {
+          "items": {
+            "$ref": "#/$defs/original_ref"
+          },
+          "title": "Counter Refs",
+          "type": "array"
+        },
+        "causal_status": {
+          "enum": [
+            "supported_association",
+            "testable_hypothesis",
+            "unknown"
+          ],
+          "title": "Causal Status",
+          "type": "string"
+        },
+        "observable_counterfactual": {
+          "minLength": 1,
+          "title": "Observable Counterfactual",
+          "type": "string"
+        },
+        "applies_when": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Applies When",
+          "type": "array"
+        },
+        "excludes_when": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Excludes When",
+          "type": "array"
+        },
+        "expected_behavior_change": {
+          "minLength": 1,
+          "title": "Expected Behavior Change",
+          "type": "string"
+        },
+        "positive_case_refs": {
+          "items": {
+            "$ref": "#/$defs/original_ref"
+          },
+          "title": "Positive Case Refs",
+          "type": "array"
+        },
+        "negative_case_refs": {
+          "items": {
+            "$ref": "#/$defs/original_ref"
+          },
+          "title": "Negative Case Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "claim",
+        "supporting_refs",
+        "counter_refs",
+        "causal_status",
+        "observable_counterfactual",
+        "applies_when",
+        "excludes_when",
+        "expected_behavior_change",
+        "positive_case_refs",
+        "negative_case_refs"
+      ],
+      "title": "ReflectionHypothesis",
+      "type": "object"
+    },
+    "reflection_delta": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-reflection-delta.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "candidate",
+            "operational_followup",
+            "no_candidate"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "source_refs": {
+          "items": {
+            "$ref": "#/$defs/original_ref"
+          },
+          "title": "Source Refs",
+          "type": "array"
+        },
+        "parent_manifest": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "hypotheses": {
+          "items": {
+            "$ref": "#/$defs/reflection_hypothesis"
+          },
+          "title": "Hypotheses",
+          "type": "array"
+        },
+        "changes": {
+          "items": {
+            "$ref": "#/$defs/resource_change"
+          },
+          "title": "Changes",
+          "type": "array"
+        },
+        "limitations": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "outcome",
+        "reason",
+        "source_refs",
+        "parent_manifest",
+        "hypotheses",
+        "changes",
+        "limitations"
+      ],
+      "title": "ReflectionDelta",
+      "type": "object"
+    },
+    "learning_unit": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-learning-unit.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "protocol": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "portfolio": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "opportunity_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Opportunity Id",
+          "type": "string"
+        },
+        "method": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "source": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "execution_receipt": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "execution_status": {
+          "enum": [
+            "filled",
+            "no_fill",
+            "rejected",
+            "unknown"
+          ],
+          "title": "Execution Status",
+          "type": "string"
+        },
+        "outcome_status": {
+          "enum": [
+            "settled",
+            "unscorable"
+          ],
+          "title": "Outcome Status",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "matured_at": {
+          "format": "date-time",
+          "title": "Matured At",
+          "type": "string"
+        },
+        "first_read_at": {
+          "format": "date-time",
+          "title": "First Read At",
+          "type": "string"
+        },
+        "recorded_at": {
+          "format": "date-time",
+          "title": "Recorded At",
+          "type": "string"
+        },
+        "job_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Job Id",
+          "type": "string"
+        },
+        "payload_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Payload Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "protocol",
+        "portfolio",
+        "opportunity_id",
+        "method",
+        "source",
+        "execution_receipt",
+        "execution_status",
+        "outcome_status",
+        "reason",
+        "matured_at",
+        "first_read_at",
+        "recorded_at",
+        "job_id",
+        "payload_hash"
+      ],
+      "title": "LearningUnit",
+      "type": "object"
+    },
+    "behavior_original_ref": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "BehaviorOriginalRef",
+          "type": "string"
+        },
+        "hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "hash"
+      ],
+      "title": "BehaviorOriginalRef",
+      "type": "object"
+    },
+    "behavior_case": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "purpose": {
+          "enum": [
+            "applies",
+            "excludes"
+          ],
+          "title": "Purpose",
+          "type": "string"
+        },
+        "inputs": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "expected": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "known_at": {
+          "format": "date-time",
+          "title": "Known At",
+          "type": "string"
+        },
+        "material_kind": {
+          "enum": [
+            "historical_pit",
+            "synthetic_control"
+          ],
+          "title": "Material Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "purpose",
+        "inputs",
+        "expected",
+        "known_at",
+        "material_kind"
+      ],
+      "title": "BehaviorCase",
+      "type": "object"
+    },
+    "behavior_protocol": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "skill-behavior-protocol.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "job_id": {
+          "title": "Job Id",
+          "type": "string"
+        },
+        "package_stage": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "candidate": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "parent": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "recipe_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Recipe Hash",
+          "type": "string"
+        },
+        "registered_at": {
+          "format": "date-time",
+          "title": "Registered At",
+          "type": "string"
+        },
+        "cases": {
+          "items": {
+            "$ref": "#/$defs/behavior_case"
+          },
+          "maxItems": 8,
+          "minItems": 2,
+          "title": "Cases",
+          "type": "array"
+        },
+        "payload_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Payload Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "job_id",
+        "package_stage",
+        "candidate",
+        "parent",
+        "recipe_hash",
+        "registered_at",
+        "cases",
+        "payload_hash"
+      ],
+      "title": "BehaviorProtocol",
+      "type": "object"
+    },
+    "behavior_attempt": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "skill-behavior-attempt.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "protocol": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "method": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "method_slot": {
+          "enum": [
+            "parent",
+            "candidate"
+          ],
+          "title": "Method Slot",
+          "type": "string"
+        },
+        "input_original": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "expected_original": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "recipe_hash": {
+          "title": "Recipe Hash",
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "live_model",
+            "controlled_model"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "key",
+        "protocol",
+        "case_id",
+        "method",
+        "method_slot",
+        "input_original",
+        "expected_original",
+        "recipe_hash",
+        "mode",
+        "created_at"
+      ],
+      "title": "BehaviorAttempt",
+      "type": "object"
+    },
+    "behavior_output": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "skill-behavior-output.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "attempt": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "actual_output": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "runtime_original": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "completed_at": {
+          "format": "date-time",
+          "title": "Completed At",
+          "type": "string"
+        },
+        "runtime_id": {
+          "title": "Runtime Id",
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "live_model",
+            "controlled_model"
+          ],
+          "title": "Mode",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "attempt",
+        "actual_output",
+        "runtime_original",
+        "completed_at",
+        "runtime_id",
+        "mode"
+      ],
+      "title": "BehaviorOutput",
+      "type": "object"
+    },
+    "behavior_receipt": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "skill-behavior-receipt.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "protocol": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "package_stage": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "attempts": {
+          "items": {
+            "$ref": "#/$defs/behavior_original_ref"
+          },
+          "title": "Attempts",
+          "type": "array"
+        },
+        "outputs": {
+          "items": {
+            "$ref": "#/$defs/behavior_original_ref"
+          },
+          "title": "Outputs",
+          "type": "array"
+        },
+        "candidate_passed": {
+          "title": "Candidate Passed",
+          "type": "boolean"
+        },
+        "parent_passed": {
+          "title": "Parent Passed",
+          "type": "boolean"
+        },
+        "execution_kind": {
+          "enum": [
+            "live_model",
+            "controlled_model"
+          ],
+          "title": "Execution Kind",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "behavior_passed",
+            "behavior_failed",
+            "control_only"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "completed_at": {
+          "format": "date-time",
+          "title": "Completed At",
+          "type": "string"
+        },
+        "payload_hash": {
+          "title": "Payload Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "protocol",
+        "package_stage",
+        "attempts",
+        "outputs",
+        "candidate_passed",
+        "parent_passed",
+        "execution_kind",
+        "status",
+        "completed_at",
+        "payload_hash"
+      ],
+      "title": "BehaviorReceipt",
+      "type": "object"
+    },
+    "method_trial_protocol": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-method-trial-protocol.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "job_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Job Id",
+          "type": "string"
+        },
+        "package_stage": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "candidate": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "parent": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "behavior_protocol": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "scope_id": {
+          "title": "Scope Id",
+          "type": "string"
+        },
+        "horizon": {
+          "enum": [
+            "30m",
+            "24h",
+            "72h"
+          ],
+          "title": "Horizon",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "registered_at": {
+          "format": "date-time",
+          "title": "Registered At",
+          "type": "string"
+        },
+        "start_at": {
+          "format": "date-time",
+          "title": "Start At",
+          "type": "string"
+        },
+        "end_at": {
+          "format": "date-time",
+          "title": "End At",
+          "type": "string"
+        },
+        "max_runs": {
+          "maximum": 20,
+          "minimum": 1,
+          "title": "Max Runs",
+          "type": "integer"
+        },
+        "financial_qualified": {
+          "const": false,
+          "title": "Financial Qualified",
+          "type": "boolean"
+        },
+        "payload_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Payload Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "job_id",
+        "package_stage",
+        "candidate",
+        "parent",
+        "behavior_protocol",
+        "scope_id",
+        "horizon",
+        "target",
+        "registered_at",
+        "start_at",
+        "end_at",
+        "max_runs",
+        "financial_qualified",
+        "payload_hash"
+      ],
+      "title": "MethodTrialProtocol",
+      "type": "object"
+    },
+    "method_trial_receipt": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-method-trial-receipt.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "protocol": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "behavior": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "package_stage": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "candidate": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "parent": {
+          "$ref": "#/$defs/behavior_original_ref"
+        },
+        "admitted_at": {
+          "format": "date-time",
+          "title": "Admitted At",
+          "type": "string"
+        },
+        "status": {
+          "const": "trial_registered",
+          "title": "Status",
+          "type": "string"
+        },
+        "financial_qualified": {
+          "const": false,
+          "title": "Financial Qualified",
+          "type": "boolean"
+        },
+        "payload_hash": {
+          "title": "Payload Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "protocol",
+        "behavior",
+        "package_stage",
+        "candidate",
+        "parent",
+        "admitted_at",
+        "status",
+        "financial_qualified",
+        "payload_hash"
+      ],
+      "title": "MethodTrialReceipt",
+      "type": "object"
+    },
+    "method_behavior_response": {
+      "additionalProperties": false,
+      "properties": {
+        "applies": {
+          "title": "Applies",
+          "type": "boolean"
+        },
+        "action": {
+          "enum": [
+            "analyze",
+            "wait",
+            "enter",
+            "reduce",
+            "exit",
+            "unknown"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "missing_inputs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Inputs",
+          "type": "array"
+        },
+        "used_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Used Refs",
+          "type": "array"
+        },
+        "explanation": {
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "applies",
+        "action",
+        "missing_inputs",
+        "used_refs",
+        "explanation"
+      ],
+      "title": "MethodBehaviorResponse",
+      "type": "object"
+    },
+    "learning_resource_body": {
+      "title": "LearningResourceBody",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "type": "string",
+          "minLength": 1
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "body",
+        "hash"
+      ]
+    },
+    "learning_parent_registration": {
+      "title": "LearningParentRegistration",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "manifest": {
+          "type": "object"
+        },
+        "first_known_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "manifest",
+        "first_known_at"
+      ]
+    },
+    "learning_parent_relationship": {
+      "title": "LearningParentRelationship",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "basis": {
+          "const": "registered_template",
+          "type": "string"
+        },
+        "consumed": {
+          "const": false,
+          "type": "boolean"
+        },
+        "consumption_claimed_by_this_context": {
+          "const": false,
+          "type": "boolean"
+        },
+        "declared_source_consumption_refs": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "financial_attribution_allowed": {
+          "const": false,
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "basis",
+        "consumed",
+        "consumption_claimed_by_this_context",
+        "declared_source_consumption_refs",
+        "financial_attribution_allowed",
+        "reason"
+      ]
+    },
+    "learning_source_semantics": {
+      "title": "LearningSourceSemantics",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "label_available_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "retrospective_labels_must_not_be_backfilled": {
+          "const": true,
+          "type": "boolean"
+        },
+        "evidence_ref_is_fulltext": {
+          "const": false,
+          "type": "boolean"
+        },
+        "untrusted_resource_text": {
+          "const": true,
+          "type": "boolean"
+        },
+        "financial_qualified": {
+          "const": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "label_available_at",
+        "retrospective_labels_must_not_be_backfilled",
+        "evidence_ref_is_fulltext",
+        "untrusted_resource_text",
+        "financial_qualified"
+      ]
+    },
+    "learning_source_snapshot": {
+      "title": "LearningSourceSnapshot",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-learning-source.v1",
+          "type": "string"
+        },
+        "source_kind": {
+          "enum": [
+            "action_outcome",
+            "execution_observation"
+          ],
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "source_available_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "originals": {
+          "type": "object"
+        },
+        "financial_qualified": {
+          "const": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "schema_version",
+        "source_kind",
+        "source",
+        "source_available_at",
+        "originals",
+        "financial_qualified"
+      ]
+    },
+    "learning_context_payload": {
+      "title": "LearningContextPayload",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-learning-context.v1",
+          "type": "string"
+        },
+        "protocol": {
+          "$ref": "#/$defs/learning_protocol"
+        },
+        "binding": {
+          "$ref": "#/$defs/learning_binding"
+        },
+        "source": {
+          "$ref": "#/$defs/learning_source_snapshot"
+        },
+        "parent_manifest": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "parent_registration": {
+          "$ref": "#/$defs/learning_parent_registration"
+        },
+        "parent_files": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/learning_resource_body"
+          },
+          "minProperties": 1
+        },
+        "parent_relationship": {
+          "$ref": "#/$defs/learning_parent_relationship"
+        },
+        "implemented_operations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "allowed_capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "allowed_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/original_ref"
+          }
+        },
+        "source_semantics": {
+          "$ref": "#/$defs/learning_source_semantics"
+        },
+        "behavior_suite": {
+          "$ref": "#/$defs/learning_behavior_suite"
+        }
+      },
+      "required": [
+        "schema_version",
+        "protocol",
+        "binding",
+        "source",
+        "parent_manifest",
+        "parent_registration",
+        "parent_files",
+        "parent_relationship",
+        "implemented_operations",
+        "allowed_capabilities",
+        "allowed_refs",
+        "source_semantics",
+        "behavior_suite"
+      ]
+    },
+    "learning_agent_request": {
+      "title": "LearningAgentRequest",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "deadline_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "max_tokens": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "instructions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "role",
+        "text",
+        "evidence",
+        "deadline_at",
+        "max_tokens",
+        "instructions"
+      ]
+    },
+    "learning_dispatch_payload": {
+      "title": "LearningDispatchPayload",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-reflection-dispatch.v1",
+          "type": "string"
+        },
+        "context_receipt": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "recipe": {
+          "type": "object"
+        },
+        "recipe_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "request": {
+          "$ref": "#/$defs/learning_agent_request"
+        }
+      },
+      "required": [
+        "schema_version",
+        "context_receipt",
+        "recipe",
+        "recipe_hash",
+        "request"
+      ]
+    },
+    "learning_package_payload": {
+      "title": "LearningPackagePayload",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-learned-package.v1",
+          "type": "string"
+        },
+        "status": {
+          "const": "registered_unadmitted",
+          "type": "string"
+        },
+        "version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "manifest_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "first_known_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "parent_manifest": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "source_method": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "parent_basis": {
+          "type": "string",
+          "enum": [
+            "registered_template",
+            "consumed_in_source"
+          ]
+        },
+        "origin_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/original_ref"
+          }
+        },
+        "lineage_stored_in": {
+          "const": "immutable_learning_package_stage",
+          "type": "string"
+        },
+        "resource_hashes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "financial_qualified": {
+          "const": false,
+          "type": "boolean"
+        },
+        "trial_admitted": {
+          "const": false,
+          "type": "boolean"
+        },
+        "requires": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "schema_version",
+        "status",
+        "version_id",
+        "manifest_hash",
+        "first_known_at",
+        "parent_manifest",
+        "source_method",
+        "parent_basis",
+        "origin_refs",
+        "lineage_stored_in",
+        "resource_hashes",
+        "financial_qualified",
+        "trial_admitted",
+        "requires"
+      ]
+    },
+    "learning_registration": {
+      "title": "LearningRegistration",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-learning-registration.v1",
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "protocol": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "portfolio": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "policy": {
+          "$ref": "#/$defs/original_ref"
+        },
+        "registered_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "protocol",
+        "portfolio",
+        "policy",
+        "registered_at",
+        "payload_hash"
+      ]
+    },
+    "learning_behavior_suite_case": {
+      "title": "LearningBehaviorSuiteCase",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "purpose": {
+          "type": "string",
+          "enum": [
+            "applies",
+            "excludes"
+          ]
+        },
+        "input_body": {
+          "type": "object"
+        },
+        "expected_schema": {
+          "type": "object"
+        },
+        "material_kind": {
+          "type": "string",
+          "enum": [
+            "historical_pit",
+            "synthetic_control"
+          ]
+        },
+        "known_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "tests_behaviors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "id",
+        "purpose",
+        "input_body",
+        "expected_schema",
+        "material_kind",
+        "known_at",
+        "tests_behaviors"
+      ]
+    },
+    "learning_behavior_suite": {
+      "title": "LearningBehaviorSuite",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-learning-behavior-suite.v1",
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "registered_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "scope_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "horizon": {
+          "const": "24h",
+          "type": "string"
+        },
+        "cases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/learning_behavior_suite_case"
+          },
+          "minItems": 2,
+          "maxItems": 8
+        },
+        "supported_behavior_changes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "registered_at",
+        "scope_ids",
+        "horizon",
+        "cases",
+        "supported_behavior_changes",
+        "payload_hash"
+      ]
+    }
+  }
+}

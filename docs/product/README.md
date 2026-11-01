@@ -2,7 +2,31 @@
 
 本目录保存用户可感知的产品形态、工作方式和验收口径。它回答“用户最终看到什么、系统如何主动工作、什么状态才算可用”，不替代技术架构、ADR、canonical schema 或 Stage Charter。
 
+## 当前评审入口（2026-10-17）
+
+**2026-10-18用户已确认review-5及OKX永续方案并恢复实施；当前D1真实主链恢复中。** 当前入口为[总控](../design/decision-product-control-2026-10-17/00_MASTER_CONTROL.md)与[实施记录](../design/decision-product-control-2026-10-17/EXECUTION_LOG.md)。文档和静态审查不代表产品已修复或验收通过。
+
+review-5沿[完整业务与跨层连接](../design/decision-product-control-2026-10-17/11_END_TO_END_DESIGN_CONTRACT.md)及[技术债台账](../design/decision-product-control-2026-10-17/10_TECHNICAL_DEBT_REGISTER.md)，补成交条件概率/组合风险/纸面成交、Agent信任与撤权、可测运行/恢复交接和文档适用性。BTC/ETH、多事件及双向主线保留；裁决见06 §13，新增规则尚待实现验证。
+
+以下是2026-10-04及更早的历史导航快照。其中“当前”“唯一下一阶段”“已完成”均受当时版本和范围限制；不覆盖10月17日暂停与最新实际状态。原需求和原始证据仍保留，映射到总控后逐项处理。
+
+## 历史入口（2026-10-04）
+
+**整体尚未达到稳定 PC 产品交付条件。** 历史 AI 原件认证出现回归，日线完整方法认证尚未实现；正常启动、单项测试和旧阶段通过不能替代当前完整业务验收。
+
+- [完整项目 PRD](DECISION_HUB_FULL_PRODUCT_PRD_2026-09-26.md)：现行 10 月 4 日快照，完整业务主线、16 层架构、落库对象、关键时间、实现与未实现及验收条件。
+- [PC 用户手册](../user-guides/DECISION_HUB_CUSTOMER_USER_MANUAL_2026-09-22.md)：现行按钮和操作、自动研究模式、11 张真实截图及已知边界。
+- [当前实现与交付评估](DECISION_HUB_DELIVERY_READINESS_REVIEW_2026-09-29.md)：实测缺陷、返回内容、16 API 快照、自动化工具、优先整改顺序。
+- [唯一执行台账与接续点](../plan/ARCHITECTURE_REMEDIATION_EXECUTION_LOG.md)：原目标继续执行，手机验收暂不处理。
+
+整改从 2026-09-29 已开始，仍有开放问题；[全链路整改方案](DECISION_HUB_ARCHITECTURE_REMEDIATION_PLAN_2026-09-29.md)定义范围与步骤，[架构总览](../ui/architecture-review-2026-09-29.html)和[原始审查](../evaluations/ARCHITECTURE_AUDIT_2026-09-29.md)保留审查依据。下列历史文件里的 completed/passed/唯一下一阶段，只对其日期和范围成立，不覆盖以上当前判断。
+
 当前规格：
+
+- [Decision Hub 全项目 PRD](DECISION_HUB_FULL_PRODUCT_PRD_2026-09-26.md)：现状核对后的评审稿，覆盖来源、采集、事件、调度、研究、证据、报告、资料、历史行情、后验评估、演进、前端、运行平台和多市场扩展，并明确每层的改进与验收门。
+- [UX V3 页面与交互 PRD](DECISION_HUB_UX_V3_PRD_2026-09-26.md)：全项目 PRD 的页面子规格与可操作原型。
+- [UX V3 实施与验收记录](DECISION_HUB_UX_V3_IMPLEMENTATION_2026-09-27.md)：逐项记录生产页面、真实性修复、真实前后端及浏览器自测、未完成的产品门槛。
+- [资料研究与文档复核 PRD](RESEARCH_LIBRARY_AND_DOCUMENT_REVIEW_PRD_2026-09-22.md)：实施前产品需求冻结草案，定义上传、原始识别可视化、金融语义修正、原文/修正文对照、观点审核、研究域隔离和现有 Research Run 接入。
 
 - [DSH 插件底座、现有插件资产与平台解耦优化方案](DSH_PLUGIN_PLATFORM_DECOUPLING_PLAN_2026-09-06.md)：`proposed / architecture remediation pending owner confirmation`，盘点自研 DSH Host/Client/Research/Synthesis 插件、官方插件与 LoongSuite 的真实启用状态，并给出 Platform/crypto_macro 解耦结构、依赖约束、迁移任务和验收门。
 - [PD-04～06 产品运行收口实施方案](../stages/PD_04_06_PRODUCT_RUNTIME_CLOSEOUT.md)：已完成，锁定当前代码构建、产品契约探针、单实例、历史状态语义、DSH/Decision Desk 浏览器验收与有限停止线。

@@ -72,7 +72,7 @@ def test_high_impact_discovery_queues_baseline_and_research_but_executes_only_ba
     ingestion = SourceIngestionService(
         database,
         registry,
-        strategy_selector=CryptoMacroDiscoveryPolicy.from_pack(PACK_ROOT),
+        strategy_selector=CryptoMacroDiscoveryPolicy.from_pack(PACK_ROOT, include_baseline=True),
         clock=lambda: NOW,
     )
 
@@ -97,7 +97,7 @@ def test_low_impact_discovery_preserves_baseline_compatibility(tmp_path: Path) -
     ingestion = SourceIngestionService(
         database,
         registry,
-        strategy_selector=CryptoMacroDiscoveryPolicy.from_pack(PACK_ROOT),
+        strategy_selector=CryptoMacroDiscoveryPolicy.from_pack(PACK_ROOT, include_baseline=True),
         clock=lambda: NOW,
     )
 
@@ -124,14 +124,12 @@ def test_fed_site_boilerplate_cannot_promote_routine_title_to_research(
     database.create_all()
     registry = SourceRegistry()
     registry.register(
-        DiscoverySource(
-            f"{title}\nFederal Reserve Board of Governors monetary policy inflation"
-        )
+        DiscoverySource(f"{title}\nFederal Reserve Board of Governors monetary policy inflation")
     )
     ingestion = SourceIngestionService(
         database,
         registry,
-        strategy_selector=CryptoMacroDiscoveryPolicy.from_pack(PACK_ROOT),
+        strategy_selector=CryptoMacroDiscoveryPolicy.from_pack(PACK_ROOT, include_baseline=True),
         clock=lambda: NOW,
     )
 
@@ -160,7 +158,7 @@ def test_explicit_high_impact_title_promotes_one_idempotent_research_run(
     ingestion = SourceIngestionService(
         database,
         registry,
-        strategy_selector=CryptoMacroDiscoveryPolicy.from_pack(PACK_ROOT),
+        strategy_selector=CryptoMacroDiscoveryPolicy.from_pack(PACK_ROOT, include_baseline=True),
         clock=lambda: NOW,
     )
 
@@ -177,7 +175,7 @@ def test_explicit_high_impact_title_promotes_one_idempotent_research_run(
 
 
 def test_calendar_observation_never_starts_immediate_research() -> None:
-    policy = CryptoMacroDiscoveryPolicy.from_pack(PACK_ROOT)
+    policy = CryptoMacroDiscoveryPolicy.from_pack(PACK_ROOT, include_baseline=True)
     manifest = SourceManifest(
         source_id="bls-calendar",
         source_type="official_feed",
@@ -240,7 +238,7 @@ def test_calendar_ingestion_creates_watch_and_defers_run_until_event(tmp_path: P
     ingestion = SourceIngestionService(
         database,
         registry,
-        strategy_selector=CryptoMacroDiscoveryPolicy.from_pack(PACK_ROOT),
+        strategy_selector=CryptoMacroDiscoveryPolicy.from_pack(PACK_ROOT, include_baseline=True),
         clock=lambda: NOW,
     )
 
@@ -290,7 +288,7 @@ def test_fresh_official_feed_bootstrap_creates_no_observation_or_run(
     ingestion = SourceIngestionService(
         database,
         registry,
-        strategy_selector=CryptoMacroDiscoveryPolicy.from_pack(PACK_ROOT),
+        strategy_selector=CryptoMacroDiscoveryPolicy.from_pack(PACK_ROOT, include_baseline=True),
         clock=lambda: NOW,
     )
 
@@ -301,3 +299,32 @@ def test_fresh_official_feed_bootstrap_creates_no_observation_or_run(
     assert result.cursor is not None and result.cursor.endswith("|old-2")
     with database.session() as session:
         assert session.query(RunRecord).count() == 0
+
+
+@pytest.mark.parametrize(
+    "text,expected_runs",
+    [
+        ("Federal Reserve chair speech on inflation and monetary policy", ["research.v1"]),
+        ("Routine administrative notice.", []),
+    ],
+)
+def test_production_pack_never_runs_fake_legacy_baseline(tmp_path, text, expected_runs):
+    database = Database(f"sqlite+pysqlite:///{tmp_path / 'production.sqlite3'}")
+    database.create_all()
+    registry = SourceRegistry()
+    registry.register(DiscoverySource(text))
+    ingestion = SourceIngestionService(
+        database,
+        registry,
+        strategy_selector=CryptoMacroDiscoveryPolicy.from_pack(PACK_ROOT),
+        clock=lambda: NOW,
+    )
+    result = asyncio.run(ingestion.poll_once("fed-press"))
+    assert result.error_code is None and result.run_targets == ()
+    with database.session() as session:
+        assert [r.strategy_version for r in session.query(RunRecord)] == expected_runs
+        from packages.kernel.decision_hub_kernel.persistence.db import AdmissionDecisionRecord
+
+        decision = session.query(AdmissionDecisionRecord).one()
+        assert decision.policy_version == "discovery-policy.v5"
+        assert decision.decision == ("admitted" if expected_runs else "ignored")

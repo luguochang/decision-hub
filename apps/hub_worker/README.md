@@ -6,9 +6,11 @@
 
 - `--role realtime`：按 durable source state 轮询来源，推进并采样 EventWatch 窗口，执行已 admission 的 R0 Run，扫描到期 Forecast，并消费 committed outbox。
 - `--role research`：领取 `strategy_version=research.v1` 的 admitted Run，执行 R2-R bounded evidence-round graph，并将结果投影到既有 Snapshot/Artifact/Forecast/Outbox 账本；默认使用受限 DSH Research Runtime，测试/replay 可注入替代 runtime。
+- `--role historical`：按已完成 UTC 小时触发滚动 90 天的 OKX BTC 1h DataJob，并按已完成 UTC 日刷新同窗口的 BTC 1d DataJob，写入不可变历史分区；它不创建 Research Run、不触发通知，也不替代正式调度器。
 - `--role evolution`：扫描 feedback/failure/evaluation/schedule trigger，领取 durable Evolution Job lease，复用 LangGraph Supervisor 和 EvaluationRunner 生成候选，停在 `pending_owner_review`。
+- `--role documents`：领取资料库的解析、金融语义修正和观点候选任务；原始文件、解析块、修正 diff 与 claim review 都写回同一资料账本，不创建 Research Run。
 
-三个 role 都写入 `service_heartbeats`；heartbeat 只表示进程存活，Run claim/Job lease 才表示任务所有权。进程管理器或 Compose 负责重启，应用不创建自守护线程。
+`realtime`、`research`、`documents` 和 `evolution` role 都写入 `service_heartbeats`；heartbeat 只表示进程存活，Run claim/Job lease 才表示任务所有权。`historical` role 只触发 DataJob，不伪装成研究 worker，也不创建第二套调度器。进程管理器或 Compose 负责重启，应用不创建自守护线程。
 
 Research worker 构造 canonical request 时只读同一 Hub 数据库中的 `EventWatch` 与 sample 状态。
 无 Watch 的人工回溯事件显式投影 `event_watch=null`；只有 `captured` sample 可进入 DSH 的窗口
@@ -25,7 +27,9 @@ Research worker 构造 canonical request 时只读同一 Hub 数据库中的 `Ev
 ```bash
 ./.venv/bin/python -m apps.hub_worker.main --role realtime --once
 ./.venv/bin/python -m apps.hub_worker.main --role research --once
+./.venv/bin/python -m apps.hub_worker.main --role historical --once
 ./.venv/bin/python -m apps.hub_worker.main --role evolution --once
+./.venv/bin/python -m apps.hub_worker.main --role documents --once
 ```
 
 常驻进程：
@@ -33,7 +37,9 @@ Research worker 构造 canonical request 时只读同一 Hub 数据库中的 `Ev
 ```bash
 ./.venv/bin/python -m apps.hub_worker.main --role realtime --interval 5
 ./.venv/bin/python -m apps.hub_worker.main --role research --interval 5
+./.venv/bin/python -m apps.hub_worker.main --role historical --interval 3600
 ./.venv/bin/python -m apps.hub_worker.main --role evolution --interval 5
+./.venv/bin/python -m apps.hub_worker.main --role documents --interval 1
 ```
 
 默认只消费 local outbox，且 `DECISION_HUB_SOURCES_ENABLED=0`、`DECISION_HUB_MARKET_ENABLED=0`、`DECISION_HUB_LLM_ENABLED=0`，因此普通 CI 和 fixture 验收不触网。显式启用来源、行情或 Provider 前必须经过 readiness/canary；密钥只从进程环境注入。
@@ -46,7 +52,7 @@ Research worker 构造 canonical request 时只读同一 Hub 数据库中的 `Ev
 
 输出只包含脱敏的 `PilotReadinessReport`。只有同时设置 `DECISION_HUB_PILOT_MODE=1` 并使用 `--pilot` 时，worker 才会把预检作为启动门；预检失败会在 scheduler、来源轮询和 outbox 之前退出。`--once` 不带 `--pilot` 继续保留 fixture/离线兼容行为。
 
-本机 Compose（API、三个 worker role 和受控 research-mcp）：
+本机 Compose（API、realtime/research/documents worker 和受控 research-mcp；historical/evolution 按需启动）：
 
 ```bash
 docker compose config --quiet
@@ -87,3 +93,14 @@ G1/G2-A/B 的 Search reliability/error provenance 和事实 manifest/replay 已�
 [R2-R-07 阶段卡](../../docs/stages/R2_R_07_SEARCH_RELIABILITY_ERROR_PROVENANCE.md)。worker 会保留
 失败 Run 的具体来源和已完成 Evidence；不把失败重试解释为需要 owner 手工补数据。真实
 Search canary（G2-C）仍须 owner 明确确认。
+
+## 取消会话维护（W6.4i）
+
+Research general lane 对提供 `reconcile_cancelled_runs` 的runtime启动独立维护任务，
+研究tick等待期间也能检查已经取消任务的DSH link。默认15秒间隔、每轮最多4个
+Run/2秒协作预算；异常只记录错误类，不把Host原文写日志或改产品Run失败状态。
+Priority lane不重复扫描；once只在tick后维护一次。关闭时先取消并等待维护与usage
+任务，再close research/runtime。此任务不claim新研究、不submit模型、不延长截止时间。
+
+线程/SQLite等待与旧凭据限制见runtime README及 `docs/operations/LOCAL_PRODUCT_RECOVERY.md`。
+源码已实现不等于正在运行的worker已更新；正式版本与PC验收状态以执行台账为准。

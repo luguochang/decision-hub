@@ -1,0 +1,1314 @@
+[
+  {
+    "name": "error_provenance-omitted",
+    "definition": "error_provenance",
+    "expected_valid": true,
+    "value": {
+      "error_code": "controlled_error",
+      "origin": "orchestration",
+      "cause_code": null,
+      "capability_id": null,
+      "tool_call_id": null,
+      "retryable": true,
+      "deadline_ms": null
+    }
+  },
+  {
+    "name": "error_provenance-empty",
+    "definition": "error_provenance",
+    "expected_valid": true,
+    "value": {
+      "error_code": "controlled_error",
+      "origin": "orchestration",
+      "cause_code": null,
+      "capability_id": null,
+      "tool_call_id": null,
+      "retryable": true,
+      "deadline_ms": null,
+      "provider_attempts": []
+    }
+  },
+  {
+    "name": "error_provenance-null",
+    "definition": "error_provenance",
+    "expected_valid": false,
+    "value": {
+      "error_code": "controlled_error",
+      "origin": "orchestration",
+      "cause_code": null,
+      "capability_id": null,
+      "tool_call_id": null,
+      "retryable": true,
+      "deadline_ms": null,
+      "provider_attempts": null
+    }
+  },
+  {
+    "name": "error_provenance-component-null",
+    "definition": "error_provenance",
+    "expected_valid": true,
+    "value": {
+      "error_code": "controlled_error",
+      "origin": "orchestration",
+      "cause_code": null,
+      "capability_id": null,
+      "tool_call_id": null,
+      "retryable": true,
+      "deadline_ms": null,
+      "provider_attempts": [
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        }
+      ]
+    }
+  },
+  {
+    "name": "error_provenance-max-20",
+    "definition": "error_provenance",
+    "expected_valid": true,
+    "value": {
+      "error_code": "controlled_error",
+      "origin": "orchestration",
+      "cause_code": null,
+      "capability_id": null,
+      "tool_call_id": null,
+      "retryable": true,
+      "deadline_ms": null,
+      "provider_attempts": [
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        }
+      ]
+    }
+  },
+  {
+    "name": "error_provenance-over-20",
+    "definition": "error_provenance",
+    "expected_valid": false,
+    "value": {
+      "error_code": "controlled_error",
+      "origin": "orchestration",
+      "cause_code": null,
+      "capability_id": null,
+      "tool_call_id": null,
+      "retryable": true,
+      "deadline_ms": null,
+      "provider_attempts": [
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        }
+      ]
+    }
+  },
+  {
+    "name": "error_provenance-object",
+    "definition": "error_provenance",
+    "expected_valid": false,
+    "value": {
+      "error_code": "controlled_error",
+      "origin": "orchestration",
+      "cause_code": null,
+      "capability_id": null,
+      "tool_call_id": null,
+      "retryable": true,
+      "deadline_ms": null,
+      "provider_attempts": {}
+    }
+  },
+  {
+    "name": "error_provenance-string",
+    "definition": "error_provenance",
+    "expected_valid": false,
+    "value": {
+      "error_code": "controlled_error",
+      "origin": "orchestration",
+      "cause_code": null,
+      "capability_id": null,
+      "tool_call_id": null,
+      "retryable": true,
+      "deadline_ms": null,
+      "provider_attempts": "[]"
+    }
+  },
+  {
+    "name": "error_provenance-number",
+    "definition": "error_provenance",
+    "expected_valid": false,
+    "value": {
+      "error_code": "controlled_error",
+      "origin": "orchestration",
+      "cause_code": null,
+      "capability_id": null,
+      "tool_call_id": null,
+      "retryable": true,
+      "deadline_ms": null,
+      "provider_attempts": 0
+    }
+  },
+  {
+    "name": "error_provenance-boolean",
+    "definition": "error_provenance",
+    "expected_valid": false,
+    "value": {
+      "error_code": "controlled_error",
+      "origin": "orchestration",
+      "cause_code": null,
+      "capability_id": null,
+      "tool_call_id": null,
+      "retryable": true,
+      "deadline_ms": null,
+      "provider_attempts": false
+    }
+  },
+  {
+    "name": "research_capability_result-omitted",
+    "definition": "research_capability_result",
+    "expected_valid": true,
+    "value": {
+      "schema_version": "research-capability-result.v1",
+      "request_id": "request-test",
+      "capability_id": "capability.test",
+      "provider": "test-provider",
+      "evidence_candidates": [],
+      "cost_usd": null,
+      "completed_at": "2026-10-02T00:00:01Z"
+    }
+  },
+  {
+    "name": "research_capability_result-empty",
+    "definition": "research_capability_result",
+    "expected_valid": true,
+    "value": {
+      "schema_version": "research-capability-result.v1",
+      "request_id": "request-test",
+      "capability_id": "capability.test",
+      "provider": "test-provider",
+      "evidence_candidates": [],
+      "cost_usd": null,
+      "completed_at": "2026-10-02T00:00:01Z",
+      "provider_attempts": []
+    }
+  },
+  {
+    "name": "research_capability_result-null",
+    "definition": "research_capability_result",
+    "expected_valid": false,
+    "value": {
+      "schema_version": "research-capability-result.v1",
+      "request_id": "request-test",
+      "capability_id": "capability.test",
+      "provider": "test-provider",
+      "evidence_candidates": [],
+      "cost_usd": null,
+      "completed_at": "2026-10-02T00:00:01Z",
+      "provider_attempts": null
+    }
+  },
+  {
+    "name": "research_capability_result-component-null",
+    "definition": "research_capability_result",
+    "expected_valid": true,
+    "value": {
+      "schema_version": "research-capability-result.v1",
+      "request_id": "request-test",
+      "capability_id": "capability.test",
+      "provider": "test-provider",
+      "evidence_candidates": [],
+      "cost_usd": null,
+      "completed_at": "2026-10-02T00:00:01Z",
+      "provider_attempts": [
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        }
+      ]
+    }
+  },
+  {
+    "name": "research_capability_result-max-20",
+    "definition": "research_capability_result",
+    "expected_valid": true,
+    "value": {
+      "schema_version": "research-capability-result.v1",
+      "request_id": "request-test",
+      "capability_id": "capability.test",
+      "provider": "test-provider",
+      "evidence_candidates": [],
+      "cost_usd": null,
+      "completed_at": "2026-10-02T00:00:01Z",
+      "provider_attempts": [
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        }
+      ]
+    }
+  },
+  {
+    "name": "research_capability_result-over-20",
+    "definition": "research_capability_result",
+    "expected_valid": false,
+    "value": {
+      "schema_version": "research-capability-result.v1",
+      "request_id": "request-test",
+      "capability_id": "capability.test",
+      "provider": "test-provider",
+      "evidence_candidates": [],
+      "cost_usd": null,
+      "completed_at": "2026-10-02T00:00:01Z",
+      "provider_attempts": [
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        },
+        {
+          "provider_id": "test-provider",
+          "route_role": "primary",
+          "service_tier": "replay",
+          "status": "succeeded",
+          "started_at": "2026-10-02T00:00:00Z",
+          "finished_at": "2026-10-02T00:00:01Z",
+          "latency_ms": 1000,
+          "cost_usd": null,
+          "error_code": null,
+          "retryable": null
+        }
+      ]
+    }
+  },
+  {
+    "name": "research_capability_result-object",
+    "definition": "research_capability_result",
+    "expected_valid": false,
+    "value": {
+      "schema_version": "research-capability-result.v1",
+      "request_id": "request-test",
+      "capability_id": "capability.test",
+      "provider": "test-provider",
+      "evidence_candidates": [],
+      "cost_usd": null,
+      "completed_at": "2026-10-02T00:00:01Z",
+      "provider_attempts": {}
+    }
+  },
+  {
+    "name": "research_capability_result-string",
+    "definition": "research_capability_result",
+    "expected_valid": false,
+    "value": {
+      "schema_version": "research-capability-result.v1",
+      "request_id": "request-test",
+      "capability_id": "capability.test",
+      "provider": "test-provider",
+      "evidence_candidates": [],
+      "cost_usd": null,
+      "completed_at": "2026-10-02T00:00:01Z",
+      "provider_attempts": "[]"
+    }
+  },
+  {
+    "name": "research_capability_result-number",
+    "definition": "research_capability_result",
+    "expected_valid": false,
+    "value": {
+      "schema_version": "research-capability-result.v1",
+      "request_id": "request-test",
+      "capability_id": "capability.test",
+      "provider": "test-provider",
+      "evidence_candidates": [],
+      "cost_usd": null,
+      "completed_at": "2026-10-02T00:00:01Z",
+      "provider_attempts": 0
+    }
+  },
+  {
+    "name": "research_capability_result-boolean",
+    "definition": "research_capability_result",
+    "expected_valid": false,
+    "value": {
+      "schema_version": "research-capability-result.v1",
+      "request_id": "request-test",
+      "capability_id": "capability.test",
+      "provider": "test-provider",
+      "evidence_candidates": [],
+      "cost_usd": null,
+      "completed_at": "2026-10-02T00:00:01Z",
+      "provider_attempts": false
+    }
+  }
+]

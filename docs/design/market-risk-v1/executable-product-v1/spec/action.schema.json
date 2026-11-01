@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:decision-hub:executable-design:action:1",
+  "title": "Design reference only; not an installed production contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "plan_id", "revision", "scope_id", "horizon_seconds", "as_of", "valid_until", "action", "position_context", "advice_qualification", "probability", "condition", "evidence_refs", "policy_hash"],
+  "properties": {
+    "schema_version": {"const": "decision-action.spec.v1"},
+    "plan_id": {"type": "string", "minLength": 1},
+    "revision": {"type": "integer", "minimum": 1},
+    "scope_id": {"type": "string", "minLength": 1},
+    "horizon_seconds": {"enum": [1800, 86400, 259200]},
+    "as_of": {"type": "string", "format": "date-time"},
+    "valid_until": {"type": "string", "format": "date-time"},
+    "action": {"enum": ["enter_long", "reduce_long", "exit_long", "hold", "wait"]},
+    "position_context": {"enum": ["flat", "long", "unknown"]},
+    "advice_qualification": {"enum": ["research_trial", "qualified", "blocked"]},
+    "probability": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "target", "value", "calibration_ref"],
+      "properties": {
+        "kind": {"enum": ["unavailable", "subjective", "calibrated"]},
+        "target": {"enum": ["return_positive", "target_before_stop"]},
+        "value": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "calibration_ref": {"type": ["string", "null"]}
+      },
+      "allOf": [
+        {"if": {"properties": {"kind": {"const": "unavailable"}}}, "then": {"properties": {"value": {"type": "null"}, "calibration_ref": {"type": "null"}}}},
+        {"if": {"properties": {"kind": {"const": "subjective"}}}, "then": {"properties": {"value": {"type": "number"}, "calibration_ref": {"type": "null"}}}},
+        {"if": {"properties": {"kind": {"const": "calibrated"}}}, "then": {"properties": {"value": {"type": "number"}, "calibration_ref": {"type": "string", "minLength": 1}}}}
+      ]
+    },
+    "condition": {"$ref": "#/$defs/condition"},
+    "evidence_refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "policy_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  },
+  "$defs": {
+    "condition": {
+      "oneOf": [
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["op", "feature", "scope_id", "unit", "cmp", "threshold", "max_age_seconds"],
+          "properties": {
+            "op": {"const": "compare"}, "feature": {"type": "string", "minLength": 1},
+            "scope_id": {"type": "string", "minLength": 1}, "unit": {"type": "string", "minLength": 1},
+            "cmp": {"enum": ["gt", "gte", "lt", "lte"]},
+            "threshold": {"type": "string", "pattern": "^-?[0-9]+(\\.[0-9]+)?$"},
+            "max_age_seconds": {"type": "integer", "minimum": 1, "maximum": 604800}
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["op", "args"],
+          "properties": {"op": {"enum": ["all", "any"]}, "args": {"type": "array", "minItems": 1, "maxItems": 16, "items": {"$ref": "#/$defs/condition"}}}
+        }
+      ]
+    }
+  }
+}

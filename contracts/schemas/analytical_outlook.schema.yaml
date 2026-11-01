@@ -1,0 +1,485 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/analytical_outlook.schema.json
+title: AnalyticalOutlookContracts
+$defs:
+  analytical_observation_view:
+    type: object
+    additionalProperties: false
+    properties:
+      status:
+        type: string
+        enum:
+        - pending
+        - running
+        - retry
+        - completed
+        - excluded
+      attempt:
+        type: integer
+        minimum: 0
+      next_attempt_at:
+        type: string
+        format: date-time
+      error_code:
+        type:
+        - string
+        - 'null'
+      market_return_pct:
+        type:
+        - number
+        - 'null'
+      directional_return_pct:
+        type:
+        - number
+        - 'null'
+      direction_correct:
+        type:
+        - boolean
+        - 'null'
+      quality_status:
+        type:
+        - string
+        - 'null'
+      benchmark:
+        type:
+        - string
+        - 'null'
+      evaluated_at:
+        type:
+        - string
+        - 'null'
+        format: date-time
+    required:
+    - status
+    - attempt
+    - next_attempt_at
+    - error_code
+    - market_return_pct
+    - directional_return_pct
+    - direction_correct
+    - quality_status
+    - benchmark
+    - evaluated_at
+  analytical_outlook_view:
+    type: object
+    additionalProperties: false
+    properties:
+      outlook_id:
+        type: string
+      run_id:
+        type: string
+      artifact_id:
+        type: string
+      study_id:
+        type:
+        - string
+        - 'null'
+      market:
+        type: string
+      instrument:
+        type: string
+      method_family:
+        type: string
+        enum:
+        - ai_synthesis
+        - daily_rule
+      method_version:
+        type: string
+      horizon:
+        type: string
+        enum:
+        - 30m
+        - 24h
+        - 72h
+        - 7d
+      action:
+        type: string
+        enum:
+        - long
+        - short
+        - neutral
+        - no_trade
+      subjective_probability:
+        type:
+        - number
+        - 'null'
+      probability_status:
+        type: string
+      data_as_of:
+        type:
+        - string
+        - 'null'
+        format: date-time
+      window_start_at:
+        type: string
+        format: date-time
+      window_end_at:
+        type: string
+        format: date-time
+      result_hash:
+        type: string
+      evidence_refs:
+        type: array
+        items:
+          type: string
+      fact_version_refs:
+        type: array
+        items:
+          type: string
+      trigger:
+        type: string
+      invalidation:
+        type: string
+      cohort:
+        type: string
+        enum:
+        - prospective
+        - retrospective
+      eligibility:
+        type: string
+        enum:
+        - eligible
+        - excluded
+      exclusion_reasons:
+        type: array
+        items:
+          type: string
+      research_quality:
+        type: string
+      recorded_at:
+        type: string
+        format: date-time
+      observation:
+        $ref: '#/$defs/analytical_observation_view'
+    required:
+    - outlook_id
+    - run_id
+    - artifact_id
+    - study_id
+    - market
+    - instrument
+    - method_family
+    - method_version
+    - horizon
+    - action
+    - subjective_probability
+    - probability_status
+    - data_as_of
+    - window_start_at
+    - window_end_at
+    - result_hash
+    - evidence_refs
+    - fact_version_refs
+    - trigger
+    - invalidation
+    - cohort
+    - eligibility
+    - exclusion_reasons
+    - research_quality
+    - recorded_at
+    - observation
+  analytical_outlook_list_view:
+    type: object
+    additionalProperties: false
+    properties:
+      items:
+        type: array
+        items:
+          $ref: '#/$defs/analytical_outlook_view'
+      total:
+        type: integer
+        minimum: 0
+      limit:
+        type: integer
+        minimum: 0
+      offset:
+        type: integer
+        minimum: 0
+    required:
+    - items
+    - total
+    - limit
+    - offset
+  analytical_attempt_view:
+    type: object
+    additionalProperties: false
+    properties:
+      attempt:
+        type: integer
+        minimum: 0
+      status:
+        type: string
+      started_at:
+        type: string
+        format: date-time
+      finished_at:
+        type:
+        - string
+        - 'null'
+        format: date-time
+      error_code:
+        type:
+        - string
+        - 'null'
+      raw_capture_ids:
+        type: array
+        items:
+          type: string
+    required:
+    - attempt
+    - status
+    - started_at
+    - finished_at
+    - error_code
+    - raw_capture_ids
+  analytical_outlook_detail_view:
+    type: object
+    additionalProperties: false
+    properties:
+      assessment:
+        type: object
+        additionalProperties: true
+      outlook:
+        $ref: '#/$defs/analytical_outlook_view'
+      raw_payload:
+        type: object
+        additionalProperties: true
+      window:
+        type:
+        - object
+        - 'null'
+        additionalProperties: true
+      attempts:
+        type: array
+        items:
+          $ref: '#/$defs/analytical_attempt_view'
+      attempts_total:
+        type: integer
+        minimum: 0
+      attempts_limit:
+        type: integer
+        minimum: 0
+      attempts_offset:
+        type: integer
+        minimum: 0
+    required:
+    - outlook
+    - raw_payload
+    - window
+    - attempts
+    - attempts_total
+    - attempts_limit
+    - attempts_offset
+  analytical_cohort_view:
+    type: object
+    additionalProperties: false
+    properties:
+      stable_recipe_hash:
+        type: [string, 'null']
+        pattern: '^[a-f0-9]{64}$'
+      recipe_status:
+        type: string
+        enum: [verified, unchecked]
+      saved_method_versions:
+        type: array
+        items:
+          type: string
+      assessment_version:
+        type: string
+        enum: [fixed-study-originals.v1, authenticated-recipe-originals.v2]
+      sample_selection_version:
+        type: string
+        const: first-record-study-authenticated-recipe-horizon.v3
+      assessment_checked_count:
+        type: integer
+        minimum: 0
+      assessment_pending_count:
+        type: integer
+        minimum: 0
+      record_directional_count:
+        type: integer
+        minimum: 0
+      record_correct_count:
+        type: integer
+        minimum: 0
+      record_average_directional_return_pct:
+        type: [number, 'null']
+      fixed_sample_count:
+        type: integer
+        minimum: 0
+      repeat_count:
+        type: integer
+        minimum: 0
+      source_verified_count:
+        type: integer
+        minimum: 0
+      label_verified_count:
+        type: integer
+        minimum: 0
+      unverified_count:
+        type: integer
+        minimum: 0
+      method_recipe_hashes:
+        type: array
+        items:
+          type: string
+      assessment_reasons:
+        type: object
+        additionalProperties:
+          type: integer
+          minimum: 0
+      market:
+        type: string
+      instrument:
+        type: string
+      method_family:
+        type: string
+      method_version:
+        type: [string, 'null']
+      horizon:
+        type: string
+      action:
+        type: string
+      cohort:
+        type: string
+      research_quality:
+        type: string
+      quality_status:
+        type:
+        - string
+        - 'null'
+      total:
+        type: integer
+        minimum: 0
+      completed:
+        type: integer
+        minimum: 0
+      pending:
+        type: integer
+        minimum: 0
+      retry:
+        type: integer
+        minimum: 0
+      excluded:
+        type: integer
+        minimum: 0
+      directional_count:
+        type: integer
+        minimum: 0
+      correct_count:
+        type: integer
+        minimum: 0
+      distinct_studies:
+        type: integer
+        minimum: 0
+      directional_hit_rate:
+        type:
+        - number
+        - 'null'
+      average_directional_return_pct:
+        type:
+        - number
+        - 'null'
+      minimum_rate_samples:
+        type: integer
+        minimum: 0
+      calibration_status:
+        type: string
+        enum:
+        - not_calibration
+    required:
+    - market
+    - instrument
+    - method_family
+    - method_version
+    - horizon
+    - action
+    - cohort
+    - research_quality
+    - quality_status
+    - total
+    - completed
+    - pending
+    - retry
+    - excluded
+    - directional_count
+    - correct_count
+    - distinct_studies
+    - directional_hit_rate
+    - average_directional_return_pct
+    - minimum_rate_samples
+    - calibration_status
+  analytical_cohort_list_view:
+    type: object
+    additionalProperties: false
+    properties:
+      items:
+        type: array
+        items:
+          $ref: '#/$defs/analytical_cohort_view'
+      total:
+        type: integer
+        minimum: 0
+      limit:
+        type: integer
+        minimum: 0
+      offset:
+        type: integer
+        minimum: 0
+    required:
+    - items
+    - total
+    - limit
+    - offset
+  publication_separation_view:
+    type: object
+    additionalProperties: false
+    properties:
+      artifact_id:
+        type: string
+      run_id:
+        type: string
+      status:
+        type: string
+      result_hash:
+        type:
+        - string
+        - 'null'
+      decisions:
+        type: array
+        items:
+          type: object
+          additionalProperties: true
+      published_horizons:
+        type: array
+        items:
+          type: object
+          additionalProperties: true
+      review_refs:
+        type: array
+        items:
+          type: object
+          additionalProperties: true
+      decided_at:
+        type: string
+        format: date-time
+      execution_allowed:
+        type: boolean
+      execution_policy:
+        type: string
+      execution_reasons:
+        type: array
+        items:
+          type: string
+    required:
+    - artifact_id
+    - run_id
+    - status
+    - result_hash
+    - decisions
+    - published_horizons
+    - review_refs
+    - decided_at
+    - execution_allowed
+    - execution_policy
+    - execution_reasons

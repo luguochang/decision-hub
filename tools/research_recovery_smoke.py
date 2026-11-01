@@ -198,6 +198,10 @@ def main() -> int:
                     sort_keys=True,
                 )
             )
+            # Windows keeps SQLite files locked while SQLAlchemy pooled
+            # connections are alive. Release them before TemporaryDirectory
+            # removes the isolated recovery database.
+            database.engine.dispose()
     return 0
 
 

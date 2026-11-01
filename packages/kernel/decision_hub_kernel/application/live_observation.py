@@ -16,16 +16,20 @@ from packages.contracts_py.decision_hub_contracts.models import (
     EvolutionJobCountsView,
     EvolutionJobCreate,
     EvolutionJobView,
-    EvolutionPlanningContext,
     ExperienceCreate,
     ExperienceView,
     ServiceHeartbeatView,
 )
 from packages.kernel.decision_hub_kernel.application.evolution import EvolutionAssetService
+from packages.kernel.decision_hub_kernel.application.evolution_context import (
+    EvolutionContextService,  # noqa: F401
+)
+from packages.kernel.decision_hub_kernel.application.runtime_configuration import (
+    capture_runtime_settings,
+    configuration_record,
+)
 from packages.kernel.decision_hub_kernel.persistence.db import (
-    ActivePointerRecord,
     ArtifactRecord,
-    CandidateVersionRecord,
     Database,
     EvaluationRecord,
     EvolutionJobRecord,
@@ -36,6 +40,7 @@ from packages.kernel.decision_hub_kernel.persistence.db import (
     OutcomeRecord,
     PromotionDecisionRecord,
     ServiceHeartbeatRecord,
+    ServiceRuntimeConfigRecord,
     SnapshotRecord,
     utcnow,
 )
@@ -109,6 +114,27 @@ class EvolutionJobService:
                     .one()
                 )
                 return self._matching(existing, request)
+
+    def enqueue_context_recovery(
+        self, source_job_id: str, *, revision: str = "v2",
+    ) -> EvolutionJobView:
+        """Re-evaluate a failed plan under v2 context without altering its history."""
+        if revision not in {"v2", "v3"}:
+            raise ValueError("context_recovery_revision_invalid")
+        with self.database.session() as session:
+            source = session.get(EvolutionJobRecord, source_job_id)
+            if source is None:
+                raise KeyError(source_job_id)
+            if source.status != "failed" or source.candidate_id is not None:
+                raise ValueError("context_recovery_requires_failed_plan_without_candidate")
+            request = EvolutionJobCreate(
+                trigger_key=f"context-recovery:{source.job_id}:{revision}",
+                trigger_type=source.trigger_type,
+                domain_pack_ref=source.domain_pack_ref,
+                input_refs=json.loads(source.input_refs_json),
+                max_attempts=source.max_attempts,
+            )
+        return self.enqueue(request)
 
     def claim(self, worker_id: str, *, lease_seconds: int) -> EvolutionJobView | None:
         if not worker_id:
@@ -224,16 +250,29 @@ class EvolutionJobService:
         candidate_id: str | None = None,
         experiment_refs: list[str] | None = None,
         result_refs: list[str] | None = None,
+        waiting_reason: str | None = None,
     ) -> EvolutionJobView:
         if stage not in JOB_STAGES:
             raise ValueError("evolution_stage_invalid")
-        if status not in {"running", "pending_owner_review", "completed", "cancelled"}:
+        if status not in {
+            "running",
+            "waiting_inputs",
+            "pending_owner_review",
+            "completed",
+            "cancelled",
+        }:
             raise ValueError("evolution_status_invalid")
+        if status == "waiting_inputs" and (
+            not waiting_reason or stage not in {"candidate", "replay", "holdout", "shadow"}
+        ):
+            raise ValueError("evolution_waiting_reason_required")
         now = _aware(self.clock())
         with self.database.session() as session:
             row = self._owned(session, job_id, worker_id)
             row.stage = stage
             row.status = status
+            if status == "waiting_inputs":
+                row.last_error_code = waiting_reason
             if candidate_id is not None:
                 row.candidate_id = candidate_id
             if experiment_refs is not None:
@@ -242,11 +281,31 @@ class EvolutionJobService:
                 row.result_refs_json = json.dumps(result_refs)
             if status in TERMINAL_STATUSES:
                 row.finished_at = now
-            if status in TERMINAL_STATUSES or status == "pending_owner_review":
+            if status in TERMINAL_STATUSES or status in {"pending_owner_review", "waiting_inputs"}:
                 row.lease_owner = None
                 row.lease_expires_at = None
             row.updated_at = now
             return self._view(row)
+
+    def resume_waiting_inputs(self, domain_pack_ref: str) -> int:
+        """Called only after the configured evaluation input validation succeeds."""
+        with self.database.session() as session:
+            changed = session.execute(
+                update(EvolutionJobRecord)
+                .where(
+                    EvolutionJobRecord.status == "waiting_inputs",
+                    EvolutionJobRecord.last_error_code != "prospective_evaluation_required",
+                    EvolutionJobRecord.domain_pack_ref == domain_pack_ref,
+                    EvolutionJobRecord.candidate_id.is_not(None),
+                )
+                .values(
+                    status="queued",
+                    last_error_code=None,
+                    next_attempt_at=None,
+                    updated_at=_aware(self.clock()),
+                )
+            )
+            return int(getattr(changed, "rowcount", 0))
 
     def list_jobs(self, limit: int = 100) -> list[EvolutionJobView]:
         with self.database.session() as session:
@@ -265,6 +324,7 @@ class EvolutionJobService:
                 "queued",
                 "running",
                 "retry_wait",
+                "waiting_inputs",
                 "pending_owner_review",
                 "completed",
                 "failed",
@@ -299,9 +359,7 @@ class EvolutionJobService:
             return int(getattr(changed, "rowcount", 0) or 0)
 
     @classmethod
-    def _matching(
-        cls, row: EvolutionJobRecord, request: EvolutionJobCreate
-    ) -> EvolutionJobView:
+    def _matching(cls, row: EvolutionJobRecord, request: EvolutionJobCreate) -> EvolutionJobView:
         stored = cls._view(row)
         if (
             stored.trigger_type != request.trigger_type
@@ -352,9 +410,17 @@ class EvolutionJobService:
 
 
 class ServiceHeartbeatService:
-    def __init__(self, database: Database, *, clock: Callable[[], datetime] = utcnow) -> None:
+    def __init__(
+        self,
+        database: Database,
+        *,
+        clock: Callable[[], datetime] = utcnow,
+        config_overrides: dict | None = None,
+    ) -> None:
         self.database = database
         self.clock = clock
+        self.config_overrides = config_overrides or {}
+        self._saved_config_ids: set[str] = set()
 
     def beat(
         self,
@@ -371,6 +437,17 @@ class ServiceHeartbeatService:
         now = _aware(self.clock())
         with self.database.session() as session:
             row = session.get(ServiceHeartbeatRecord, service_id)
+            start = _aware(started_at or (row.started_at if row else now))
+            configuration = configuration_record(
+                service_id=service_id,
+                instance_id=instance_id,
+                started_at=start,
+                now=now,
+                settings=capture_runtime_settings(self.database, mode) | self.config_overrides,
+            )
+            if configuration.config_id not in self._saved_config_ids:
+                if session.get(ServiceRuntimeConfigRecord, configuration.config_id) is None:
+                    session.add(configuration)
             if row is None:
                 row = ServiceHeartbeatRecord(
                     service_id=service_id,
@@ -390,10 +467,14 @@ class ServiceHeartbeatService:
                 row.version = version
                 row.mode = mode
                 row.interval_seconds = interval_seconds
+                if started_at is not None:
+                    row.started_at = _aware(started_at)
                 row.heartbeat_at = now
                 row.last_error_code = last_error_code
             session.flush()
-            return self._view(row, now)
+            view = self._view(row, now)
+        self._saved_config_ids.add(configuration.config_id)
+        return view
 
     def list_views(self) -> list[ServiceHeartbeatView]:
         now = _aware(self.clock())
@@ -502,9 +583,7 @@ class EvolutionTriggerScanner:
             )
             return [
                 EvolutionJobCreate(
-                    trigger_key=(
-                        f"failure_pattern:{row.pattern_id}:{row.occurrence_count}"
-                    ),
+                    trigger_key=(f"failure_pattern:{row.pattern_id}:{row.occurrence_count}"),
                     trigger_type="failure_pattern",
                     domain_pack_ref=self.policy.domain_pack_ref,
                     input_refs=[f"failure_pattern:{row.pattern_id}"],
@@ -554,81 +633,11 @@ class EvolutionTriggerScanner:
         watermark = hashlib.sha256("\n".join(unconsumed).encode()).hexdigest()[:16]
         day = _aware(self.clock()).date().isoformat()
         return EvolutionJobCreate(
-            trigger_key=(
-                f"scheduled:{self.policy.domain_pack_ref}:{day}:{watermark}"
-            ),
+            trigger_key=(f"scheduled:{self.policy.domain_pack_ref}:{day}:{watermark}"),
             trigger_type="scheduled",
             domain_pack_ref=self.policy.domain_pack_ref,
             input_refs=unconsumed,
             max_attempts=self.policy.max_attempts,
-        )
-
-
-class EvolutionContextService:
-    """Build a bounded typed planning context from immutable job references."""
-
-    def __init__(self, database: Database) -> None:
-        self.database = database
-
-    def build(self, job: EvolutionJobView) -> EvolutionPlanningContext:
-        context: list[str] = []
-        with self.database.session() as session:
-            for reference in job.input_refs:
-                if reference.startswith("feedback:"):
-                    row = session.get(FeedbackRecord, reference.removeprefix("feedback:"))
-                    if row is not None:
-                        context.append(
-                            f"feedback {row.verdict} on {row.target_type}:{row.target_id}: "
-                            f"{row.notes}"
-                        )
-                        continue
-                if reference.startswith("failure_pattern:"):
-                    row = session.get(
-                        FailurePatternRecord,
-                        reference.removeprefix("failure_pattern:"),
-                    )
-                    if row is not None:
-                        context.append(
-                            f"failure {row.failure_code} occurred {row.occurrence_count} times; "
-                            f"impact={row.impact}; status={row.status}"
-                        )
-                        continue
-                if reference.startswith("evaluation:"):
-                    row = session.get(
-                        EvaluationRecord, reference.removeprefix("evaluation:")
-                    )
-                    if row is not None:
-                        context.append(
-                            f"evaluation {row.evaluation_id}: brier={row.brier_score:.6f}, "
-                            f"net_return_pct={row.net_return_pct:.6f}, "
-                            f"direction_correct={row.direction_correct}"
-                        )
-                        continue
-                context.append(f"referenced fact: {reference}")
-            pointer = (
-                session.query(ActivePointerRecord)
-                .filter_by(domain_pack_ref=job.domain_pack_ref)
-                .one_or_none()
-            )
-            active_candidate = (
-                session.get(CandidateVersionRecord, pointer.candidate_id)
-                if pointer is not None
-                else None
-            )
-            if pointer is not None and active_candidate is None:
-                raise ValueError("evolution_active_candidate_not_found")
-        return EvolutionPlanningContext(
-            job_id=job.job_id,
-            domain_pack_ref=job.domain_pack_ref,
-            context_items=context or ["No actionable context was resolved."],
-            evidence_refs=list(job.input_refs),
-            active_candidate_id=pointer.candidate_id if pointer is not None else None,
-            active_candidate_version=(
-                active_candidate.version if active_candidate is not None else None
-            ),
-            active_candidate_content_hash=(
-                active_candidate.content_hash if active_candidate is not None else None
-            ),
         )
 
 
@@ -683,9 +692,7 @@ class EvolutionExperienceService:
                     if observation is not None and observation.event_hint
                     else "unknown"
                 )
-                snapshots = session.query(SnapshotRecord).filter_by(
-                    event_id=artifact.event_id
-                )
+                snapshots = session.query(SnapshotRecord).filter_by(event_id=artifact.event_id)
                 for snapshot in snapshots:
                     for evidence in json.loads(snapshot.evidence_json):
                         if isinstance(evidence, dict) and isinstance(
@@ -694,9 +701,7 @@ class EvolutionExperienceService:
                             evidence_refs.add(evidence["evidence_id"])
         if not outcomes or not evidence_refs:
             return None
-        event_family = (
-            next(iter(event_families)) if len(event_families) == 1 else "mixed"
-        )
+        event_family = next(iter(event_families)) if len(event_families) == 1 else "mixed"
         return self.assets.create_experience(
             ExperienceCreate(
                 request_id=f"evolution:{job.job_id}:experience",
@@ -706,9 +711,7 @@ class EvolutionExperienceService:
                 applicable_conditions=list(proposal.changes),
                 evidence_refs=sorted(evidence_refs),
                 outcome_refs=sorted(item.outcome_id for item in outcomes),
-                evaluation_refs=sorted(
-                    item.evaluation_id for item in typed_evaluations
-                ),
+                evaluation_refs=sorted(item.evaluation_id for item in typed_evaluations),
                 source_type="agent",
                 created_by="evolution_supervisor",
             )

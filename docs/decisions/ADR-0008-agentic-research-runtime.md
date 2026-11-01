@@ -150,3 +150,9 @@ FastAPI `BackgroundTasks` 不再承担长研究。复用现有 `hub-worker` 可�
 ## Owner 确认
 
 Owner 已于 2026-08-29 接受本 ADR，并授权从 `R2-R-00` 开始实施。接受 ADR 不等于授权任意社区插件、自动 Promotion、自动交易、第二领域或公开网络无限访问；DSH 精确版本和 profile 必须在 R2-R-01 canary 后锁定。
+
+## 2026-09-21 架构复核重申
+
+本次复核没有改变 ADR-0008 的核心选择，反而确认此前实现偏离了本 ADR：DSH 仍是唯一正式 `ResearchHarnessRuntime` candidate；LangGraph 的 Product Evidence Round 不是另一套 Agent Loop；Deep Agents、OpenAI Agents SDK 和 Pi 不进入当前生产执行链。
+
+当前 DSH Profile 禁用了 Skills、只允许一个无工具 reviewer subagent，并由外层 graph 在 direction coverage 达标后提前收口。这属于 Profile/集成问题，不能作为 DSH Harness 无能力的证据。整改顺序固定为：锁定 baseline → 隔离验证官方 DSH 新版本 → 通过 preset/plugin/Skill/MCP 启用原生多角色与同 Session continuation → 精简外层重复编排。只有插件扩展点无法解决且存在最小复现的 DSH 核心缺陷，才允许建立受控 fork；没有同契约对照数据不得更换 Harness。

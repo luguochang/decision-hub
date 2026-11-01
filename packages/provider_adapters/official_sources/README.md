@@ -19,3 +19,5 @@ adapter，不为每个网站复制 HTTP、timeout、PIT 或 Evidence 逻辑。
 `research_capability_requirement_unsupported`，不会改标签伪造 `current/baseline/delta`。
 Fed speech feed 调用负责从可信发布日期生成 event identity；正文阅读交给共用 Registry 的
 `web.fetch`，真正的政策变化 Fact 需要以后单独批准 baseline-aware parser/provider。
+
+M01：RSS/Atom 不再默认绑定第一条。query 必须给出明确文章 URL 或人物姓氏和 ISO 日期，且只匹配一条；无法匹配/歧义返回 `official_event_target_unresolved`。event_id 是不透明关联键，不能用来猜来源；显式 event_at 也必须匹配。日期或人物不明确时先 discovery，再精确查询。

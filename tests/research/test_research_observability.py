@@ -13,12 +13,15 @@ from apps.hub_worker.research import DurableResearchWorker
 from packages.contracts_py.decision_hub_contracts import (
     ErrorProvenance,
     EvidenceCandidate,
+    EvidenceGap,
+    ResearchReview,
     ResearchRunCommand,
     ResearchSessionResult,
     ResearchTraceEvent,
     RunStatus,
 )
 from packages.kernel.decision_hub_kernel.application.commit import CommitDecisionService
+from packages.kernel.decision_hub_kernel.application.event_watch import EventWatchService
 from packages.kernel.decision_hub_kernel.application.research_evidence import (
     ResearchEvidenceService,
 )
@@ -46,6 +49,7 @@ from tests.evolution.test_research_worker import (
     _candidate,
     _result,
 )
+from tests.research.query_basis_helpers import save_control_request
 
 
 def _trace(run_id: str, *, event_type: str, summary: str) -> ResearchTraceEvent:
@@ -65,6 +69,50 @@ def _trace(run_id: str, *, event_type: str, summary: str) -> ResearchTraceEvent:
             "error_code": None,
         }
     )
+
+
+def test_completed_report_keeps_subagent_failure_activity_without_rewriting_result(tmp_path):
+    database, event_id, run_id = _admitted_run(tmp_path)
+    request = ResearchRequestFactory(database, pack_root=PACK_ROOT, clock=lambda: NOW).build(
+        event_id, run_id
+    )
+    result = _result(request)
+    CommitDecisionService(database, clock=lambda: NOW).commit_research_result(
+        run_id, event_id, result
+    )
+    with database.session() as session:
+        frozen = session.get(ResearchResultRecord, run_id).payload_json
+    service = ResearchObservabilityService(database, clock=lambda: NOW)
+    for kind in ("tool_started", "tool_failed"):
+        service.append_trace(
+            _trace(run_id, event_type=kind, summary="Subagent request").model_copy(
+                update={
+                    "reference_type": "capability_call",
+                    "reference_id": "subagent-expired-call",
+                    "status": "failed" if kind == "tool_failed" else "running",
+                    "error_code": "research_pit_violation" if kind == "tool_failed" else None,
+                    "error": ErrorProvenance(
+                        error_code="research_pit_violation",
+                        origin="pit",
+                        cause_code="live_request_after_cutoff",
+                        capability_id="web.fetch",
+                        tool_call_id="subagent-expired-call",
+                        retryable=False,
+                        deadline_ms=None,
+                    )
+                    if kind == "tool_failed"
+                    else None,
+                }
+            )
+        )
+    detail = ResearchQueryService(database, pack_root=PACK_ROOT).get(run_id)
+    calls = [call for row in detail.rounds for call in row.tool_invocations]
+    added = [call for call in calls if call.tool_call_id == "subagent-expired-call"]
+    assert len(added) == 1 and added[0].status == "failed"
+    assert added[0].error.cause_code == "live_request_after_cutoff"
+    assert len(calls) == sum(len(row.tool_invocations) for row in result.rounds) + 1
+    with database.session() as session:
+        assert session.get(ResearchResultRecord, run_id).payload_json == frozen
 
 
 def test_event_title_uses_only_the_first_nonempty_source_line() -> None:
@@ -138,9 +186,7 @@ def test_research_result_is_committed_with_ledger_and_query_view(tmp_path: Path)
     )
     result = _result(request)
     observability = ResearchObservabilityService(database, clock=lambda: NOW)
-    asyncio.run(
-        observability.emit(_trace(run_id, event_type="session_started", summary="Started"))
-    )
+    asyncio.run(observability.emit(_trace(run_id, event_type="session_started", summary="Started")))
 
     first_artifact, _ = CommitDecisionService(database, clock=lambda: NOW).commit_research_result(
         run_id, event_id, result
@@ -159,10 +205,69 @@ def test_research_result_is_committed_with_ledger_and_query_view(tmp_path: Path)
     assert detail.run.latest_sequence_no == 1
     assert detail.trigger_snapshot is not None
     assert detail.decision_snapshot is None
-    assert detail.rounds == result.rounds
+    assert [r.model_dump() for r in detail.rounds] == [r.model_dump() for r in result.rounds]
     assert detail.causal_case == result.causal_case
     assert {item.horizon for item in detail.horizons} == {"30m", "24h", "72h"}
-    assert detail.scheduled_recheck_at == NOW + timedelta(minutes=10)
+    assert detail.scheduled_recheck_at is None
+    assert detail.horizons[0].next_review_at == NOW + timedelta(minutes=10)
+    # A model's review suggestion is data, not owner authorization to enqueue.
+    from packages.kernel.decision_hub_kernel.persistence.db import RunRecord
+
+    with database.session() as session:
+        assert session.query(RunRecord).filter_by(parent_run_id=run_id).count() == 0
+
+
+@pytest.mark.parametrize("importance", ["soft", "hard"])
+def test_commit_distinguishes_soft_evidence_gaps_from_hard_gaps(
+    tmp_path: Path,
+    importance: str,
+) -> None:
+    database, event_id, run_id = _admitted_run(tmp_path)
+    request = ResearchRequestFactory(database, pack_root=PACK_ROOT, clock=lambda: NOW).build(
+        event_id, run_id
+    )
+    result = _result(request)
+    gap = EvidenceGap.model_validate(
+        {
+            "requirement_id": "counter.thesis",
+            "importance": importance,
+            "reason_code": "missing",
+            "query_hint": "Read another counterexample",
+            "attempted_capabilities": [],
+            "blocks_directional_output": importance == "hard",
+        }
+    )
+    review = ResearchReview(
+        review_id="review-soft-hard-gap",
+        role="independent_reviewer",
+        target_claim=result.causal_case.thesis if result.causal_case else "Directional claim.",
+        evidence_refs=[result.evidence_candidates[0].evidence_id],
+        result_hash="2" * 64,
+        challenge="The move may already be priced.",
+        resolution="accepted",
+        limitations=[],
+        created_at=NOW,
+    )
+    result = result.model_copy(
+        update={
+            "final_coverage": result.final_coverage.model_copy(
+                update={"status": "sufficient", "hard_coverage_ratio": 1.0, "gaps": [gap]},
+            ),
+            "horizons": [
+                item.model_copy(update={"probability_status": "calibrated"})
+                for item in result.horizons
+            ],
+            "reviews": [review],
+        }
+    )
+    artifact_id, _ = CommitDecisionService(database, clock=lambda: NOW).commit_research_result(
+        run_id, event_id, result
+    )
+    artifact = database.get_artifact_view(artifact_id)
+    assert artifact is not None
+    # A model-authored calibrated string and an unverified review receipt
+    # cannot authorize a direction, regardless of soft/hard gap semantics.
+    assert {item.direction.value for item in artifact.forecasts} == {"no_trade"}
 
 
 def test_partial_progress_remains_visible_without_final_result(tmp_path: Path) -> None:
@@ -172,6 +277,7 @@ def test_partial_progress_remains_visible_without_final_result(tmp_path: Path) -
     request = ResearchRequestFactory(database, pack_root=PACK_ROOT, clock=lambda: NOW).build(
         event_id, run_id
     )
+    save_control_request(database, request, NOW, tool_calls=2)
     candidate = EvidenceCandidate.model_validate(_candidate(request)).model_copy(
         update={
             "tool_call_id": "call-official",
@@ -287,13 +393,12 @@ def test_partial_progress_remains_visible_without_final_result(tmp_path: Path) -
     assert detail.run.runtime_id == "dsh"
     assert detail.run.coverage is not None
     assert detail.run.coverage.gaps
-    assert "policy_or_data_delta" in {
-        item.requirement_id for item in detail.run.coverage.gaps
-    }
+    assert "policy_or_data_delta" in {item.requirement_id for item in detail.run.coverage.gaps}
     assert len(detail.rounds) == 1
-    assert {
-        item.capability_id for item in detail.rounds[0].tool_invocations
-    } == {"market.cross_asset", "official.macro"}
+    assert {item.capability_id for item in detail.rounds[0].tool_invocations} == {
+        "market.cross_asset",
+        "official.macro",
+    }
     assert detail.run.failure is not None
     assert detail.run.failure.error_code == "research_capability_timeout"
 
@@ -311,6 +416,40 @@ def test_partial_progress_remains_visible_without_final_result(tmp_path: Path) -
     assert business.failures[0].origin == "transport"
 
 
+def test_fallback_coverage_applies_event_family_policy(tmp_path: Path) -> None:
+    database, event_id, run_id = _admitted_run(tmp_path)
+    EventWatchService(database, clock=lambda: NOW).ensure_watch(
+        event_id=event_id,
+        source_id="manual-text",
+        event_family="geopolitical_shock",
+        scheduled_at=NOW - timedelta(days=1),
+        window_offsets=("t-5m", "t+1m"),
+    )
+    request = ResearchRequestFactory(database, pack_root=PACK_ROOT, clock=lambda: NOW).build(
+        event_id, run_id
+    )
+    save_control_request(database, request, NOW)
+    RunService(database, clock=lambda: NOW).set_status(
+        run_id, RunStatus.failed, error_code="research_stopped"
+    )
+
+    detail = ResearchQueryService(database, pack_root=PACK_ROOT).get(run_id)
+
+    assert detail is not None
+    assert detail.run.coverage is not None
+    importance = {item.requirement_id: item.importance for item in detail.run.coverage.gaps}
+    assert importance["expectation_pricing"] == "soft"
+    assert importance["macro_transmission"] == "soft"
+    assert importance["crypto_spot_confirmation"] == "hard"
+    assert importance["derivatives_crowding"] == "hard"
+
+    observability = ResearchQueryService(database, pack_root=PACK_ROOT).observability_view(run_id)
+    assert observability is not None
+    readiness = {item.requirement_id: item.importance for item in observability.readiness}
+    assert readiness["expectation_pricing"] == "soft"
+    assert readiness["macro_transmission"] == "soft"
+
+
 def test_failed_synthesis_projects_durable_round_and_real_hard_gaps(tmp_path: Path) -> None:
     """A rejected synthesis must not erase the trusted work that preceded it."""
 
@@ -318,6 +457,7 @@ def test_failed_synthesis_projects_durable_round_and_real_hard_gaps(tmp_path: Pa
     request = ResearchRequestFactory(database, pack_root=PACK_ROOT, clock=lambda: NOW).build(
         event_id, run_id
     )
+    save_control_request(database, request, NOW, tool_calls=1)
     candidate = EvidenceCandidate.model_validate(_candidate(request)).model_copy(
         update={
             "tool_call_id": "call-official",
@@ -405,9 +545,7 @@ def test_failed_synthesis_projects_durable_round_and_real_hard_gaps(tmp_path: Pa
     assert detail.run.stop_reason.code == "critical_data_unavailable"
     assert detail.run.coverage is not None
     expected_hard_gaps = {
-        item.requirement_id
-        for item in detail.run.coverage.gaps
-        if item.importance == "hard"
+        item.requirement_id for item in detail.run.coverage.gaps if item.importance == "hard"
     }
     assert set(detail.run.stop_reason.remaining_hard_gaps) == expected_hard_gaps
     assert expected_hard_gaps

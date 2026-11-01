@@ -62,7 +62,7 @@ $defs:
     additionalProperties: false
     required: [mode, supervisor_role, planned_capabilities, required_capabilities, specialist_coverage, missing_capabilities, replan_count, experiment_refs]
     properties:
-      mode: {type: string, enum: [fixed_graph, supervisor_candidate]}
+      mode: {type: string, enum: [fixed_graph, supervisor_candidate, dsh_native, unknown]}
       supervisor_role: {type: [string, 'null']}
       planned_capabilities: {type: array, items: {type: string}}
       required_capabilities: {type: array, items: {type: string}}

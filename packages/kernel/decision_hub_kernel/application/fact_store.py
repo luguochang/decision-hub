@@ -4,6 +4,9 @@ import hashlib
 import json
 from collections.abc import Iterable
 from datetime import UTC, datetime
+from decimal import Decimal, InvalidOperation
+
+from sqlalchemy.orm import Session
 
 from packages.contracts_py.decision_hub_contracts import FactEnvelope
 from packages.kernel.decision_hub_kernel.persistence.db import (
@@ -30,86 +33,239 @@ class ResearchFactStore:
         facts: Iterable[FactEnvelope],
         cutoff_at: datetime,
     ) -> list[FactEnvelope]:
+        with self.database.session() as session:
+            return self.accept_facts_in_session(
+                session,
+                run_id=run_id,
+                capability_id=capability_id,
+                facts=facts,
+                cutoff_at=cutoff_at,
+            )
+
+    def accept_facts_in_session(
+        self,
+        session: Session,
+        *,
+        run_id: str,
+        capability_id: str,
+        facts: Iterable[FactEnvelope],
+        cutoff_at: datetime,
+        lineage_reuse: dict[str, str] | None = None,
+    ) -> list[FactEnvelope]:
+        """Persist facts using a caller-owned transaction."""
         cutoff = _aware(cutoff_at)
         accepted: list[FactEnvelope] = []
-        with self.database.session() as session:
-            if session.get(RunRecord, run_id) is None:
-                raise KeyError(run_id)
-            for fact in facts:
-                evidence = session.get(ResearchEvidenceRecord, fact.evidence_id)
-                if evidence is None or evidence.run_id != run_id:
-                    raise ValueError("research_fact_evidence_not_found")
-                if (
-                    evidence.requirement_id != fact.requirement_id
-                    or evidence.source_id != fact.source_id
-                ):
-                    raise ValueError("research_fact_lineage_mismatch")
-                _validate_fact_pit(fact, cutoff)
-                normalized = fact.model_copy(
-                    update={
-                        "quality": (
-                            "accepted" if evidence.quality == "accepted" else evidence.quality
-                        )
-                    }
-                )
-                existing = session.get(ResearchFactRecord, fact.fact_id)
-                if existing is not None:
-                    persisted = _fact_model(existing)
-                    if not _same_semantic_fact(persisted, normalized):
+        if session.get(RunRecord, run_id) is None:
+            raise KeyError(run_id)
+        for fact in facts:
+            evidence = session.get(ResearchEvidenceRecord, fact.evidence_id)
+            if evidence is None or evidence.run_id != run_id:
+                raise ValueError("research_fact_evidence_not_found")
+            if (
+                evidence.requirement_id != fact.requirement_id
+                or evidence.source_id != fact.source_id
+            ):
+                raise ValueError("research_fact_lineage_mismatch")
+            _validate_fact_pit(fact, cutoff)
+            normalized = fact.model_copy(
+                update={
+                    "quality": ("accepted" if evidence.quality == "accepted" else evidence.quality)
+                }
+            )
+            existing = session.get(ResearchFactRecord, fact.fact_id)
+            if existing is not None:
+                persisted = _fact_model(existing)
+                if not _same_semantic_fact(persisted, normalized):
+                    raise ValueError("research_fact_identity_conflict")
+                accepted.append(persisted)
+                continue
+            baseline = _previous_open_interest(session, run_id, normalized)
+            session.add(_fact_record(run_id, capability_id, normalized))
+            accepted.append(normalized)
+            derived = _open_interest_delta(normalized, baseline)
+            if derived is not None:
+                existing_delta = session.get(ResearchFactRecord, derived.fact_id)
+                if existing_delta is None:
+                    session.add(_fact_record(run_id, capability_id, derived))
+                    accepted.append(derived)
+                else:
+                    persisted_delta = _fact_model(existing_delta)
+                    if not _same_semantic_fact(persisted_delta, derived):
                         raise ValueError("research_fact_identity_conflict")
-                    accepted.append(persisted)
-                    continue
-                session.add(
-                    ResearchFactRecord(
-                        fact_id=normalized.fact_id,
-                        run_id=run_id,
-                        capability_id=capability_id,
-                        evidence_id=normalized.evidence_id,
-                        requirement_id=normalized.requirement_id,
-                        metric_family=normalized.metric_family,
-                        field=normalized.field,
-                        instrument=normalized.instrument,
-                        venue=normalized.venue,
-                        value_json=json.dumps(
-                            normalized.value,
-                            ensure_ascii=False,
-                            sort_keys=True,
-                            separators=(",", ":"),
-                        ),
-                        unit=normalized.unit,
-                        window_start_at=normalized.window_start_at,
-                        window_end_at=normalized.window_end_at,
-                        event_offset=normalized.event_offset,
-                        observed_at=normalized.observed_at,
-                        received_at=normalized.received_at,
-                        published_at=normalized.published_at,
-                        source_id=normalized.source_id,
-                        independence_group=normalized.independence_group,
-                        quality=normalized.quality,
-                        delay_class=normalized.delay_class,
-                        payload_schema_ref=normalized.payload_schema_ref,
-                        payload_hash=normalized.payload_hash,
-                        attributes_json=json.dumps(
-                            normalized.attributes,
-                            ensure_ascii=False,
-                            sort_keys=True,
-                            separators=(",", ":"),
-                        ),
-                        accepted_at=utcnow(),
-                    )
-                )
-                accepted.append(normalized)
+                    accepted.append(persisted_delta)
+        session.flush()
+        from packages.kernel.decision_hub_kernel.application.fact_lineage import FactLineageStore
+
+        FactLineageStore(self.database).bind_facts(
+            session,
+            facts=[session.get(ResearchFactRecord, item.fact_id) for item in accepted],
+            cutoff_at=cutoff_at,
+            reused=lineage_reuse,
+        )
         return accepted
 
     def list_run_facts(self, run_id: str) -> list[FactEnvelope]:
         with self.database.session() as session:
-            rows = (
-                session.query(ResearchFactRecord)
-                .filter_by(run_id=run_id)
-                .order_by(ResearchFactRecord.accepted_at, ResearchFactRecord.fact_id)
-                .all()
-            )
-            return [_fact_model(row) for row in rows]
+            return self.list_run_facts_in_session(session, run_id)
+
+    @staticmethod
+    def list_run_facts_in_session(session: Session, run_id: str) -> list[FactEnvelope]:
+        """Read original facts using the caller's admission/Snapshot transaction."""
+        rows = (
+            session.query(ResearchFactRecord)
+            .filter_by(run_id=run_id)
+            .order_by(ResearchFactRecord.accepted_at, ResearchFactRecord.fact_id)
+            .execution_options(populate_existing=True)
+            .all()
+        )
+        return [_fact_model(row) for row in rows]
+
+
+def _previous_open_interest(
+    session: Session,
+    run_id: str,
+    current: FactEnvelope,
+) -> FactEnvelope | None:
+    if (
+        current.field != "open_interest"
+        or current.metric_family != "crypto.derivatives"
+        or current.venue is None
+        or current.instrument is None
+    ):
+        return None
+    row = (
+        session.query(ResearchFactRecord)
+        .filter(
+            ResearchFactRecord.run_id == run_id,
+            ResearchFactRecord.requirement_id == current.requirement_id,
+            ResearchFactRecord.field == "open_interest",
+            ResearchFactRecord.venue == current.venue,
+            ResearchFactRecord.instrument == current.instrument,
+            ResearchFactRecord.unit == current.unit,
+            ResearchFactRecord.quality == "accepted",
+            ResearchFactRecord.observed_at < current.observed_at,
+        )
+        .order_by(ResearchFactRecord.observed_at.desc())
+        .first()
+    )
+    return _fact_model(row) if row is not None else None
+
+
+def _open_interest_delta(
+    current: FactEnvelope,
+    baseline: FactEnvelope | None,
+) -> FactEnvelope | None:
+    if baseline is None:
+        return None
+    elapsed_seconds = (current.observed_at - baseline.observed_at).total_seconds()
+    if elapsed_seconds < 15 or elapsed_seconds > 86_400:
+        return None
+    try:
+        baseline_value = Decimal(str(baseline.value))
+        current_value = Decimal(str(current.value))
+        if baseline_value == 0:
+            return None
+        delta = (current_value - baseline_value) / baseline_value * Decimal("100")
+    except (InvalidOperation, TypeError, ValueError):
+        return None
+    attributes: dict[str, float | str | bool | None] = {
+        "derivation": "percent_change_between_live_snapshots",
+        "baseline_fact_id": baseline.fact_id,
+        "baseline_evidence_id": baseline.evidence_id,
+        "baseline_value": str(baseline.value),
+        "window_seconds": elapsed_seconds,
+    }
+    payload_schema_ref = "decision-hub.derived-open-interest-delta.v1"
+    value = format(delta, "f")
+    payload_hash = research_fact_payload_hash(
+        requirement_id=current.requirement_id,
+        metric_family=current.metric_family,
+        field="open_interest_delta",
+        instrument=current.instrument,
+        venue=current.venue,
+        value=value,
+        unit="percent",
+        window_start_at=baseline.observed_at,
+        window_end_at=current.observed_at,
+        event_offset=None,
+        published_at=current.published_at,
+        source_id=current.source_id,
+        independence_group=current.independence_group,
+        delay_class=current.delay_class,
+        payload_schema_ref=payload_schema_ref,
+        attributes=attributes,
+    )
+    return FactEnvelope(
+        schema_version="fact-envelope.v1",
+        fact_id=research_fact_instance_id(
+            evidence_id=current.evidence_id, payload_hash=payload_hash
+        ),
+        evidence_id=current.evidence_id,
+        requirement_id=current.requirement_id,
+        metric_family=current.metric_family,
+        field="open_interest_delta",
+        instrument=current.instrument,
+        venue=current.venue,
+        value=value,
+        unit="percent",
+        window_start_at=baseline.observed_at,
+        window_end_at=current.observed_at,
+        event_offset=None,
+        observed_at=current.observed_at,
+        received_at=current.received_at,
+        published_at=current.published_at,
+        source_id=current.source_id,
+        independence_group=current.independence_group,
+        quality=current.quality,
+        delay_class=current.delay_class,
+        payload_schema_ref=payload_schema_ref,
+        payload_hash=payload_hash,
+        attributes=attributes,
+    )
+
+
+def _fact_record(
+    run_id: str,
+    capability_id: str,
+    fact: FactEnvelope,
+) -> ResearchFactRecord:
+    return ResearchFactRecord(
+        fact_id=fact.fact_id,
+        run_id=run_id,
+        capability_id=capability_id,
+        evidence_id=fact.evidence_id,
+        requirement_id=fact.requirement_id,
+        metric_family=fact.metric_family,
+        field=fact.field,
+        instrument=fact.instrument,
+        venue=fact.venue,
+        value_json=json.dumps(
+            fact.value,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ),
+        unit=fact.unit,
+        window_start_at=fact.window_start_at,
+        window_end_at=fact.window_end_at,
+        event_offset=fact.event_offset,
+        observed_at=fact.observed_at,
+        received_at=fact.received_at,
+        published_at=fact.published_at,
+        source_id=fact.source_id,
+        independence_group=fact.independence_group,
+        quality=fact.quality,
+        delay_class=fact.delay_class,
+        payload_schema_ref=fact.payload_schema_ref,
+        payload_hash=fact.payload_hash,
+        attributes_json=json.dumps(
+            fact.attributes,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ),
+        accepted_at=utcnow(),
+    )
 
 
 def research_fact_payload_hash(

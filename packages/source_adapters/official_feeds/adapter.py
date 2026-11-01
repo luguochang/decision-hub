@@ -2,17 +2,24 @@ from __future__ import annotations
 
 import hashlib
 from collections.abc import Awaitable, Callable
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from email.utils import parsedate_to_datetime
 from typing import Any
 from xml.etree import ElementTree
 
-import httpx
 from bs4 import BeautifulSoup
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, TypeAdapter
 
 from packages.contracts_py.decision_hub_contracts.models import SourceType, TextEnvelope
-from packages.kernel.decision_hub_kernel.ports.sources import SourceManifest, SourcePollResult
+from packages.kernel.decision_hub_kernel.ports.sources import (
+    SourceManifest,
+    SourcePollFailure,
+    SourcePollResult,
+)
+from packages.provider_adapters.research.raw_capture import CapturingAsyncClient
+
+from .diagnostics import response_snapshot
+from .transport import public_source_client
 
 
 class FeedItem(BaseModel):
@@ -31,7 +38,7 @@ Fetcher = Callable[[str], Awaitable[tuple[int, str]]]
 
 
 async def _http_fetch(url: str) -> tuple[int, str]:
-    async with httpx.AsyncClient(timeout=20) as client:
+    async with public_source_client(url) as client:
         response = await client.get(url, follow_redirects=True)
         return response.status_code, response.text
 
@@ -56,14 +63,79 @@ class OfficialFeedSource:
         self.document_fetcher = document_fetcher or self.fetcher
         self.bootstrap_latest = bootstrap_latest
 
+    async def poll_recent(
+        self,
+        cursor: str | None,
+        *,
+        accepts_title: Callable[[str], bool],
+        lookback_hours: int = 168,
+    ) -> SourcePollResult:
+        """Catch up at most one recent announcement without rewinding the live cursor."""
+        if not 1 <= lookback_hours <= 720:
+            raise ValueError("source_catchup_window_invalid")
+        status, body = await self.fetcher(self.endpoint)
+        snapshot = response_snapshot(status, body, self.manifest.version)
+        now = datetime.now(UTC)
+        try:
+            items = parse_feed(body, self.format_hint)
+        except ValueError as exc:
+            raise SourcePollFailure(
+                "source_parse_error", snapshot.model_copy(update={"parse_status": "invalid"})
+            ) from exc
+        eligible = [
+            item
+            for item in items
+            if item.published_at is not None
+            and now - timedelta(hours=lookback_hours) <= item.published_at <= now
+            and accepts_title(item.title)
+        ]
+        eligible.sort(key=_cursor_for, reverse=True)
+        envelopes = tuple([await self._envelope(item, now) for item in eligible[:1]])
+        return SourcePollResult(
+            source_id=self.manifest.source_id,
+            cursor_before=cursor,
+            cursor_after=cursor,
+            envelopes=envelopes,
+            fetched_at=now,
+            content_snapshot=snapshot.model_copy(
+                update={"parse_status": "valid", "parsed_count": len(items)}
+            ),
+        )
+
+    async def _envelope(self, item: FeedItem, fetched_at: datetime) -> TextEnvelope:
+        text = (f"{item.title}\n{item.summary}").strip()
+        if self.include_document_body and item.url:
+            status, body = await self.document_fetcher(item.url)
+            response_snapshot(status, body, self.manifest.version)
+            extracted = extract_document_text(body)
+            if extracted:
+                text = f"{item.title}\n{extracted}".strip()
+        return TextEnvelope(
+            source_id=self.manifest.source_id,
+            source_type=SourceType.official_feed,
+            observed_at=item.published_at or item.updated_at or fetched_at,
+            published_at=item.published_at,
+            received_at=fetched_at,
+            raw_text=text,
+            language="en",
+            event_hint=self.manifest.source_id,
+            event_family=_event_family(text, self.manifest.source_id),
+            source_url=_url(item.url),
+            revision_of=item.revision_of,
+            content_hash=hashlib.sha256(text.encode("utf-8")).hexdigest(),
+        )
+
     async def poll(self, cursor: str | None = None) -> SourcePollResult:
         status_code, body = await self.fetcher(self.endpoint)
-        if status_code == 429:
-            raise RuntimeError("source_rate_limited")
-        if status_code >= 400:
-            raise RuntimeError(f"source_unavailable:{status_code}")
+        snapshot = response_snapshot(status_code, body, self.manifest.version)
         fetched_at = datetime.now(UTC)
-        items = sorted(parse_feed(body, self.format_hint), key=_cursor_for)
+        try:
+            items = sorted(parse_feed(body, self.format_hint), key=_cursor_for)
+        except ValueError as exc:
+            raise SourcePollFailure(
+                "source_parse_error", snapshot.model_copy(update={"parse_status": "invalid"})
+            ) from exc
+        snapshot = snapshot.model_copy(update={"parse_status": "valid", "parsed_count": len(items)})
         selected = _after_cursor(items, cursor)
         if cursor is None and self.bootstrap_latest:
             return SourcePollResult(
@@ -72,34 +144,11 @@ class OfficialFeedSource:
                 cursor_after=_cursor_for(items[-1]) if items else None,
                 envelopes=(),
                 fetched_at=fetched_at,
+                content_snapshot=snapshot,
             )
         envelopes_list: list[TextEnvelope] = []
         for item in selected[: self.manifest.max_batch]:
-            text = (f"{item.title}\n{item.summary}").strip()
-            if self.include_document_body and item.url:
-                article_status, article_body = await self.document_fetcher(item.url)
-                if article_status == 429:
-                    raise RuntimeError("source_rate_limited")
-                if article_status >= 400:
-                    raise RuntimeError(f"source_document_unavailable:{article_status}")
-                extracted = extract_document_text(article_body)
-                if extracted:
-                    text = f"{item.title}\n{extracted}".strip()
-            envelopes_list.append(
-                TextEnvelope(
-                    source_id=self.manifest.source_id,
-                    source_type=SourceType.official_feed,
-                    observed_at=item.published_at or item.updated_at or fetched_at,
-                    published_at=item.published_at,
-                    received_at=fetched_at,
-                    raw_text=text,
-                    language="en",
-                    event_hint=self.manifest.source_id,
-                    source_url=_url(item.url),
-                    revision_of=item.revision_of,
-                    content_hash=hashlib.sha256(text.encode("utf-8")).hexdigest(),
-                )
-            )
+            envelopes_list.append(await self._envelope(item, fetched_at))
         envelopes = tuple(envelopes_list)
         # Do not advance past unprocessed entries when a source batch is capped.
         cursor_after = _cursor_for(selected[len(envelopes) - 1]) if envelopes else cursor
@@ -109,6 +158,7 @@ class OfficialFeedSource:
             cursor_after=cursor_after,
             envelopes=envelopes,
             fetched_at=fetched_at,
+            content_snapshot=snapshot,
         )
 
 
@@ -209,3 +259,19 @@ def _after_cursor(items: list[FeedItem], cursor: str | None) -> list[FeedItem]:
     if not cursor:
         return items
     return [_item for _item in items if _cursor_for(_item) > cursor]
+
+
+def _event_family(text: str, source_id: str) -> str | None:
+    normalized = text.casefold()
+    rules = (
+        (("consumer price index", "cpi"), "cpi"),
+        (("employment situation", "nonfarm payroll", "non-farm payroll"), "nfp"),
+        (("producer price index", "ppi"), "ppi"),
+        (("personal income and outlays", "personal consumption expenditures"), "pce"),
+        (("gross domestic product", "gdp"), "gdp"),
+        (("federal open market committee", "fomc statement", "monetary policy"), "fomc"),
+    )
+    for markers, family in rules:
+        if any(marker in normalized for marker in markers):
+            return family
+    return "fomc" if source_id == "fed-press" and "federal funds" in normalized else None

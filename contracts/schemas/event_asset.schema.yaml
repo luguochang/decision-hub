@@ -1,0 +1,266 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.local/contracts/event_asset.schema.json",
+  "title": "EventAssetContracts",
+  "$defs": {
+    "event_asset_vintage": {
+      "type": "object",
+      "title": "EventAssetVintage",
+      "additionalProperties": false,
+      "properties": {
+        "vintage_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "time_precision": {
+          "type": "string"
+        },
+        "scheduled_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "scheduled_date": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "prior_value": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "consensus_value": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "actual_value": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "source_timezone": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "payload_hash": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "vintage_id",
+        "status",
+        "time_precision",
+        "scheduled_at",
+        "scheduled_date",
+        "observed_at",
+        "recorded_at",
+        "prior_value",
+        "consensus_value",
+        "actual_value",
+        "source_timezone",
+        "payload_hash"
+      ]
+    },
+    "event_asset_sample": {
+      "type": "object",
+      "title": "EventAssetSample",
+      "additionalProperties": false,
+      "properties": {
+        "sample_id": {
+          "type": "string"
+        },
+        "watch_id": {
+          "type": "string"
+        },
+        "offset": {
+          "type": "string"
+        },
+        "target_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "watch_scheduled_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "watch_status": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "received_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "provider_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "error_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "payload_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "sample_id",
+        "watch_id",
+        "offset",
+        "target_at",
+        "watch_scheduled_at",
+        "watch_status",
+        "status",
+        "observed_at",
+        "received_at",
+        "provider_id",
+        "error_code",
+        "payload_ref"
+      ]
+    },
+    "event_asset_run": {
+      "type": "object",
+      "title": "EventAssetRun",
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "type": "string"
+        },
+        "study_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "type": "string"
+        },
+        "strategy_version": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "artifact_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "run_id",
+        "study_id",
+        "status",
+        "strategy_version",
+        "created_at",
+        "artifact_id"
+      ]
+    },
+    "event_asset_view": {
+      "type": "object",
+      "title": "EventAssetView",
+      "additionalProperties": false,
+      "properties": {
+        "macro_event_id": {
+          "type": "string"
+        },
+        "occurrence_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "vintages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/event_asset_vintage"
+          }
+        },
+        "vintage_total": {
+          "type": "integer"
+        },
+        "samples": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/event_asset_sample"
+          }
+        },
+        "sample_total": {
+          "type": "integer"
+        },
+        "runs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/event_asset_run"
+          }
+        },
+        "run_total": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "macro_event_id",
+        "occurrence_id",
+        "vintages",
+        "vintage_total",
+        "samples",
+        "sample_total",
+        "runs",
+        "run_total"
+      ]
+    }
+  }
+}

@@ -7,17 +7,21 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, overload
 
 from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
     DateTime,
     Float,
+    Index,
     Integer,
     String,
     Text,
     UniqueConstraint,
     create_engine,
     event,
+    or_,
     select,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
@@ -47,6 +51,14 @@ def utcnow() -> datetime:
     return datetime.now(UTC)
 
 
+@overload
+def as_utc(value: None) -> None: ...
+
+
+@overload
+def as_utc(value: datetime) -> datetime: ...
+
+
 def as_utc(value: datetime | None) -> datetime | None:
     """Normalize SQLite's timezone-less datetime values at the public boundary."""
     if value is None:
@@ -56,6 +68,36 @@ def as_utc(value: datetime | None) -> datetime | None:
 
 class Base(DeclarativeBase):
     pass
+
+
+class UsageCollectionRecord(Base):
+    __tablename__ = "usage_collection_jobs"
+    job_id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    run_id: Mapped[str] = mapped_column(String(128), index=True)
+    session_id: Mapped[str] = mapped_column(String(256))
+    generation: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(32), default="pending")
+    next_check_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    checked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    lease_owner: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    lease_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    request_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    last_view_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    last_snapshot_id: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ResearchUsageSnapshotRecord(Base):
+    """Immutable metadata-only model usage reconciliations, separate from reports."""
+
+    __tablename__ = "research_usage_snapshots"
+    snapshot_id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    run_id: Mapped[str] = mapped_column(String(128), index=True)
+    recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    payload_sha256: Mapped[str] = mapped_column(String(64))
+    payload_json: Mapped[str] = mapped_column(Text)
 
 
 class EventRecord(Base):
@@ -122,6 +164,91 @@ class EventWatchRecord(Base):
     )
 
 
+class MacroEventRecord(Base):
+    """Point-in-time macro event ledger; calendar, expectation and release stay separate."""
+
+    __tablename__ = "macro_events"
+    __table_args__ = (
+        UniqueConstraint(
+            "source_id",
+            "external_event_id",
+            name="uq_macro_events_source_external",
+        ),
+    )
+
+    macro_event_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    event_id: Mapped[str] = mapped_column(String(128), index=True)
+    external_event_id: Mapped[str] = mapped_column(String(256))
+    family: Mapped[str] = mapped_column(String(128), index=True)
+    scheduled_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    source_id: Mapped[str] = mapped_column(String(128), index=True)
+    source_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    scheduled_date: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    time_precision: Mapped[str] = mapped_column(String(16), default="unknown")
+    source_timezone: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    invalidated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    correction_ref: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    source_authority: Mapped[str] = mapped_column(String(32), default="official")
+    unit: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    prior_value: Mapped[float | None] = mapped_column(Float, nullable=True)
+    consensus_value: Mapped[float | None] = mapped_column(Float, nullable=True)
+    actual_value: Mapped[float | None] = mapped_column(Float, nullable=True)
+    vintage_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    revision_flag: Mapped[bool] = mapped_column(default=False)
+    surprise: Mapped[float | None] = mapped_column(Float, nullable=True)
+    surprise_z: Mapped[float | None] = mapped_column(Float, nullable=True)
+    status: Mapped[str] = mapped_column(String(32), default="scheduled", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class CalendarCorrectionRecord(Base):
+    """Auditable parser correction, distinct from an official event cancellation."""
+
+    __tablename__ = "calendar_corrections"
+    correction_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    source_id: Mapped[str] = mapped_column(String(128), index=True)
+    parser_version: Mapped[str] = mapped_column(String(128))
+    source_content_hash: Mapped[str] = mapped_column(String(64))
+    source_content_ref: Mapped[str] = mapped_column(String(2048))
+    reason: Mapped[str] = mapped_column(String(256))
+    before_json: Mapped[str] = mapped_column(Text)
+    invalidated_ids_json: Mapped[str] = mapped_column(Text)
+    verified_ids_json: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class MacroEventVintageRecord(Base):
+    """Append-only point-in-time values for one macro event revision."""
+
+    __tablename__ = "macro_event_vintages"
+    __table_args__ = (
+        UniqueConstraint(
+            "macro_event_id",
+            "payload_hash",
+            name="uq_macro_event_vintages_payload",
+        ),
+    )
+
+    vintage_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    macro_event_id: Mapped[str] = mapped_column(String(128), index=True)
+    event_id: Mapped[str] = mapped_column(String(128), index=True)
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    prior_value: Mapped[float | None] = mapped_column(Float, nullable=True)
+    scheduled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    scheduled_date: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    time_precision: Mapped[str] = mapped_column(String(16), default="unknown")
+    source_timezone: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    consensus_value: Mapped[float | None] = mapped_column(Float, nullable=True)
+    actual_value: Mapped[float | None] = mapped_column(Float, nullable=True)
+    surprise: Mapped[float | None] = mapped_column(Float, nullable=True)
+    surprise_z: Mapped[float | None] = mapped_column(Float, nullable=True)
+    revision_flag: Mapped[bool] = mapped_column(default=False)
+    status: Mapped[str] = mapped_column(String(32))
+    payload_hash: Mapped[str] = mapped_column(String(64), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
 class EventWindowSampleRecord(Base):
     """One idempotent sample slot; payloads stay outside the Kernel ledger."""
 
@@ -159,6 +286,12 @@ class ResearchEvidenceRecord(Base):
     received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     content_hash: Mapped[str] = mapped_column(String(64), index=True)
     excerpt: Mapped[str] = mapped_column(Text)
+    content_ref: Mapped[str | None] = mapped_column(String(2048), nullable=True, index=True)
+    acquisition_receipt_id: Mapped[str | None] = mapped_column(
+        String(128), nullable=True, index=True
+    )
+    source_content_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    parser_ref: Mapped[str | None] = mapped_column(String(256), nullable=True)
     structured_payload_ref: Mapped[str | None] = mapped_column(String(2048), nullable=True)
     tool_call_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
     research_session_id: Mapped[str] = mapped_column(String(256), index=True)
@@ -167,6 +300,172 @@ class ResearchEvidenceRecord(Base):
     freshness_status: Mapped[str] = mapped_column(String(32))
     conflict_group: Mapped[str | None] = mapped_column(String(128), nullable=True)
     accepted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class SourceAcquisitionRecord(Base):
+    """Durable metadata for browser/HTTP acquisition receipts.
+
+    Raw browser artifacts stay in the content-addressed artifact store.  The
+    Kernel only stores the immutable receipt and its canonical hash so a
+    later Evidence admission can prove which acquisition produced a claim.
+    """
+
+    __tablename__ = "source_acquisition_receipts"
+
+    receipt_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    source_id: Mapped[str] = mapped_column(String(128), index=True)
+    url: Mapped[str] = mapped_column(String(2048))
+    access_mode: Mapped[str] = mapped_column(String(32))
+    status: Mapped[str] = mapped_column(String(32), index=True)
+    request_started_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    request_completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    observed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, index=True
+    )
+    received_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, index=True
+    )
+    status_code: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    artifacts_json: Mapped[str] = mapped_column(Text)
+    error_code: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    receipt_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ResearchDocumentRecord(Base):
+    __tablename__ = "research_documents"
+
+    document_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    title: Mapped[str] = mapped_column(String(512))
+    source_type: Mapped[str] = mapped_column(String(32))
+    source_profile_id: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    author: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    market_scopes_json: Mapped[str] = mapped_column(Text)
+    instrument_scopes_json: Mapped[str] = mapped_column(Text)
+    privacy_mode: Mapped[str] = mapped_column(String(32), default="local_only")
+    visibility: Mapped[str] = mapped_column(String(32), default="private")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    latest_version_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
+
+class ResearchDocumentVersionRecord(Base):
+    __tablename__ = "research_document_versions"
+
+    version_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    document_id: Mapped[str] = mapped_column(String(128), index=True)
+    original_file_ref: Mapped[str] = mapped_column(String(2048))
+    original_file_hash: Mapped[str] = mapped_column(String(64), index=True)
+    status: Mapped[str] = mapped_column(String(32), default="received", index=True)
+    correction_status: Mapped[str] = mapped_column(String(32), default="not_requested", index=True)
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    supersedes_version_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    parse_receipt_ref: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    corrected_content_ref: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    block_count: Mapped[int] = mapped_column(Integer, default=0)
+    claim_count: Mapped[int] = mapped_column(Integer, default=0)
+    quality_json: Mapped[str] = mapped_column(Text, default="{}")
+    attempt: Mapped[int] = mapped_column(Integer, default=0)
+    lease_owner: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    lease_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+
+
+class ResearchDocumentBlockRecord(Base):
+    __tablename__ = "research_document_blocks"
+
+    block_id: Mapped[str] = mapped_column(String(160), primary_key=True)
+    version_id: Mapped[str] = mapped_column(String(128), index=True)
+    block_type: Mapped[str] = mapped_column(String(32))
+    page_no: Mapped[int] = mapped_column(Integer, index=True)
+    content: Mapped[str] = mapped_column(Text)
+    content_hash: Mapped[str] = mapped_column(String(64), index=True)
+    locator: Mapped[str] = mapped_column(String(2048))
+    bbox_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    confidence: Mapped[float] = mapped_column(Float)
+    has_numeric_content: Mapped[bool] = mapped_column(default=False)
+    needs_review: Mapped[bool] = mapped_column(default=False, index=True)
+
+
+class ResearchDocumentCorrectionRecord(Base):
+    __tablename__ = "research_document_corrections"
+
+    correction_id: Mapped[str] = mapped_column(String(160), primary_key=True)
+    version_id: Mapped[str] = mapped_column(String(128), index=True)
+    correction_model_ref: Mapped[str] = mapped_column(String(256))
+    prompt_ref: Mapped[str] = mapped_column(String(256))
+    corrected_content_ref: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    quality_status: Mapped[str] = mapped_column(String(32), index=True)
+    changes_json: Mapped[str] = mapped_column(Text, default="[]")
+    unresolved_json: Mapped[str] = mapped_column(Text, default="[]")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class AnalystClaimRecord(Base):
+    __tablename__ = "analyst_claims"
+
+    claim_id: Mapped[str] = mapped_column(String(160), primary_key=True)
+    version_id: Mapped[str] = mapped_column(String(128), index=True)
+    claim_type: Mapped[str] = mapped_column(String(32))
+    stance: Mapped[str] = mapped_column(String(32))
+    claim_text: Mapped[str] = mapped_column(Text)
+    supporting_quote: Mapped[str] = mapped_column(Text)
+    locator_refs_json: Mapped[str] = mapped_column(Text)
+    market_scope: Mapped[str] = mapped_column(String(64), index=True)
+    instrument_scope_json: Mapped[str] = mapped_column(Text)
+    horizon: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    conditions_json: Mapped[str] = mapped_column(Text)
+    invalidation_conditions_json: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(32), default="candidate", index=True)
+    attribution_confidence: Mapped[str] = mapped_column(String(32))
+    requires_independent_evidence: Mapped[bool] = mapped_column(default=True)
+    review_reason: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class ResearchRunScopeRecord(Base):
+    __tablename__ = "research_run_scopes"
+
+    run_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    research_family: Mapped[str] = mapped_column(String(64), index=True)
+    domain_pack_ref: Mapped[str] = mapped_column(String(128))
+    instrument_scope_json: Mapped[str] = mapped_column(Text)
+    library_context_mode: Mapped[str] = mapped_column(String(32))
+    selected_version_ids_json: Mapped[str] = mapped_column(Text)
+    allow_remote_library_content: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default="0"
+    )
+    input_receipts_json: Mapped[str] = mapped_column(Text, default="[]", server_default="[]")
+    request_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class DataJobRecord(Base):
+    """Owner-triggered history load; it is deliberately independent of Runs."""
+
+    __tablename__ = "data_jobs"
+    job_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    idempotency_key: Mapped[str] = mapped_column(String(256), unique=True)
+    request_hash: Mapped[str] = mapped_column(String(64))
+    requested_by: Mapped[str] = mapped_column(String(32))
+    dataset_ids_json: Mapped[str] = mapped_column(Text)
+    window_start_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    window_end_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    status: Mapped[str] = mapped_column(String(32), default="queued", index=True)
+    attempt: Mapped[int] = mapped_column(Integer, default=0)
+    partition_refs_json: Mapped[str] = mapped_column(Text, default="[]")
+    coverage_manifest_ref: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    errors_json: Mapped[str] = mapped_column(Text, default="[]")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class ResearchFactRecord(Base):
@@ -184,18 +483,12 @@ class ResearchFactRecord(Base):
     venue: Mapped[str | None] = mapped_column(String(128), nullable=True)
     value_json: Mapped[str] = mapped_column(Text)
     unit: Mapped[str] = mapped_column(String(64))
-    window_start_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    window_end_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    window_start_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    window_end_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     event_offset: Mapped[str | None] = mapped_column(String(64), nullable=True)
     observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    published_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     source_id: Mapped[str] = mapped_column(String(256), index=True)
     independence_group: Mapped[str] = mapped_column(String(256), index=True)
     quality: Mapped[str] = mapped_column(String(32))
@@ -204,6 +497,213 @@ class ResearchFactRecord(Base):
     payload_hash: Mapped[str] = mapped_column(String(64), index=True)
     attributes_json: Mapped[str] = mapped_column(Text)
     accepted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class RawCaptureRecord(Base):
+    __tablename__ = "raw_captures"
+    __table_args__ = (
+        Index("ix_raw_capture_body_identity", "body_ref", "body_hash", unique=False),
+    )
+    capture_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    context_id: Mapped[str] = mapped_column(String(256), index=True)
+    url: Mapped[str] = mapped_column(String(2048))
+    status_code: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    body_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    body_ref: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    byte_count: Mapped[int] = mapped_column(Integer)
+    media_type: Mapped[str] = mapped_column(String(128))
+    adapter_version: Mapped[str] = mapped_column(String(128))
+    error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ParsedVersionRecord(Base):
+    __tablename__ = "parsed_versions"
+    parsed_version_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    original_evidence_id: Mapped[str] = mapped_column(String(128))
+    content_hash: Mapped[str] = mapped_column(String(64))
+    parser_version: Mapped[str] = mapped_column(String(256))
+    capture_ids_json: Mapped[str] = mapped_column(Text)
+    content_ref: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    acquisition_receipt_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    archive_status: Mapped[str] = mapped_column(String(32))
+    recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class EvidenceParsedLinkRecord(Base):
+    __tablename__ = "evidence_parsed_links"
+    evidence_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    parsed_version_id: Mapped[str] = mapped_column(String(128), index=True)
+
+
+class FactVersionRecord(Base):
+    __tablename__ = "fact_versions"
+    __table_args__ = (
+        Index("ix_fact_versions_pit", "market", "scope_instrument", "known_at"),
+        Index("ix_fact_versions_semantic", "semantic_key", "known_at"),
+    )
+    fact_version_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    semantic_key: Mapped[str] = mapped_column(String(64))
+    market: Mapped[str] = mapped_column(String(64))
+    scope_instrument: Mapped[str] = mapped_column(String(128))
+    field: Mapped[str] = mapped_column(String(128), index=True)
+    source_id: Mapped[str] = mapped_column(String(256), index=True)
+    original_fact_id: Mapped[str] = mapped_column(String(128))
+    parsed_version_id: Mapped[str] = mapped_column(String(128), index=True)
+    payload_json: Mapped[str] = mapped_column(Text)
+    known_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class RunInputRefRecord(Base):
+    __tablename__ = "run_input_refs"
+    fact_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    run_id: Mapped[str] = mapped_column(String(128), index=True)
+    fact_version_id: Mapped[str] = mapped_column(String(128), index=True)
+    use_mode: Mapped[str] = mapped_column(String(32))
+    as_of: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    adopted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class AnalyticalOutlookRecord(Base):
+    __tablename__ = "analytical_outlooks"
+    __table_args__ = (
+        UniqueConstraint(
+            "run_id", "method_version", "horizon", name="uq_outlook_run_method_horizon"
+        ),
+        Index("ix_outlooks_cohort", "market", "instrument", "method_version", "horizon"),
+    )
+    outlook_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    run_id: Mapped[str] = mapped_column(String(128), index=True)
+    artifact_id: Mapped[str] = mapped_column(String(128), index=True)
+    study_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    market: Mapped[str] = mapped_column(String(64))
+    instrument: Mapped[str] = mapped_column(String(128))
+    method_family: Mapped[str] = mapped_column(String(64))
+    method_version: Mapped[str] = mapped_column(String(256))
+    horizon: Mapped[str] = mapped_column(String(16))
+    action: Mapped[str] = mapped_column(String(32))
+    subjective_probability: Mapped[float | None] = mapped_column(Float, nullable=True)
+    probability_status: Mapped[str] = mapped_column(String(32))
+    data_as_of: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    window_start_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    window_end_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    result_hash: Mapped[str] = mapped_column(String(64))
+    evidence_refs_json: Mapped[str] = mapped_column(Text)
+    fact_version_refs_json: Mapped[str] = mapped_column(Text)
+    raw_payload_json: Mapped[str] = mapped_column(Text)
+    trigger: Mapped[str] = mapped_column(Text)
+    invalidation: Mapped[str] = mapped_column(Text)
+    cohort: Mapped[str] = mapped_column(String(32))
+    eligibility: Mapped[str] = mapped_column(String(32))
+    exclusion_reasons_json: Mapped[str] = mapped_column(Text)
+    research_quality: Mapped[str] = mapped_column(String(32))
+    recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class PublicationDecisionRecord(Base):
+    __tablename__ = "publication_decisions"
+    artifact_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    run_id: Mapped[str] = mapped_column(String(128), index=True)
+    status: Mapped[str] = mapped_column(String(32))
+    result_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    decisions_json: Mapped[str] = mapped_column(Text)
+    published_horizons_json: Mapped[str] = mapped_column(Text)
+    review_refs_json: Mapped[str] = mapped_column(Text)
+    decided_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ExecutionPermissionRecord(Base):
+    __tablename__ = "execution_permissions"
+    artifact_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    allowed: Mapped[bool] = mapped_column(Boolean)
+    policy_version: Mapped[str] = mapped_column(String(128))
+    reasons_json: Mapped[str] = mapped_column(Text)
+    decided_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class AnalyticalObservationRecord(Base):
+    __tablename__ = "analytical_observations"
+    outlook_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    status: Mapped[str] = mapped_column(String(32), index=True)
+    attempt: Mapped[int] = mapped_column(Integer, default=0)
+    next_attempt_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    lease_owner: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    lease_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    market_return_pct: Mapped[float | None] = mapped_column(Float, nullable=True)
+    directional_return_pct: Mapped[float | None] = mapped_column(Float, nullable=True)
+    direction_correct: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    quality_status: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    benchmark: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    window_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    evaluated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
+
+class AnalyticalObservationAttemptRecord(Base):
+    __tablename__ = "analytical_observation_attempts"
+    outlook_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    attempt: Mapped[int] = mapped_column(Integer, primary_key=True)
+    status: Mapped[str] = mapped_column(String(32))
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
+
+class AnalyticalAssessmentJobRecord(Base):
+    __tablename__ = "analytical_assessment_jobs"
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('pending', 'running', 'retry', 'completed')",
+            name="ck_analytical_assessment_job_status",
+        ),
+        CheckConstraint("attempt >= 0", name="ck_analytical_assessment_job_attempt"),
+        CheckConstraint(
+            "status != 'running' OR "
+            "(lease_owner IS NOT NULL AND lease_expires_at IS NOT NULL)",
+            name="ck_analytical_assessment_job_running_lease",
+        ),
+        CheckConstraint(
+            "status != 'completed' OR "
+            "(evaluated_at IS NOT NULL AND basis_json IS NOT NULL AND basis_hash IS NOT NULL "
+            "AND assessment_json IS NOT NULL AND assessment_hash IS NOT NULL)",
+            name="ck_analytical_assessment_job_completed_projection",
+        ),
+        Index("ix_assessment_jobs_status_due", "status", "next_attempt_at"),
+        Index("ix_assessment_jobs_lease_expires_at", "lease_expires_at"),
+    )
+    outlook_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    status: Mapped[str] = mapped_column(String(32))
+    attempt: Mapped[int] = mapped_column(Integer, default=0)
+    next_attempt_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    lease_owner: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    lease_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    evaluated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    verifier_version: Mapped[str] = mapped_column(String(128))
+    basis_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    basis_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    assessment_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    assessment_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
+
+class CapabilityReuseRecord(Base):
+    __tablename__ = "capability_reuse_batches"
+    batch_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    query_key: Mapped[str] = mapped_column(String(64), index=True)
+    run_id: Mapped[str] = mapped_column(String(128))
+    result_json: Mapped[str] = mapped_column(Text)
+    fact_versions_json: Mapped[str] = mapped_column(Text)
+    parsed_versions_json: Mapped[str] = mapped_column(Text)
+    known_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 class ResearchResultRecord(Base):
@@ -256,20 +756,17 @@ class ResearchToolCallReservationRecord(Base):
     research_session_id: Mapped[str] = mapped_column(String(256), nullable=False)
     generation: Mapped[int] = mapped_column(Integer, nullable=False)
     capability_id: Mapped[str] = mapped_column(String(128), nullable=False)
+    query_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
     status: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
     result_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     error_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     reserved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
-    completed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class DshSessionLinkRecord(Base):
     __tablename__ = "dsh_session_links"
-    __table_args__ = (
-        UniqueConstraint("dsh_session_id", name="uq_dsh_session_links_session_id"),
-    )
+    __table_args__ = (UniqueConstraint("dsh_session_id", name="uq_dsh_session_links_session_id"),)
     run_id: Mapped[str] = mapped_column(String(128), primary_key=True)
     dsh_session_id: Mapped[str] = mapped_column(String(256), nullable=False)
     request_hash: Mapped[str] = mapped_column(String(64), nullable=False)
@@ -281,6 +778,7 @@ class DshSessionLinkRecord(Base):
     # gateway rejects such rows instead of guessing a time boundary.
     deadline_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     max_tool_calls: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    model_step_timeout_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
     tool_calls_started: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -309,6 +807,7 @@ class RunRecord(Base):
     __tablename__ = "runs"
     run_id: Mapped[str] = mapped_column(String(128), primary_key=True)
     event_id: Mapped[str] = mapped_column(String(128), index=True)
+    study_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
     idempotency_key: Mapped[str | None] = mapped_column(String(256), unique=True, nullable=True)
     snapshot_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
     decision_snapshot_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
@@ -327,13 +826,138 @@ class RunRecord(Base):
     available_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True, index=True
     )
-    parent_run_id: Mapped[str | None] = mapped_column(
-        String(128), nullable=True, index=True
-    )
+    parent_run_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
     lease_owner: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
     lease_expires_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+
+
+class OccurrenceRecord(Base):
+    """Stable identity only; the existing macro ledger remains the calendar authority."""
+
+    __tablename__ = "occurrences"
+    occurrence_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    identity_key: Mapped[str] = mapped_column(String(64), unique=True)
+    identity_basis: Mapped[str] = mapped_column(String(64))
+    family: Mapped[str] = mapped_column(String(128))
+    source_id: Mapped[str] = mapped_column(String(256))
+    macro_event_id: Mapped[str | None] = mapped_column(String(128), nullable=True, unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class EventOccurrenceRecord(Base):
+    __tablename__ = "event_occurrences"
+    event_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    occurrence_id: Mapped[str] = mapped_column(String(128), index=True)
+    linked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    basis: Mapped[str] = mapped_column(String(64))
+
+
+class EventWatchLinkRecord(Base):
+    __tablename__ = "event_watch_links"
+    event_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    watch_id: Mapped[str] = mapped_column(String(128), index=True)
+    linked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class StudyRecord(Base):
+    __tablename__ = "studies"
+    study_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    scope_key: Mapped[str] = mapped_column(String(64), unique=True)
+    title: Mapped[str] = mapped_column(String(512))
+    market: Mapped[str] = mapped_column(String(64))
+    instrument: Mapped[str] = mapped_column(String(128))
+    horizon_scope: Mapped[str] = mapped_column(String(128))
+    question_key: Mapped[str] = mapped_column(String(256))
+    identity_basis: Mapped[str] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(32), default="active")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class StudyOccurrenceRecord(Base):
+    __tablename__ = "study_occurrences"
+    study_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    occurrence_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    linked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ReportRevisionRecord(Base):
+    __tablename__ = "report_revisions"
+    revision_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    study_id: Mapped[str] = mapped_column(String(128), index=True)
+    source_run_id: Mapped[str] = mapped_column(String(128), unique=True)
+    artifact_id: Mapped[str] = mapped_column(String(128), unique=True)
+    previous_revision_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    strategy_version: Mapped[str] = mapped_column(String(64))
+    input_fingerprint: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    publication_status: Mapped[str] = mapped_column(String(32))
+    change_json: Mapped[str] = mapped_column(Text)
+    identity_basis: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class AdmissionDecisionRecord(Base):
+    __tablename__ = "admission_decisions"
+    decision_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    attempt_id: Mapped[str] = mapped_column(String(128), index=True)
+    event_id: Mapped[str] = mapped_column(String(128), index=True)
+    study_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    source_id: Mapped[str] = mapped_column(String(128), index=True)
+    strategy_version: Mapped[str] = mapped_column(String(64))
+    policy_version: Mapped[str] = mapped_column(String(128))
+    decision: Mapped[str] = mapped_column(String(32))
+    reason_code: Mapped[str] = mapped_column(String(128))
+    details_json: Mapped[str] = mapped_column(Text)
+    run_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    decided_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+
+
+class DiscoveryAdmissionRecoveryJobRecord(Base):
+    """Mutable slots for immutable source admission originals; never an event."""
+
+    __tablename__ = "discovery_admission_recovery_jobs"
+    __table_args__ = (
+        Index("ix_discovery_recovery_due", "status", "next_check_at", "job_id"),
+        CheckConstraint(
+            "status IN ('pending', 'completed', 'closed')",
+            name="ck_discovery_recovery_status",
+        ),
+        CheckConstraint("attempts >= 0", name="ck_discovery_recovery_attempts"),
+    )
+
+    job_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    root_decision_id: Mapped[str] = mapped_column(String(128), unique=True)
+    contract_sha256: Mapped[str] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(32))
+    next_check_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    attempts: Mapped[int] = mapped_column(Integer)
+    terminal_decision_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ReviewScheduleRecord(Base):
+    """Durable trigger plan for a child research recheck."""
+
+    __tablename__ = "review_schedules"
+    __table_args__ = (UniqueConstraint("trigger_hash", name="uq_review_schedule_trigger"),)
+
+    review_plan_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    parent_run_id: Mapped[str] = mapped_column(String(128), index=True)
+    horizon: Mapped[str] = mapped_column(String(16), index=True)
+    trigger_type: Mapped[str] = mapped_column(String(32), index=True)
+    trigger_ref: Mapped[str] = mapped_column(String(256))
+    trigger_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    trigger_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    status: Mapped[str] = mapped_column(String(32), default="planned", index=True)
+    child_run_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    failure_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 class RunEventRecord(Base):
@@ -420,6 +1044,112 @@ class ForecastRecord(Base):
     trigger: Mapped[str] = mapped_column(Text)
     invalidation: Mapped[str] = mapped_column(Text)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    forecasted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, index=True
+    )
+    as_of: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    strategy_version: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    input_snapshot_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    input_fingerprint: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    feature_snapshot_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    evidence_cutoff_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    calibration_receipt_id: Mapped[str | None] = mapped_column(
+        String(128), nullable=True, index=True
+    )
+
+
+class StrategyCalibrationRecord(Base):
+    """Immutable kernel-owned evidence that a strategy passed walk-forward evaluation."""
+
+    __tablename__ = "strategy_calibrations"
+    __table_args__ = (
+        UniqueConstraint(
+            "strategy_version",
+            "horizon",
+            "dataset_hash",
+            name="uq_strategy_calibration_dataset",
+        ),
+    )
+
+    receipt_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    strategy_version: Mapped[str] = mapped_column(String(128), index=True)
+    horizon: Mapped[str] = mapped_column(String(16), index=True)
+    dataset_hash: Mapped[str] = mapped_column(String(64), index=True)
+    sample_count: Mapped[int] = mapped_column(Integer)
+    evaluated_sample_count: Mapped[int] = mapped_column(Integer)
+    fold_count: Mapped[int] = mapped_column(Integer)
+    accuracy: Mapped[float] = mapped_column(Float)
+    accuracy_lower_bound: Mapped[float] = mapped_column(Float)
+    brier_score: Mapped[float] = mapped_column(Float)
+    baseline_brier_score: Mapped[float] = mapped_column(Float)
+    log_loss: Mapped[float] = mapped_column(Float)
+    net_return_pct: Mapped[float] = mapped_column(Float)
+    max_drawdown_pct: Mapped[float] = mapped_column(Float)
+    coverage_ratio: Mapped[float] = mapped_column(Float)
+    max_regime_share: Mapped[float] = mapped_column(Float)
+    calibration_slope: Mapped[float] = mapped_column(Float)
+    calibration_intercept: Mapped[float] = mapped_column(Float)
+    passed: Mapped[bool] = mapped_column(default=False, index=True)
+    failure_reasons_json: Mapped[str] = mapped_column(Text)
+    report_json: Mapped[str] = mapped_column(Text)
+    report_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    evaluated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+
+
+class StrategyCalibrationJobRecord(Base):
+    """Immutable sampling plan with only its owned retry/lease state mutable."""
+    __tablename__ = "strategy_calibration_jobs"
+    __table_args__ = (Index("ix_calibration_jobs_due", "status", "next_attempt_at", "job_id"),)
+    job_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    request_id: Mapped[str] = mapped_column(String(256), unique=True)
+    plan_json: Mapped[str] = mapped_column(Text)
+    plan_hash: Mapped[str] = mapped_column(String(64))
+    registered_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    status: Mapped[str] = mapped_column(String(32), index=True)
+    attempt: Mapped[int] = mapped_column(Integer, default=0)
+    next_attempt_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    lease_owner: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    lease_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_production_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
+
+class StrategyCalibrationProductionRecord(Base):
+    """Append-only full authenticated inputs and the exact unextended report."""
+    __tablename__ = "strategy_calibration_productions"
+    __table_args__ = (UniqueConstraint("job_id", "inputs_hash", "producer_hash", name="uq_calibration_production_inputs"),)
+    production_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    job_id: Mapped[str] = mapped_column(String(128), index=True)
+    scope_hash: Mapped[str] = mapped_column(String(64), index=True)
+    inputs_hash: Mapped[str] = mapped_column(String(64))
+    producer_hash: Mapped[str] = mapped_column(String(64))
+    sample_dataset_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    captured_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    server_known_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    state: Mapped[str] = mapped_column(String(32), index=True)
+    payload_json: Mapped[str] = mapped_column(Text)
+    payload_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    report_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    report_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
+
+class StrategyProbabilityActivationRecord(Base):
+    """An explicit immutable interval and exact production IDs, never latest."""
+    __tablename__ = "strategy_probability_activations"
+    __table_args__ = (Index("ix_probability_activation_scope", "market", "instrument", "pack_definition_hash", "compiled_policy_recipe_hash", "valid_from", "valid_until"),)
+    activation_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    request_id: Mapped[str] = mapped_column(String(256), unique=True)
+    market: Mapped[str] = mapped_column(String(64))
+    instrument: Mapped[str] = mapped_column(String(128))
+    pack_definition_hash: Mapped[str] = mapped_column(String(64))
+    compiled_policy_recipe_hash: Mapped[str] = mapped_column(String(64))
+    server_known_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    valid_from: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    valid_until: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    payload_json: Mapped[str] = mapped_column(Text)
+    payload_hash: Mapped[str] = mapped_column(String(64), unique=True)
 
 
 class GateDecisionRecord(Base):
@@ -477,10 +1207,116 @@ class ResearchValueEvaluationRecord(Base):
     evaluated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
 
 
+class RevisionFeedbackEvaluationRecord(Base):
+    """One immutable available/unavailable evaluation attachment per saved opinion."""
+
+    __tablename__ = "revision_feedback_evaluations"
+    __table_args__ = (
+        Index("ix_revision_feedback_owner_revision", "owner_id", "revision_id"),
+        CheckConstraint("status IN ('available', 'unavailable')",
+                        name="ck_revision_feedback_status"),
+        CheckConstraint(
+            "(status = 'available' AND reason_code IS NULL AND evaluation_id IS NOT NULL "
+            "AND value_payload_hash IS NOT NULL) OR "
+            "(status = 'unavailable' AND reason_code IS NOT NULL AND evaluation_id IS NULL "
+            "AND value_payload_hash IS NULL)",
+            name="ck_revision_feedback_value_presence",
+        ),
+        {"sqlite_autoincrement": True},
+    )
+
+    binding_seq: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    binding_id: Mapped[str] = mapped_column(String(128), unique=True)
+    feedback_id: Mapped[str] = mapped_column(String(128), unique=True)
+    request_id: Mapped[str] = mapped_column(String(256), unique=True)
+    owner_id: Mapped[str] = mapped_column(String(128))
+    revision_id: Mapped[str] = mapped_column(String(128))
+    run_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    artifact_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    schema_version: Mapped[str] = mapped_column(String(128))
+    status: Mapped[str] = mapped_column(String(32))
+    reason_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    evaluation_id: Mapped[str | None] = mapped_column(String(128), unique=True, nullable=True)
+    evaluation_version: Mapped[str] = mapped_column(String(128))
+    value_payload_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    basis_json: Mapped[str] = mapped_column(Text)
+    receipt_json: Mapped[str] = mapped_column(Text)
+    basis_hash: Mapped[str] = mapped_column(String(64))
+    receipt_hash: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ProductReadReceiptRecord(Base):
+    __tablename__ = "product_read_receipts"
+    revision_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    owner_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ProductCommandRecord(Base):
+    __tablename__ = "product_commands"
+    request_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    owner_id: Mapped[str] = mapped_column(String(128))
+    target_id: Mapped[str] = mapped_column(String(128), index=True)
+    kind: Mapped[str] = mapped_column(String(32))
+    payload_hash: Mapped[str] = mapped_column(String(64))
+    result_json: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class StudyEffectTrackingRequestJobRecord(Base):
+    """Durable acceptance; completed ProductCommand remains the final ACK."""
+
+    __tablename__ = "study_effect_tracking_request_jobs"
+    __table_args__ = (
+        Index("ix_effect_tracking_requests_due", "state", "next_attempt_at", "request_id"),
+        Index("ix_effect_tracking_requests_owner_study", "owner_id", "study_id", "accepted_at"),
+        CheckConstraint("state IN ('accepted', 'running', 'retrying', 'completed', 'failed')",
+                        name="ck_effect_tracking_request_state"),
+        CheckConstraint("attempts >= 0 AND attempts <= 5", name="ck_effect_tracking_request_attempts"),
+    )
+
+    request_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    owner_id: Mapped[str] = mapped_column(String(128))
+    study_id: Mapped[str] = mapped_column(String(128))
+    revision_id: Mapped[str] = mapped_column(String(128))
+    source_run_id: Mapped[str] = mapped_column(String(128))
+    artifact_id: Mapped[str] = mapped_column(String(128))
+    payload_json: Mapped[str] = mapped_column(Text)
+    payload_hash: Mapped[str] = mapped_column(String(64))
+    source_json: Mapped[str] = mapped_column(Text)
+    source_hash: Mapped[str] = mapped_column(String(64))
+    accepted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    state: Mapped[str] = mapped_column(String(32), default="accepted")
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    next_attempt_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    lease_owner: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    lease_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
+
 class OutboxRecord(Base):
     __tablename__ = "outbox"
+    __table_args__ = (
+        CheckConstraint(
+            "(subject_kind = 'report' AND artifact_id IS NOT NULL "
+            "AND (subject_id IS NULL OR subject_id = artifact_id)) OR "
+            "(subject_kind IN ('risk_alert', 'action_revision', 'event_opportunity') AND artifact_id IS NULL "
+            "AND subject_id IS NOT NULL AND payload_json IS NOT NULL "
+            "AND payload_hash IS NOT NULL)",
+            name="ck_outbox_subject_identity",
+        ),
+        CheckConstraint("claim_generation >= 0", name="ck_outbox_claim_generation"),
+        Index("ix_outbox_due_claim", "sent_at", "failed_at", "next_attempt_at", "claim_expires_at"),
+    )
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    artifact_id: Mapped[str] = mapped_column(String(128), index=True)
+    artifact_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    subject_kind: Mapped[str] = mapped_column(String(32), default="report", server_default="report")
+    subject_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    payload_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    payload_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
     channel: Mapped[str] = mapped_column(String(64), default="local")
     dedupe_key: Mapped[str] = mapped_column(String(256), unique=True)
     attempts: Mapped[int] = mapped_column(Integer, default=0)
@@ -488,6 +1324,13 @@ class OutboxRecord(Base):
     next_attempt_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     failed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     last_error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    dispatch_status: Mapped[str] = mapped_column(String(32), default="queued", server_default="queued")
+    claim_owner: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    claim_generation: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    claim_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    provider_message_id: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    provider_accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    attempt_history_json: Mapped[str] = mapped_column(Text, default="[]", server_default="[]")
 
 
 class SourceStateRecord(Base):
@@ -496,6 +1339,10 @@ class SourceStateRecord(Base):
     source_type: Mapped[str] = mapped_column(String(64))
     manifest_version: Mapped[str] = mapped_column(String(64))
     cursor: Mapped[str | None] = mapped_column(Text, nullable=True)
+    poll_owner: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    poll_lease_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     status: Mapped[str] = mapped_column(String(32), default="unknown")
     last_success_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     last_error_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -504,6 +1351,29 @@ class SourceStateRecord(Base):
     error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
     next_poll_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class SourcePollAttemptRecord(Base):
+    __tablename__ = "source_poll_attempts"
+    __table_args__ = (
+        Index("ix_source_poll_attempts_source_started", "source_id", "started_at"),
+    )
+
+    attempt_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    source_id: Mapped[str] = mapped_column(String(128), nullable=False)
+    trigger_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    status: Mapped[str] = mapped_column(String(32), nullable=False)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    cursor_before: Mapped[str | None] = mapped_column(Text, nullable=True)
+    cursor_after: Mapped[str | None] = mapped_column(Text, nullable=True)
+    received_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    accepted_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    duplicate_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    revision_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    latency_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    content_snapshot_json: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
 class ResearchMemoRecord(Base):
@@ -551,6 +1421,7 @@ class EvaluationDatasetRecord(Base):
 
 class CandidateVersionRecord(Base):
     __tablename__ = "candidate_versions"
+    execution_scope: Mapped[str | None] = mapped_column(String(32), nullable=True)
     candidate_id: Mapped[str] = mapped_column(String(128), primary_key=True)
     candidate_type: Mapped[str] = mapped_column(String(32))
     content_hash: Mapped[str] = mapped_column(String(64), unique=True)
@@ -564,6 +1435,7 @@ class CandidateVersionRecord(Base):
 
 class ExperimentRecord(Base):
     __tablename__ = "experiments"
+    execution_scope: Mapped[str | None] = mapped_column(String(32), nullable=True)
     experiment_id: Mapped[str] = mapped_column(String(128), primary_key=True)
     dataset_id: Mapped[str] = mapped_column(String(128), index=True)
     baseline_ref: Mapped[str] = mapped_column(String(128))
@@ -600,6 +1472,17 @@ class ExperimentResultRecord(Base):
     directional_accuracy: Mapped[float | None] = mapped_column(Float, nullable=True)
     raw_artifact_refs_json: Mapped[str] = mapped_column(Text, default="[]")
     scorer_version: Mapped[str] = mapped_column(String(64), default="evaluation.v1")
+
+
+class EvaluationStageReceiptRecord(Base):
+    __tablename__ = "evaluation_stage_receipts"
+    experiment_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    binding_hash: Mapped[str] = mapped_column(String(64))
+    binding_json: Mapped[str] = mapped_column(Text)
+    completion_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    completion_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class ActivePointerRecord(Base):
@@ -659,6 +1542,35 @@ class ExperienceRecord(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
+class EvolutionPlanningDecisionRecord(Base):
+    __tablename__ = "evolution_planning_decisions"
+    job_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    context_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    content_json: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class EvolutionContextSnapshotRecord(Base):
+    __tablename__ = "evolution_context_snapshots"
+    job_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    content_hash: Mapped[str] = mapped_column(String(64))
+    content_json: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class EvolutionPlanningCallRecord(Base):
+    __tablename__ = "evolution_planning_calls"
+    call_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    job_id: Mapped[str] = mapped_column(String(128), index=True)
+    job_attempt: Mapped[int] = mapped_column(Integer)
+    role: Mapped[str] = mapped_column(String(64))
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    status: Mapped[str] = mapped_column(String(32))
+    details_json: Mapped[str] = mapped_column(Text)
+
+
 class EvolutionJobRecord(Base):
     __tablename__ = "evolution_jobs"
     job_id: Mapped[str] = mapped_column(String(128), primary_key=True)
@@ -685,6 +1597,18 @@ class EvolutionJobRecord(Base):
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
+class ServiceRuntimeConfigRecord(Base):
+    __tablename__ = "service_runtime_configs"
+    config_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    service_id: Mapped[str] = mapped_column(String(128), index=True)
+    instance_id: Mapped[str] = mapped_column(String(128))
+    process_id: Mapped[int] = mapped_column(Integer)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    fingerprint: Mapped[str] = mapped_column(String(64))
+    settings_json: Mapped[str] = mapped_column(Text)
+
+
 class ServiceHeartbeatRecord(Base):
     __tablename__ = "service_heartbeats"
     service_id: Mapped[str] = mapped_column(String(128), primary_key=True)
@@ -696,6 +1620,71 @@ class ServiceHeartbeatRecord(Base):
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     heartbeat_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     last_error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
+
+class ProspectiveTrialRecord(Base):
+    __tablename__ = "prospective_trials"
+    trial_id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    request_id: Mapped[str] = mapped_column(String(128), unique=True)
+    definition_hash: Mapped[str] = mapped_column(String(64))
+    definition_json: Mapped[str] = mapped_column(Text)
+    registered_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+
+
+class ProspectivePairRecord(Base):
+    __tablename__ = "prospective_pairs"
+    __table_args__ = (UniqueConstraint("trial_id", "study_id", name="uq_trial_study_pair"),)
+    pair_id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    trial_id: Mapped[str] = mapped_column(String(80), index=True)
+    study_id: Mapped[str] = mapped_column(String(128))
+    outlook_id: Mapped[str] = mapped_column(String(128))
+    input_json: Mapped[str] = mapped_column(Text)
+    input_hash: Mapped[str] = mapped_column(String(64))
+    source_recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    admitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    deadline_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    window_end_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    exclusion_reason: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
+
+class ProspectiveArmRecord(Base):
+    __tablename__ = "prospective_arms"
+    pair_id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    arm: Mapped[str] = mapped_column(String(16), primary_key=True)
+    status: Mapped[str] = mapped_column(String(32), index=True)
+    recipe_hash: Mapped[str] = mapped_column(String(64))
+    owner: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    result_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    result_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
+
+class ProspectiveLabelRecord(Base):
+    __tablename__ = "prospective_labels"
+    pair_id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    status: Mapped[str] = mapped_column(String(32), index=True)
+    attempt: Mapped[int] = mapped_column(Integer)
+    next_attempt_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    lease_owner: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    lease_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    result_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    result_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    evaluated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
+
+class ProspectiveLabelAttemptRecord(Base):
+    __tablename__ = "prospective_label_attempts"
+    pair_id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    attempt: Mapped[int] = mapped_column(Integer, primary_key=True)
+    status: Mapped[str] = mapped_column(String(32))
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
 
 
 class Database:
@@ -712,13 +1701,43 @@ class Database:
         self.factory = sessionmaker(self.engine, expire_on_commit=False)
 
     def create_all(self) -> None:
+        from . import (  # noqa: F401
+            action_execution_records,
+            action_quote_repository,
+            action_quote_sampling_records,
+            action_records,
+            decision_settings_records,
+            event_coverage_records,
+            event_monitor_records,
+            event_outcome_records,
+            event_realization_records,
+            event_scenario_records,
+            history_observed_records,
+            market_case_records,
+            path_forecast_records,
+            perpetual_paper_records,
+            research_quality_records,
+            research_learning_records,
+            research_skill_behavior,
+            research_method_trial,
+            research_method_trial_selection,
+            research_skill_callback_jobs,
+            risk_records,
+            risk_research_records,
+            run_spot_admission,
+            spot_scope_admission,
+        )
+
         Base.metadata.create_all(self.engine)
 
     def initialize(self) -> None:
         """Apply the checked-in Alembic head for an application startup."""
         from alembic import command
 
-        command.upgrade(self._alembic_config(), "head")
+        config = self._alembic_config()
+        # Embedded migrations must preserve the API/worker's logging handlers.
+        config.attributes["configure_logger"] = False
+        command.upgrade(config, "head")
 
     def expected_migration_heads(self) -> tuple[str, ...]:
         """Return the checked-in Alembic heads instead of duplicating a revision constant."""
@@ -754,27 +1773,16 @@ class Database:
             if not run:
                 return None
             artifact = session.get(ArtifactRecord, run.artifact_id) if run.artifact_id else None
-            return RunView(
-                run_id=run.run_id,
-                event_id=run.event_id,
-                status=RunStatus(run.status),
-                strategy_version=run.strategy_version,
-                runtime_version=run.runtime_version,
-                snapshot_id=run.snapshot_id,
-                artifact_id=run.artifact_id,
-                created_at=run.created_at,
-                updated_at=run.updated_at,
-                finished_at=run.finished_at,
-                latency_ms=run.latency_ms,
-                cost_usd=run.cost_usd,
-                error_code=run.error_code,
-                headline=artifact.headline if artifact else None,
-                gate_status=GateStatus(artifact.gate_status) if artifact else None,
-            )
+            return _ledger_run_view(run, artifact)
 
     def get_run_record(self, run_id: str) -> RunRecord | None:
         with self.session() as session:
             return session.get(RunRecord, run_id)
+
+    def get_event_type(self, event_id: str) -> str | None:
+        with self.session() as session:
+            event = session.get(EventRecord, event_id)
+            return event.event_type if event is not None else None
 
     @property
     def sqlite_path(self) -> Path | None:
@@ -837,6 +1845,20 @@ class Database:
         if not isinstance(payload, dict):
             raise ValueError("role output is invalid")
         return output.output_id, payload
+
+    def find_role_output_envelope(
+        self, run_id: str, role: str
+    ) -> tuple[str, dict[str, object], str] | None:
+        """Return a role output with its durable provenance schema."""
+
+        with self.session() as session:
+            output = session.query(RunRoleOutputRecord).filter_by(run_id=run_id, role=role).first()
+            if not output:
+                return None
+            payload = json.loads(output.payload_json)
+        if not isinstance(payload, dict):
+            raise ValueError("role output is invalid")
+        return output.output_id, payload, output.schema_version
 
     def record_run_event(
         self,
@@ -1037,40 +2059,42 @@ class Database:
             )
 
     def latest_runs(self, limit: int = 20) -> list[RunView]:
+        return self.ledger_runs(limit=limit)[0]
+
+    def ledger_runs(
+        self, *, limit: int = 20, offset: int = 0,
+        created_before: datetime | None = None,
+        status: str | None = None, kind: str | None = None, q: str | None = None,
+    ) -> tuple[list[RunView], int]:
+        """Page every execution family with a shared list/detail projection."""
         with self.session() as session:
-            rows = session.scalars(
-                select(RunRecord).order_by(RunRecord.created_at.desc()).limit(limit)
-            ).all()
-            artifacts = {
-                artifact.artifact_id: artifact
-                for artifact in session.scalars(select(ArtifactRecord)).all()
-            }
-            return [
-                RunView(
-                    run_id=row.run_id,
-                    event_id=row.event_id,
-                    status=RunStatus(row.status),
-                    strategy_version=row.strategy_version,
-                    runtime_version=row.runtime_version,
-                    snapshot_id=row.snapshot_id,
-                    artifact_id=row.artifact_id,
-                    created_at=row.created_at,
-                    updated_at=row.updated_at,
-                    finished_at=row.finished_at,
-                    latency_ms=row.latency_ms,
-                    cost_usd=row.cost_usd,
-                    error_code=row.error_code,
-                    headline=artifacts[row.artifact_id].headline
-                    if row.artifact_id in artifacts
-                    else None,
-                    gate_status=(
-                        GateStatus(artifacts[row.artifact_id].gate_status)
-                        if row.artifact_id in artifacts
-                        else None
-                    ),
+            query = session.query(RunRecord, ArtifactRecord).outerjoin(
+                ArtifactRecord, ArtifactRecord.artifact_id == RunRecord.artifact_id
+            )
+            if created_before is not None:
+                query = query.filter(RunRecord.created_at <= created_before)
+            if status:
+                query = query.filter(RunRecord.status == status)
+            if kind in {"research", "baseline"}:
+                query = query.filter(RunRecord.strategy_version == f"{kind}.v1")
+            elif kind == "other":
+                query = query.filter(
+                    RunRecord.strategy_version.notin_(["research.v1", "baseline.v1"])
                 )
-                for row in rows
-            ]
+            if q and q.strip():
+                keyword = q.strip()
+                query = query.filter(or_(
+                    RunRecord.run_id.contains(keyword, autoescape=True),
+                    RunRecord.event_id.contains(keyword, autoescape=True),
+                    RunRecord.error_code.contains(keyword, autoescape=True),
+                    ArtifactRecord.headline.contains(keyword, autoescape=True),
+                ))
+            total = query.count()
+            rows = (
+                query.order_by(RunRecord.created_at.desc(), RunRecord.run_id.desc())
+                .offset(offset).limit(limit).all()
+            )
+            return [_ledger_run_view(run, artifact) for run, artifact in rows], total
 
     def get_evaluation(self, evaluation_id: str) -> EvaluationView | None:
         with self.session() as session:
@@ -1084,7 +2108,7 @@ class Database:
                 net_return_pct=evaluation.net_return_pct,
                 direction_correct=evaluation.direction_correct,
                 label_status=evaluation.label_status,
-                evaluated_at=evaluation.evaluated_at,
+                evaluated_at=as_utc(evaluation.evaluated_at),
             )
 
     def get_timeline(self, run_id: str) -> list[RunTimelineItemView]:
@@ -1110,8 +2134,8 @@ class Database:
                     role=row.role,
                     status=row.status,
                     attempt=row.attempt,
-                    started_at=row.started_at,
-                    finished_at=row.finished_at,
+                    started_at=as_utc(row.started_at),
+                    finished_at=as_utc(row.finished_at),
                     latency_ms=row.latency_ms,
                     runtime_id=row.runtime_id,
                     runtime_version=row.runtime_version,
@@ -1145,8 +2169,8 @@ class Database:
                     step_name=row.step_name,
                     status=row.status,
                     attempt=row.attempt,
-                    started_at=row.started_at,
-                    finished_at=row.finished_at,
+                    started_at=as_utc(row.started_at),
+                    finished_at=as_utc(row.finished_at),
                     latency_ms=row.latency_ms,
                     error_code=row.error_code,
                 )
@@ -1159,6 +2183,7 @@ class Database:
             return None
         artifact = self.get_artifact_view(run.artifact_id) if run.artifact_id else None
         with self.session() as session:
+            dsh_link = session.get(DshSessionLinkRecord, run_id)
             evaluations = session.scalars(
                 select(EvaluationRecord)
                 .join(ForecastRecord, EvaluationRecord.forecast_id == ForecastRecord.forecast_id)
@@ -1184,7 +2209,7 @@ class Database:
                 net_return_pct=item.net_return_pct,
                 direction_correct=item.direction_correct,
                 label_status=item.label_status,
-                evaluated_at=item.evaluated_at,
+                evaluated_at=as_utc(item.evaluated_at),
             )
             for item in evaluations
         ]
@@ -1221,7 +2246,7 @@ class Database:
             artifact=artifact,
             evaluation_count=len(evaluation_views),
             evaluations=evaluation_views,
-            snapshot_cutoff_at=snapshot.cutoff_at if snapshot else None,
+            snapshot_cutoff_at=as_utc(snapshot.cutoff_at) if snapshot else None,
             snapshot_hash=snapshot.snapshot_hash if snapshot else None,
             evidence_lineage=evidence_lineage,
             versions=VersionLineageView(
@@ -1238,7 +2263,12 @@ class Database:
                 ),
             ),
             orchestration=OrchestrationLineageView(
-                mode="supervisor_candidate" if supervisor_mode else "fixed_graph",
+                mode=(
+                    "dsh_native" if dsh_link is not None
+                    else "supervisor_candidate" if supervisor_mode
+                    else "unknown" if run.strategy_version == "research.v1" and not calls
+                    else "fixed_graph"
+                ),
                 supervisor_role="research_supervisor" if supervisor_mode else None,
                 planned_capabilities=specialist_roles,
                 required_capabilities=specialist_roles,
@@ -1250,6 +2280,19 @@ class Database:
                 experiment_refs=experiment_refs,
             ),
         )
+
+
+def _ledger_run_view(run: RunRecord, artifact: ArtifactRecord | None) -> RunView:
+    return RunView(
+        run_id=run.run_id, event_id=run.event_id, status=RunStatus(run.status),
+        strategy_version=run.strategy_version, runtime_version=run.runtime_version,
+        snapshot_id=run.snapshot_id, artifact_id=run.artifact_id,
+        created_at=as_utc(run.created_at), updated_at=as_utc(run.updated_at),
+        finished_at=as_utc(run.finished_at), latency_ms=run.latency_ms,
+        cost_usd=run.cost_usd, error_code=run.error_code,
+        headline=artifact.headline if artifact else None,
+        gate_status=GateStatus(artifact.gate_status) if artifact else None,
+    )
 
 
 def _timeline_view(row: RunEventRecord) -> RunTimelineItemView:

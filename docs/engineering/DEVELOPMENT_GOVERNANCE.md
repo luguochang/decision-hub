@@ -1,5 +1,7 @@
 # Decision Hub 全局开发治理规范
 
+> 2026-10-17当前适用补充：[00总控](../design/decision-product-control-2026-10-17/00_MASTER_CONTROL.md)、[12开发与交付门](../design/decision-product-control-2026-10-17/12_ENGINEERING_READINESS_AND_DELIVERY.md)和[继承ADR](../decisions/ADR-20261017-decision-product-baseline-and-document-authority.md)明确当前范围。用户最新明确指令优先；旧“聊天只能提供线索”不否认用户批准/暂停。普通工程选择按已批准任务处理；不得把每次refactor全量检查或每个内部冲突重新审批解释成无限重试/扩围。当前仍按最新指令暂停，仅补审文档；现有权限/PIT/原件/账本约束继续有效。
+
 版本：`GOVERNANCE-2026-08-26.v1`
 状态：`accepted`（owner 已确认），作为所有后续阶段的强制约束。
 适用范围：代码、契约、Agent/Workflow、前端、数据、测试、文档、评测和发布。

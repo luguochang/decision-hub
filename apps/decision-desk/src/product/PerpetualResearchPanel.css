@@ -1,0 +1,5 @@
+.perpetual-research-panel { margin-top: 1.25rem; padding: 1rem; border: 1px solid var(--border-color, #344155); border-radius: .75rem; }
+.perpetual-research-panel h3 { margin-top: 0; }
+.perpetual-research-panel p { line-height: 1.6; overflow-wrap: anywhere; }
+.perpetual-research-warning { border-left: 3px solid #d7a853; padding-left: .75rem; }
+.perpetual-research-progress { display: inline-block; margin: .25rem 0 .75rem; text-underline-offset: .2em; }

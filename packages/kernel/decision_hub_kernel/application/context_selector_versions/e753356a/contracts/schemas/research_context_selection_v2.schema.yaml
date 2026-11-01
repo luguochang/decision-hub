@@ -1,0 +1,312 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.local/contracts/research_context_selection_v2.schema.json",
+  "title": "Research context selection V2 declarations",
+  "description": "Exact-ranking version declaration only; no selector, clock, row or execution authority.",
+  "$defs": {
+    "research_context_selector_identity_v2": {
+      "title": "ResearchContextSelectorIdentityV2",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "time_rule_ref": {
+          "type": "string",
+          "const": "research-context.received-cutoff.v1"
+        },
+        "ranking_rules_ref": {
+          "type": "string",
+          "const": "research-context.relevance-authority-recency.v2"
+        },
+        "context_policy_source_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "producer_source_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "implementation_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "implementation_hash_kind": {
+          "type": "string",
+          "const": "canonical_context_selector_sources.v1"
+        }
+      },
+      "required": [
+        "time_rule_ref",
+        "ranking_rules_ref",
+        "context_policy_source_hash",
+        "producer_source_hash",
+        "implementation_hash",
+        "implementation_hash_kind"
+      ]
+    },
+    "research_context_selection_receipt_v2": {
+      "title": "ResearchContextSelectionReceiptV2",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "research-context-selection.v2"
+        },
+        "receipt_state": {
+          "type": "string",
+          "const": "context_selected"
+        },
+        "selection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 71,
+          "pattern": "^ctxsel_[a-f0-9]{64}$"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "graph_round": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "attempt_no": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "attempt_basis": {
+          "type": "string",
+          "enum": [
+            "initial_round",
+            "next_round",
+            "explicit_reselection"
+          ]
+        },
+        "parent_selection_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 71,
+              "pattern": "^ctxsel_[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "task_anchor": {
+          "$ref": "research_context_selection.schema.yaml#/$defs/research_context_task_anchor_v1"
+        },
+        "prepared_bundle_identity": {
+          "anyOf": [
+            {
+              "$ref": "research_execution_binding.schema.yaml#/$defs/research_prepared_bundle_identity"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "execution_mode": {
+          "type": "string",
+          "enum": [
+            "live",
+            "replay"
+          ]
+        },
+        "original_pit_cutoff_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "live_selection_clock_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "effective_eligibility_cutoff_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "cutoff_basis": {
+          "type": "string",
+          "enum": [
+            "live_clock_min_original_pit",
+            "replay_original_pit"
+          ]
+        },
+        "decision_cutoff_before_selection": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "decision_cutoff_basis": {
+          "type": "string",
+          "enum": [
+            "original_task_max_received",
+            "replay_original_pit",
+            "graph_state_declared"
+          ]
+        },
+        "decision_basis_ref": {
+          "anyOf": [
+            {
+              "$ref": "research_context_selection.schema.yaml#/$defs/research_context_declared_prior_ref_v1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "selector_identity": {
+          "$ref": "#/$defs/research_context_selector_identity_v2"
+        },
+        "context_policy": {
+          "$ref": "agentic_research.schema.yaml#/$defs/research_task_policy"
+        },
+        "considered_inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "research_context_selection.schema.yaml#/$defs/research_context_input_witness_v1"
+          },
+          "minItems": 1,
+          "maxItems": 2050
+        },
+        "inherited_exclusions": {
+          "type": "array",
+          "items": {
+            "$ref": "agentic_research.schema.yaml#/$defs/context_exclusion"
+          },
+          "maxItems": 50
+        },
+        "projected_request": {
+          "$ref": "agentic_research.schema.yaml#/$defs/research_session_request"
+        },
+        "current_full_request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "current_full_request_hash_kind": {
+          "type": "string",
+          "const": "canonical_research_session_request.v1"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "selection_payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "selection_payload_hash_kind": {
+          "type": "string",
+          "const": "canonical_context_selection.v2"
+        }
+      },
+      "required": [
+        "schema_version",
+        "receipt_state",
+        "selection_id",
+        "run_id",
+        "event_id",
+        "graph_round",
+        "attempt_no",
+        "attempt_basis",
+        "parent_selection_id",
+        "task_anchor",
+        "prepared_bundle_identity",
+        "execution_mode",
+        "original_pit_cutoff_at",
+        "live_selection_clock_at",
+        "effective_eligibility_cutoff_at",
+        "cutoff_basis",
+        "decision_cutoff_before_selection",
+        "decision_cutoff_basis",
+        "decision_basis_ref",
+        "selector_identity",
+        "context_policy",
+        "considered_inputs",
+        "inherited_exclusions",
+        "projected_request",
+        "current_full_request_hash",
+        "current_full_request_hash_kind",
+        "recorded_at",
+        "selection_payload_hash",
+        "selection_payload_hash_kind"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "execution_mode": {
+                "const": "live"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "live_selection_clock_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+              },
+              "cutoff_basis": {
+                "type": "string",
+                "const": "live_clock_min_original_pit"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "execution_mode": {
+                "const": "replay"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "live_selection_clock_at": {
+                "type": "null"
+              },
+              "cutoff_basis": {
+                "type": "string",
+                "const": "replay_original_pit"
+              }
+            }
+          }
+        }
+      ],
+      "x-max-canonical-utf8-bytes": 16777216
+    }
+  }
+}

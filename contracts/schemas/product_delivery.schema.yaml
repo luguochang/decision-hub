@@ -1,0 +1,295 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.local/contracts/product_delivery.schema.json",
+  "title": "ProductDeliveryContracts",
+  "$defs": {
+    "read_receipt_command": {
+      "type": "object",
+      "title": "ReadReceiptCommand",
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "read": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "request_id",
+        "read"
+      ]
+    },
+    "read_receipt_view": {
+      "type": "object",
+      "title": "ReadReceiptView",
+      "additionalProperties": false,
+      "properties": {
+        "revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "owner_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "read_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "revision_id",
+        "owner_id",
+        "read_at",
+        "updated_at"
+      ]
+    },
+    "study_tracking_command": {
+      "type": "object",
+      "title": "StudyTrackingCommand",
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "status": {
+          "enum": [
+            "active",
+            "paused"
+          ],
+          "type": "string"
+        },
+        "expected_status": {
+          "enum": [
+            "active",
+            "paused"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "request_id",
+        "status",
+        "expected_status"
+      ]
+    },
+    "study_tracking_receipt": {
+      "type": "object",
+      "title": "StudyTrackingReceipt",
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "study_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "previous_status": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "cancelled_runs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "retired_plans": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "request_id",
+        "study_id",
+        "previous_status",
+        "status",
+        "cancelled_runs",
+        "retired_plans",
+        "recorded_at"
+      ]
+    },
+    "report_delivery_item": {
+      "type": "object",
+      "title": "ReportDeliveryItem",
+      "additionalProperties": false,
+      "properties": {
+        "revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "study_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "source_run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "title": {
+          "type": "string"
+        },
+        "instrument": {
+          "type": "string"
+        },
+        "strategy_version": {
+          "type": "string"
+        },
+        "publication_status": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "local_written_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "external_dispatch_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "read_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "latest_feedback": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/revision_feedback_receipt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "revision_id",
+        "study_id",
+        "source_run_id",
+        "title",
+        "instrument",
+        "strategy_version",
+        "publication_status",
+        "created_at",
+        "local_written_at",
+        "external_dispatch_at",
+        "read_at",
+        "latest_feedback"
+      ]
+    },
+    "report_delivery_page": {
+      "type": "object",
+      "title": "ReportDeliveryPage",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/report_delivery_item"
+          }
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "offset": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "items",
+        "total",
+        "limit",
+        "offset"
+      ]
+    },
+    "revision_feedback_receipt": {
+      "type": "object",
+      "title": "RevisionFeedbackReceipt",
+      "additionalProperties": false,
+      "properties": {
+        "feedback_id": {
+          "type": "string"
+        },
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "useful",
+            "not_useful",
+            "incorrect",
+            "needs_review"
+          ]
+        },
+        "notes": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "feedback_id",
+        "verdict",
+        "notes",
+        "created_at"
+      ]
+    }
+  }
+}

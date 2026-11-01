@@ -1,0 +1,102 @@
+{
+  "intent": {
+    "owner_id": "binding-owner",
+    "command": {
+      "schema_version": "decision-settings-command.v1",
+      "request_id": "binding-save",
+      "expected_state_version": 0,
+      "partition": {
+        "account_kind": "user_declared",
+        "account_id": "declared-account",
+        "instrument_id": "okx:BTC-USDT-SWAP",
+        "profile_ref": "decision-profile:okx-usdt-linear-paper-net-isolated-1x.v1"
+      },
+      "operation": "upsert",
+      "values": {
+        "instrument": {
+          "ref": "perp_contract_bf94a70ebf48f46d66d3d4f1e10d1a7fe84533ffdaaaff2a06485926d8ea4e9f",
+          "hash": "bf94a70ebf48f46d66d3d4f1e10d1a7fe84533ffdaaaff2a06485926d8ea4e9f"
+        },
+        "execution_profile": {
+          "ref": "decision-profile:okx-usdt-linear-paper-net-isolated-1x.v1",
+          "hash": "e1cf66761fa0224438a2e2173efc4ced924a900ed9e357d87e13a445a5413b8c"
+        },
+        "account_snapshot": {
+          "schema_version": "account-snapshot.v2",
+          "owner_id": "binding-owner",
+          "account_kind": "user_declared",
+          "account_id": "declared-account",
+          "source": "unknown",
+          "as_of": "2026-10-19T00:00:00Z",
+          "account_mode": "unknown",
+          "positions": null,
+          "collateral": null,
+          "valuation_ccy": "USDT",
+          "equity": null,
+          "available_margin": null,
+          "fee_tier": null,
+          "limits": {
+            "max_gross_notional": null,
+            "max_reserved_margin": null,
+            "max_fee_buffer": null,
+            "max_stress_loss": null
+          },
+          "original": null
+        },
+        "position_context": {
+          "schema_version": "position-context.v2",
+          "instrument_id": "okx:BTC-USDT-SWAP",
+          "instrument_ref": {
+            "ref": "perp_contract_bf94a70ebf48f46d66d3d4f1e10d1a7fe84533ffdaaaff2a06485926d8ea4e9f",
+            "hash": "bf94a70ebf48f46d66d3d4f1e10d1a7fe84533ffdaaaff2a06485926d8ea4e9f"
+          },
+          "state": "unknown",
+          "signed_contracts": null,
+          "entry_price": null,
+          "isolated_margin": null,
+          "margin_mode": "unknown",
+          "position_mode": "unknown",
+          "hedge_leg": null,
+          "leverage": null,
+          "liquidation_estimate": null,
+          "source": "unknown",
+          "ref": null,
+          "hash": null,
+          "account_ref": null
+        },
+        "utility_policy": {
+          "schema_version": "utility-policy.v2",
+          "policy_ref": "user-risk.v1",
+          "hash": "1111111111111111111111111111111111111111111111111111111111111111",
+          "source": "user",
+          "objective": "mean_net",
+          "risk_penalty": "0",
+          "max_gross_notional": null,
+          "max_planned_loss": null,
+          "tail_constraints": null,
+          "position_scenario": "unknown",
+          "margin_buffer_policy": null,
+          "allowed_leverage": null,
+          "allowed_sides": null,
+          "account_ref": null
+        }
+      }
+    }
+  },
+  "receipt": {
+    "schema_version": "decision-settings-save-receipt.v1",
+    "owner_id": "binding-owner",
+    "request_id": "binding-save",
+    "settings_key": "dsettings_05eff3b8341b4f13150ac4bc519cb3b8d84087396ba031e0d725ff86cd43b31c",
+    "command_hash": "6464e07005228fd17fa0a1b167bcde6d05c0a9893c782cf7c22b5e5d73cd12e1",
+    "revision": {
+      "ref": "settingsrev_047520cc6f5c27af7e193d3a27f86e67d4f99e485947ac68a67d25c921fdc463",
+      "hash": "800043242f6d869ddf34bda1e92f4de2f09ae6957f2ebac7053d862283b90ae6"
+    },
+    "state_version": 1,
+    "settings_saved": true,
+    "reevaluation_state": "pending",
+    "accepted_at": "2026-10-19T00:00:00Z",
+    "payload_hash": "5498db5bd768f4d711b569dfcbf47e6f8d3b3a2884fb0e4cedc723397ef9f987"
+  }
+}

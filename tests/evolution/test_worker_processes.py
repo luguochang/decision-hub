@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 from fastapi.testclient import TestClient
@@ -47,6 +48,38 @@ def test_release_baseline_bootstrap_is_idempotent_and_never_repoints(
     overview = assets.overview()
     assert len(overview.pointers) == 1
     assert len(overview.candidates) == 1
+
+
+def test_default_evolution_worker_never_silently_uses_fake(tmp_path, monkeypatch):
+    monkeypatch.setenv("DECISION_HUB_LLM_ENABLED", "0")
+    database = _database(tmp_path)
+    with pytest.raises(ValueError, match="evolution_live_provider_required_no_implicit_fake"):
+        build_evolution_worker(database)
+    assert EvolutionAssetService(database).overview().candidates == []
+
+
+def test_evolution_heartbeat_continues_and_stops_with_execution(tmp_path, monkeypatch):
+    monkeypatch.setenv("DECISION_HUB_DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("DECISION_HUB_LLM_ENABLED", "0")
+    worker = build_evolution_worker(
+        _database(tmp_path), runtime=FakeAgentRuntime(), heartbeat_interval_seconds=1
+    )
+
+    async def slow_tick(_instance):
+        await asyncio.sleep(1.15)
+        return None
+
+    worker.executor.tick = AsyncMock(side_effect=slow_tick)
+    worker._beat = Mock()
+
+    async def observe():
+        await worker.tick()
+        assert worker._beat.call_count >= 3
+        completed_count = worker._beat.call_count
+        await asyncio.sleep(1.05)
+        assert worker._beat.call_count == completed_count
+
+    asyncio.run(observe())
 
 
 def test_worker_composition_roots_tick_independently_and_write_heartbeats(

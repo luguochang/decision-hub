@@ -1,0 +1,2719 @@
+{
+  "status": {
+    "schema_version": "history-outcome-status.v2",
+    "owner_authenticated": true,
+    "protocol_id": "heval2_000000000000000000000000000000000000000000000001",
+    "state": "completed",
+    "prepared_registered_at": "2026-10-10T10:00:00Z",
+    "independently_confirmed_registered_at": "2026-10-10T10:00:01Z",
+    "first_hour": "2026-10-10T11:00:00Z",
+    "last_hour": "2026-10-11T10:00:00Z",
+    "actual_as_of": "2026-10-13T12:00:00Z",
+    "expected_total": 48,
+    "publication_due_count": 48,
+    "label_due_count": 48,
+    "publication_counts": {
+      "pending": 0,
+      "on_time": 1,
+      "late": 1,
+      "off_schedule": 0,
+      "blocked": 46,
+      "failed": 0,
+      "abstained": 0,
+      "missing": 0,
+      "unconfirmed": 0
+    },
+    "label_counts": {
+      "pending_maturity": 0,
+      "verified": 2,
+      "partial": 46,
+      "invalid": 0,
+      "missing_at_deadline": 0,
+      "late_diagnostic": 0
+    },
+    "paired_count": 1,
+    "latest_score": {
+      "identifier": "hscore2_000000000000000000000000000000000000000000000001",
+      "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "original_ref": "fixture://wire-only/hscore2_000000000000000000000000000000000000000000000001",
+      "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "opportunities": [
+      {
+        "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000001",
+        "asset": "BTC",
+        "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+        "asset_label": "比特币",
+        "hour_at": "2026-10-10T11:00:00Z",
+        "actual_cutoff_at": "2026-10-10T11:00:00Z",
+        "publication_state": "on_time",
+        "label_state": "verified",
+        "state": "completed",
+        "attempts": 1,
+        "reason_code": null
+      },
+      {
+        "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000002",
+        "asset": "ETH",
+        "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+        "asset_label": "以太坊",
+        "hour_at": "2026-10-10T11:00:00Z",
+        "actual_cutoff_at": "2026-10-10T11:00:00Z",
+        "publication_state": "late",
+        "label_state": "verified",
+        "state": "completed",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000003",
+        "asset": "BTC",
+        "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+        "asset_label": "比特币",
+        "hour_at": "2026-10-10T12:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000004",
+        "asset": "ETH",
+        "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+        "asset_label": "以太坊",
+        "hour_at": "2026-10-10T12:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000005",
+        "asset": "BTC",
+        "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+        "asset_label": "比特币",
+        "hour_at": "2026-10-10T13:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000006",
+        "asset": "ETH",
+        "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+        "asset_label": "以太坊",
+        "hour_at": "2026-10-10T13:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000007",
+        "asset": "BTC",
+        "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+        "asset_label": "比特币",
+        "hour_at": "2026-10-10T14:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000008",
+        "asset": "ETH",
+        "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+        "asset_label": "以太坊",
+        "hour_at": "2026-10-10T14:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000009",
+        "asset": "BTC",
+        "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+        "asset_label": "比特币",
+        "hour_at": "2026-10-10T15:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000000a",
+        "asset": "ETH",
+        "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+        "asset_label": "以太坊",
+        "hour_at": "2026-10-10T15:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000000b",
+        "asset": "BTC",
+        "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+        "asset_label": "比特币",
+        "hour_at": "2026-10-10T16:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000000c",
+        "asset": "ETH",
+        "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+        "asset_label": "以太坊",
+        "hour_at": "2026-10-10T16:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000000d",
+        "asset": "BTC",
+        "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+        "asset_label": "比特币",
+        "hour_at": "2026-10-10T17:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000000e",
+        "asset": "ETH",
+        "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+        "asset_label": "以太坊",
+        "hour_at": "2026-10-10T17:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000000f",
+        "asset": "BTC",
+        "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+        "asset_label": "比特币",
+        "hour_at": "2026-10-10T18:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000010",
+        "asset": "ETH",
+        "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+        "asset_label": "以太坊",
+        "hour_at": "2026-10-10T18:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000011",
+        "asset": "BTC",
+        "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+        "asset_label": "比特币",
+        "hour_at": "2026-10-10T19:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000012",
+        "asset": "ETH",
+        "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+        "asset_label": "以太坊",
+        "hour_at": "2026-10-10T19:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000013",
+        "asset": "BTC",
+        "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+        "asset_label": "比特币",
+        "hour_at": "2026-10-10T20:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000014",
+        "asset": "ETH",
+        "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+        "asset_label": "以太坊",
+        "hour_at": "2026-10-10T20:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000015",
+        "asset": "BTC",
+        "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+        "asset_label": "比特币",
+        "hour_at": "2026-10-10T21:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000016",
+        "asset": "ETH",
+        "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+        "asset_label": "以太坊",
+        "hour_at": "2026-10-10T21:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000017",
+        "asset": "BTC",
+        "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+        "asset_label": "比特币",
+        "hour_at": "2026-10-10T22:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000018",
+        "asset": "ETH",
+        "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+        "asset_label": "以太坊",
+        "hour_at": "2026-10-10T22:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000019",
+        "asset": "BTC",
+        "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+        "asset_label": "比特币",
+        "hour_at": "2026-10-10T23:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000001a",
+        "asset": "ETH",
+        "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+        "asset_label": "以太坊",
+        "hour_at": "2026-10-10T23:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000001b",
+        "asset": "BTC",
+        "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+        "asset_label": "比特币",
+        "hour_at": "2026-10-11T00:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000001c",
+        "asset": "ETH",
+        "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+        "asset_label": "以太坊",
+        "hour_at": "2026-10-11T00:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000001d",
+        "asset": "BTC",
+        "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+        "asset_label": "比特币",
+        "hour_at": "2026-10-11T01:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      },
+      {
+        "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000001e",
+        "asset": "ETH",
+        "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+        "asset_label": "以太坊",
+        "hour_at": "2026-10-11T01:00:00Z",
+        "actual_cutoff_at": null,
+        "publication_state": "blocked",
+        "label_state": "partial",
+        "state": "blocked",
+        "attempts": 1,
+        "reason_code": "synthetic_wire_control"
+      }
+    ],
+    "pagination": {
+      "offset": 0,
+      "limit": 30,
+      "total": 48
+    },
+    "current_originals_verified": false,
+    "financial_qualified": false,
+    "historical_pit_verified": false,
+    "promotion_allowed": false,
+    "ci": null,
+    "ci_status": "not_registered_for_hourly_overlapping_windows"
+  },
+  "opportunities": [
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000001",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-10T11:00:00Z",
+      "actual_cutoff_at": "2026-10-10T11:00:00Z",
+      "publication_state": "on_time",
+      "label_state": "verified",
+      "state": "completed",
+      "attempts": 1,
+      "reason_code": null
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000002",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-10T11:00:00Z",
+      "actual_cutoff_at": "2026-10-10T11:00:00Z",
+      "publication_state": "late",
+      "label_state": "verified",
+      "state": "completed",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000003",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-10T12:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000004",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-10T12:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000005",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-10T13:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000006",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-10T13:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000007",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-10T14:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000008",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-10T14:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000009",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-10T15:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000000a",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-10T15:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000000b",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-10T16:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000000c",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-10T16:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000000d",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-10T17:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000000e",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-10T17:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000000f",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-10T18:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000010",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-10T18:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000011",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-10T19:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000012",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-10T19:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000013",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-10T20:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000014",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-10T20:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000015",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-10T21:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000016",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-10T21:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000017",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-10T22:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000018",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-10T22:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000019",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-10T23:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000001a",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-10T23:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000001b",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-11T00:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000001c",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-11T00:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000001d",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-11T01:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000001e",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-11T01:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000001f",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-11T02:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000020",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-11T02:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000021",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-11T03:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000022",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-11T03:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000023",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-11T04:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000024",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-11T04:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000025",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-11T05:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000026",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-11T05:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000027",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-11T06:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000028",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-11T06:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000029",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-11T07:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000002a",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-11T07:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000002b",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-11T08:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000002c",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-11T08:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000002d",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-11T09:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000002e",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-11T09:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000002f",
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "hour_at": "2026-10-11T10:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    },
+    {
+      "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000030",
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "hour_at": "2026-10-11T10:00:00Z",
+      "actual_cutoff_at": null,
+      "publication_state": "blocked",
+      "label_state": "partial",
+      "state": "blocked",
+      "attempts": 1,
+      "reason_code": "synthetic_wire_control"
+    }
+  ],
+  "scoreReply": {
+    "schema_version": "history-outcome-score-reply.v2",
+    "owner_authenticated": true,
+    "current_originals_verified": true,
+    "protocol_id": "heval2_000000000000000000000000000000000000000000000001",
+    "score": {
+      "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "financial_qualified": false,
+      "historical_pit_verified": false,
+      "promotion_allowed": false,
+      "fixture_mode": false,
+      "owner_claim": "synthetic_wire_only_owner",
+      "request_id": "synthetic_wire_only",
+      "source_files": [
+        [
+          "synthetic_wire_only.py",
+          "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        ]
+      ],
+      "source_original_ref": "fixture://wire-only/source",
+      "source_original_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "produced_at": "2026-10-13T12:00:01Z",
+      "recorded_at": "2026-10-13T12:00:02Z",
+      "schema_version": "history-outcome-score.v2",
+      "score_id": "hscore2_000000000000000000000000000000000000000000000001",
+      "protocol": {
+        "identifier": "heval2_000000000000000000000000000000000000000000000001",
+        "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "original_ref": "fixture://wire-only/heval2_000000000000000000000000000000000000000000000001",
+        "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "actual_as_of": "2026-10-13T12:00:00Z",
+      "expected_total": 48,
+      "publication_due_count": 48,
+      "label_due_count": 48,
+      "publication_counts": {
+        "pending": 0,
+        "on_time": 1,
+        "late": 1,
+        "off_schedule": 0,
+        "blocked": 46,
+        "failed": 0,
+        "abstained": 0,
+        "missing": 0,
+        "unconfirmed": 0
+      },
+      "label_counts": {
+        "pending_maturity": 0,
+        "verified": 2,
+        "partial": 46,
+        "invalid": 0,
+        "missing_at_deadline": 0,
+        "late_diagnostic": 0
+      },
+      "published_count": 2,
+      "on_time_count": 1,
+      "verified_label_count": 2,
+      "paired_count": 1,
+      "targets": [
+        {
+          "direction": "long",
+          "threshold": "0.02",
+          "n_baseline": 1,
+          "n_conditional": 1,
+          "n_pair": 1,
+          "baseline_brier": "0.64",
+          "conditional_brier": "0.4225",
+          "paired_gain": "0.2175",
+          "ci": null,
+          "ci_status": "not_registered_for_hourly_overlapping_windows"
+        },
+        {
+          "direction": "short",
+          "threshold": "0.02",
+          "n_baseline": 1,
+          "n_conditional": 1,
+          "n_pair": 1,
+          "baseline_brier": "0.64",
+          "conditional_brier": "0.4225",
+          "paired_gain": "0.2175",
+          "ci": null,
+          "ci_status": "not_registered_for_hourly_overlapping_windows"
+        },
+        {
+          "direction": "long",
+          "threshold": "0.05",
+          "n_baseline": 1,
+          "n_conditional": 1,
+          "n_pair": 1,
+          "baseline_brier": "0.64",
+          "conditional_brier": "0.4225",
+          "paired_gain": "0.2175",
+          "ci": null,
+          "ci_status": "not_registered_for_hourly_overlapping_windows"
+        },
+        {
+          "direction": "short",
+          "threshold": "0.05",
+          "n_baseline": 1,
+          "n_conditional": 1,
+          "n_pair": 1,
+          "baseline_brier": "0.64",
+          "conditional_brier": "0.4225",
+          "paired_gain": "0.2175",
+          "ci": null,
+          "ci_status": "not_registered_for_hourly_overlapping_windows"
+        }
+      ],
+      "cases": [
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000001",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-10T11:00:00Z",
+          "publication_state": "on_time",
+          "label_state": "verified",
+          "label_cutoff_at": "2026-10-10T11:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": true,
+          "exclusions": [],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000001",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000001",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000001",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000001",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": {
+            "identifier": "hobservation2_000000000000000000000000000000000000000000000001",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hobservation2_000000000000000000000000000000000000000000000001",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "forecast": {
+            "identifier": "hforecast2_000000000000000000000000000000000000000000000001",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hforecast2_000000000000000000000000000000000000000000000001",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "acceptance": {
+            "identifier": "hacceptance2_000000000000000000000000000000000000000000000001",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hacceptance2_000000000000000000000000000000000000000000000001",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          }
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000002",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-10T11:00:00Z",
+          "publication_state": "late",
+          "label_state": "verified",
+          "label_cutoff_at": "2026-10-10T11:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_late"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000002",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000002",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000002",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000002",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": {
+            "identifier": "hobservation2_000000000000000000000000000000000000000000000002",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hobservation2_000000000000000000000000000000000000000000000002",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "forecast": {
+            "identifier": "hforecast2_000000000000000000000000000000000000000000000002",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hforecast2_000000000000000000000000000000000000000000000002",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "acceptance": {
+            "identifier": "hacceptance2_000000000000000000000000000000000000000000000002",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hacceptance2_000000000000000000000000000000000000000000000002",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          }
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000003",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-10T12:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T12:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000003",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000003",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000003",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000003",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000004",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-10T12:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T12:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000004",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000004",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000004",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000004",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000005",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-10T13:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T13:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000005",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000005",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000005",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000005",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000006",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-10T13:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T13:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000006",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000006",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000006",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000006",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000007",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-10T14:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T14:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000007",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000007",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000007",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000007",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000008",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-10T14:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T14:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000008",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000008",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000008",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000008",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000009",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-10T15:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T15:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000009",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000009",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000009",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000009",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000000a",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-10T15:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T15:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_00000000000000000000000000000000000000000000000a",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_00000000000000000000000000000000000000000000000a",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_00000000000000000000000000000000000000000000000a",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_00000000000000000000000000000000000000000000000a",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000000b",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-10T16:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T16:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_00000000000000000000000000000000000000000000000b",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_00000000000000000000000000000000000000000000000b",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_00000000000000000000000000000000000000000000000b",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_00000000000000000000000000000000000000000000000b",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000000c",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-10T16:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T16:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_00000000000000000000000000000000000000000000000c",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_00000000000000000000000000000000000000000000000c",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_00000000000000000000000000000000000000000000000c",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_00000000000000000000000000000000000000000000000c",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000000d",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-10T17:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T17:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_00000000000000000000000000000000000000000000000d",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_00000000000000000000000000000000000000000000000d",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_00000000000000000000000000000000000000000000000d",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_00000000000000000000000000000000000000000000000d",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000000e",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-10T17:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T17:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_00000000000000000000000000000000000000000000000e",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_00000000000000000000000000000000000000000000000e",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_00000000000000000000000000000000000000000000000e",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_00000000000000000000000000000000000000000000000e",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000000f",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-10T18:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T18:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_00000000000000000000000000000000000000000000000f",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_00000000000000000000000000000000000000000000000f",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_00000000000000000000000000000000000000000000000f",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_00000000000000000000000000000000000000000000000f",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000010",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-10T18:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T18:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000010",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000010",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000010",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000010",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000011",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-10T19:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T19:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000011",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000011",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000011",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000011",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000012",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-10T19:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T19:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000012",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000012",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000012",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000012",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000013",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-10T20:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T20:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000013",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000013",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000013",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000013",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000014",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-10T20:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T20:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000014",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000014",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000014",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000014",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000015",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-10T21:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T21:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000015",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000015",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000015",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000015",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000016",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-10T21:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T21:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000016",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000016",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000016",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000016",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000017",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-10T22:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T22:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000017",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000017",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000017",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000017",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000018",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-10T22:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T22:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000018",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000018",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000018",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000018",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000019",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-10T23:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T23:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000019",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000019",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000019",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000019",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000001a",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-10T23:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-10T23:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_00000000000000000000000000000000000000000000001a",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_00000000000000000000000000000000000000000000001a",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_00000000000000000000000000000000000000000000001a",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_00000000000000000000000000000000000000000000001a",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000001b",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-11T00:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T00:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_00000000000000000000000000000000000000000000001b",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_00000000000000000000000000000000000000000000001b",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_00000000000000000000000000000000000000000000001b",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_00000000000000000000000000000000000000000000001b",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000001c",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-11T00:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T00:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_00000000000000000000000000000000000000000000001c",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_00000000000000000000000000000000000000000000001c",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_00000000000000000000000000000000000000000000001c",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_00000000000000000000000000000000000000000000001c",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000001d",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-11T01:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T01:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_00000000000000000000000000000000000000000000001d",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_00000000000000000000000000000000000000000000001d",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_00000000000000000000000000000000000000000000001d",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_00000000000000000000000000000000000000000000001d",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000001e",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-11T01:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T01:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_00000000000000000000000000000000000000000000001e",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_00000000000000000000000000000000000000000000001e",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_00000000000000000000000000000000000000000000001e",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_00000000000000000000000000000000000000000000001e",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000001f",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-11T02:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T02:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_00000000000000000000000000000000000000000000001f",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_00000000000000000000000000000000000000000000001f",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_00000000000000000000000000000000000000000000001f",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_00000000000000000000000000000000000000000000001f",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000020",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-11T02:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T02:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000020",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000020",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000020",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000020",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000021",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-11T03:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T03:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000021",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000021",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000021",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000021",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000022",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-11T03:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T03:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000022",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000022",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000022",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000022",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000023",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-11T04:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T04:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000023",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000023",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000023",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000023",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000024",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-11T04:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T04:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000024",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000024",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000024",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000024",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000025",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-11T05:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T05:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000025",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000025",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000025",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000025",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000026",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-11T05:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T05:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000026",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000026",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000026",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000026",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000027",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-11T06:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T06:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000027",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000027",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000027",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000027",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000028",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-11T06:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T06:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000028",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000028",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000028",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000028",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000029",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-11T07:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T07:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000029",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000029",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000029",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000029",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000002a",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-11T07:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T07:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_00000000000000000000000000000000000000000000002a",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_00000000000000000000000000000000000000000000002a",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_00000000000000000000000000000000000000000000002a",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_00000000000000000000000000000000000000000000002a",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000002b",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-11T08:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T08:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_00000000000000000000000000000000000000000000002b",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_00000000000000000000000000000000000000000000002b",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_00000000000000000000000000000000000000000000002b",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_00000000000000000000000000000000000000000000002b",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000002c",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-11T08:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T08:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_00000000000000000000000000000000000000000000002c",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_00000000000000000000000000000000000000000000002c",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_00000000000000000000000000000000000000000000002c",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_00000000000000000000000000000000000000000000002c",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000002d",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-11T09:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T09:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_00000000000000000000000000000000000000000000002d",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_00000000000000000000000000000000000000000000002d",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_00000000000000000000000000000000000000000000002d",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_00000000000000000000000000000000000000000000002d",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000002e",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-11T09:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T09:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_00000000000000000000000000000000000000000000002e",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_00000000000000000000000000000000000000000000002e",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_00000000000000000000000000000000000000000000002e",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_00000000000000000000000000000000000000000000002e",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_00000000000000000000000000000000000000000000002f",
+          "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+          "hour_at": "2026-10-11T10:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T10:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_00000000000000000000000000000000000000000000002f",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_00000000000000000000000000000000000000000000002f",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_00000000000000000000000000000000000000000000002f",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_00000000000000000000000000000000000000000000002f",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        },
+        {
+          "opportunity_id": "hopportunity2_000000000000000000000000000000000000000000000030",
+          "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+          "hour_at": "2026-10-11T10:00:00Z",
+          "publication_state": "blocked",
+          "label_state": "partial",
+          "label_cutoff_at": "2026-10-11T10:00:00Z",
+          "publication_due": true,
+          "label_due": true,
+          "eligible_pair": false,
+          "exclusions": [
+            "publication_blocked",
+            "label_partial"
+          ],
+          "opportunity": {
+            "identifier": "hopportunity2_000000000000000000000000000000000000000000000030",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000030",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "publication": {
+            "identifier": "hpublication2_000000000000000000000000000000000000000000000030",
+            "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000030",
+            "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "observation": null,
+          "forecast": null,
+          "acceptance": null
+        }
+      ],
+      "primary_target": "long:0.02",
+      "ci": null,
+      "ci_status": "not_registered_for_hourly_overlapping_windows"
+    }
+  },
+  "observationReply": {
+    "schema_version": "history-outcome-observation-reply.v2",
+    "owner_authenticated": true,
+    "current_originals_verified": true,
+    "protocol_id": "heval2_000000000000000000000000000000000000000000000001",
+    "observation": {
+      "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "financial_qualified": false,
+      "historical_pit_verified": false,
+      "promotion_allowed": false,
+      "fixture_mode": false,
+      "owner_claim": "synthetic_wire_only_owner",
+      "request_id": "synthetic_wire_only",
+      "source_files": [
+        [
+          "synthetic_wire_only.py",
+          "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        ]
+      ],
+      "source_original_ref": "fixture://wire-only/source",
+      "source_original_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "produced_at": "2026-10-13T12:00:01Z",
+      "recorded_at": "2026-10-13T12:00:02Z",
+      "schema_version": "history-outcome-observation.v2",
+      "observation_id": "hobservation2_000000000000000000000000000000000000000000000001",
+      "protocol": {
+        "identifier": "heval2_000000000000000000000000000000000000000000000001",
+        "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "original_ref": "fixture://wire-only/heval2_000000000000000000000000000000000000000000000001",
+        "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "opportunity": {
+        "identifier": "hopportunity2_000000000000000000000000000000000000000000000001",
+        "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "original_ref": "fixture://wire-only/hopportunity2_000000000000000000000000000000000000000000000001",
+        "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "publication": {
+        "identifier": "hpublication2_000000000000000000000000000000000000000000000001",
+        "payload_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "original_ref": "fixture://wire-only/hpublication2_000000000000000000000000000000000000000000000001",
+        "original_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "label_cutoff_at": "2026-10-10T11:00:00Z",
+      "window_start_at": "2026-10-10T11:01:00Z",
+      "window_end_at": "2026-10-11T11:01:00Z",
+      "label_deadline_at": "2026-10-12T11:01:00Z",
+      "observed_at": "2026-10-11T12:00:00Z",
+      "accepted_at": null,
+      "attempt": 1,
+      "classification": "verified",
+      "reason_code": "synthetic_wire_only",
+      "anchor_status": "verified",
+      "anchor_price": "100",
+      "observed_count": 1440,
+      "expected_count": 1440,
+      "pending_count": 0,
+      "window_status": "complete",
+      "mae_long": "0.02",
+      "mae_short": "0.03",
+      "path_semantic_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "path_manifest_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "observation_original_ref": "fixture://wire-only/path",
+      "observation_original_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  }
+}

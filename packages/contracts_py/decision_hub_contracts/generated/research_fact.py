@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 
@@ -42,3 +42,73 @@ class FactEnvelope(BaseModel):
     payload_schema_ref: Annotated[str, Field(min_length=1)]
     payload_hash: Annotated[str, Field(pattern="^[a-f0-9]{64}$")]
     attributes: dict[str, float | str | bool | None]
+
+
+class RawCaptureView(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    capture_id: str
+    url: str
+    body_ref: str | None
+    body_hash: str | None
+    status_code: int | None
+    byte_count: Annotated[int, Field(ge=0)]
+    media_type: str
+    started_at: AwareDatetime
+    completed_at: AwareDatetime
+
+
+class RunInputView(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    run_id: str
+    fact_id: str
+    use_mode: Literal["fresh", "reused", "legacy"]
+    as_of: AwareDatetime
+    adopted_at: AwareDatetime
+
+
+class FactVersionView(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    structured_payload_ref: str | None = None
+    fact_version_id: str
+    semantic_key: str
+    market: str
+    scope_instrument: str
+    known_at: AwareDatetime
+    recorded_at: AwareDatetime
+    fact: FactEnvelope
+    parsed_version_id: str
+    archive_status: Literal[
+        "captured", "reference_only", "legacy_unarchived", "unarchived", "missing"
+    ]
+    parser_version: str
+    content_ref: str | None
+    acquisition_receipt_id: str | None
+    raw_captures: list[RawCaptureView]
+    run_inputs: Annotated[list[RunInputView] | None, Field(validate_default=True)] = []
+
+
+class FactVersionListView(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    items: list[FactVersionView]
+    total: Annotated[int, Field(ge=0)]
+    limit: Annotated[int, Field(ge=1, le=100)]
+    offset: Annotated[int, Field(ge=0)]
+    as_of: AwareDatetime
+
+
+class ArchivedInputView(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: Literal["coverage_manifest", "historical_partition", "event_window", "original_text"]
+    ref: str
+    verified: bool
+    payload: dict[str, Any]

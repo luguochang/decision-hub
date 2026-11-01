@@ -1,0 +1,68 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/notification_envelope.schema.json
+title: NotificationEnvelopeContracts
+$defs:
+  notification_envelope_v2:
+    type: object
+    additionalProperties: false
+    properties:
+      schema_version:
+        type: string
+        const: notification-envelope.v2
+      subject_kind:
+        type: string
+        enum: [report, risk_alert, action_revision]
+      subject_id:
+        type: string
+        minLength: 1
+      channel:
+        type: string
+        minLength: 1
+      dedupe_key:
+        type: string
+        minLength: 1
+      subject:
+        type: string
+        minLength: 1
+      body:
+        type: string
+        minLength: 1
+      created_at:
+        type: string
+        format: date-time
+      payload_hash:
+        type: string
+        pattern: '^[a-f0-9]{64}$'
+    required: [schema_version, subject_kind, subject_id, channel, dedupe_key, subject, body, created_at, payload_hash]
+  notification_envelope_v3:
+    type: object
+    additionalProperties: false
+    properties:
+      schema_version:
+        type: string
+        const: notification-envelope.v3
+      subject_kind:
+        type: string
+        const: event_opportunity
+      subject_id:
+        type: string
+        minLength: 1
+      channel:
+        type: string
+        minLength: 1
+      dedupe_key:
+        type: string
+        minLength: 1
+      subject:
+        type: string
+        minLength: 1
+      body:
+        type: string
+        minLength: 1
+      created_at:
+        type: string
+        format: date-time
+      payload_hash:
+        type: string
+        pattern: '^[a-f0-9]{64}$'
+    required: [schema_version, subject_kind, subject_id, channel, dedupe_key, subject, body, created_at, payload_hash]

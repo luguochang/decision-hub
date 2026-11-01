@@ -1,0 +1,3170 @@
+[
+  {
+    "name": "actual-research_context_selection_row_identity_v3",
+    "definition": "research_context_selection_row_identity_v3",
+    "value": {
+      "output_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+      "payload_hash": "74dfb76a21ee1dd7274880084dc56044942a5a0e9f16a9f88596470b7c6f2815",
+      "recorded_at": "2026-10-02T19:47:17.453240Z",
+      "role": "context_select.r1.a1",
+      "row_schema_version": "research-context-selection.v3",
+      "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+    },
+    "expected": true
+  },
+  {
+    "name": "actual-research_context_execution_row_identity_v3",
+    "definition": "research_context_execution_row_identity_v3",
+    "value": {
+      "output_id": "execution_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+      "payload_hash": "5126e7a62423b22bf2a554d3ffaff72a59976a6c717c71167faecebc4df58a9e",
+      "recorded_at": "2026-10-02T19:47:19.385485Z",
+      "role": "dsh_execution_request:1",
+      "row_schema_version": "dsh-execution-request.v3",
+      "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+    },
+    "expected": true
+  },
+  {
+    "name": "actual-research_required_context_selection_binding_v1",
+    "definition": "research_required_context_selection_binding_v1",
+    "value": {
+      "first_selection_full_request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "first_selection_full_request_hash_kind": "canonical_research_session_request.v1",
+      "first_selection_payload_hash": "1fed8ed3688c99c8227a535e7763b4e714ba0c4922d5ad478e9bf5d3f78fd5cc",
+      "first_selection_row": {
+        "output_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+        "payload_hash": "74dfb76a21ee1dd7274880084dc56044942a5a0e9f16a9f88596470b7c6f2815",
+        "recorded_at": "2026-10-02T19:47:17.453240Z",
+        "role": "context_select.r1.a1",
+        "row_schema_version": "research-context-selection.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "mode": "required_before_rpc",
+      "ranking_rules_ref": "research-context.relevance-authority-recency.v2",
+      "selection_schema": "research-context-selection.v3",
+      "time_rule_ref": "research-context.received-cutoff.v1"
+    },
+    "expected": true
+  },
+  {
+    "name": "actual-research_execution_method_definition_v3",
+    "definition": "research_execution_method_definition_v3",
+    "value": {
+      "agent_preset": "decision-research",
+      "allowed_capabilities": [
+        "document.readback",
+        "replay.research",
+        "web.search"
+      ],
+      "bundle": {
+        "bundle_hash": "7266d64c141e91bd0d759d67610f1a5dd83e00c417d48893a5a968dfeb2a93b6",
+        "bundle_hash_kind": "canonical_bundle_rows.v1",
+        "compiled": {
+          "output_id": "compiled_71a77e7a997d61eb5025e261e3c6d71a",
+          "payload_hash": "8988417d55adef28f3b09b31ba758f4780e3ec244b59556549b3dbc5ad7fdc6a",
+          "recorded_at": "2026-10-02T19:47:15.102909Z",
+          "role": "research_compiled_policy",
+          "row_schema_version": "research-compiled-policy-receipt.v1",
+          "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+        },
+        "pack": {
+          "output_id": "pack_71a77e7a997d61eb5025e261e3c6d71a",
+          "payload_hash": "267b47eb77156f48cd0a29889263a002b4e7d79e193f72f7b6ee47c02211c096",
+          "recorded_at": "2026-10-02T19:47:15.102909Z",
+          "role": "research_request_pack",
+          "row_schema_version": "research-request-pack.v2",
+          "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+        },
+        "recorded_at": "2026-10-02T19:47:15.102909Z",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+        "schema_version": "research-prepared-bundle-identity.v1",
+        "task": {
+          "output_id": "task_71a77e7a997d61eb5025e261e3c6d71a",
+          "payload_hash": "ec846168ed14ca892be513a6c173faea8e5a597a4cfa17eb54418b441f8710a4",
+          "recorded_at": "2026-10-02T19:47:15.102909Z",
+          "role": "research_task_request",
+          "row_schema_version": "research-task-request.v2",
+          "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+        }
+      },
+      "candidate_id": null,
+      "context_policy_hash": "fc79378812cd31b42346bfdd8fa7ce227cf65d06b0e63f704c2ef7a8823358f7",
+      "context_selection_binding": {
+        "first_selection_full_request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+        "first_selection_full_request_hash_kind": "canonical_research_session_request.v1",
+        "first_selection_payload_hash": "1fed8ed3688c99c8227a535e7763b4e714ba0c4922d5ad478e9bf5d3f78fd5cc",
+        "first_selection_row": {
+          "output_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+          "payload_hash": "74dfb76a21ee1dd7274880084dc56044942a5a0e9f16a9f88596470b7c6f2815",
+          "recorded_at": "2026-10-02T19:47:17.453240Z",
+          "role": "context_select.r1.a1",
+          "row_schema_version": "research-context-selection.v3",
+          "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+        },
+        "mode": "required_before_rpc",
+        "ranking_rules_ref": "research-context.relevance-authority-recency.v2",
+        "selection_schema": "research-context-selection.v3",
+        "time_rule_ref": "research-context.received-cutoff.v1"
+      },
+      "deadline_at": "2026-10-02T20:17:15.102909Z",
+      "domain_pack_ref": "crypto_macro.v1",
+      "evolution_pointer_consumed": false,
+      "execution_budget": {
+        "max_estimated_cost_usd": 10.0,
+        "max_evidence_rounds": 1,
+        "max_structured_repairs": 3,
+        "max_subagents": 32,
+        "max_tool_calls": 100,
+        "per_model_step_timeout_seconds": 600,
+        "per_tool_timeout_seconds": 120,
+        "total_deadline_seconds": 1800
+      },
+      "execution_mode": "replay",
+      "first_execution_request_hash_kind": "canonical_research_session_request.v1",
+      "output_schema_ref": "agentic_research.schema.yaml#/$defs/research_session_result",
+      "permission_ref": "decision-hub://permissions/research-only",
+      "policy_binding": {
+        "binding_hash": "4514a3c309dbdb7e3104fe8fdfd8adeb54d65ff0d6d7498f35784f416ec1c771",
+        "checker_activation": "prepared",
+        "checker_code_hash": "4c4ce772c367110e35d190b87256fdd375662212d31c3e59baf73e5555ccd60c",
+        "checker_version": "research-policy-checker-registry.v1",
+        "compiled_policy_hash": "6bb0fe011d3689437855643d7572dc85bf9566e83585e2008342454bba52162e",
+        "compiler_code_hash": "005e9766cc5422843a84443c997a26f98c52505ff056c42d7276be95c1a0d15f",
+        "compiler_version": "research-policy-compiler.v1",
+        "event_id": "evt_b5e241d2b3e148c69fdf0db7607c3a40",
+        "first_execution_hash_kind": "actual_first_execution_request",
+        "first_execution_request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+        "full_task_hash": "4ef102756893637a46bd85895e5bef39267f04c5fa0d11b12b03ac23d6c4d41c",
+        "gate_policy_hash": "ef17fb91c9f03f01535959e4ffd9287ee22b2a0ba6ed6e4b0d5311f8bf2d1484",
+        "request_pack_hash": "3e678f466d365410b8e7c5f54302bb902f2bdbb1144c925c4c4c68bd14732aa5",
+        "requirements_hash": "3c4c4a9032b2734385b829d832189008ce638e49c3f04cb1f9c97ff60b745ae7",
+        "rubric_hash": "ff858d2d6a7a945e9bc74c87eeda1d53c2d69e9433c87a370296e757f82a3df6",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+        "schema_version": "research-policy-method-binding.v1",
+        "scope_hash": "a8e640951b0e4bb989d184bc078e8e93b1305cce01bbf333418dcef4cc31f993"
+      },
+      "profile_ref": "decision-research.web.v1",
+      "prompt_policy_hash": "f57d06211cc02687d25bf5a0a1bff2df90152e644da53f97c25c97d00f16c5bd",
+      "provider_configuration_attested": false,
+      "request_pack_hash": "3e678f466d365410b8e7c5f54302bb902f2bdbb1144c925c4c4c68bd14732aa5",
+      "research_mode": "current_decision",
+      "research_policy_prompt_hash": "fc3bea8dc048f719d1876e0bf40cdbd75912a14a10ff4e412a3ddf403afa8355",
+      "research_policy_renderer_hash": "b9c3324b37bf384728ac0bbc1a219fae9fc4a4c9fd2d719c549ae359265bb8b2",
+      "role_profile_ref": "crypto_macro.manager.v1",
+      "runtime_id": "dsh",
+      "runtime_version": "dsh-web-0.1.0+222222222222",
+      "schema_version": "research-execution-method.v3",
+      "upstream_identity": {
+        "package_versions": {},
+        "plugin_build_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+        "source_commit": "1111111111111111111111111111111111111111",
+        "source_version": "0.1.0"
+      },
+      "workspace_ref": "decision-hub://workspace/default"
+    },
+    "expected": true
+  },
+  {
+    "name": "actual-research_execution_method_receipt_v3",
+    "definition": "research_execution_method_receipt_v3",
+    "value": {
+      "definition": {
+        "agent_preset": "decision-research",
+        "allowed_capabilities": [
+          "document.readback",
+          "replay.research",
+          "web.search"
+        ],
+        "bundle": {
+          "bundle_hash": "7266d64c141e91bd0d759d67610f1a5dd83e00c417d48893a5a968dfeb2a93b6",
+          "bundle_hash_kind": "canonical_bundle_rows.v1",
+          "compiled": {
+            "output_id": "compiled_71a77e7a997d61eb5025e261e3c6d71a",
+            "payload_hash": "8988417d55adef28f3b09b31ba758f4780e3ec244b59556549b3dbc5ad7fdc6a",
+            "recorded_at": "2026-10-02T19:47:15.102909Z",
+            "role": "research_compiled_policy",
+            "row_schema_version": "research-compiled-policy-receipt.v1",
+            "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+          },
+          "pack": {
+            "output_id": "pack_71a77e7a997d61eb5025e261e3c6d71a",
+            "payload_hash": "267b47eb77156f48cd0a29889263a002b4e7d79e193f72f7b6ee47c02211c096",
+            "recorded_at": "2026-10-02T19:47:15.102909Z",
+            "role": "research_request_pack",
+            "row_schema_version": "research-request-pack.v2",
+            "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+          },
+          "recorded_at": "2026-10-02T19:47:15.102909Z",
+          "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+          "schema_version": "research-prepared-bundle-identity.v1",
+          "task": {
+            "output_id": "task_71a77e7a997d61eb5025e261e3c6d71a",
+            "payload_hash": "ec846168ed14ca892be513a6c173faea8e5a597a4cfa17eb54418b441f8710a4",
+            "recorded_at": "2026-10-02T19:47:15.102909Z",
+            "role": "research_task_request",
+            "row_schema_version": "research-task-request.v2",
+            "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+          }
+        },
+        "candidate_id": null,
+        "context_policy_hash": "fc79378812cd31b42346bfdd8fa7ce227cf65d06b0e63f704c2ef7a8823358f7",
+        "context_selection_binding": {
+          "first_selection_full_request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+          "first_selection_full_request_hash_kind": "canonical_research_session_request.v1",
+          "first_selection_payload_hash": "1fed8ed3688c99c8227a535e7763b4e714ba0c4922d5ad478e9bf5d3f78fd5cc",
+          "first_selection_row": {
+            "output_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+            "payload_hash": "74dfb76a21ee1dd7274880084dc56044942a5a0e9f16a9f88596470b7c6f2815",
+            "recorded_at": "2026-10-02T19:47:17.453240Z",
+            "role": "context_select.r1.a1",
+            "row_schema_version": "research-context-selection.v3",
+            "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+          },
+          "mode": "required_before_rpc",
+          "ranking_rules_ref": "research-context.relevance-authority-recency.v2",
+          "selection_schema": "research-context-selection.v3",
+          "time_rule_ref": "research-context.received-cutoff.v1"
+        },
+        "deadline_at": "2026-10-02T20:17:15.102909Z",
+        "domain_pack_ref": "crypto_macro.v1",
+        "evolution_pointer_consumed": false,
+        "execution_budget": {
+          "max_estimated_cost_usd": 10.0,
+          "max_evidence_rounds": 1,
+          "max_structured_repairs": 3,
+          "max_subagents": 32,
+          "max_tool_calls": 100,
+          "per_model_step_timeout_seconds": 600,
+          "per_tool_timeout_seconds": 120,
+          "total_deadline_seconds": 1800
+        },
+        "execution_mode": "replay",
+        "first_execution_request_hash_kind": "canonical_research_session_request.v1",
+        "output_schema_ref": "agentic_research.schema.yaml#/$defs/research_session_result",
+        "permission_ref": "decision-hub://permissions/research-only",
+        "policy_binding": {
+          "binding_hash": "4514a3c309dbdb7e3104fe8fdfd8adeb54d65ff0d6d7498f35784f416ec1c771",
+          "checker_activation": "prepared",
+          "checker_code_hash": "4c4ce772c367110e35d190b87256fdd375662212d31c3e59baf73e5555ccd60c",
+          "checker_version": "research-policy-checker-registry.v1",
+          "compiled_policy_hash": "6bb0fe011d3689437855643d7572dc85bf9566e83585e2008342454bba52162e",
+          "compiler_code_hash": "005e9766cc5422843a84443c997a26f98c52505ff056c42d7276be95c1a0d15f",
+          "compiler_version": "research-policy-compiler.v1",
+          "event_id": "evt_b5e241d2b3e148c69fdf0db7607c3a40",
+          "first_execution_hash_kind": "actual_first_execution_request",
+          "first_execution_request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+          "full_task_hash": "4ef102756893637a46bd85895e5bef39267f04c5fa0d11b12b03ac23d6c4d41c",
+          "gate_policy_hash": "ef17fb91c9f03f01535959e4ffd9287ee22b2a0ba6ed6e4b0d5311f8bf2d1484",
+          "request_pack_hash": "3e678f466d365410b8e7c5f54302bb902f2bdbb1144c925c4c4c68bd14732aa5",
+          "requirements_hash": "3c4c4a9032b2734385b829d832189008ce638e49c3f04cb1f9c97ff60b745ae7",
+          "rubric_hash": "ff858d2d6a7a945e9bc74c87eeda1d53c2d69e9433c87a370296e757f82a3df6",
+          "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+          "schema_version": "research-policy-method-binding.v1",
+          "scope_hash": "a8e640951b0e4bb989d184bc078e8e93b1305cce01bbf333418dcef4cc31f993"
+        },
+        "profile_ref": "decision-research.web.v1",
+        "prompt_policy_hash": "f57d06211cc02687d25bf5a0a1bff2df90152e644da53f97c25c97d00f16c5bd",
+        "provider_configuration_attested": false,
+        "request_pack_hash": "3e678f466d365410b8e7c5f54302bb902f2bdbb1144c925c4c4c68bd14732aa5",
+        "research_mode": "current_decision",
+        "research_policy_prompt_hash": "fc3bea8dc048f719d1876e0bf40cdbd75912a14a10ff4e412a3ddf403afa8355",
+        "research_policy_renderer_hash": "b9c3324b37bf384728ac0bbc1a219fae9fc4a4c9fd2d719c549ae359265bb8b2",
+        "role_profile_ref": "crypto_macro.manager.v1",
+        "runtime_id": "dsh",
+        "runtime_version": "dsh-web-0.1.0+222222222222",
+        "schema_version": "research-execution-method.v3",
+        "upstream_identity": {
+          "package_versions": {},
+          "plugin_build_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+          "source_commit": "1111111111111111111111111111111111111111",
+          "source_version": "0.1.0"
+        },
+        "workspace_ref": "decision-hub://workspace/default"
+      },
+      "method_hash": "3c2b384cca008d6b808a6c312e2d354f2670879d488987be7bb25401fb384f3f",
+      "recorded_at": "2026-10-02T19:47:19.385485Z",
+      "request_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "request_hash_kind": "dsh_link_identity.v1",
+      "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+      "schema_version": "research-execution-method.v3"
+    },
+    "expected": true
+  },
+  {
+    "name": "actual-research_execution_request_receipt_v3",
+    "definition": "research_execution_request_receipt_v3",
+    "value": {
+      "bundle_hash": "7266d64c141e91bd0d759d67610f1a5dd83e00c417d48893a5a968dfeb2a93b6",
+      "current_selection_payload_hash": "1fed8ed3688c99c8227a535e7763b4e714ba0c4922d5ad478e9bf5d3f78fd5cc",
+      "current_selection_row": {
+        "output_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+        "payload_hash": "74dfb76a21ee1dd7274880084dc56044942a5a0e9f16a9f88596470b7c6f2815",
+        "recorded_at": "2026-10-02T19:47:17.453240Z",
+        "role": "context_select.r1.a1",
+        "row_schema_version": "research-context-selection.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "dsh_session_id": "dsh_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "execution_request_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "execution_request_hash_kind": "dsh_link_identity.v1",
+      "first_execution_request_full_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "first_execution_request_full_hash_kind": "canonical_research_session_request.v1",
+      "generation": 1,
+      "link_request_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "link_request_hash_kind": "dsh_link_identity.v1",
+      "method_hash": "3c2b384cca008d6b808a6c312e2d354f2670879d488987be7bb25401fb384f3f",
+      "recorded_at": "2026-10-02T19:47:19.385485Z",
+      "request": {
+        "allowed_capabilities": [
+          "replay.research",
+          "document.readback",
+          "web.search"
+        ],
+        "context_manifest": {
+          "created_at": "2026-08-29T12:00:00Z",
+          "data_versions": {
+            "crypto_macro.pack": "v1",
+            "evidence.schema": "agentic_research.v1"
+          },
+          "effective_inputs": [
+            "ev_419c6da71f62d4be4c218d1fe1e7deae"
+          ],
+          "excluded_inputs": [],
+          "input_fingerprint": "4327910a32e43233802b40b2c41b441ccdb9f33fcdae2db601f5e1039baf3ac7",
+          "manifest_id": "context:run_9a7e9c5bbda1433fa4806f416e4cfd3d:r1:4327910a32e43233",
+          "policy_ref": "crypto_macro.research.v1:bd03c53c17d97d36",
+          "revision": 1,
+          "rules_ref": "research-context.relevance-authority-recency.v2",
+          "selected_inputs": [
+            "ev_419c6da71f62d4be4c218d1fe1e7deae"
+          ],
+          "tool_versions": {
+            "document.readback": "gateway-contract.v1",
+            "replay.research": "gateway-contract.v1",
+            "web.search": "gateway-contract.v1"
+          }
+        },
+        "current_round": 1,
+        "deadline_at": "2026-10-02T20:17:15.102909Z",
+        "domain_pack_ref": "crypto_macro.v1",
+        "event_id": "evt_b5e241d2b3e148c69fdf0db7607c3a40",
+        "event_watch": null,
+        "event_window_samples": [],
+        "evidence_refs": [
+          "ev_419c6da71f62d4be4c218d1fe1e7deae"
+        ],
+        "evidence_requirements": [
+          {
+            "accepted_metric_families": [
+              "event.identity"
+            ],
+            "allowed_delay_classes": [
+              "realtime",
+              "delayed"
+            ],
+            "allowed_fallbacks": [
+              "web.fetch",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "official",
+            "confidence_cap": 0.45,
+            "description": "Identify the primary event, speaker or document, event time and revision status.",
+            "field_units": {
+              "event_actor": [
+                "text"
+              ],
+              "event_time": [
+                "datetime"
+              ],
+              "revision_status": [
+                "text"
+              ]
+            },
+            "freshness_seconds": 604800,
+            "importance": "hard",
+            "minimum_independence_groups": 1,
+            "minimum_independent_sources": 1,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [
+              "t0"
+            ],
+            "required_fields": [
+              "event_actor",
+              "event_time",
+              "revision_status"
+            ],
+            "required_metric_families": [
+              "event.identity"
+            ],
+            "requirement_id": "event_identity",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#event_identity",
+            "source_priority": [
+              "official",
+              "verified_web"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          },
+          {
+            "accepted_metric_families": [
+              "policy.statement_delta",
+              "economic.release_delta"
+            ],
+            "allowed_delay_classes": [
+              "realtime",
+              "delayed"
+            ],
+            "allowed_fallbacks": [
+              "web.fetch",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "official",
+            "confidence_cap": 0.5,
+            "description": "Establish what changed relative to prior wording, prior value or consensus.",
+            "field_units": {
+              "baseline": [
+                "text",
+                "number",
+                "percent"
+              ],
+              "current": [
+                "text",
+                "number",
+                "percent"
+              ],
+              "delta": [
+                "text",
+                "number",
+                "percentage_point",
+                "bps"
+              ]
+            },
+            "freshness_seconds": 86400,
+            "importance": "hard",
+            "minimum_independence_groups": 1,
+            "minimum_independent_sources": 1,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [
+              "baseline",
+              "t0"
+            ],
+            "required_fields": [
+              "current",
+              "baseline",
+              "delta"
+            ],
+            "required_metric_families": [],
+            "requirement_id": "policy_or_data_delta",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#policy_or_data_delta",
+            "source_priority": [
+              "official",
+              "audited_aggregator",
+              "verified_web"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          },
+          {
+            "accepted_metric_families": [
+              "macro.policy_expectation"
+            ],
+            "allowed_delay_classes": [
+              "realtime"
+            ],
+            "allowed_fallbacks": [
+              "macro.expectation_pricing",
+              "market.cross_asset",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "exchange",
+            "confidence_cap": 0.55,
+            "description": "Observe policy expectations, rates repricing or credible positioning evidence.",
+            "field_units": {
+              "delta": [
+                "percentage_point",
+                "bps"
+              ],
+              "level": [
+                "probability",
+                "percent",
+                "bps",
+                "yield_percent"
+              ]
+            },
+            "freshness_seconds": 900,
+            "importance": "hard",
+            "minimum_independence_groups": 1,
+            "minimum_independent_sources": 1,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [
+              "baseline",
+              "t-5m"
+            ],
+            "required_fields": [
+              "level",
+              "delta"
+            ],
+            "required_metric_families": [
+              "macro.policy_expectation"
+            ],
+            "requirement_id": "expectation_pricing",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#expectation_pricing",
+            "source_priority": [
+              "exchange",
+              "audited_aggregator",
+              "verified_web"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          },
+          {
+            "accepted_metric_families": [
+              "macro.rates",
+              "macro.usd"
+            ],
+            "allowed_delay_classes": [
+              "realtime"
+            ],
+            "allowed_fallbacks": [
+              "macro.cross_asset_intraday",
+              "market.cross_asset",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "exchange",
+            "confidence_cap": 0.55,
+            "description": "Observe the rates and USD transmission path relevant to the event.",
+            "field_units": {
+              "event_return": [
+                "bps",
+                "percent"
+              ],
+              "level": [
+                "yield_percent",
+                "index"
+              ]
+            },
+            "freshness_seconds": 600,
+            "importance": "hard",
+            "minimum_independence_groups": 2,
+            "minimum_independent_sources": 2,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [
+              "t-5m",
+              "t+1m"
+            ],
+            "required_fields": [
+              "level",
+              "event_return"
+            ],
+            "required_metric_families": [
+              "macro.rates",
+              "macro.usd"
+            ],
+            "requirement_id": "macro_transmission",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#macro_transmission",
+            "source_priority": [
+              "official",
+              "exchange",
+              "audited_aggregator"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          },
+          {
+            "accepted_metric_families": [
+              "cross_asset.equity",
+              "cross_asset.volatility",
+              "cross_asset.commodity",
+              "cross_asset.credit"
+            ],
+            "allowed_delay_classes": [
+              "realtime"
+            ],
+            "allowed_fallbacks": [
+              "macro.cross_asset_intraday",
+              "market.cross_asset",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "verified_web",
+            "confidence_cap": 0.65,
+            "description": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation.",
+            "field_units": {
+              "event_return": [
+                "percent",
+                "bps"
+              ],
+              "level": [
+                "price",
+                "index",
+                "spread_bps"
+              ]
+            },
+            "freshness_seconds": 600,
+            "importance": "soft",
+            "minimum_independence_groups": 1,
+            "minimum_independent_sources": 1,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [
+              "t-5m",
+              "t+1m"
+            ],
+            "required_fields": [
+              "level",
+              "event_return"
+            ],
+            "required_metric_families": [],
+            "requirement_id": "cross_asset_confirmation",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#cross_asset_confirmation",
+            "source_priority": [
+              "exchange",
+              "audited_aggregator",
+              "verified_web"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          },
+          {
+            "accepted_metric_families": [
+              "research.counter_thesis"
+            ],
+            "allowed_delay_classes": [
+              "realtime",
+              "delayed"
+            ],
+            "allowed_fallbacks": [
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "verified_web",
+            "confidence_cap": 0.7,
+            "description": "Build the strongest evidence-backed alternative transmission chain.",
+            "field_units": {
+              "alternative_chain": [
+                "text"
+              ]
+            },
+            "freshness_seconds": 86400,
+            "importance": "soft",
+            "minimum_independence_groups": 1,
+            "minimum_independent_sources": 1,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [],
+            "required_fields": [
+              "alternative_chain"
+            ],
+            "required_metric_families": [
+              "research.counter_thesis"
+            ],
+            "requirement_id": "counter_thesis",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#counter_thesis",
+            "source_priority": [
+              "official",
+              "exchange",
+              "verified_web"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          }
+        ],
+        "execution_budget": {
+          "max_estimated_cost_usd": 10.0,
+          "max_evidence_rounds": 1,
+          "max_structured_repairs": 3,
+          "max_subagents": 32,
+          "max_tool_calls": 100,
+          "per_model_step_timeout_seconds": 600,
+          "per_tool_timeout_seconds": 120,
+          "total_deadline_seconds": 1800
+        },
+        "execution_mode": "replay",
+        "input_evidence": [
+          {
+            "authority": "unverified",
+            "content_hash": "5c40ec105b8a43469b9b84c9c08bb6b4ae5c4297f255fcbfef2f048630e000aa",
+            "evidence_id": "ev_419c6da71f62d4be4c218d1fe1e7deae",
+            "excerpt": "The official event confirms elevated inflation risks.",
+            "kind": "transcript",
+            "observed_at": "2026-08-29T11:59:58Z",
+            "published_at": "2026-08-29T11:59:57Z",
+            "received_at": "2026-08-29T12:00:00Z",
+            "source_id": "worker-input",
+            "source_url": null
+          }
+        ],
+        "output_schema_ref": "agentic_research.schema.yaml#/$defs/research_session_result",
+        "pit_cutoff_at": "2026-08-29T12:00:00Z",
+        "repair_instructions": null,
+        "request_id": "research-request:run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+        "research_mode": "current_decision",
+        "role_profile_ref": "crypto_macro.manager.v1",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+        "schema_version": "research-session-request.v1",
+        "target_gaps": [
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Identify the primary event, speaker or document, event time and revision status. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "event_identity"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Establish what changed relative to prior wording, prior value or consensus. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "policy_or_data_delta"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Observe policy expectations, rates repricing or credible positioning evidence. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "expectation_pricing"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Observe the rates and USD transmission path relevant to the event. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "macro_transmission"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": false,
+            "importance": "soft",
+            "query_hint": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "cross_asset_confirmation"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Observe BTC spot reaction, volume and the event-time comparison window. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "crypto_spot_confirmation"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Observe funding, open interest, basis and available liquidation or flow evidence. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "derivatives_crowding"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": false,
+            "importance": "soft",
+            "query_hint": "Build the strongest evidence-backed alternative transmission chain. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "counter_thesis"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": false,
+            "importance": "soft",
+            "query_hint": "Build a reproducible BTC daily trend baseline from at least 60 completed candles for the next seven natural days. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "market_regime_context"
+          }
+        ],
+        "task_policy_ref": "crypto_macro.research.v1:bd03c53c17d97d36",
+        "trigger_snapshot_id": "snap_abc19cd88569667ebc6fe6c87cabbe4c"
+      },
+      "request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "request_hash_kind": "canonical_research_session_request.v1",
+      "request_id": "req_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+      "schema_version": "dsh-execution-request.v3",
+      "task_request_hash": "4ef102756893637a46bd85895e5bef39267f04c5fa0d11b12b03ac23d6c4d41c",
+      "task_request_hash_kind": "canonical_research_session_request.v1",
+      "turn_kind": "research_round"
+    },
+    "expected": true
+  },
+  {
+    "name": "actual-research_context_selection_execution_link_v2",
+    "definition": "research_context_selection_execution_link_v2",
+    "value": {
+      "actual_execution_full_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "actual_execution_full_hash_kind": "canonical_research_session_request.v1",
+      "actual_execution_reduced_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "actual_execution_reduced_hash_kind": "dsh_link_identity.v1",
+      "bundle_hash": "7266d64c141e91bd0d759d67610f1a5dd83e00c417d48893a5a968dfeb2a93b6",
+      "dsh_session_id": "dsh_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "event_id": "evt_b5e241d2b3e148c69fdf0db7607c3a40",
+      "execution_row_identity": {
+        "output_id": "execution_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+        "payload_hash": "5126e7a62423b22bf2a554d3ffaff72a59976a6c717c71167faecebc4df58a9e",
+        "recorded_at": "2026-10-02T19:47:19.385485Z",
+        "role": "dsh_execution_request:1",
+        "row_schema_version": "dsh-execution-request.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "first_execution_request_full_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "first_execution_request_full_hash_kind": "canonical_research_session_request.v1",
+      "first_link_request_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "first_link_request_hash_kind": "dsh_link_identity.v1",
+      "generation": 1,
+      "graph_round": 1,
+      "link_id": "ctxlink_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+      "link_payload_hash": "1c4538413c22df5abf130f1993a698b48e5ad11397167840ddabb77b1726d111",
+      "link_payload_hash_kind": "canonical_context_selection_execution_link.v2",
+      "method_hash": "3c2b384cca008d6b808a6c312e2d354f2670879d488987be7bb25401fb384f3f",
+      "original_task_request_hash": "4ef102756893637a46bd85895e5bef39267f04c5fa0d11b12b03ac23d6c4d41c",
+      "original_task_request_hash_kind": "canonical_research_session_request.v1",
+      "prompt_integrity_row_identity": {
+        "output_id": "prompt_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+        "payload_hash": "a2077620456a8f311d6c176eccb590227cffcb455d00e9c30e7352ee93a6826d",
+        "recorded_at": "2026-10-02T19:47:19.385485Z",
+        "role": "dsh_prompt_integrity:1",
+        "row_schema_version": "dsh-prompt-integrity.v2",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "recorded_at": "2026-10-02T19:47:19.385485Z",
+      "request_id": "req_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+      "schema_version": "research-context-selection-execution-link.v2",
+      "selection_full_request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "selection_full_request_hash_kind": "canonical_research_session_request.v1",
+      "selection_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+      "selection_payload_hash": "1fed8ed3688c99c8227a535e7763b4e714ba0c4922d5ad478e9bf5d3f78fd5cc",
+      "selection_row_identity": {
+        "output_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+        "payload_hash": "74dfb76a21ee1dd7274880084dc56044942a5a0e9f16a9f88596470b7c6f2815",
+        "recorded_at": "2026-10-02T19:47:17.453240Z",
+        "role": "context_select.r1.a1",
+        "row_schema_version": "research-context-selection.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "turn_kind": "research_round"
+    },
+    "expected": true
+  },
+  {
+    "name": "sticky-binding-required",
+    "definition": "research_execution_method_definition_v3",
+    "value": {
+      "agent_preset": "decision-research",
+      "allowed_capabilities": [
+        "document.readback",
+        "replay.research",
+        "web.search"
+      ],
+      "bundle": {
+        "bundle_hash": "7266d64c141e91bd0d759d67610f1a5dd83e00c417d48893a5a968dfeb2a93b6",
+        "bundle_hash_kind": "canonical_bundle_rows.v1",
+        "compiled": {
+          "output_id": "compiled_71a77e7a997d61eb5025e261e3c6d71a",
+          "payload_hash": "8988417d55adef28f3b09b31ba758f4780e3ec244b59556549b3dbc5ad7fdc6a",
+          "recorded_at": "2026-10-02T19:47:15.102909Z",
+          "role": "research_compiled_policy",
+          "row_schema_version": "research-compiled-policy-receipt.v1",
+          "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+        },
+        "pack": {
+          "output_id": "pack_71a77e7a997d61eb5025e261e3c6d71a",
+          "payload_hash": "267b47eb77156f48cd0a29889263a002b4e7d79e193f72f7b6ee47c02211c096",
+          "recorded_at": "2026-10-02T19:47:15.102909Z",
+          "role": "research_request_pack",
+          "row_schema_version": "research-request-pack.v2",
+          "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+        },
+        "recorded_at": "2026-10-02T19:47:15.102909Z",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+        "schema_version": "research-prepared-bundle-identity.v1",
+        "task": {
+          "output_id": "task_71a77e7a997d61eb5025e261e3c6d71a",
+          "payload_hash": "ec846168ed14ca892be513a6c173faea8e5a597a4cfa17eb54418b441f8710a4",
+          "recorded_at": "2026-10-02T19:47:15.102909Z",
+          "role": "research_task_request",
+          "row_schema_version": "research-task-request.v2",
+          "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+        }
+      },
+      "candidate_id": null,
+      "context_policy_hash": "fc79378812cd31b42346bfdd8fa7ce227cf65d06b0e63f704c2ef7a8823358f7",
+      "deadline_at": "2026-10-02T20:17:15.102909Z",
+      "domain_pack_ref": "crypto_macro.v1",
+      "evolution_pointer_consumed": false,
+      "execution_budget": {
+        "max_estimated_cost_usd": 10.0,
+        "max_evidence_rounds": 1,
+        "max_structured_repairs": 3,
+        "max_subagents": 32,
+        "max_tool_calls": 100,
+        "per_model_step_timeout_seconds": 600,
+        "per_tool_timeout_seconds": 120,
+        "total_deadline_seconds": 1800
+      },
+      "execution_mode": "replay",
+      "first_execution_request_hash_kind": "canonical_research_session_request.v1",
+      "output_schema_ref": "agentic_research.schema.yaml#/$defs/research_session_result",
+      "permission_ref": "decision-hub://permissions/research-only",
+      "policy_binding": {
+        "binding_hash": "4514a3c309dbdb7e3104fe8fdfd8adeb54d65ff0d6d7498f35784f416ec1c771",
+        "checker_activation": "prepared",
+        "checker_code_hash": "4c4ce772c367110e35d190b87256fdd375662212d31c3e59baf73e5555ccd60c",
+        "checker_version": "research-policy-checker-registry.v1",
+        "compiled_policy_hash": "6bb0fe011d3689437855643d7572dc85bf9566e83585e2008342454bba52162e",
+        "compiler_code_hash": "005e9766cc5422843a84443c997a26f98c52505ff056c42d7276be95c1a0d15f",
+        "compiler_version": "research-policy-compiler.v1",
+        "event_id": "evt_b5e241d2b3e148c69fdf0db7607c3a40",
+        "first_execution_hash_kind": "actual_first_execution_request",
+        "first_execution_request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+        "full_task_hash": "4ef102756893637a46bd85895e5bef39267f04c5fa0d11b12b03ac23d6c4d41c",
+        "gate_policy_hash": "ef17fb91c9f03f01535959e4ffd9287ee22b2a0ba6ed6e4b0d5311f8bf2d1484",
+        "request_pack_hash": "3e678f466d365410b8e7c5f54302bb902f2bdbb1144c925c4c4c68bd14732aa5",
+        "requirements_hash": "3c4c4a9032b2734385b829d832189008ce638e49c3f04cb1f9c97ff60b745ae7",
+        "rubric_hash": "ff858d2d6a7a945e9bc74c87eeda1d53c2d69e9433c87a370296e757f82a3df6",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+        "schema_version": "research-policy-method-binding.v1",
+        "scope_hash": "a8e640951b0e4bb989d184bc078e8e93b1305cce01bbf333418dcef4cc31f993"
+      },
+      "profile_ref": "decision-research.web.v1",
+      "prompt_policy_hash": "f57d06211cc02687d25bf5a0a1bff2df90152e644da53f97c25c97d00f16c5bd",
+      "provider_configuration_attested": false,
+      "request_pack_hash": "3e678f466d365410b8e7c5f54302bb902f2bdbb1144c925c4c4c68bd14732aa5",
+      "research_mode": "current_decision",
+      "research_policy_prompt_hash": "fc3bea8dc048f719d1876e0bf40cdbd75912a14a10ff4e412a3ddf403afa8355",
+      "research_policy_renderer_hash": "b9c3324b37bf384728ac0bbc1a219fae9fc4a4c9fd2d719c549ae359265bb8b2",
+      "role_profile_ref": "crypto_macro.manager.v1",
+      "runtime_id": "dsh",
+      "runtime_version": "dsh-web-0.1.0+222222222222",
+      "schema_version": "research-execution-method.v3",
+      "upstream_identity": {
+        "package_versions": {},
+        "plugin_build_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+        "source_commit": "1111111111111111111111111111111111111111",
+        "source_version": "0.1.0"
+      },
+      "workspace_ref": "decision-hub://workspace/default"
+    },
+    "expected": false
+  },
+  {
+    "name": "unknown-mode",
+    "definition": "research_required_context_selection_binding_v1",
+    "value": {
+      "first_selection_full_request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "first_selection_full_request_hash_kind": "canonical_research_session_request.v1",
+      "first_selection_payload_hash": "1fed8ed3688c99c8227a535e7763b4e714ba0c4922d5ad478e9bf5d3f78fd5cc",
+      "first_selection_row": {
+        "output_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+        "payload_hash": "74dfb76a21ee1dd7274880084dc56044942a5a0e9f16a9f88596470b7c6f2815",
+        "recorded_at": "2026-10-02T19:47:17.453240Z",
+        "role": "context_select.r1.a1",
+        "row_schema_version": "research-context-selection.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "mode": "optional",
+      "ranking_rules_ref": "research-context.relevance-authority-recency.v2",
+      "selection_schema": "research-context-selection.v3",
+      "time_rule_ref": "research-context.received-cutoff.v1"
+    },
+    "expected": false
+  },
+  {
+    "name": "old-selection-version",
+    "definition": "research_context_selection_row_identity_v3",
+    "value": {
+      "output_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+      "payload_hash": "74dfb76a21ee1dd7274880084dc56044942a5a0e9f16a9f88596470b7c6f2815",
+      "recorded_at": "2026-10-02T19:47:17.453240Z",
+      "role": "context_select.r1.a1",
+      "row_schema_version": "research-context-selection.v2",
+      "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+    },
+    "expected": false
+  },
+  {
+    "name": "old-execution-version",
+    "definition": "research_context_execution_row_identity_v3",
+    "value": {
+      "output_id": "execution_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+      "payload_hash": "5126e7a62423b22bf2a554d3ffaff72a59976a6c717c71167faecebc4df58a9e",
+      "recorded_at": "2026-10-02T19:47:19.385485Z",
+      "role": "dsh_execution_request:1",
+      "row_schema_version": "dsh-execution-request.v2",
+      "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+    },
+    "expected": false
+  },
+  {
+    "name": "current-selection-required",
+    "definition": "research_execution_request_receipt_v3",
+    "value": {
+      "bundle_hash": "7266d64c141e91bd0d759d67610f1a5dd83e00c417d48893a5a968dfeb2a93b6",
+      "current_selection_payload_hash": "1fed8ed3688c99c8227a535e7763b4e714ba0c4922d5ad478e9bf5d3f78fd5cc",
+      "dsh_session_id": "dsh_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "execution_request_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "execution_request_hash_kind": "dsh_link_identity.v1",
+      "first_execution_request_full_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "first_execution_request_full_hash_kind": "canonical_research_session_request.v1",
+      "generation": 1,
+      "link_request_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "link_request_hash_kind": "dsh_link_identity.v1",
+      "method_hash": "3c2b384cca008d6b808a6c312e2d354f2670879d488987be7bb25401fb384f3f",
+      "recorded_at": "2026-10-02T19:47:19.385485Z",
+      "request": {
+        "allowed_capabilities": [
+          "replay.research",
+          "document.readback",
+          "web.search"
+        ],
+        "context_manifest": {
+          "created_at": "2026-08-29T12:00:00Z",
+          "data_versions": {
+            "crypto_macro.pack": "v1",
+            "evidence.schema": "agentic_research.v1"
+          },
+          "effective_inputs": [
+            "ev_419c6da71f62d4be4c218d1fe1e7deae"
+          ],
+          "excluded_inputs": [],
+          "input_fingerprint": "4327910a32e43233802b40b2c41b441ccdb9f33fcdae2db601f5e1039baf3ac7",
+          "manifest_id": "context:run_9a7e9c5bbda1433fa4806f416e4cfd3d:r1:4327910a32e43233",
+          "policy_ref": "crypto_macro.research.v1:bd03c53c17d97d36",
+          "revision": 1,
+          "rules_ref": "research-context.relevance-authority-recency.v2",
+          "selected_inputs": [
+            "ev_419c6da71f62d4be4c218d1fe1e7deae"
+          ],
+          "tool_versions": {
+            "document.readback": "gateway-contract.v1",
+            "replay.research": "gateway-contract.v1",
+            "web.search": "gateway-contract.v1"
+          }
+        },
+        "current_round": 1,
+        "deadline_at": "2026-10-02T20:17:15.102909Z",
+        "domain_pack_ref": "crypto_macro.v1",
+        "event_id": "evt_b5e241d2b3e148c69fdf0db7607c3a40",
+        "event_watch": null,
+        "event_window_samples": [],
+        "evidence_refs": [
+          "ev_419c6da71f62d4be4c218d1fe1e7deae"
+        ],
+        "evidence_requirements": [
+          {
+            "accepted_metric_families": [
+              "event.identity"
+            ],
+            "allowed_delay_classes": [
+              "realtime",
+              "delayed"
+            ],
+            "allowed_fallbacks": [
+              "web.fetch",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "official",
+            "confidence_cap": 0.45,
+            "description": "Identify the primary event, speaker or document, event time and revision status.",
+            "field_units": {
+              "event_actor": [
+                "text"
+              ],
+              "event_time": [
+                "datetime"
+              ],
+              "revision_status": [
+                "text"
+              ]
+            },
+            "freshness_seconds": 604800,
+            "importance": "hard",
+            "minimum_independence_groups": 1,
+            "minimum_independent_sources": 1,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [
+              "t0"
+            ],
+            "required_fields": [
+              "event_actor",
+              "event_time",
+              "revision_status"
+            ],
+            "required_metric_families": [
+              "event.identity"
+            ],
+            "requirement_id": "event_identity",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#event_identity",
+            "source_priority": [
+              "official",
+              "verified_web"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          },
+          {
+            "accepted_metric_families": [
+              "policy.statement_delta",
+              "economic.release_delta"
+            ],
+            "allowed_delay_classes": [
+              "realtime",
+              "delayed"
+            ],
+            "allowed_fallbacks": [
+              "web.fetch",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "official",
+            "confidence_cap": 0.5,
+            "description": "Establish what changed relative to prior wording, prior value or consensus.",
+            "field_units": {
+              "baseline": [
+                "text",
+                "number",
+                "percent"
+              ],
+              "current": [
+                "text",
+                "number",
+                "percent"
+              ],
+              "delta": [
+                "text",
+                "number",
+                "percentage_point",
+                "bps"
+              ]
+            },
+            "freshness_seconds": 86400,
+            "importance": "hard",
+            "minimum_independence_groups": 1,
+            "minimum_independent_sources": 1,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [
+              "baseline",
+              "t0"
+            ],
+            "required_fields": [
+              "current",
+              "baseline",
+              "delta"
+            ],
+            "required_metric_families": [],
+            "requirement_id": "policy_or_data_delta",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#policy_or_data_delta",
+            "source_priority": [
+              "official",
+              "audited_aggregator",
+              "verified_web"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          },
+          {
+            "accepted_metric_families": [
+              "macro.policy_expectation"
+            ],
+            "allowed_delay_classes": [
+              "realtime"
+            ],
+            "allowed_fallbacks": [
+              "macro.expectation_pricing",
+              "market.cross_asset",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "exchange",
+            "confidence_cap": 0.55,
+            "description": "Observe policy expectations, rates repricing or credible positioning evidence.",
+            "field_units": {
+              "delta": [
+                "percentage_point",
+                "bps"
+              ],
+              "level": [
+                "probability",
+                "percent",
+                "bps",
+                "yield_percent"
+              ]
+            },
+            "freshness_seconds": 900,
+            "importance": "hard",
+            "minimum_independence_groups": 1,
+            "minimum_independent_sources": 1,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [
+              "baseline",
+              "t-5m"
+            ],
+            "required_fields": [
+              "level",
+              "delta"
+            ],
+            "required_metric_families": [
+              "macro.policy_expectation"
+            ],
+            "requirement_id": "expectation_pricing",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#expectation_pricing",
+            "source_priority": [
+              "exchange",
+              "audited_aggregator",
+              "verified_web"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          },
+          {
+            "accepted_metric_families": [
+              "macro.rates",
+              "macro.usd"
+            ],
+            "allowed_delay_classes": [
+              "realtime"
+            ],
+            "allowed_fallbacks": [
+              "macro.cross_asset_intraday",
+              "market.cross_asset",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "exchange",
+            "confidence_cap": 0.55,
+            "description": "Observe the rates and USD transmission path relevant to the event.",
+            "field_units": {
+              "event_return": [
+                "bps",
+                "percent"
+              ],
+              "level": [
+                "yield_percent",
+                "index"
+              ]
+            },
+            "freshness_seconds": 600,
+            "importance": "hard",
+            "minimum_independence_groups": 2,
+            "minimum_independent_sources": 2,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [
+              "t-5m",
+              "t+1m"
+            ],
+            "required_fields": [
+              "level",
+              "event_return"
+            ],
+            "required_metric_families": [
+              "macro.rates",
+              "macro.usd"
+            ],
+            "requirement_id": "macro_transmission",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#macro_transmission",
+            "source_priority": [
+              "official",
+              "exchange",
+              "audited_aggregator"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          },
+          {
+            "accepted_metric_families": [
+              "cross_asset.equity",
+              "cross_asset.volatility",
+              "cross_asset.commodity",
+              "cross_asset.credit"
+            ],
+            "allowed_delay_classes": [
+              "realtime"
+            ],
+            "allowed_fallbacks": [
+              "macro.cross_asset_intraday",
+              "market.cross_asset",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "verified_web",
+            "confidence_cap": 0.65,
+            "description": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation.",
+            "field_units": {
+              "event_return": [
+                "percent",
+                "bps"
+              ],
+              "level": [
+                "price",
+                "index",
+                "spread_bps"
+              ]
+            },
+            "freshness_seconds": 600,
+            "importance": "soft",
+            "minimum_independence_groups": 1,
+            "minimum_independent_sources": 1,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [
+              "t-5m",
+              "t+1m"
+            ],
+            "required_fields": [
+              "level",
+              "event_return"
+            ],
+            "required_metric_families": [],
+            "requirement_id": "cross_asset_confirmation",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#cross_asset_confirmation",
+            "source_priority": [
+              "exchange",
+              "audited_aggregator",
+              "verified_web"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          },
+          {
+            "accepted_metric_families": [
+              "research.counter_thesis"
+            ],
+            "allowed_delay_classes": [
+              "realtime",
+              "delayed"
+            ],
+            "allowed_fallbacks": [
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "verified_web",
+            "confidence_cap": 0.7,
+            "description": "Build the strongest evidence-backed alternative transmission chain.",
+            "field_units": {
+              "alternative_chain": [
+                "text"
+              ]
+            },
+            "freshness_seconds": 86400,
+            "importance": "soft",
+            "minimum_independence_groups": 1,
+            "minimum_independent_sources": 1,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [],
+            "required_fields": [
+              "alternative_chain"
+            ],
+            "required_metric_families": [
+              "research.counter_thesis"
+            ],
+            "requirement_id": "counter_thesis",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#counter_thesis",
+            "source_priority": [
+              "official",
+              "exchange",
+              "verified_web"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          }
+        ],
+        "execution_budget": {
+          "max_estimated_cost_usd": 10.0,
+          "max_evidence_rounds": 1,
+          "max_structured_repairs": 3,
+          "max_subagents": 32,
+          "max_tool_calls": 100,
+          "per_model_step_timeout_seconds": 600,
+          "per_tool_timeout_seconds": 120,
+          "total_deadline_seconds": 1800
+        },
+        "execution_mode": "replay",
+        "input_evidence": [
+          {
+            "authority": "unverified",
+            "content_hash": "5c40ec105b8a43469b9b84c9c08bb6b4ae5c4297f255fcbfef2f048630e000aa",
+            "evidence_id": "ev_419c6da71f62d4be4c218d1fe1e7deae",
+            "excerpt": "The official event confirms elevated inflation risks.",
+            "kind": "transcript",
+            "observed_at": "2026-08-29T11:59:58Z",
+            "published_at": "2026-08-29T11:59:57Z",
+            "received_at": "2026-08-29T12:00:00Z",
+            "source_id": "worker-input",
+            "source_url": null
+          }
+        ],
+        "output_schema_ref": "agentic_research.schema.yaml#/$defs/research_session_result",
+        "pit_cutoff_at": "2026-08-29T12:00:00Z",
+        "repair_instructions": null,
+        "request_id": "research-request:run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+        "research_mode": "current_decision",
+        "role_profile_ref": "crypto_macro.manager.v1",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+        "schema_version": "research-session-request.v1",
+        "target_gaps": [
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Identify the primary event, speaker or document, event time and revision status. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "event_identity"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Establish what changed relative to prior wording, prior value or consensus. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "policy_or_data_delta"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Observe policy expectations, rates repricing or credible positioning evidence. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "expectation_pricing"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Observe the rates and USD transmission path relevant to the event. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "macro_transmission"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": false,
+            "importance": "soft",
+            "query_hint": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "cross_asset_confirmation"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Observe BTC spot reaction, volume and the event-time comparison window. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "crypto_spot_confirmation"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Observe funding, open interest, basis and available liquidation or flow evidence. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "derivatives_crowding"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": false,
+            "importance": "soft",
+            "query_hint": "Build the strongest evidence-backed alternative transmission chain. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "counter_thesis"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": false,
+            "importance": "soft",
+            "query_hint": "Build a reproducible BTC daily trend baseline from at least 60 completed candles for the next seven natural days. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "market_regime_context"
+          }
+        ],
+        "task_policy_ref": "crypto_macro.research.v1:bd03c53c17d97d36",
+        "trigger_snapshot_id": "snap_abc19cd88569667ebc6fe6c87cabbe4c"
+      },
+      "request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "request_hash_kind": "canonical_research_session_request.v1",
+      "request_id": "req_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+      "schema_version": "dsh-execution-request.v3",
+      "task_request_hash": "4ef102756893637a46bd85895e5bef39267f04c5fa0d11b12b03ac23d6c4d41c",
+      "task_request_hash_kind": "canonical_research_session_request.v1",
+      "turn_kind": "research_round"
+    },
+    "expected": false
+  },
+  {
+    "name": "current-selfhash-required",
+    "definition": "research_execution_request_receipt_v3",
+    "value": {
+      "bundle_hash": "7266d64c141e91bd0d759d67610f1a5dd83e00c417d48893a5a968dfeb2a93b6",
+      "current_selection_row": {
+        "output_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+        "payload_hash": "74dfb76a21ee1dd7274880084dc56044942a5a0e9f16a9f88596470b7c6f2815",
+        "recorded_at": "2026-10-02T19:47:17.453240Z",
+        "role": "context_select.r1.a1",
+        "row_schema_version": "research-context-selection.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "dsh_session_id": "dsh_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "execution_request_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "execution_request_hash_kind": "dsh_link_identity.v1",
+      "first_execution_request_full_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "first_execution_request_full_hash_kind": "canonical_research_session_request.v1",
+      "generation": 1,
+      "link_request_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "link_request_hash_kind": "dsh_link_identity.v1",
+      "method_hash": "3c2b384cca008d6b808a6c312e2d354f2670879d488987be7bb25401fb384f3f",
+      "recorded_at": "2026-10-02T19:47:19.385485Z",
+      "request": {
+        "allowed_capabilities": [
+          "replay.research",
+          "document.readback",
+          "web.search"
+        ],
+        "context_manifest": {
+          "created_at": "2026-08-29T12:00:00Z",
+          "data_versions": {
+            "crypto_macro.pack": "v1",
+            "evidence.schema": "agentic_research.v1"
+          },
+          "effective_inputs": [
+            "ev_419c6da71f62d4be4c218d1fe1e7deae"
+          ],
+          "excluded_inputs": [],
+          "input_fingerprint": "4327910a32e43233802b40b2c41b441ccdb9f33fcdae2db601f5e1039baf3ac7",
+          "manifest_id": "context:run_9a7e9c5bbda1433fa4806f416e4cfd3d:r1:4327910a32e43233",
+          "policy_ref": "crypto_macro.research.v1:bd03c53c17d97d36",
+          "revision": 1,
+          "rules_ref": "research-context.relevance-authority-recency.v2",
+          "selected_inputs": [
+            "ev_419c6da71f62d4be4c218d1fe1e7deae"
+          ],
+          "tool_versions": {
+            "document.readback": "gateway-contract.v1",
+            "replay.research": "gateway-contract.v1",
+            "web.search": "gateway-contract.v1"
+          }
+        },
+        "current_round": 1,
+        "deadline_at": "2026-10-02T20:17:15.102909Z",
+        "domain_pack_ref": "crypto_macro.v1",
+        "event_id": "evt_b5e241d2b3e148c69fdf0db7607c3a40",
+        "event_watch": null,
+        "event_window_samples": [],
+        "evidence_refs": [
+          "ev_419c6da71f62d4be4c218d1fe1e7deae"
+        ],
+        "evidence_requirements": [
+          {
+            "accepted_metric_families": [
+              "event.identity"
+            ],
+            "allowed_delay_classes": [
+              "realtime",
+              "delayed"
+            ],
+            "allowed_fallbacks": [
+              "web.fetch",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "official",
+            "confidence_cap": 0.45,
+            "description": "Identify the primary event, speaker or document, event time and revision status.",
+            "field_units": {
+              "event_actor": [
+                "text"
+              ],
+              "event_time": [
+                "datetime"
+              ],
+              "revision_status": [
+                "text"
+              ]
+            },
+            "freshness_seconds": 604800,
+            "importance": "hard",
+            "minimum_independence_groups": 1,
+            "minimum_independent_sources": 1,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [
+              "t0"
+            ],
+            "required_fields": [
+              "event_actor",
+              "event_time",
+              "revision_status"
+            ],
+            "required_metric_families": [
+              "event.identity"
+            ],
+            "requirement_id": "event_identity",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#event_identity",
+            "source_priority": [
+              "official",
+              "verified_web"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          },
+          {
+            "accepted_metric_families": [
+              "policy.statement_delta",
+              "economic.release_delta"
+            ],
+            "allowed_delay_classes": [
+              "realtime",
+              "delayed"
+            ],
+            "allowed_fallbacks": [
+              "web.fetch",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "official",
+            "confidence_cap": 0.5,
+            "description": "Establish what changed relative to prior wording, prior value or consensus.",
+            "field_units": {
+              "baseline": [
+                "text",
+                "number",
+                "percent"
+              ],
+              "current": [
+                "text",
+                "number",
+                "percent"
+              ],
+              "delta": [
+                "text",
+                "number",
+                "percentage_point",
+                "bps"
+              ]
+            },
+            "freshness_seconds": 86400,
+            "importance": "hard",
+            "minimum_independence_groups": 1,
+            "minimum_independent_sources": 1,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [
+              "baseline",
+              "t0"
+            ],
+            "required_fields": [
+              "current",
+              "baseline",
+              "delta"
+            ],
+            "required_metric_families": [],
+            "requirement_id": "policy_or_data_delta",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#policy_or_data_delta",
+            "source_priority": [
+              "official",
+              "audited_aggregator",
+              "verified_web"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          },
+          {
+            "accepted_metric_families": [
+              "macro.policy_expectation"
+            ],
+            "allowed_delay_classes": [
+              "realtime"
+            ],
+            "allowed_fallbacks": [
+              "macro.expectation_pricing",
+              "market.cross_asset",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "exchange",
+            "confidence_cap": 0.55,
+            "description": "Observe policy expectations, rates repricing or credible positioning evidence.",
+            "field_units": {
+              "delta": [
+                "percentage_point",
+                "bps"
+              ],
+              "level": [
+                "probability",
+                "percent",
+                "bps",
+                "yield_percent"
+              ]
+            },
+            "freshness_seconds": 900,
+            "importance": "hard",
+            "minimum_independence_groups": 1,
+            "minimum_independent_sources": 1,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [
+              "baseline",
+              "t-5m"
+            ],
+            "required_fields": [
+              "level",
+              "delta"
+            ],
+            "required_metric_families": [
+              "macro.policy_expectation"
+            ],
+            "requirement_id": "expectation_pricing",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#expectation_pricing",
+            "source_priority": [
+              "exchange",
+              "audited_aggregator",
+              "verified_web"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          },
+          {
+            "accepted_metric_families": [
+              "macro.rates",
+              "macro.usd"
+            ],
+            "allowed_delay_classes": [
+              "realtime"
+            ],
+            "allowed_fallbacks": [
+              "macro.cross_asset_intraday",
+              "market.cross_asset",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "exchange",
+            "confidence_cap": 0.55,
+            "description": "Observe the rates and USD transmission path relevant to the event.",
+            "field_units": {
+              "event_return": [
+                "bps",
+                "percent"
+              ],
+              "level": [
+                "yield_percent",
+                "index"
+              ]
+            },
+            "freshness_seconds": 600,
+            "importance": "hard",
+            "minimum_independence_groups": 2,
+            "minimum_independent_sources": 2,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [
+              "t-5m",
+              "t+1m"
+            ],
+            "required_fields": [
+              "level",
+              "event_return"
+            ],
+            "required_metric_families": [
+              "macro.rates",
+              "macro.usd"
+            ],
+            "requirement_id": "macro_transmission",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#macro_transmission",
+            "source_priority": [
+              "official",
+              "exchange",
+              "audited_aggregator"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          },
+          {
+            "accepted_metric_families": [
+              "cross_asset.equity",
+              "cross_asset.volatility",
+              "cross_asset.commodity",
+              "cross_asset.credit"
+            ],
+            "allowed_delay_classes": [
+              "realtime"
+            ],
+            "allowed_fallbacks": [
+              "macro.cross_asset_intraday",
+              "market.cross_asset",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "verified_web",
+            "confidence_cap": 0.65,
+            "description": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation.",
+            "field_units": {
+              "event_return": [
+                "percent",
+                "bps"
+              ],
+              "level": [
+                "price",
+                "index",
+                "spread_bps"
+              ]
+            },
+            "freshness_seconds": 600,
+            "importance": "soft",
+            "minimum_independence_groups": 1,
+            "minimum_independent_sources": 1,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [
+              "t-5m",
+              "t+1m"
+            ],
+            "required_fields": [
+              "level",
+              "event_return"
+            ],
+            "required_metric_families": [],
+            "requirement_id": "cross_asset_confirmation",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#cross_asset_confirmation",
+            "source_priority": [
+              "exchange",
+              "audited_aggregator",
+              "verified_web"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          },
+          {
+            "accepted_metric_families": [
+              "research.counter_thesis"
+            ],
+            "allowed_delay_classes": [
+              "realtime",
+              "delayed"
+            ],
+            "allowed_fallbacks": [
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "verified_web",
+            "confidence_cap": 0.7,
+            "description": "Build the strongest evidence-backed alternative transmission chain.",
+            "field_units": {
+              "alternative_chain": [
+                "text"
+              ]
+            },
+            "freshness_seconds": 86400,
+            "importance": "soft",
+            "minimum_independence_groups": 1,
+            "minimum_independent_sources": 1,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [],
+            "required_fields": [
+              "alternative_chain"
+            ],
+            "required_metric_families": [
+              "research.counter_thesis"
+            ],
+            "requirement_id": "counter_thesis",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#counter_thesis",
+            "source_priority": [
+              "official",
+              "exchange",
+              "verified_web"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          }
+        ],
+        "execution_budget": {
+          "max_estimated_cost_usd": 10.0,
+          "max_evidence_rounds": 1,
+          "max_structured_repairs": 3,
+          "max_subagents": 32,
+          "max_tool_calls": 100,
+          "per_model_step_timeout_seconds": 600,
+          "per_tool_timeout_seconds": 120,
+          "total_deadline_seconds": 1800
+        },
+        "execution_mode": "replay",
+        "input_evidence": [
+          {
+            "authority": "unverified",
+            "content_hash": "5c40ec105b8a43469b9b84c9c08bb6b4ae5c4297f255fcbfef2f048630e000aa",
+            "evidence_id": "ev_419c6da71f62d4be4c218d1fe1e7deae",
+            "excerpt": "The official event confirms elevated inflation risks.",
+            "kind": "transcript",
+            "observed_at": "2026-08-29T11:59:58Z",
+            "published_at": "2026-08-29T11:59:57Z",
+            "received_at": "2026-08-29T12:00:00Z",
+            "source_id": "worker-input",
+            "source_url": null
+          }
+        ],
+        "output_schema_ref": "agentic_research.schema.yaml#/$defs/research_session_result",
+        "pit_cutoff_at": "2026-08-29T12:00:00Z",
+        "repair_instructions": null,
+        "request_id": "research-request:run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+        "research_mode": "current_decision",
+        "role_profile_ref": "crypto_macro.manager.v1",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+        "schema_version": "research-session-request.v1",
+        "target_gaps": [
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Identify the primary event, speaker or document, event time and revision status. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "event_identity"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Establish what changed relative to prior wording, prior value or consensus. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "policy_or_data_delta"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Observe policy expectations, rates repricing or credible positioning evidence. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "expectation_pricing"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Observe the rates and USD transmission path relevant to the event. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "macro_transmission"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": false,
+            "importance": "soft",
+            "query_hint": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "cross_asset_confirmation"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Observe BTC spot reaction, volume and the event-time comparison window. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "crypto_spot_confirmation"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Observe funding, open interest, basis and available liquidation or flow evidence. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "derivatives_crowding"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": false,
+            "importance": "soft",
+            "query_hint": "Build the strongest evidence-backed alternative transmission chain. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "counter_thesis"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": false,
+            "importance": "soft",
+            "query_hint": "Build a reproducible BTC daily trend baseline from at least 60 completed candles for the next seven natural days. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "market_regime_context"
+          }
+        ],
+        "task_policy_ref": "crypto_macro.research.v1:bd03c53c17d97d36",
+        "trigger_snapshot_id": "snap_abc19cd88569667ebc6fe6c87cabbe4c"
+      },
+      "request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "request_hash_kind": "canonical_research_session_request.v1",
+      "request_id": "req_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+      "schema_version": "dsh-execution-request.v3",
+      "task_request_hash": "4ef102756893637a46bd85895e5bef39267f04c5fa0d11b12b03ac23d6c4d41c",
+      "task_request_hash_kind": "canonical_research_session_request.v1",
+      "turn_kind": "research_round"
+    },
+    "expected": false
+  },
+  {
+    "name": "bool-generation",
+    "definition": "research_execution_request_receipt_v3",
+    "value": {
+      "bundle_hash": "7266d64c141e91bd0d759d67610f1a5dd83e00c417d48893a5a968dfeb2a93b6",
+      "current_selection_payload_hash": "1fed8ed3688c99c8227a535e7763b4e714ba0c4922d5ad478e9bf5d3f78fd5cc",
+      "current_selection_row": {
+        "output_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+        "payload_hash": "74dfb76a21ee1dd7274880084dc56044942a5a0e9f16a9f88596470b7c6f2815",
+        "recorded_at": "2026-10-02T19:47:17.453240Z",
+        "role": "context_select.r1.a1",
+        "row_schema_version": "research-context-selection.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "dsh_session_id": "dsh_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "execution_request_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "execution_request_hash_kind": "dsh_link_identity.v1",
+      "first_execution_request_full_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "first_execution_request_full_hash_kind": "canonical_research_session_request.v1",
+      "generation": true,
+      "link_request_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "link_request_hash_kind": "dsh_link_identity.v1",
+      "method_hash": "3c2b384cca008d6b808a6c312e2d354f2670879d488987be7bb25401fb384f3f",
+      "recorded_at": "2026-10-02T19:47:19.385485Z",
+      "request": {
+        "allowed_capabilities": [
+          "replay.research",
+          "document.readback",
+          "web.search"
+        ],
+        "context_manifest": {
+          "created_at": "2026-08-29T12:00:00Z",
+          "data_versions": {
+            "crypto_macro.pack": "v1",
+            "evidence.schema": "agentic_research.v1"
+          },
+          "effective_inputs": [
+            "ev_419c6da71f62d4be4c218d1fe1e7deae"
+          ],
+          "excluded_inputs": [],
+          "input_fingerprint": "4327910a32e43233802b40b2c41b441ccdb9f33fcdae2db601f5e1039baf3ac7",
+          "manifest_id": "context:run_9a7e9c5bbda1433fa4806f416e4cfd3d:r1:4327910a32e43233",
+          "policy_ref": "crypto_macro.research.v1:bd03c53c17d97d36",
+          "revision": 1,
+          "rules_ref": "research-context.relevance-authority-recency.v2",
+          "selected_inputs": [
+            "ev_419c6da71f62d4be4c218d1fe1e7deae"
+          ],
+          "tool_versions": {
+            "document.readback": "gateway-contract.v1",
+            "replay.research": "gateway-contract.v1",
+            "web.search": "gateway-contract.v1"
+          }
+        },
+        "current_round": 1,
+        "deadline_at": "2026-10-02T20:17:15.102909Z",
+        "domain_pack_ref": "crypto_macro.v1",
+        "event_id": "evt_b5e241d2b3e148c69fdf0db7607c3a40",
+        "event_watch": null,
+        "event_window_samples": [],
+        "evidence_refs": [
+          "ev_419c6da71f62d4be4c218d1fe1e7deae"
+        ],
+        "evidence_requirements": [
+          {
+            "accepted_metric_families": [
+              "event.identity"
+            ],
+            "allowed_delay_classes": [
+              "realtime",
+              "delayed"
+            ],
+            "allowed_fallbacks": [
+              "web.fetch",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "official",
+            "confidence_cap": 0.45,
+            "description": "Identify the primary event, speaker or document, event time and revision status.",
+            "field_units": {
+              "event_actor": [
+                "text"
+              ],
+              "event_time": [
+                "datetime"
+              ],
+              "revision_status": [
+                "text"
+              ]
+            },
+            "freshness_seconds": 604800,
+            "importance": "hard",
+            "minimum_independence_groups": 1,
+            "minimum_independent_sources": 1,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [
+              "t0"
+            ],
+            "required_fields": [
+              "event_actor",
+              "event_time",
+              "revision_status"
+            ],
+            "required_metric_families": [
+              "event.identity"
+            ],
+            "requirement_id": "event_identity",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#event_identity",
+            "source_priority": [
+              "official",
+              "verified_web"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          },
+          {
+            "accepted_metric_families": [
+              "policy.statement_delta",
+              "economic.release_delta"
+            ],
+            "allowed_delay_classes": [
+              "realtime",
+              "delayed"
+            ],
+            "allowed_fallbacks": [
+              "web.fetch",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "official",
+            "confidence_cap": 0.5,
+            "description": "Establish what changed relative to prior wording, prior value or consensus.",
+            "field_units": {
+              "baseline": [
+                "text",
+                "number",
+                "percent"
+              ],
+              "current": [
+                "text",
+                "number",
+                "percent"
+              ],
+              "delta": [
+                "text",
+                "number",
+                "percentage_point",
+                "bps"
+              ]
+            },
+            "freshness_seconds": 86400,
+            "importance": "hard",
+            "minimum_independence_groups": 1,
+            "minimum_independent_sources": 1,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [
+              "baseline",
+              "t0"
+            ],
+            "required_fields": [
+              "current",
+              "baseline",
+              "delta"
+            ],
+            "required_metric_families": [],
+            "requirement_id": "policy_or_data_delta",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#policy_or_data_delta",
+            "source_priority": [
+              "official",
+              "audited_aggregator",
+              "verified_web"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          },
+          {
+            "accepted_metric_families": [
+              "macro.policy_expectation"
+            ],
+            "allowed_delay_classes": [
+              "realtime"
+            ],
+            "allowed_fallbacks": [
+              "macro.expectation_pricing",
+              "market.cross_asset",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "exchange",
+            "confidence_cap": 0.55,
+            "description": "Observe policy expectations, rates repricing or credible positioning evidence.",
+            "field_units": {
+              "delta": [
+                "percentage_point",
+                "bps"
+              ],
+              "level": [
+                "probability",
+                "percent",
+                "bps",
+                "yield_percent"
+              ]
+            },
+            "freshness_seconds": 900,
+            "importance": "hard",
+            "minimum_independence_groups": 1,
+            "minimum_independent_sources": 1,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [
+              "baseline",
+              "t-5m"
+            ],
+            "required_fields": [
+              "level",
+              "delta"
+            ],
+            "required_metric_families": [
+              "macro.policy_expectation"
+            ],
+            "requirement_id": "expectation_pricing",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#expectation_pricing",
+            "source_priority": [
+              "exchange",
+              "audited_aggregator",
+              "verified_web"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          },
+          {
+            "accepted_metric_families": [
+              "macro.rates",
+              "macro.usd"
+            ],
+            "allowed_delay_classes": [
+              "realtime"
+            ],
+            "allowed_fallbacks": [
+              "macro.cross_asset_intraday",
+              "market.cross_asset",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "exchange",
+            "confidence_cap": 0.55,
+            "description": "Observe the rates and USD transmission path relevant to the event.",
+            "field_units": {
+              "event_return": [
+                "bps",
+                "percent"
+              ],
+              "level": [
+                "yield_percent",
+                "index"
+              ]
+            },
+            "freshness_seconds": 600,
+            "importance": "hard",
+            "minimum_independence_groups": 2,
+            "minimum_independent_sources": 2,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [
+              "t-5m",
+              "t+1m"
+            ],
+            "required_fields": [
+              "level",
+              "event_return"
+            ],
+            "required_metric_families": [
+              "macro.rates",
+              "macro.usd"
+            ],
+            "requirement_id": "macro_transmission",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#macro_transmission",
+            "source_priority": [
+              "official",
+              "exchange",
+              "audited_aggregator"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          },
+          {
+            "accepted_metric_families": [
+              "cross_asset.equity",
+              "cross_asset.volatility",
+              "cross_asset.commodity",
+              "cross_asset.credit"
+            ],
+            "allowed_delay_classes": [
+              "realtime"
+            ],
+            "allowed_fallbacks": [
+              "macro.cross_asset_intraday",
+              "market.cross_asset",
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "verified_web",
+            "confidence_cap": 0.65,
+            "description": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation.",
+            "field_units": {
+              "event_return": [
+                "percent",
+                "bps"
+              ],
+              "level": [
+                "price",
+                "index",
+                "spread_bps"
+              ]
+            },
+            "freshness_seconds": 600,
+            "importance": "soft",
+            "minimum_independence_groups": 1,
+            "minimum_independent_sources": 1,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [
+              "t-5m",
+              "t+1m"
+            ],
+            "required_fields": [
+              "level",
+              "event_return"
+            ],
+            "required_metric_families": [],
+            "requirement_id": "cross_asset_confirmation",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#cross_asset_confirmation",
+            "source_priority": [
+              "exchange",
+              "audited_aggregator",
+              "verified_web"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          },
+          {
+            "accepted_metric_families": [
+              "research.counter_thesis"
+            ],
+            "allowed_delay_classes": [
+              "realtime",
+              "delayed"
+            ],
+            "allowed_fallbacks": [
+              "web.search",
+              "web.search.tavily"
+            ],
+            "authority_floor": "verified_web",
+            "confidence_cap": 0.7,
+            "description": "Build the strongest evidence-backed alternative transmission chain.",
+            "field_units": {
+              "alternative_chain": [
+                "text"
+              ]
+            },
+            "freshness_seconds": 86400,
+            "importance": "soft",
+            "minimum_independence_groups": 1,
+            "minimum_independent_sources": 1,
+            "minimum_venues": 1,
+            "preferred_capabilities": [
+              "web.search"
+            ],
+            "required_event_offsets": [],
+            "required_fields": [
+              "alternative_chain"
+            ],
+            "required_metric_families": [
+              "research.counter_thesis"
+            ],
+            "requirement_id": "counter_thesis",
+            "semantic_policy_ref": "crypto_macro.fact_semantics.v1#counter_thesis",
+            "source_priority": [
+              "official",
+              "exchange",
+              "verified_web"
+            ],
+            "unit_policy": "field_map.v1",
+            "venue_required": false
+          }
+        ],
+        "execution_budget": {
+          "max_estimated_cost_usd": 10.0,
+          "max_evidence_rounds": 1,
+          "max_structured_repairs": 3,
+          "max_subagents": 32,
+          "max_tool_calls": 100,
+          "per_model_step_timeout_seconds": 600,
+          "per_tool_timeout_seconds": 120,
+          "total_deadline_seconds": 1800
+        },
+        "execution_mode": "replay",
+        "input_evidence": [
+          {
+            "authority": "unverified",
+            "content_hash": "5c40ec105b8a43469b9b84c9c08bb6b4ae5c4297f255fcbfef2f048630e000aa",
+            "evidence_id": "ev_419c6da71f62d4be4c218d1fe1e7deae",
+            "excerpt": "The official event confirms elevated inflation risks.",
+            "kind": "transcript",
+            "observed_at": "2026-08-29T11:59:58Z",
+            "published_at": "2026-08-29T11:59:57Z",
+            "received_at": "2026-08-29T12:00:00Z",
+            "source_id": "worker-input",
+            "source_url": null
+          }
+        ],
+        "output_schema_ref": "agentic_research.schema.yaml#/$defs/research_session_result",
+        "pit_cutoff_at": "2026-08-29T12:00:00Z",
+        "repair_instructions": null,
+        "request_id": "research-request:run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+        "research_mode": "current_decision",
+        "role_profile_ref": "crypto_macro.manager.v1",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+        "schema_version": "research-session-request.v1",
+        "target_gaps": [
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Identify the primary event, speaker or document, event time and revision status. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "event_identity"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Establish what changed relative to prior wording, prior value or consensus. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "policy_or_data_delta"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Observe policy expectations, rates repricing or credible positioning evidence. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "expectation_pricing"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Observe the rates and USD transmission path relevant to the event. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "macro_transmission"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": false,
+            "importance": "soft",
+            "query_hint": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "cross_asset_confirmation"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Observe BTC spot reaction, volume and the event-time comparison window. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "crypto_spot_confirmation"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": true,
+            "importance": "hard",
+            "query_hint": "Observe funding, open interest, basis and available liquidation or flow evidence. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "derivatives_crowding"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": false,
+            "importance": "soft",
+            "query_hint": "Build the strongest evidence-backed alternative transmission chain. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "counter_thesis"
+          },
+          {
+            "attempted_capabilities": [],
+            "blocks_directional_output": false,
+            "importance": "soft",
+            "query_hint": "Build a reproducible BTC daily trend baseline from at least 60 completed candles for the next seven natural days. Acquire typed facts with the required metric family, fields and units.",
+            "reason_code": "semantic_mismatch",
+            "requirement_id": "market_regime_context"
+          }
+        ],
+        "task_policy_ref": "crypto_macro.research.v1:bd03c53c17d97d36",
+        "trigger_snapshot_id": "snap_abc19cd88569667ebc6fe6c87cabbe4c"
+      },
+      "request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "request_hash_kind": "canonical_research_session_request.v1",
+      "request_id": "req_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+      "schema_version": "dsh-execution-request.v3",
+      "task_request_hash": "4ef102756893637a46bd85895e5bef39267f04c5fa0d11b12b03ac23d6c4d41c",
+      "task_request_hash_kind": "canonical_research_session_request.v1",
+      "turn_kind": "research_round"
+    },
+    "expected": false
+  },
+  {
+    "name": "string-generation",
+    "definition": "research_context_selection_execution_link_v2",
+    "value": {
+      "actual_execution_full_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "actual_execution_full_hash_kind": "canonical_research_session_request.v1",
+      "actual_execution_reduced_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "actual_execution_reduced_hash_kind": "dsh_link_identity.v1",
+      "bundle_hash": "7266d64c141e91bd0d759d67610f1a5dd83e00c417d48893a5a968dfeb2a93b6",
+      "dsh_session_id": "dsh_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "event_id": "evt_b5e241d2b3e148c69fdf0db7607c3a40",
+      "execution_row_identity": {
+        "output_id": "execution_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+        "payload_hash": "5126e7a62423b22bf2a554d3ffaff72a59976a6c717c71167faecebc4df58a9e",
+        "recorded_at": "2026-10-02T19:47:19.385485Z",
+        "role": "dsh_execution_request:1",
+        "row_schema_version": "dsh-execution-request.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "first_execution_request_full_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "first_execution_request_full_hash_kind": "canonical_research_session_request.v1",
+      "first_link_request_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "first_link_request_hash_kind": "dsh_link_identity.v1",
+      "generation": "1",
+      "graph_round": 1,
+      "link_id": "ctxlink_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+      "link_payload_hash": "1c4538413c22df5abf130f1993a698b48e5ad11397167840ddabb77b1726d111",
+      "link_payload_hash_kind": "canonical_context_selection_execution_link.v2",
+      "method_hash": "3c2b384cca008d6b808a6c312e2d354f2670879d488987be7bb25401fb384f3f",
+      "original_task_request_hash": "4ef102756893637a46bd85895e5bef39267f04c5fa0d11b12b03ac23d6c4d41c",
+      "original_task_request_hash_kind": "canonical_research_session_request.v1",
+      "prompt_integrity_row_identity": {
+        "output_id": "prompt_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+        "payload_hash": "a2077620456a8f311d6c176eccb590227cffcb455d00e9c30e7352ee93a6826d",
+        "recorded_at": "2026-10-02T19:47:19.385485Z",
+        "role": "dsh_prompt_integrity:1",
+        "row_schema_version": "dsh-prompt-integrity.v2",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "recorded_at": "2026-10-02T19:47:19.385485Z",
+      "request_id": "req_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+      "schema_version": "research-context-selection-execution-link.v2",
+      "selection_full_request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "selection_full_request_hash_kind": "canonical_research_session_request.v1",
+      "selection_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+      "selection_payload_hash": "1fed8ed3688c99c8227a535e7763b4e714ba0c4922d5ad478e9bf5d3f78fd5cc",
+      "selection_row_identity": {
+        "output_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+        "payload_hash": "74dfb76a21ee1dd7274880084dc56044942a5a0e9f16a9f88596470b7c6f2815",
+        "recorded_at": "2026-10-02T19:47:17.453240Z",
+        "role": "context_select.r1.a1",
+        "row_schema_version": "research-context-selection.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "turn_kind": "research_round"
+    },
+    "expected": false
+  },
+  {
+    "name": "float-generation",
+    "definition": "research_context_selection_execution_link_v2",
+    "value": {
+      "actual_execution_full_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "actual_execution_full_hash_kind": "canonical_research_session_request.v1",
+      "actual_execution_reduced_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "actual_execution_reduced_hash_kind": "dsh_link_identity.v1",
+      "bundle_hash": "7266d64c141e91bd0d759d67610f1a5dd83e00c417d48893a5a968dfeb2a93b6",
+      "dsh_session_id": "dsh_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "event_id": "evt_b5e241d2b3e148c69fdf0db7607c3a40",
+      "execution_row_identity": {
+        "output_id": "execution_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+        "payload_hash": "5126e7a62423b22bf2a554d3ffaff72a59976a6c717c71167faecebc4df58a9e",
+        "recorded_at": "2026-10-02T19:47:19.385485Z",
+        "role": "dsh_execution_request:1",
+        "row_schema_version": "dsh-execution-request.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "first_execution_request_full_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "first_execution_request_full_hash_kind": "canonical_research_session_request.v1",
+      "first_link_request_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "first_link_request_hash_kind": "dsh_link_identity.v1",
+      "generation": 1.5,
+      "graph_round": 1,
+      "link_id": "ctxlink_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+      "link_payload_hash": "1c4538413c22df5abf130f1993a698b48e5ad11397167840ddabb77b1726d111",
+      "link_payload_hash_kind": "canonical_context_selection_execution_link.v2",
+      "method_hash": "3c2b384cca008d6b808a6c312e2d354f2670879d488987be7bb25401fb384f3f",
+      "original_task_request_hash": "4ef102756893637a46bd85895e5bef39267f04c5fa0d11b12b03ac23d6c4d41c",
+      "original_task_request_hash_kind": "canonical_research_session_request.v1",
+      "prompt_integrity_row_identity": {
+        "output_id": "prompt_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+        "payload_hash": "a2077620456a8f311d6c176eccb590227cffcb455d00e9c30e7352ee93a6826d",
+        "recorded_at": "2026-10-02T19:47:19.385485Z",
+        "role": "dsh_prompt_integrity:1",
+        "row_schema_version": "dsh-prompt-integrity.v2",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "recorded_at": "2026-10-02T19:47:19.385485Z",
+      "request_id": "req_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+      "schema_version": "research-context-selection-execution-link.v2",
+      "selection_full_request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "selection_full_request_hash_kind": "canonical_research_session_request.v1",
+      "selection_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+      "selection_payload_hash": "1fed8ed3688c99c8227a535e7763b4e714ba0c4922d5ad478e9bf5d3f78fd5cc",
+      "selection_row_identity": {
+        "output_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+        "payload_hash": "74dfb76a21ee1dd7274880084dc56044942a5a0e9f16a9f88596470b7c6f2815",
+        "recorded_at": "2026-10-02T19:47:17.453240Z",
+        "role": "context_select.r1.a1",
+        "row_schema_version": "research-context-selection.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "turn_kind": "research_round"
+    },
+    "expected": false
+  },
+  {
+    "name": "naive-time",
+    "definition": "research_context_selection_execution_link_v2",
+    "value": {
+      "actual_execution_full_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "actual_execution_full_hash_kind": "canonical_research_session_request.v1",
+      "actual_execution_reduced_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "actual_execution_reduced_hash_kind": "dsh_link_identity.v1",
+      "bundle_hash": "7266d64c141e91bd0d759d67610f1a5dd83e00c417d48893a5a968dfeb2a93b6",
+      "dsh_session_id": "dsh_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "event_id": "evt_b5e241d2b3e148c69fdf0db7607c3a40",
+      "execution_row_identity": {
+        "output_id": "execution_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+        "payload_hash": "5126e7a62423b22bf2a554d3ffaff72a59976a6c717c71167faecebc4df58a9e",
+        "recorded_at": "2026-10-02T19:47:19.385485Z",
+        "role": "dsh_execution_request:1",
+        "row_schema_version": "dsh-execution-request.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "first_execution_request_full_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "first_execution_request_full_hash_kind": "canonical_research_session_request.v1",
+      "first_link_request_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "first_link_request_hash_kind": "dsh_link_identity.v1",
+      "generation": 1,
+      "graph_round": 1,
+      "link_id": "ctxlink_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+      "link_payload_hash": "1c4538413c22df5abf130f1993a698b48e5ad11397167840ddabb77b1726d111",
+      "link_payload_hash_kind": "canonical_context_selection_execution_link.v2",
+      "method_hash": "3c2b384cca008d6b808a6c312e2d354f2670879d488987be7bb25401fb384f3f",
+      "original_task_request_hash": "4ef102756893637a46bd85895e5bef39267f04c5fa0d11b12b03ac23d6c4d41c",
+      "original_task_request_hash_kind": "canonical_research_session_request.v1",
+      "prompt_integrity_row_identity": {
+        "output_id": "prompt_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+        "payload_hash": "a2077620456a8f311d6c176eccb590227cffcb455d00e9c30e7352ee93a6826d",
+        "recorded_at": "2026-10-02T19:47:19.385485Z",
+        "role": "dsh_prompt_integrity:1",
+        "row_schema_version": "dsh-prompt-integrity.v2",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "recorded_at": "2026-10-02T19:47:19.385485",
+      "request_id": "req_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+      "schema_version": "research-context-selection-execution-link.v2",
+      "selection_full_request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "selection_full_request_hash_kind": "canonical_research_session_request.v1",
+      "selection_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+      "selection_payload_hash": "1fed8ed3688c99c8227a535e7763b4e714ba0c4922d5ad478e9bf5d3f78fd5cc",
+      "selection_row_identity": {
+        "output_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+        "payload_hash": "74dfb76a21ee1dd7274880084dc56044942a5a0e9f16a9f88596470b7c6f2815",
+        "recorded_at": "2026-10-02T19:47:17.453240Z",
+        "role": "context_select.r1.a1",
+        "row_schema_version": "research-context-selection.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "turn_kind": "research_round"
+    },
+    "expected": false
+  },
+  {
+    "name": "future-selection",
+    "definition": "research_context_selection_execution_link_v2",
+    "value": {
+      "actual_execution_full_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "actual_execution_full_hash_kind": "canonical_research_session_request.v1",
+      "actual_execution_reduced_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "actual_execution_reduced_hash_kind": "dsh_link_identity.v1",
+      "bundle_hash": "7266d64c141e91bd0d759d67610f1a5dd83e00c417d48893a5a968dfeb2a93b6",
+      "dsh_session_id": "dsh_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "event_id": "evt_b5e241d2b3e148c69fdf0db7607c3a40",
+      "execution_row_identity": {
+        "output_id": "execution_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+        "payload_hash": "5126e7a62423b22bf2a554d3ffaff72a59976a6c717c71167faecebc4df58a9e",
+        "recorded_at": "2026-10-02T19:47:19.385485Z",
+        "role": "dsh_execution_request:1",
+        "row_schema_version": "dsh-execution-request.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "first_execution_request_full_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "first_execution_request_full_hash_kind": "canonical_research_session_request.v1",
+      "first_link_request_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "first_link_request_hash_kind": "dsh_link_identity.v1",
+      "generation": 1,
+      "graph_round": 1,
+      "link_id": "ctxlink_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+      "link_payload_hash": "1c4538413c22df5abf130f1993a698b48e5ad11397167840ddabb77b1726d111",
+      "link_payload_hash_kind": "canonical_context_selection_execution_link.v2",
+      "method_hash": "3c2b384cca008d6b808a6c312e2d354f2670879d488987be7bb25401fb384f3f",
+      "original_task_request_hash": "4ef102756893637a46bd85895e5bef39267f04c5fa0d11b12b03ac23d6c4d41c",
+      "original_task_request_hash_kind": "canonical_research_session_request.v1",
+      "prompt_integrity_row_identity": {
+        "output_id": "prompt_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+        "payload_hash": "a2077620456a8f311d6c176eccb590227cffcb455d00e9c30e7352ee93a6826d",
+        "recorded_at": "2026-10-02T19:47:19.385485Z",
+        "role": "dsh_prompt_integrity:1",
+        "row_schema_version": "dsh-prompt-integrity.v2",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "recorded_at": "2000-01-01T00:00:00Z",
+      "request_id": "req_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+      "schema_version": "research-context-selection-execution-link.v2",
+      "selection_full_request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "selection_full_request_hash_kind": "canonical_research_session_request.v1",
+      "selection_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+      "selection_payload_hash": "1fed8ed3688c99c8227a535e7763b4e714ba0c4922d5ad478e9bf5d3f78fd5cc",
+      "selection_row_identity": {
+        "output_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+        "payload_hash": "74dfb76a21ee1dd7274880084dc56044942a5a0e9f16a9f88596470b7c6f2815",
+        "recorded_at": "2026-10-02T19:47:17.453240Z",
+        "role": "context_select.r1.a1",
+        "row_schema_version": "research-context-selection.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "turn_kind": "research_round"
+    },
+    "expected": false
+  },
+  {
+    "name": "normal-full-conflict",
+    "definition": "research_context_selection_execution_link_v2",
+    "value": {
+      "actual_execution_full_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "actual_execution_full_hash_kind": "canonical_research_session_request.v1",
+      "actual_execution_reduced_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "actual_execution_reduced_hash_kind": "dsh_link_identity.v1",
+      "bundle_hash": "7266d64c141e91bd0d759d67610f1a5dd83e00c417d48893a5a968dfeb2a93b6",
+      "dsh_session_id": "dsh_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "event_id": "evt_b5e241d2b3e148c69fdf0db7607c3a40",
+      "execution_row_identity": {
+        "output_id": "execution_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+        "payload_hash": "5126e7a62423b22bf2a554d3ffaff72a59976a6c717c71167faecebc4df58a9e",
+        "recorded_at": "2026-10-02T19:47:19.385485Z",
+        "role": "dsh_execution_request:1",
+        "row_schema_version": "dsh-execution-request.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "first_execution_request_full_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "first_execution_request_full_hash_kind": "canonical_research_session_request.v1",
+      "first_link_request_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "first_link_request_hash_kind": "dsh_link_identity.v1",
+      "generation": 1,
+      "graph_round": 1,
+      "link_id": "ctxlink_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+      "link_payload_hash": "1c4538413c22df5abf130f1993a698b48e5ad11397167840ddabb77b1726d111",
+      "link_payload_hash_kind": "canonical_context_selection_execution_link.v2",
+      "method_hash": "3c2b384cca008d6b808a6c312e2d354f2670879d488987be7bb25401fb384f3f",
+      "original_task_request_hash": "4ef102756893637a46bd85895e5bef39267f04c5fa0d11b12b03ac23d6c4d41c",
+      "original_task_request_hash_kind": "canonical_research_session_request.v1",
+      "prompt_integrity_row_identity": {
+        "output_id": "prompt_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+        "payload_hash": "a2077620456a8f311d6c176eccb590227cffcb455d00e9c30e7352ee93a6826d",
+        "recorded_at": "2026-10-02T19:47:19.385485Z",
+        "role": "dsh_prompt_integrity:1",
+        "row_schema_version": "dsh-prompt-integrity.v2",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "recorded_at": "2026-10-02T19:47:19.385485Z",
+      "request_id": "req_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+      "schema_version": "research-context-selection-execution-link.v2",
+      "selection_full_request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "selection_full_request_hash_kind": "canonical_research_session_request.v1",
+      "selection_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+      "selection_payload_hash": "1fed8ed3688c99c8227a535e7763b4e714ba0c4922d5ad478e9bf5d3f78fd5cc",
+      "selection_row_identity": {
+        "output_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+        "payload_hash": "74dfb76a21ee1dd7274880084dc56044942a5a0e9f16a9f88596470b7c6f2815",
+        "recorded_at": "2026-10-02T19:47:17.453240Z",
+        "role": "context_select.r1.a1",
+        "row_schema_version": "research-context-selection.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "turn_kind": "research_round"
+    },
+    "expected": false
+  },
+  {
+    "name": "bundle-required",
+    "definition": "research_context_selection_execution_link_v2",
+    "value": {
+      "actual_execution_full_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "actual_execution_full_hash_kind": "canonical_research_session_request.v1",
+      "actual_execution_reduced_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "actual_execution_reduced_hash_kind": "dsh_link_identity.v1",
+      "bundle_hash": null,
+      "dsh_session_id": "dsh_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "event_id": "evt_b5e241d2b3e148c69fdf0db7607c3a40",
+      "execution_row_identity": {
+        "output_id": "execution_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+        "payload_hash": "5126e7a62423b22bf2a554d3ffaff72a59976a6c717c71167faecebc4df58a9e",
+        "recorded_at": "2026-10-02T19:47:19.385485Z",
+        "role": "dsh_execution_request:1",
+        "row_schema_version": "dsh-execution-request.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "first_execution_request_full_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "first_execution_request_full_hash_kind": "canonical_research_session_request.v1",
+      "first_link_request_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "first_link_request_hash_kind": "dsh_link_identity.v1",
+      "generation": 1,
+      "graph_round": 1,
+      "link_id": "ctxlink_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+      "link_payload_hash": "1c4538413c22df5abf130f1993a698b48e5ad11397167840ddabb77b1726d111",
+      "link_payload_hash_kind": "canonical_context_selection_execution_link.v2",
+      "method_hash": "3c2b384cca008d6b808a6c312e2d354f2670879d488987be7bb25401fb384f3f",
+      "original_task_request_hash": "4ef102756893637a46bd85895e5bef39267f04c5fa0d11b12b03ac23d6c4d41c",
+      "original_task_request_hash_kind": "canonical_research_session_request.v1",
+      "prompt_integrity_row_identity": {
+        "output_id": "prompt_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+        "payload_hash": "a2077620456a8f311d6c176eccb590227cffcb455d00e9c30e7352ee93a6826d",
+        "recorded_at": "2026-10-02T19:47:19.385485Z",
+        "role": "dsh_prompt_integrity:1",
+        "row_schema_version": "dsh-prompt-integrity.v2",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "recorded_at": "2026-10-02T19:47:19.385485Z",
+      "request_id": "req_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+      "schema_version": "research-context-selection-execution-link.v2",
+      "selection_full_request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "selection_full_request_hash_kind": "canonical_research_session_request.v1",
+      "selection_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+      "selection_payload_hash": "1fed8ed3688c99c8227a535e7763b4e714ba0c4922d5ad478e9bf5d3f78fd5cc",
+      "selection_row_identity": {
+        "output_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+        "payload_hash": "74dfb76a21ee1dd7274880084dc56044942a5a0e9f16a9f88596470b7c6f2815",
+        "recorded_at": "2026-10-02T19:47:17.453240Z",
+        "role": "context_select.r1.a1",
+        "row_schema_version": "research-context-selection.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "turn_kind": "research_round"
+    },
+    "expected": false
+  },
+  {
+    "name": "first-full-required",
+    "definition": "research_context_selection_execution_link_v2",
+    "value": {
+      "actual_execution_full_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "actual_execution_full_hash_kind": "canonical_research_session_request.v1",
+      "actual_execution_reduced_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "actual_execution_reduced_hash_kind": "dsh_link_identity.v1",
+      "bundle_hash": "7266d64c141e91bd0d759d67610f1a5dd83e00c417d48893a5a968dfeb2a93b6",
+      "dsh_session_id": "dsh_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "event_id": "evt_b5e241d2b3e148c69fdf0db7607c3a40",
+      "execution_row_identity": {
+        "output_id": "execution_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+        "payload_hash": "5126e7a62423b22bf2a554d3ffaff72a59976a6c717c71167faecebc4df58a9e",
+        "recorded_at": "2026-10-02T19:47:19.385485Z",
+        "role": "dsh_execution_request:1",
+        "row_schema_version": "dsh-execution-request.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "first_execution_request_full_hash_kind": "canonical_research_session_request.v1",
+      "first_link_request_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "first_link_request_hash_kind": "dsh_link_identity.v1",
+      "generation": 1,
+      "graph_round": 1,
+      "link_id": "ctxlink_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+      "link_payload_hash": "1c4538413c22df5abf130f1993a698b48e5ad11397167840ddabb77b1726d111",
+      "link_payload_hash_kind": "canonical_context_selection_execution_link.v2",
+      "method_hash": "3c2b384cca008d6b808a6c312e2d354f2670879d488987be7bb25401fb384f3f",
+      "original_task_request_hash": "4ef102756893637a46bd85895e5bef39267f04c5fa0d11b12b03ac23d6c4d41c",
+      "original_task_request_hash_kind": "canonical_research_session_request.v1",
+      "prompt_integrity_row_identity": {
+        "output_id": "prompt_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+        "payload_hash": "a2077620456a8f311d6c176eccb590227cffcb455d00e9c30e7352ee93a6826d",
+        "recorded_at": "2026-10-02T19:47:19.385485Z",
+        "role": "dsh_prompt_integrity:1",
+        "row_schema_version": "dsh-prompt-integrity.v2",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "recorded_at": "2026-10-02T19:47:19.385485Z",
+      "request_id": "req_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+      "schema_version": "research-context-selection-execution-link.v2",
+      "selection_full_request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "selection_full_request_hash_kind": "canonical_research_session_request.v1",
+      "selection_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+      "selection_payload_hash": "1fed8ed3688c99c8227a535e7763b4e714ba0c4922d5ad478e9bf5d3f78fd5cc",
+      "selection_row_identity": {
+        "output_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+        "payload_hash": "74dfb76a21ee1dd7274880084dc56044942a5a0e9f16a9f88596470b7c6f2815",
+        "recorded_at": "2026-10-02T19:47:17.453240Z",
+        "role": "context_select.r1.a1",
+        "row_schema_version": "research-context-selection.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "turn_kind": "research_round"
+    },
+    "expected": false
+  },
+  {
+    "name": "wrong-hash-kind",
+    "definition": "research_context_selection_execution_link_v2",
+    "value": {
+      "actual_execution_full_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "actual_execution_full_hash_kind": "canonical_research_session_request.v1",
+      "actual_execution_reduced_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "actual_execution_reduced_hash_kind": "dsh_link_identity.v1",
+      "bundle_hash": "7266d64c141e91bd0d759d67610f1a5dd83e00c417d48893a5a968dfeb2a93b6",
+      "dsh_session_id": "dsh_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "event_id": "evt_b5e241d2b3e148c69fdf0db7607c3a40",
+      "execution_row_identity": {
+        "output_id": "execution_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+        "payload_hash": "5126e7a62423b22bf2a554d3ffaff72a59976a6c717c71167faecebc4df58a9e",
+        "recorded_at": "2026-10-02T19:47:19.385485Z",
+        "role": "dsh_execution_request:1",
+        "row_schema_version": "dsh-execution-request.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "first_execution_request_full_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "first_execution_request_full_hash_kind": "dsh_link_identity.v1",
+      "first_link_request_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "first_link_request_hash_kind": "dsh_link_identity.v1",
+      "generation": 1,
+      "graph_round": 1,
+      "link_id": "ctxlink_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+      "link_payload_hash": "1c4538413c22df5abf130f1993a698b48e5ad11397167840ddabb77b1726d111",
+      "link_payload_hash_kind": "canonical_context_selection_execution_link.v2",
+      "method_hash": "3c2b384cca008d6b808a6c312e2d354f2670879d488987be7bb25401fb384f3f",
+      "original_task_request_hash": "4ef102756893637a46bd85895e5bef39267f04c5fa0d11b12b03ac23d6c4d41c",
+      "original_task_request_hash_kind": "canonical_research_session_request.v1",
+      "prompt_integrity_row_identity": {
+        "output_id": "prompt_7e97f22f6494d4c0ec013fab8204e1531850afa690f100e8d1b6cdfc1bc74e88",
+        "payload_hash": "a2077620456a8f311d6c176eccb590227cffcb455d00e9c30e7352ee93a6826d",
+        "recorded_at": "2026-10-02T19:47:19.385485Z",
+        "role": "dsh_prompt_integrity:1",
+        "row_schema_version": "dsh-prompt-integrity.v2",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "recorded_at": "2026-10-02T19:47:19.385485Z",
+      "request_id": "req_f75746b41377c7094390b87759cbf87b56cd7006ec5c803bba4311ad380edb0f",
+      "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+      "schema_version": "research-context-selection-execution-link.v2",
+      "selection_full_request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+      "selection_full_request_hash_kind": "canonical_research_session_request.v1",
+      "selection_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+      "selection_payload_hash": "1fed8ed3688c99c8227a535e7763b4e714ba0c4922d5ad478e9bf5d3f78fd5cc",
+      "selection_row_identity": {
+        "output_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+        "payload_hash": "74dfb76a21ee1dd7274880084dc56044942a5a0e9f16a9f88596470b7c6f2815",
+        "recorded_at": "2026-10-02T19:47:17.453240Z",
+        "role": "context_select.r1.a1",
+        "row_schema_version": "research-context-selection.v3",
+        "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+      },
+      "turn_kind": "research_round"
+    },
+    "expected": false
+  },
+  {
+    "name": "old-method-version",
+    "definition": "research_execution_method_receipt_v3",
+    "value": {
+      "definition": {
+        "agent_preset": "decision-research",
+        "allowed_capabilities": [
+          "document.readback",
+          "replay.research",
+          "web.search"
+        ],
+        "bundle": {
+          "bundle_hash": "7266d64c141e91bd0d759d67610f1a5dd83e00c417d48893a5a968dfeb2a93b6",
+          "bundle_hash_kind": "canonical_bundle_rows.v1",
+          "compiled": {
+            "output_id": "compiled_71a77e7a997d61eb5025e261e3c6d71a",
+            "payload_hash": "8988417d55adef28f3b09b31ba758f4780e3ec244b59556549b3dbc5ad7fdc6a",
+            "recorded_at": "2026-10-02T19:47:15.102909Z",
+            "role": "research_compiled_policy",
+            "row_schema_version": "research-compiled-policy-receipt.v1",
+            "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+          },
+          "pack": {
+            "output_id": "pack_71a77e7a997d61eb5025e261e3c6d71a",
+            "payload_hash": "267b47eb77156f48cd0a29889263a002b4e7d79e193f72f7b6ee47c02211c096",
+            "recorded_at": "2026-10-02T19:47:15.102909Z",
+            "role": "research_request_pack",
+            "row_schema_version": "research-request-pack.v2",
+            "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+          },
+          "recorded_at": "2026-10-02T19:47:15.102909Z",
+          "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+          "schema_version": "research-prepared-bundle-identity.v1",
+          "task": {
+            "output_id": "task_71a77e7a997d61eb5025e261e3c6d71a",
+            "payload_hash": "ec846168ed14ca892be513a6c173faea8e5a597a4cfa17eb54418b441f8710a4",
+            "recorded_at": "2026-10-02T19:47:15.102909Z",
+            "role": "research_task_request",
+            "row_schema_version": "research-task-request.v2",
+            "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+          }
+        },
+        "candidate_id": null,
+        "context_policy_hash": "fc79378812cd31b42346bfdd8fa7ce227cf65d06b0e63f704c2ef7a8823358f7",
+        "context_selection_binding": {
+          "first_selection_full_request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+          "first_selection_full_request_hash_kind": "canonical_research_session_request.v1",
+          "first_selection_payload_hash": "1fed8ed3688c99c8227a535e7763b4e714ba0c4922d5ad478e9bf5d3f78fd5cc",
+          "first_selection_row": {
+            "output_id": "ctxsel_cd4956cd02ca54737795210fbc3bff0142b524f1f76d1fbcc829f6974602fea0",
+            "payload_hash": "74dfb76a21ee1dd7274880084dc56044942a5a0e9f16a9f88596470b7c6f2815",
+            "recorded_at": "2026-10-02T19:47:17.453240Z",
+            "role": "context_select.r1.a1",
+            "row_schema_version": "research-context-selection.v3",
+            "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d"
+          },
+          "mode": "required_before_rpc",
+          "ranking_rules_ref": "research-context.relevance-authority-recency.v2",
+          "selection_schema": "research-context-selection.v3",
+          "time_rule_ref": "research-context.received-cutoff.v1"
+        },
+        "deadline_at": "2026-10-02T20:17:15.102909Z",
+        "domain_pack_ref": "crypto_macro.v1",
+        "evolution_pointer_consumed": false,
+        "execution_budget": {
+          "max_estimated_cost_usd": 10.0,
+          "max_evidence_rounds": 1,
+          "max_structured_repairs": 3,
+          "max_subagents": 32,
+          "max_tool_calls": 100,
+          "per_model_step_timeout_seconds": 600,
+          "per_tool_timeout_seconds": 120,
+          "total_deadline_seconds": 1800
+        },
+        "execution_mode": "replay",
+        "first_execution_request_hash_kind": "canonical_research_session_request.v1",
+        "output_schema_ref": "agentic_research.schema.yaml#/$defs/research_session_result",
+        "permission_ref": "decision-hub://permissions/research-only",
+        "policy_binding": {
+          "binding_hash": "4514a3c309dbdb7e3104fe8fdfd8adeb54d65ff0d6d7498f35784f416ec1c771",
+          "checker_activation": "prepared",
+          "checker_code_hash": "4c4ce772c367110e35d190b87256fdd375662212d31c3e59baf73e5555ccd60c",
+          "checker_version": "research-policy-checker-registry.v1",
+          "compiled_policy_hash": "6bb0fe011d3689437855643d7572dc85bf9566e83585e2008342454bba52162e",
+          "compiler_code_hash": "005e9766cc5422843a84443c997a26f98c52505ff056c42d7276be95c1a0d15f",
+          "compiler_version": "research-policy-compiler.v1",
+          "event_id": "evt_b5e241d2b3e148c69fdf0db7607c3a40",
+          "first_execution_hash_kind": "actual_first_execution_request",
+          "first_execution_request_hash": "7b61ff30f035b8852c5d8c25235cfce47fec1ba3fe0d6483a904b7ea1ac015ca",
+          "full_task_hash": "4ef102756893637a46bd85895e5bef39267f04c5fa0d11b12b03ac23d6c4d41c",
+          "gate_policy_hash": "ef17fb91c9f03f01535959e4ffd9287ee22b2a0ba6ed6e4b0d5311f8bf2d1484",
+          "request_pack_hash": "3e678f466d365410b8e7c5f54302bb902f2bdbb1144c925c4c4c68bd14732aa5",
+          "requirements_hash": "3c4c4a9032b2734385b829d832189008ce638e49c3f04cb1f9c97ff60b745ae7",
+          "rubric_hash": "ff858d2d6a7a945e9bc74c87eeda1d53c2d69e9433c87a370296e757f82a3df6",
+          "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+          "schema_version": "research-policy-method-binding.v1",
+          "scope_hash": "a8e640951b0e4bb989d184bc078e8e93b1305cce01bbf333418dcef4cc31f993"
+        },
+        "profile_ref": "decision-research.web.v1",
+        "prompt_policy_hash": "f57d06211cc02687d25bf5a0a1bff2df90152e644da53f97c25c97d00f16c5bd",
+        "provider_configuration_attested": false,
+        "request_pack_hash": "3e678f466d365410b8e7c5f54302bb902f2bdbb1144c925c4c4c68bd14732aa5",
+        "research_mode": "current_decision",
+        "research_policy_prompt_hash": "fc3bea8dc048f719d1876e0bf40cdbd75912a14a10ff4e412a3ddf403afa8355",
+        "research_policy_renderer_hash": "b9c3324b37bf384728ac0bbc1a219fae9fc4a4c9fd2d719c549ae359265bb8b2",
+        "role_profile_ref": "crypto_macro.manager.v1",
+        "runtime_id": "dsh",
+        "runtime_version": "dsh-web-0.1.0+222222222222",
+        "schema_version": "research-execution-method.v3",
+        "upstream_identity": {
+          "package_versions": {},
+          "plugin_build_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+          "source_commit": "1111111111111111111111111111111111111111",
+          "source_version": "0.1.0"
+        },
+        "workspace_ref": "decision-hub://workspace/default"
+      },
+      "method_hash": "3c2b384cca008d6b808a6c312e2d354f2670879d488987be7bb25401fb384f3f",
+      "recorded_at": "2026-10-02T19:47:19.385485Z",
+      "request_hash": "8bdd2f5436d6e23ab90c6a25db9441f19af429c930d6eb31a0e2e66b7f1036b5",
+      "request_hash_kind": "dsh_link_identity.v1",
+      "run_id": "run_9a7e9c5bbda1433fa4806f416e4cfd3d",
+      "schema_version": "research-execution-method.v2"
+    },
+    "expected": false
+  }
+]

@@ -1,0 +1,1540 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.local/contracts/research_signal.schema.json",
+  "title": "ResearchSignalContractsV1",
+  "description": "Versioned research signals and untrusted synthesis declarations. Parsing does not attest native production, point-in-time eligibility, publication or financial qualification.",
+  "$defs": {
+    "research_publication_time_v1": {
+      "title": "ResearchPublicationTimeV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "precision": {
+          "type": "string",
+          "enum": [
+            "exact",
+            "interval",
+            "unknown"
+          ]
+        },
+        "published_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "window_start": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "window_end": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "display_text": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_timezone": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "precision",
+        "published_at",
+        "window_start",
+        "window_end",
+        "display_text",
+        "source_timezone"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "precision": {
+                "const": "exact"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "published_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "window_start": {
+                "type": "null"
+              },
+              "window_end": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "precision": {
+                "const": "interval"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "published_at": {
+                "type": "null"
+              },
+              "window_start": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "window_end": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "precision": {
+                "const": "unknown"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "published_at": {
+                "type": "null"
+              },
+              "window_start": {
+                "type": "null"
+              },
+              "window_end": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "research_claim_source_context_v1": {
+      "title": "ResearchClaimSourceContextV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "canonical_url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https?://",
+          "maxLength": 2048
+        },
+        "language": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 32
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "publication": {
+          "$ref": "#/$defs/research_publication_time_v1"
+        },
+        "first_seen_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "syndication_cluster": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rights_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "extraction_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "content_kind": {
+          "type": "string",
+          "enum": [
+            "editorial",
+            "promotion"
+          ]
+        }
+      },
+      "required": [
+        "source_id",
+        "canonical_url",
+        "language",
+        "publication",
+        "first_seen_at",
+        "syndication_cluster",
+        "rights_ref",
+        "extraction_version",
+        "content_kind"
+      ]
+    },
+    "research_claim_signal_v1": {
+      "title": "ResearchClaimSignalV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-claim-signal.v1"
+        },
+        "claim_id": {
+          "type": "string",
+          "pattern": "^claim_[A-Za-z0-9_-]+$",
+          "maxLength": 160
+        },
+        "version_id": {
+          "type": "string",
+          "pattern": "^docver_[A-Za-z0-9_-]+$",
+          "maxLength": 128
+        },
+        "document_id": {
+          "type": "string",
+          "pattern": "^doc_[A-Za-z0-9_-]+$",
+          "maxLength": 128
+        },
+        "supersedes_version_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source": {
+          "$ref": "#/$defs/research_claim_source_context_v1"
+        },
+        "author": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "content_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "content_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "claim_type": {
+          "type": "string",
+          "enum": [
+            "fact_claim",
+            "opinion",
+            "forecast",
+            "scenario",
+            "rumor"
+          ]
+        },
+        "stance": {
+          "type": "string",
+          "enum": [
+            "bullish",
+            "bearish",
+            "neutral",
+            "mixed",
+            "unknown"
+          ]
+        },
+        "proposition": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "supporting_quote": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "quoted_evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "market_scope": {
+          "type": "string",
+          "enum": [
+            "crypto_macro",
+            "cn_equity",
+            "cross_asset"
+          ]
+        },
+        "instrument_scopes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "maxItems": 32,
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "horizon": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "claimed_conditions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "maxItems": 32,
+          "minItems": 0
+        },
+        "invalidation_conditions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "maxItems": 32,
+          "minItems": 0
+        },
+        "review_status": {
+          "type": "string",
+          "enum": [
+            "candidate",
+            "accepted",
+            "rejected",
+            "superseded"
+          ]
+        },
+        "attribution_confidence": {
+          "type": "string",
+          "enum": [
+            "high",
+            "medium",
+            "low",
+            "unknown"
+          ]
+        },
+        "requires_independent_evidence": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "required": [
+        "schema_version",
+        "claim_id",
+        "version_id",
+        "document_id",
+        "supersedes_version_id",
+        "source",
+        "author",
+        "content_ref",
+        "content_hash",
+        "claim_type",
+        "stance",
+        "proposition",
+        "supporting_quote",
+        "quoted_evidence_refs",
+        "market_scope",
+        "instrument_scopes",
+        "horizon",
+        "claimed_conditions",
+        "invalidation_conditions",
+        "review_status",
+        "attribution_confidence",
+        "requires_independent_evidence"
+      ]
+    },
+    "research_mechanism_node_v1": {
+      "title": "ResearchMechanismNodeV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "event",
+            "expectation",
+            "observable",
+            "asset_effect"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "maxItems": 32,
+          "minItems": 0,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "description",
+        "refs"
+      ]
+    },
+    "research_mechanism_lag_v1": {
+      "title": "ResearchMechanismLagV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "minimum_seconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 31536000
+        },
+        "maximum_seconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 31536000
+        }
+      },
+      "required": [
+        "minimum_seconds",
+        "maximum_seconds"
+      ]
+    },
+    "research_testable_feature_ref_v1": {
+      "title": "ResearchTestableFeatureRefV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "feature": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "scope_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 192
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "feature",
+        "scope_id",
+        "unit"
+      ]
+    },
+    "research_mechanism_edge_v1": {
+      "title": "ResearchMechanismEdgeV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "from_node": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "to_node": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "hypothesis": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "lag": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/research_mechanism_lag_v1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "support_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "maxItems": 32,
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "counter_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "maxItems": 32,
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "testable_feature_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/research_testable_feature_ref_v1"
+          },
+          "maxItems": 32,
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "status": {
+          "const": "hypothesis"
+        }
+      },
+      "required": [
+        "id",
+        "from_node",
+        "to_node",
+        "hypothesis",
+        "lag",
+        "support_refs",
+        "counter_refs",
+        "testable_feature_refs",
+        "status"
+      ]
+    },
+    "research_mechanism_review_v1": {
+      "title": "ResearchMechanismReviewV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-mechanism-review.v1"
+        },
+        "review_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "cutoff": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "scope_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 192
+        },
+        "horizon": {
+          "type": "string",
+          "enum": [
+            "30m",
+            "24h",
+            "72h"
+          ]
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/research_mechanism_node_v1"
+          },
+          "maxItems": 64,
+          "minItems": 1
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/research_mechanism_edge_v1"
+          },
+          "maxItems": 128,
+          "minItems": 1
+        },
+        "alternative_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "maxItems": 32,
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "priced_in_status": {
+          "type": "string",
+          "enum": [
+            "priced_in",
+            "not_priced_in",
+            "unknown"
+          ]
+        },
+        "priced_in_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "maxItems": 32,
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "unresolved": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "maxItems": 64,
+          "minItems": 0
+        },
+        "affected_plan_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "maxItems": 32,
+          "minItems": 0,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schema_version",
+        "review_id",
+        "run_id",
+        "cutoff",
+        "scope_id",
+        "horizon",
+        "nodes",
+        "edges",
+        "alternative_refs",
+        "priced_in_status",
+        "priced_in_refs",
+        "unresolved",
+        "affected_plan_refs"
+      ]
+    },
+    "research_action_candidate_v1": {
+      "title": "ResearchActionCandidateV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-action-candidate.v1"
+        },
+        "scope_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 192
+        },
+        "horizon": {
+          "type": "string",
+          "enum": [
+            "30m",
+            "24h",
+            "72h"
+          ]
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "valid_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "next_review_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "position_context": {
+          "type": "string",
+          "enum": [
+            "flat",
+            "long"
+          ]
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "enter_long",
+            "reduce_long",
+            "exit_long",
+            "hold",
+            "wait"
+          ]
+        },
+        "probability": {
+          "$ref": "decision_product_v1.schema.yaml#/$defs/decision_probability_v1"
+        },
+        "entry": {
+          "type": "array",
+          "items": {
+            "$ref": "decision_product_v1.schema.yaml#/$defs/decision_condition_v1"
+          },
+          "maxItems": 16,
+          "minItems": 0
+        },
+        "exit": {
+          "type": "array",
+          "items": {
+            "$ref": "decision_product_v1.schema.yaml#/$defs/decision_condition_v1"
+          },
+          "maxItems": 16,
+          "minItems": 0
+        },
+        "invalidation": {
+          "type": "array",
+          "items": {
+            "$ref": "decision_product_v1.schema.yaml#/$defs/decision_condition_v1"
+          },
+          "maxItems": 16,
+          "minItems": 0
+        },
+        "size_policy_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "cost_policy_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "target_spec_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "maxItems": 32,
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "claim_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "maxItems": 32,
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "mechanism_review_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        }
+      },
+      "required": [
+        "schema_version",
+        "scope_id",
+        "horizon",
+        "as_of",
+        "valid_until",
+        "next_review_at",
+        "position_context",
+        "action",
+        "probability",
+        "entry",
+        "exit",
+        "invalidation",
+        "size_policy_ref",
+        "cost_policy_ref",
+        "target_spec_ref",
+        "evidence_refs",
+        "claim_refs",
+        "mechanism_review_ref",
+        "reason"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "position_context": {
+                "const": "flat"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "action": {
+                "type": "string",
+                "enum": [
+                  "enter_long",
+                  "wait"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "position_context": {
+                "const": "long"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "action": {
+                "type": "string",
+                "enum": [
+                  "hold",
+                  "reduce_long",
+                  "exit_long",
+                  "wait"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "research_skill_consumption_ref_v1": {
+      "title": "ResearchSkillConsumptionRefV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "version_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "consumption_receipt_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "consumption_receipt_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "version_id",
+        "version_hash",
+        "consumption_receipt_ref",
+        "consumption_receipt_hash"
+      ]
+    },
+    "research_decision_synthesis_v1": {
+      "title": "ResearchDecisionSynthesisV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-decision-synthesis.v1"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "research_candidate_v1": {
+          "$ref": "agentic_research.schema.yaml#/$defs/research_synthesis_candidate"
+        },
+        "action_intents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/research_action_candidate_v1"
+          },
+          "maxItems": 24,
+          "minItems": 0
+        },
+        "mechanism_reviews": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/research_mechanism_review_v1"
+          },
+          "maxItems": 24,
+          "minItems": 0
+        },
+        "claim_signal_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "maxItems": 64,
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "skill_consumption_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/research_skill_consumption_ref_v1"
+          },
+          "maxItems": 32,
+          "minItems": 0,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schema_version",
+        "request_id",
+        "research_candidate_v1",
+        "action_intents",
+        "mechanism_reviews",
+        "claim_signal_refs",
+        "skill_consumption_refs"
+      ]
+    },
+    "research_observed_execution_ref_v1": {
+      "title": "ResearchObservedExecutionRefV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "output_id": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "schema_version": {
+          "type": "string"
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "output_id",
+        "role",
+        "schema_version",
+        "payload_hash",
+        "recorded_at"
+      ]
+    },
+    "research_native_selection_v1": {
+      "title": "ResearchNativeSelectionV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "tool_capture",
+            "structured_response"
+          ]
+        },
+        "final_response_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "call_event_index": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "result_event_index": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payload_occurrence": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payload_path": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "maxItems": 64,
+              "minItems": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "call_event_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "result_event_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "call_seq": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "result_seq": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "origin_generation": {
+          "type": "null"
+        },
+        "presence_generation": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "presence_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/research_observed_execution_ref_v1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "final_response_hash",
+        "call_id",
+        "call_event_index",
+        "result_event_index",
+        "payload_occurrence",
+        "payload_path",
+        "call_event_hash",
+        "result_event_hash",
+        "call_seq",
+        "result_seq",
+        "origin_generation",
+        "presence_generation",
+        "presence_ref"
+      ]
+    },
+    "research_action_synthesis_sidecar_v1": {
+      "title": "ResearchActionSynthesisSidecarV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-action-synthesis-sidecar.v1"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "context_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "scope_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 192
+        },
+        "horizon": {
+          "type": "string",
+          "enum": [
+            "30m",
+            "24h",
+            "72h"
+          ]
+        },
+        "cutoff": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "selected_native_observation_ref": {
+          "$ref": "#/$defs/research_observed_execution_ref_v1"
+        },
+        "selection_witness": {
+          "$ref": "#/$defs/research_native_selection_v1"
+        },
+        "raw_candidate_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "projected_research_candidate_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "synthesis": {
+          "$ref": "#/$defs/research_decision_synthesis_v1"
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "producer_cutoff": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "schema_version",
+        "run_id",
+        "request_id",
+        "generation",
+        "request_hash",
+        "context_hash",
+        "scope_id",
+        "horizon",
+        "cutoff",
+        "selected_native_observation_ref",
+        "selection_witness",
+        "raw_candidate_hash",
+        "projected_research_candidate_hash",
+        "synthesis",
+        "payload_hash",
+        "producer_cutoff"
+      ]
+    },
+    "decision_ui_review_branch_v1": {
+      "title": "DecisionUiReviewBranchV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "position_context": {
+          "enum": [
+            "flat",
+            "long",
+            "unknown"
+          ]
+        },
+        "plan_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "revision_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "outbox_id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "disposition": {
+          "enum": [
+            "updated",
+            "retained"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "next_review_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "candidate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/research_action_candidate_v1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mechanism": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/research_mechanism_review_v1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "current_head": {
+          "$ref": "decision_product_v1.schema.yaml#/$defs/decision_action_plan_head_v1"
+        },
+        "applied": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "position_context",
+        "plan_id",
+        "revision_id",
+        "revision_hash",
+        "outbox_id",
+        "disposition",
+        "reason",
+        "next_review_at",
+        "candidate",
+        "mechanism",
+        "current_head",
+        "applied"
+      ]
+    },
+    "decision_ui_review_result_v1": {
+      "title": "DecisionUiReviewResultV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "receipt_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "sidecar_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "sidecar_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "completed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "enum": [
+            "published",
+            "review_only"
+          ]
+        },
+        "branches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_ui_review_branch_v1"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        }
+      },
+      "required": [
+        "run_id",
+        "request_id",
+        "receipt_hash",
+        "sidecar_ref",
+        "sidecar_hash",
+        "completed_at",
+        "status",
+        "branches"
+      ]
+    },
+    "decision_ui_review_view_v1": {
+      "title": "DecisionUiReviewViewV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "action-review-view.v1"
+        },
+        "opportunity_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "scope_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 192
+        },
+        "horizon": {
+          "enum": [
+            "30m",
+            "24h",
+            "72h"
+          ]
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "review": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/decision_ui_review_result_v1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "opportunity_id",
+        "scope_id",
+        "horizon",
+        "as_of",
+        "review"
+      ]
+    }
+  }
+}

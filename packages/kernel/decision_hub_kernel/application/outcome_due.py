@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from datetime import UTC, datetime
 
 from packages.contracts_py.decision_hub_contracts.models import OutcomeCreate
@@ -11,6 +12,8 @@ from packages.kernel.decision_hub_kernel.persistence.db import (
     OutcomeRecord,
 )
 from packages.kernel.decision_hub_kernel.ports.sources import MarketWindowPort
+
+logger = logging.getLogger(__name__)
 
 
 class DueOutcomeService:
@@ -26,7 +29,11 @@ class DueOutcomeService:
                 session.query(ForecastRecord, ArtifactRecord)
                 .join(ArtifactRecord, ForecastRecord.artifact_id == ArtifactRecord.artifact_id)
                 .outerjoin(OutcomeRecord, OutcomeRecord.forecast_id == ForecastRecord.forecast_id)
-                .filter(ForecastRecord.expires_at <= cutoff, OutcomeRecord.forecast_id.is_(None))
+                .filter(
+                    ForecastRecord.expires_at <= cutoff,
+                    ForecastRecord.direction.in_(("long", "short")),
+                    OutcomeRecord.forecast_id.is_(None),
+                )
                 .order_by(ForecastRecord.expires_at.asc())
                 .limit(limit)
                 .all()
@@ -45,7 +52,18 @@ class DueOutcomeService:
         for forecast_id, instrument, expires_at, direction, emitted_at in targets:
             if direction not in {"long", "short"}:
                 continue
-            window = await self.market.window(instrument, emitted_at, expires_at)
+            try:
+                window = await self.market.window(instrument, emitted_at, expires_at)
+            except Exception as exc:
+                # A public market endpoint can be temporarily unreachable. Keep
+                # the forecast unlabelled and let the next scheduler tick retry;
+                # one provider outage must not terminate source/calendar polling.
+                logger.warning(
+                    "market window unavailable for forecast %s: %s",
+                    forecast_id,
+                    type(exc).__name__,
+                )
+                continue
             if window is None:
                 continue
             entry = window.entry.ask if window.entry.ask is not None else window.entry.last

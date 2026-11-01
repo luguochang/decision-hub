@@ -1,0 +1,566 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/study.schema.json
+title: StudyContracts
+$defs:
+  study_entry_projection_view:
+    type: object
+    title: StudyEntryProjectionView
+    additionalProperties: false
+    properties:
+      state:
+        type: string
+        enum: [has_research, collected_not_researched, unknown]
+      research_runs:
+        type: integer
+        minimum: 0
+      latest_admission_decision:
+        anyOf:
+        - type: string
+          enum: [admitted, merged, blocked, ignored]
+        - type: 'null'
+      latest_admission_reason:
+        type: [string, 'null']
+      display_title:
+        type: [string, 'null']
+      display_title_source_run_id:
+        type: [string, 'null']
+      display_title_source_observation_id:
+        type: [string, 'null']
+    required:
+    - state
+    - research_runs
+    - latest_admission_decision
+    - latest_admission_reason
+    - display_title
+    - display_title_source_run_id
+    - display_title_source_observation_id
+  study_view:
+    additionalProperties: false
+    properties:
+      entry_projection:
+        anyOf:
+        - $ref: '#/$defs/study_entry_projection_view'
+        - type: 'null'
+        default: null
+      study_id:
+        title: Study Id
+        type: string
+      title:
+        title: Title
+        type: string
+      market:
+        title: Market
+        type: string
+      instrument:
+        title: Instrument
+        type: string
+      horizon_scope:
+        title: Horizon Scope
+        type: string
+      identity_basis:
+        title: Identity Basis
+        type: string
+      status:
+        enum:
+        - active
+        - paused
+        title: Status
+        type: string
+      created_at:
+        format: date-time
+        title: Created At
+        type: string
+      updated_at:
+        format: date-time
+        title: Updated At
+        type: string
+      latest_report_at:
+        type:
+        - string
+        - 'null'
+        format: date-time
+        default: null
+    required:
+    - study_id
+    - title
+    - market
+    - instrument
+    - horizon_scope
+    - identity_basis
+    - status
+    - created_at
+    - updated_at
+    title: StudyView
+    type: object
+  revision_change_view:
+    additionalProperties: false
+    properties:
+      summary_changed:
+        anyOf:
+        - type: boolean
+        - type: 'null'
+        title: Summary Changed
+      added_evidence_count:
+        minimum: 0
+        title: Added Evidence Count
+        type: integer
+      removed_evidence_count:
+        minimum: 0
+        title: Removed Evidence Count
+        type: integer
+      evidence_unit:
+        const: distinct_content_hash
+        title: Evidence Unit
+        type: string
+      previous_summary:
+        anyOf:
+        - type: string
+        - type: 'null'
+        title: Previous Summary
+      current_summary:
+        title: Current Summary
+        type: string
+      comparison_status:
+        enum:
+        - compared
+        - first_recorded_revision
+        title: Comparison Status
+        type: string
+    required:
+    - summary_changed
+    - added_evidence_count
+    - removed_evidence_count
+    - evidence_unit
+    - previous_summary
+    - current_summary
+    - comparison_status
+    title: RevisionChangeView
+    type: object
+  report_revision_view:
+    additionalProperties: false
+    properties:
+      revision_id:
+        title: Revision Id
+        type: string
+      study_id:
+        title: Study Id
+        type: string
+      source_run_id:
+        title: Source Run Id
+        type: string
+      artifact_id:
+        title: Artifact Id
+        type: string
+      previous_revision_id:
+        anyOf:
+        - type: string
+        - type: 'null'
+        title: Previous Revision Id
+      strategy_version:
+        title: Strategy Version
+        type: string
+      input_fingerprint:
+        anyOf:
+        - type: string
+        - type: 'null'
+        title: Input Fingerprint
+      publication_status:
+        title: Publication Status
+        type: string
+      change:
+        $ref: '#/$defs/revision_change_view'
+      identity_basis:
+        title: Identity Basis
+        type: string
+      created_at:
+        format: date-time
+        title: Created At
+        type: string
+      recorded_at:
+        format: date-time
+        title: Recorded At
+        type: string
+      direction_changes:
+        type: array
+        items:
+          $ref: '#/$defs/revision_direction_change'
+        default: []
+    required:
+    - revision_id
+    - study_id
+    - source_run_id
+    - artifact_id
+    - previous_revision_id
+    - strategy_version
+    - input_fingerprint
+    - publication_status
+    - change
+    - identity_basis
+    - created_at
+    - recorded_at
+    title: ReportRevisionView
+    type: object
+  study_list_view:
+    additionalProperties: false
+    properties:
+      items:
+        items:
+          $ref: '#/$defs/study_view'
+        title: Items
+        type: array
+      total:
+        title: Total
+        type: integer
+      limit:
+        title: Limit
+        type: integer
+      offset:
+        title: Offset
+        type: integer
+    required:
+    - items
+    - total
+    - limit
+    - offset
+    title: StudyListView
+    type: object
+  study_timeline_view:
+    additionalProperties: false
+    properties:
+      activity:
+        anyOf:
+        - $ref: "#/$defs/study_activity_view"
+        - type: "null"
+        default: null
+      study:
+        $ref: '#/$defs/study_view'
+      revisions:
+        items:
+          $ref: '#/$defs/report_revision_view'
+        title: Revisions
+        type: array
+      total:
+        title: Total
+        type: integer
+      limit:
+        title: Limit
+        type: integer
+      offset:
+        title: Offset
+        type: integer
+    required:
+    - study
+    - revisions
+    - total
+    - limit
+    - offset
+    title: StudyTimelineView
+    type: object
+  admission_decision_view:
+    additionalProperties: false
+    properties:
+      decision_id:
+        title: Decision Id
+        type: string
+      attempt_id:
+        title: Attempt Id
+        type: string
+      event_id:
+        title: Event Id
+        type: string
+      study_id:
+        anyOf:
+        - type: string
+        - type: 'null'
+        title: Study Id
+      source_id:
+        title: Source Id
+        type: string
+      strategy_version:
+        title: Strategy Version
+        type: string
+      policy_version:
+        title: Policy Version
+        type: string
+      decision:
+        enum:
+        - admitted
+        - merged
+        - blocked
+        - ignored
+        title: Decision
+        type: string
+      reason_code:
+        title: Reason Code
+        type: string
+      details:
+        additionalProperties:
+          anyOf:
+          - $ref: '#/$defs/discovery_admission_recovery_contract'
+          - type: string
+          - type: boolean
+          - type: integer
+          - items:
+              type: string
+            type: array
+        title: Details
+        type: object
+      run_id:
+        anyOf:
+        - type: string
+        - type: 'null'
+        title: Run Id
+      decided_at:
+        format: date-time
+        title: Decided At
+        type: string
+    required:
+    - decision_id
+    - attempt_id
+    - event_id
+    - study_id
+    - source_id
+    - strategy_version
+    - policy_version
+    - decision
+    - reason_code
+    - details
+    - run_id
+    - decided_at
+    title: AdmissionDecisionView
+    type: object
+  admission_list_view:
+    additionalProperties: false
+    properties:
+      items:
+        items:
+          $ref: '#/$defs/admission_decision_view'
+        title: Items
+        type: array
+      total:
+        title: Total
+        type: integer
+      limit:
+        title: Limit
+        type: integer
+      offset:
+        title: Offset
+        type: integer
+    required:
+    - items
+    - total
+    - limit
+    - offset
+    title: AdmissionListView
+    type: object
+  revision_direction_change:
+    type: object
+    additionalProperties: false
+    properties:
+      method_family:
+        type: string
+      method_version:
+        type: string
+      instrument:
+        type: string
+      horizon:
+        type: string
+      previous_action:
+        type:
+        - string
+        - 'null'
+      current_action:
+        type:
+        - string
+        - 'null'
+      comparison_status:
+        type: string
+        enum:
+        - compared
+        - method_changed
+        - first_recorded
+        - missing_current
+        - missing_previous
+      changed:
+        type:
+        - boolean
+        - 'null'
+    required:
+    - method_family
+    - method_version
+    - instrument
+    - horizon
+    - previous_action
+    - current_action
+    - comparison_status
+    - changed
+
+  study_task_view:
+    type: object
+    additionalProperties: false
+    properties:
+      run_id: &id001
+        type: string
+      status: *id001
+      admission_origin: *id001
+      created_at: &id002
+        type: string
+        format: date-time
+      updated_at: *id002
+      error_code:
+        type:
+        - string
+        - 'null'
+      report_available:
+        type: boolean
+    required:
+    - run_id
+    - status
+    - admission_origin
+    - created_at
+    - updated_at
+    - error_code
+    - report_available
+  study_activity_view:
+    type: object
+    additionalProperties: false
+    properties:
+      research_runs:
+        type: integer
+        minimum: 0
+      active_runs:
+        type: integer
+        minimum: 0
+      recent_runs:
+        type: array
+        items:
+          $ref: '#/$defs/study_task_view'
+      pending_review_plans:
+        type: integer
+        minimum: 0
+      next_review_at:
+        type:
+        - string
+        - 'null'
+        format: date-time
+      latest_admission:
+        anyOf:
+        - $ref: '#/$defs/admission_decision_view'
+        - type: 'null'
+    required:
+    - research_runs
+    - active_runs
+    - recent_runs
+    - pending_review_plans
+    - next_review_at
+    - latest_admission
+  discovery_admission_recovery_contract:
+    additionalProperties: false
+    properties:
+      schema_version:
+        const: discovery-admission-recovery.v1
+        title: Schema Version
+        type: string
+      root_decision_id:
+        title: Root Decision Id
+        type: string
+      job_id:
+        title: Job Id
+        type: string
+      event_id:
+        title: Event Id
+        type: string
+      study_id:
+        title: Study Id
+        type: string
+      study_scope_sha256:
+        pattern: ^[a-f0-9]{64}$
+        title: Study Scope Sha256
+        type: string
+      idempotency_key:
+        title: Idempotency Key
+        type: string
+      strategy_version:
+        const: research.v1
+        title: Strategy Version
+        type: string
+      observation_id:
+        title: Observation Id
+        type: string
+      observation_sha256:
+        pattern: ^[a-f0-9]{64}$
+        title: Observation Sha256
+        type: string
+      envelope_json:
+        title: Envelope Json
+        type: string
+      source_manifest_sha256:
+        pattern: ^[a-f0-9]{64}$
+        title: Source Manifest Sha256
+        type: string
+      policy_json:
+        title: Policy Json
+        type: string
+      policy_sha256:
+        pattern: ^[a-f0-9]{64}$
+        title: Policy Sha256
+        type: string
+      original_reason:
+        title: Original Reason
+        type: string
+        enum:
+        - research_admission_budget_exhausted
+        - study_host_terminal_unknown
+        - study_research_active
+      created_at:
+        format: date-time
+        title: Created At
+        type: string
+      expires_at:
+        format: date-time
+        title: Expires At
+        type: string
+    required:
+    - schema_version
+    - root_decision_id
+    - job_id
+    - event_id
+    - study_id
+    - study_scope_sha256
+    - idempotency_key
+    - strategy_version
+    - observation_id
+    - observation_sha256
+    - envelope_json
+    - source_manifest_sha256
+    - policy_json
+    - policy_sha256
+    - original_reason
+    - created_at
+    - expires_at
+    title: DiscoveryAdmissionRecoveryContract
+    type: object
+    description: Immutable discovery_recovery details for the existing four official RSS recovery jobs;
+      this exact closed shape is the sole nested object admitted by the details value contract.
+
+  study_report_comparison_view:
+    type: object
+    title: StudyReportComparisonView
+    additionalProperties: false
+    properties:
+      schema_version:
+        type: string
+        const: study-report-comparison-view.v1
+      study_id:
+        type: string
+      current:
+        $ref: '#/$defs/report_revision_view'
+      previous:
+        anyOf:
+        - $ref: '#/$defs/report_revision_view'
+        - type: 'null'
+    required:
+    - schema_version
+    - study_id
+    - current
+    - previous

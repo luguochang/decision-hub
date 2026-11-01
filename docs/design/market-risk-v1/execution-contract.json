@@ -1,0 +1,1460 @@
+{
+  "schema_version": "market-risk-execution-design.v1",
+  "design_version": "design.v1",
+  "date": "2026-10-10",
+  "mode": "implementation_authorized",
+  "old_goal_status": "paused",
+  "new_goal_created": true,
+  "implemented": false,
+  "current_batch": "B2",
+  "proposed_first_batch": "B0",
+  "scope": {
+    "surface": "pc",
+    "instruments": [
+      "BTC-USDT",
+      "ETH-USDT"
+    ],
+    "market": "spot",
+    "venue": "okx",
+    "price_type": "trade",
+    "research_horizon_seconds": 86400,
+    "monitor_lookback_seconds": 1800,
+    "bar_seconds": 60,
+    "poll_seconds": 60,
+    "stale_after_seconds": 180,
+    "research_admission": "required_for_both_spot_scopes",
+    "gold": "independent_extension",
+    "automatic_trading": false
+  },
+  "proposal_parameters": {
+    "fact_alert_abs_return_btc": 0.015,
+    "fact_alert_abs_return_eth": 0.02,
+    "primary_path_adverse_threshold": 0.02,
+    "secondary_path_adverse_threshold": 0.05,
+    "shadow_days": 28,
+    "model_min_time_blocks": 100,
+    "model_min_event_blocks": 30,
+    "paired_brier_gain_min": 0.005,
+    "paired_gain_ci_level": 0.95,
+    "false_alarm_episodes_per_asset_day_max": 0.2,
+    "event_recall_min": 0.6,
+    "minimum_advance_seconds": 300,
+    "parameters_validated": false
+  },
+  "shadow_publication": {
+    "input_cutoff_utc": "00:00:00",
+    "publish_deadline_utc": "00:01:00",
+    "fixed_window_start_utc": "00:01:00",
+    "window_seconds": 86400,
+    "anchor_policy": "scheduled_bar_open",
+    "missing_anchor": "unknown_do_not_move_window",
+    "late_output": "ledger_only_exclude_primary_pair",
+    "deep_research_budget_is_independent": true
+  },
+  "alarm_matching": {
+    "version": "matching.v1",
+    "alarm_kind": "forecast_risk",
+    "shadow_probability_threshold": 0.2,
+    "validity": "fixed_prediction_window",
+    "scope_direction_threshold_price_type_must_match": true,
+    "one_to_one": true,
+    "event_cluster_gap_seconds": 1800,
+    "minimum_advance_seconds": 300,
+    "unknown_delivery_or_label": "unscorable_with_coverage_accounting",
+    "fact_change_alert_is_prediction_hit": false
+  },
+  "feasibility_probes": {
+    "total_timebox_minutes": 450,
+    "max_attempts_per_named_probe": 1,
+    "endpoint_attempt_limit_including_retry": 2,
+    "retry_requires_retryable_error_or_changed_condition": true,
+    "items": [
+      {
+        "id": "F1",
+        "timebox_minutes": 90,
+        "status": "pass",
+        "evidence": "B0/F1/summary.json"
+      },
+      {
+        "id": "F2",
+        "timebox_minutes": 90,
+        "status": "pass",
+        "evidence": "B0/F2-load01.json"
+      },
+      {
+        "id": "F3",
+        "timebox_minutes": 60,
+        "status": "pass",
+        "evidence": "B0/runtime-F3-junit03.xml"
+      },
+      {
+        "id": "F4",
+        "timebox_minutes": 90,
+        "status": "prerequisites_pass_quality_gate_pending_B2",
+        "evidence": "B0/runtime-F4-review.md"
+      },
+      {
+        "id": "F5",
+        "timebox_minutes": 120,
+        "status": "insufficient_evidence",
+        "evidence": "B0/F5/receipt.json"
+      }
+    ],
+    "endpoint_attempt_limit_scope": "per planned page; pagination is not retry",
+    "f1_planned_pages_per_scope_max": 6
+  },
+  "batches": [
+    {
+      "id": "B0",
+      "status": "closed_with_explicit_unknowns",
+      "result": "protocol_and_finite_feasibility",
+      "depends_on": [],
+      "remaining_gate": "new recipe/profile and normal/challenge real DSH runs are retained in B2, not passed by readiness"
+    },
+    {
+      "id": "B1",
+      "status": "closed_engineering_with_observation_limits",
+      "result": "persisted_risk_monitor_and_pc",
+      "depends_on": [
+        "B0"
+      ]
+    },
+    {
+      "id": "B2",
+      "status": "in_progress",
+      "result": "real_ai_quality_and_complete_report",
+      "depends_on": [
+        "B1"
+      ]
+    },
+    {
+      "id": "B3",
+      "status": "engineering_installed_formal_acceptance_pending",
+      "result": "verified_path_labels_and_finite_shadow_result",
+      "depends_on": [
+        "B2"
+      ],
+      "independent_engineering_status": "named_native_controls_pass_formal_build03_installed",
+      "remaining_gate": "natural prospective slots and mature labels, one finite 28-day closure, formal full score PC; statistical qualification remains insufficient"
+    },
+    {
+      "id": "B4",
+      "status": "engineering_installed_formal_acceptance_pending",
+      "result": "case_memory_and_independent_market_extension",
+      "depends_on": [
+        "B3"
+      ],
+      "independent_engineering_status": "named_native_controls_pass_formal_build03_installed",
+      "remaining_gate": "genuine published recipe and memory use, formal component qualification and full PC; gold provider and macro/consensus/crowding limits remain explicit"
+    }
+  ],
+  "gates": {
+    "engineering": [
+      "A01-A27",
+      "O01-O05",
+      "U01-U03"
+    ],
+    "model": [
+      "Q01-Q05"
+    ],
+    "continuation": [
+      "M01-M03"
+    ],
+    "tests_executed": true,
+    "engineering_pass_implies_predictive_gain": false,
+    "engineering_all_pass": false
+  },
+  "stop_rules": [
+    "do_not_resume_paused_goal_without_new_user_direction",
+    "one_active_implementation_batch",
+    "no_retest_unchanged_passed_scope_without_specific_risk",
+    "finite_probe_attempts_and_timebox",
+    "unknown_is_not_success_or_forced_wrong_prediction_label",
+    "shadow_may_close_no_gain_or_insufficient_evidence_without_promotion",
+    "scope_or_threshold_change_requires_new_protocol_version"
+  ],
+  "documentation": {
+    "entry": "README.md",
+    "technical": "TECHNICAL_DESIGN.md",
+    "metrics": "ACCEPTANCE_AND_METRICS.md",
+    "delivery": "DELIVERY_PLAN.md",
+    "continuation": "CURRENT_FOCUS.md",
+    "checklist": "IMPLEMENTATION_CHECKLIST.md",
+    "user_guide": "PC_USER_GUIDE.md",
+    "release_runbook": "B2_B4_RELEASE_RUNBOOK.md",
+    "real_acceptance_fixes": "14_REAL_ACCEPTANCE_FIXES.md",
+    "current_focus": "CURRENT_FOCUS.md",
+    "contract_mapping": "CONTRACT_AND_Q05_EXECUTION_MAP.md",
+    "current_remediation": "CORE_RECOVERY_PLAN24.md",
+    "implementation_contracts": "IMPLEMENTATION_CONTRACTS26.md",
+    "cross_layer_implementation_contracts": "IMPLEMENTATION_CONTRACTS27.md",
+    "real_acceptance32": "REAL_ACCEPTANCE32.md",
+    "before33_bytes": "artifacts/market-risk-implementation-20261007/B2/release33/docs-before01",
+    "core_read_fix34": "CORE_READ_FIX34.md",
+    "before34_bytes": "artifacts/market-risk-implementation-20261007/B2/release34/docs-before34-01"
+  },
+  "new_goal_status": "active",
+  "authorization": {
+    "date": "2026-10-07",
+    "source": "user explicitly requested goal, implementation of all documented work and self-test",
+    "scope": "B0-B4, PC first"
+  },
+  "implementation_evidence_root": "artifacts/market-risk-implementation-20261007",
+  "formal_new_features_installed": true,
+  "history_snapshot": {
+    "path": "artifacts/market-risk-implementation-20261007/B2/release10/docs-before-current01/docs/design/market-risk-v1/execution-contract.json",
+    "sha256": "ec2cfea86a64063a206714b275be6b9e5fc4919e7fdabce4f971ebd2aa5053b2"
+  },
+  "continuation_evaluation": {
+    "path": "artifacts/market-risk-implementation-20261007/B2/continuation-eval10/review01.json",
+    "sha256": "152823fdee05118edd834640a5452f42758efeb0109ec79ddd8312ab487a0e5c",
+    "clean_context_isolated_instances": 5,
+    "conflict_samples": 10,
+    "natural_production_resume_proven": 0,
+    "M03_scope": "actual finite batch stop boundaries"
+  },
+  "whole_product_accepted": false,
+  "q05_engineering_controls": {
+    "count": 20,
+    "passed": 20,
+    "failed": 0,
+    "unavailable": 0,
+    "actual_input_invocations": 93,
+    "source_pins": 19,
+    "receipt": "artifacts/market-risk-implementation-20261007/B2/q05-frozen-controls01/execution02/receipt.json",
+    "sha256": "7aab65219c919212a554d867b63c9e14e14a6cdf4cf10ac987b9d5ef14276603",
+    "native_single_twenty_item_junit": false,
+    "real_market_case_count": 0,
+    "model_understanding_verified": false,
+    "two_method_real_comparison_executed": false,
+    "full_q05_acceptance": false
+  },
+  "next_action": "First natural00UTC two-asset native/90s/ACK/on-time2P; next23hours/lock/mature/finance pending. Review sealed DEV claiming-demand/fresh preflight/final-expired-lease recovery then standard install and genuine new owner/automatic Run; retain failed3. R1 native capture complete but7runtime dependencies unknown: attest/replay before formal R2. Bridge current-qualified risk to home withinMR13/19/26/31; original28day unchanged, natural counts12/112 and4/56.",
+  "current_formal_release": "46",
+  "last_formal_release": "45b",
+  "current_target_release": "46",
+  "current_goal_status": "active",
+  "historical_runtime_evidence": {
+    "path": "artifacts/market-risk-implementation-20261007/B2/release37/historical-runtime-states37.json",
+    "sha256": "00ca6c9fb6820285e30f7d1c2948d61f382064a13669651309f6111e6a6c951c",
+    "purpose": "past snapshots only; never current execution instructions"
+  },
+  "candidate_b2_b4": {
+    "observed_at": "2026-10-10T00:00:09.901155+00:00",
+    "source_release": "46",
+    "runtime_release": "46",
+    "target_release": "46",
+    "runtime_state": "formal46_ReadyP_first_natural_pair_commit_ACK_on_timeP_mature_labels_financial_unverified",
+    "schema": "0090_history_model_qualification_v3",
+    "formal_installed": true,
+    "services_online": 7,
+    "source_promotion": {
+      "path": "artifacts/market-risk-implementation-20261007/B2/release46/promotion46_01.json",
+      "sha256": "b64c7bfab6f4cf7a4f99603c17f7ca1c154e7712a7e5a65244f70a0534fad8eb",
+      "bytes": 1588
+    },
+    "current_O04": {
+      "stage": "actual100_complete",
+      "count": 100,
+      "p95_limit_seconds": 0.5,
+      "p95_seconds": 0.6453165999846533,
+      "projection_passed": true,
+      "http_all_200": true,
+      "passed": false,
+      "path": "artifacts/market-risk-implementation-20261007/B2/formal-o04-19/actual01/receipt.json",
+      "sha256": "701eeb3e59c9877d0f50d87cae5271b95de3742a9066e74f8c099a619a0648f1"
+    },
+    "latest_real_research": {
+      "request_id": "riskresearch_e76265cee05030faf339f57cf28c915f88079749",
+      "run_id": "run_dbce68caf06e41f799c5a2b5a6d1c8ce",
+      "status": "completed",
+      "run_status": "degraded",
+      "attempts": 1,
+      "created_at": "2026-10-09T19:56:10.892867Z",
+      "error_code": null,
+      "release": "39",
+      "submitted_once_from_PC": true,
+      "scope": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "record": "artifacts/market-risk-implementation-20261007/B2/release39/eth-actual39_01/receipt07.json",
+      "record_sha256": "32420708c613c5cc96756189c64adc2dcaa18ef5189bc264c4390db915d4755e",
+      "complete_report_accepted": false,
+      "automatic_retry": false,
+      "evidence_count": 14,
+      "public_status": "research_only",
+      "artifact_id": "art_51aea03b626f4cb694bb0e825e8a221a",
+      "review_count": 1,
+      "report_original_and_PC_verified": true,
+      "report_original_bytes": 308477,
+      "report_original_sha256": "f3c1629fd171f4b21e03afcfb6829515325d91cb4c051dfdb1644bff6211c523",
+      "quality_GET_seconds": 22.34299999999348,
+      "download_GET_seconds": 45.03200000000652,
+      "quality_status": "available",
+      "direction_status": "blocked",
+      "path_risk_status": "blocked",
+      "execution_status": "blocked",
+      "factual_status": "complete",
+      "context_status": "complete",
+      "report_status": "complete",
+      "actual_tool_schema_failures": 3,
+      "final_review_checkpoint_count": 1,
+      "verified_conversation_calls": 20,
+      "usage_total_unknown": true,
+      "PC_record": "artifacts/market-risk-implementation-20261007/B2/release39/eth-terminal39_01/pc-download39_01.json",
+      "actual_PC_screenshot": "artifacts/mr-pc39/eth39-report-terminal_01.png",
+      "financial_qualified": false
+    },
+    "history": {
+      "verified_complete_days_per_asset": 87,
+      "excluded_days_per_asset": 3,
+      "plan_id": "hds2_plan_50ec9649e948e192a14f0bba0af7e131e04e426be13761c4",
+      "max_missing_pages": 368,
+      "real_fit_completed": true,
+      "real_hourly_forecast_accepted": false,
+      "epoch_id": "hds2_epoch_665b321ae4c05ab8b5bc9ff4e84bae6e7c1daea010409b25",
+      "last_saved_runner_progress": {
+        "attempts": 381,
+        "pages": 362,
+        "elapsed_seconds": 1592.0,
+        "state": "completed",
+        "collection_full_coverage_verified": false,
+        "record": "artifacts/market-risk-implementation-20261007/B2/release37/real-missing37_01/final.json",
+        "fit_completed": false,
+        "completed_jobs": 3
+      },
+      "PC_status_readback": {
+        "at": "2026-10-09T17:51:00Z",
+        "completed_jobs": 3,
+        "BTC_attempts": 190,
+        "ETH_attempts": 191,
+        "hourly_BTC": "blocked_trusted_model_not_configured",
+        "hourly_ETH": "blocked_trusted_model_not_configured",
+        "record": "artifacts/mr-pc37b/history-before-fit37b_01.txt"
+      },
+      "dataset_id": "hds2_dataset_00b148d58eb476f623ee6106b6617847c3782bb8b7dc0f09",
+      "dataset_known_asof": "2026-10-09T17:56:52.327415Z",
+      "actual_fit_record": "artifacts/market-risk-implementation-20261007/B2/release37/real-freeze-fit-handoff37_01.json",
+      "old_plan_missing_minutes": 108240,
+      "runtime_actual_model_grants": true,
+      "real_forecast_original_PC_accepted": true,
+      "V2_outcome_labels_and_paired_score_accepted": false,
+      "real_explicit_forecasts_saved_and_readback": true,
+      "real_forecast_original_PC_ETH_accepted": true,
+      "real_forecast_original_BTC_API_accepted": true,
+      "PC_BTC_selection_accepted": true,
+      "actual_forecasts_record": "artifacts/market-risk-implementation-20261007/B2/release38/forecast-metadata38_01.json",
+      "whole_pipeline_timeliness_accepted": false,
+      "producer_seconds": {
+        "BTC": 96.25,
+        "ETH": 92.938
+      },
+      "actual_hour19": "two_blocked_deadline_reached_no_saved_forecast",
+      "actual_hour19_record": "artifacts/market-risk-implementation-20261007/B2/release38/hour19-reconciliation38_01.json",
+      "actual_hour19_record_sha256": "79fe7d0068757a812945d7db8d4115160e3328e36fe2e9cb953d5aa03b2ce023",
+      "short_writer39_accepted": false,
+      "short_writer39_installed": true,
+      "actual39_forecast_record": "artifacts/market-risk-implementation-20261007/B2/release39/forecast-explicit39_01/ETH-receipt.json",
+      "actual39_phase_record": "artifacts/market-risk-implementation-20261007/B2/release39/actual-phases39_01.json",
+      "actual39_phase_sha256": "f03a94702f1c0ec256f2670e9e46a3c48ff0ca6a0aefa0677af802725ec37095",
+      "actual39_phases_seconds": {
+        "ACK": 60.62648269999772,
+        "commit": 0.0074275999795645475,
+        "deep_verified_at": "2026-10-09T19:54:52.944056+00:00",
+        "deep_verify": 37.092330000014044,
+        "feature_transfer": 10.417299799970351,
+        "file_bytes_per_pass": 208395540,
+        "file_count": 1061,
+        "model_authenticated_at": "2026-10-09T19:55:16.983878+00:00",
+        "produced_at": "2026-10-09T19:55:16.984875+00:00",
+        "readback": 4.496748699981254,
+        "recorded_at": "2026-10-09T19:55:21.193137+00:00",
+        "row_count_per_pass": 254444,
+        "row_sql_batches_per_pass": 372,
+        "writer_hold": 8.614715999981854,
+        "writer_wait": 0.0002462000120431185
+      },
+      "actual39_writer_hold_seconds": 8.614715999981854,
+      "actual39_PC_screenshots": [
+        "artifacts/mr-pc39/btc38-original-verified39_01.png",
+        "artifacts/mr-pc39/eth38-original-verified39_01.png"
+      ],
+      "actual39_old_original_compatibility": true,
+      "actual_hour20": "two_blocked_cancelled_before_write_no_saved_forecast",
+      "actual_hour20_record": "artifacts/market-risk-implementation-20261007/B2/release39/core39-runtime-first-failure01.json",
+      "actual_hour20_deep_seconds": [
+        87.766,
+        89.625
+      ]
+    },
+    "fixed_original_trial": {
+      "fit_windows": 0,
+      "required_fit_windows": 60,
+      "group_windows": 0,
+      "required_group_windows": 30,
+      "frozen": true,
+      "end_bj": "2026-11-04 08:00",
+      "last_path_bj": "2026-11-05 08:01",
+      "last_label_bj": "2026-11-06 08:01"
+    },
+    "whole_product_accepted": false,
+    "financial_qualified": false,
+    "all_buttons_accepted": false,
+    "build_receipt": {
+      "path": "artifacts/mr-release-b2b4-46/product-validated-builds.json",
+      "sha256": "75e0be98f2386eb955f485f390d461ba3271c71c2fb4d6ffe98619299b935027",
+      "bytes": 162519
+    },
+    "startup_first_failure": {
+      "phase": "hub_api_import",
+      "cause": "unpublished_DEV_evidence_input_routes_missing",
+      "SDK_execution_started": false,
+      "record": "artifacts/market-risk-implementation-20261007/B2/release37/STARTUP_FIRST_FAILURE37.md"
+    },
+    "ready_receipt": {
+      "path": "artifacts/market-risk-implementation-20261007/B2/release46/ready46_03.json",
+      "sha256": "2b3ba53b045bff9a823e4ac0c90a9a91b513b91e2bca0c65aa35c40f73bc2952",
+      "bytes": 4419
+    },
+    "new_real_research": {
+      "request_id": "riskresearch_e76265cee05030faf339f57cf28c915f88079749",
+      "run_id": "run_dbce68caf06e41f799c5a2b5a6d1c8ce",
+      "status": "completed",
+      "run_status": "degraded",
+      "attempts": 1,
+      "created_at": "2026-10-09T19:56:10.892867Z",
+      "error_code": null,
+      "release": "39",
+      "submitted_once_from_PC": true,
+      "scope": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "record": "artifacts/market-risk-implementation-20261007/B2/release39/eth-actual39_01/receipt07.json",
+      "record_sha256": "32420708c613c5cc96756189c64adc2dcaa18ef5189bc264c4390db915d4755e",
+      "complete_report_accepted": false,
+      "automatic_retry": false,
+      "evidence_count": 14,
+      "public_status": "research_only",
+      "artifact_id": "art_51aea03b626f4cb694bb0e825e8a221a",
+      "review_count": 1,
+      "report_original_and_PC_verified": true,
+      "report_original_bytes": 308477,
+      "report_original_sha256": "f3c1629fd171f4b21e03afcfb6829515325d91cb4c051dfdb1644bff6211c523",
+      "quality_GET_seconds": 22.34299999999348,
+      "download_GET_seconds": 45.03200000000652,
+      "quality_status": "available",
+      "direction_status": "blocked",
+      "path_risk_status": "blocked",
+      "execution_status": "blocked",
+      "factual_status": "complete",
+      "context_status": "complete",
+      "report_status": "complete",
+      "actual_tool_schema_failures": 3,
+      "final_review_checkpoint_count": 1,
+      "verified_conversation_calls": 20,
+      "usage_total_unknown": true,
+      "PC_record": "artifacts/market-risk-implementation-20261007/B2/release39/eth-terminal39_01/pc-download39_01.json",
+      "actual_PC_screenshot": "artifacts/mr-pc39/eth39-report-terminal_01.png",
+      "financial_qualified": false
+    },
+    "source_promotions": [
+      {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release39/promotion39.json",
+        "sha256": "6f031819e53ee0e837c531e96922a0e4b7c8c5601c5b6b4421df5076fa658fd0"
+      },
+      {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release44/promotion44.json",
+        "sha256": "5c869c2003ce93261d1875a5e28ea8bac2f1699a9dbb7c7d935d1ba0debee90c"
+      }
+    ],
+    "continuous_health_failure": {
+      "path": "artifacts/market-risk-implementation-20261007/B2/release38/ready38_02.json",
+      "sha256": "a4be97f60b204e7c298d26c7d090d5cf38d291b4d8b1a4c669aa51fbf72aec4f",
+      "services_reachable": true,
+      "error": "realtime_channel_failed_SQLITE_BUSY_BEGIN",
+      "lock_holder_proven": false
+    },
+    "previous_research37b": {
+      "scope": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "submitted_once_from_PC": true,
+      "PC_status": "failed",
+      "record": "artifacts/market-risk-implementation-20261007/B2/release37/ETH_FAILURE37B.md",
+      "complete_report_accepted": false,
+      "request_id": "riskresearch_e9604a1b9479048d57af7afa47b4b9a675a3540d",
+      "run_id": "run_f56125df45eb416799fcc5cf0582f313",
+      "created_at": "2026-10-09T17:45:01.856634Z",
+      "artifact_id": null,
+      "evidence_count": 14,
+      "tool_calls": 10,
+      "reason": "dsh_provider_emission_transport_timeout",
+      "release": "37b",
+      "status": "failed"
+    },
+    "previous_research38": {
+      "request_id": "riskresearch_97c5c7bb0f6ac368acfcb601a382cefb9ea7f331",
+      "run_id": "run_303ef0e775b547fca04710b05ee0f1b5",
+      "status": "failed",
+      "run_status": "failed",
+      "attempts": 1,
+      "created_at": "2026-10-09T18:45:18.827611Z",
+      "error_code": null,
+      "release": "38",
+      "submitted_once_from_PC": true,
+      "scope": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "record": "artifacts/market-risk-implementation-20261007/B2/release38/eth-actual38_01/first-cause38_01.json",
+      "complete_report_accepted": false,
+      "artifact_id": null,
+      "PC_status": "failed",
+      "evidence_count": 14,
+      "review_count": 0,
+      "public_error_code": "research_status_storage_pending",
+      "native_error_code": "dsh_model_binding_unavailable",
+      "first_cause": "model_binding_begin_immediate_sqlite_busy",
+      "writer_wait_ms": 11050.742,
+      "failed_binding_operation_committed": false,
+      "lock_holder_proven": false,
+      "automatic_retry": false,
+      "record_sha256": "e09c1d7c8fa66491cb817bb6ac58879505c3eb5adddb6a66a19602efa2b3d873",
+      "actual_PC_screenshot": "artifacts/mr-pc38/eth38-model-binding-failure_01.png"
+    },
+    "continuous_health_failure39": {
+      "record": "artifacts/market-risk-implementation-20261007/B2/release39/core39-runtime-first-failure01.json",
+      "first_failure_events": 8,
+      "lock_holder_proven": false
+    },
+    "core_architecture41": {
+      "status": "installed46_qualificationP_explicit_serving_config_prepared_ReadyP_natural_hourly_ACK_lock_native_audit_pending",
+      "contract": "docs/design/market-risk-v1/CORE_SERVING_REDESIGN.md",
+      "target_writer_hold_seconds": 0.5,
+      "hourly_original_budget_seconds": 90,
+      "opportunity_publication_deadline_seconds": 300,
+      "financial_qualified": false
+    },
+    "research_output42": {
+      "status": "installed45b_standard_HostP_new_real_Run_unverified",
+      "contract": "docs/design/market-risk-v1/RESEARCH_OUTPUT_REMEDIATION.md",
+      "model_visible_nested_canonical_schema": true,
+      "strict_validator_and_raw_provider_attestation_unchanged": true,
+      "new_real_Run_verified": false,
+      "whole_Host_type_gate": "failed_existing_missing_DSH_peer_types",
+      "report_read_performance_accepted": false,
+      "financial_qualified": false
+    },
+    "research_output43": {
+      "UI_status": "installed45b_PC_legacy_report_qualification_Chinese_and_bytes_restored",
+      "UI_seal": "artifacts/market-risk-implementation-20261007/B2/research-output-ui43/candidate-source-seal43_01.json",
+      "UI_seal_sha256": "54d0a06b3efc188c053c01997964d2d827f1f0ecea442fb1952240b436b4965a",
+      "quality_shape_candidate": "HOLD_actual_49.375s_vs_51s_not_2s_goal",
+      "quality_production_restored_equal_formal39": true,
+      "report_performance_accepted": false,
+      "new_formal_PC_verified": false,
+      "whole_product_accepted": false,
+      "financial_qualified": false,
+      "qualification_notice_actual_PC_verified": true,
+      "Chinese_terms_actual_PC_verified": true,
+      "PC_original_report_compatibility_verified": true,
+      "actual_PC_evidence": {
+        ".png": {
+          "path": "artifacts/mr-pc45/eth39-restored45_01.png",
+          "sha256": "0d84cc97b97b748808e73c916def778a2e94232fc9b599c9fd74f504a0403994"
+        },
+        ".txt": {
+          "path": "artifacts/mr-pc45/eth39-restored45_01.txt",
+          "sha256": "0bf15f2f71714cd548109ad3981b9a73eb53fbe15a6b9d65c84ea5ce34ba3f59"
+        }
+      }
+    },
+    "core44_preparation": {
+      "status": "installed69_prod48_migration0090_build1UI1HostP_Ready3HTTP2007fresh_qualificationF_legacy_report_compatibilityF",
+      "core41_source_seal_sha256": "88695adbeda058234843cbaa9659774dd7da419f6ff1a2efaad31abea467d7e5",
+      "core41_controls": "10P_synthetic_private",
+      "selected_core_schema_UI_files": 19,
+      "selected_production_files": 15,
+      "outcome40_bridge_final_seal_pending": false,
+      "outcome40_real_tuple_interface_defect": "corrected_and_installed44_real_registration_unverified",
+      "minimal_composition": "installed44_AST_and_explicit_launch_controls_passed",
+      "explicit_policy_launch_controls": "5_boundaries_plus_outcome_qualification_parent_passed",
+      "prestop_at": "2026-10-09T21:18:17.334404+00:00",
+      "prestop_receipt": "artifacts/market-risk-implementation-20261007/B2/release44/prestop44_01.json",
+      "actual_model_qualification_verified": false,
+      "actual_writer_hold_0_5_verified": false,
+      "held_quality_cache_included": false,
+      "report_serving_design": "docs/design/market-risk-v1/REPORT_SERVING_REDESIGN.md",
+      "report_serving_implemented": false,
+      "whole_product_accepted": false,
+      "financial_qualified": false,
+      "promotion": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release44/promotion44.json",
+        "sha256": "5c869c2003ce93261d1875a5e28ea8bac2f1699a9dbb7c7d935d1ba0debee90c"
+      },
+      "migration": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release44/migration44_02.json",
+        "sha256": "9db792de8eb337bc8ff350bb8ff69ac7e8162155784b4bd14c94506edf39101b"
+      },
+      "backup_bytes": 3916283904,
+      "new_table_count": 9,
+      "original_table_DML": 0,
+      "DB_restore": 0,
+      "build_receipt": {
+        "path": "artifacts/mr-release-b2b4-44/product-validated-builds.json",
+        "sha256": "e961be925c04b3e6ec17b8f8b4bea89a3882269276717b85427598e3ed0f396f"
+      },
+      "UI_build_attempts": 1,
+      "Host_build_attempts": 1,
+      "qualification_first_failure": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release44/qualification44_01.json",
+        "sha256": "1c25f20897c2f8be47cf22208948e20c70fe3ab3d3668054af48d155dda08d74"
+      },
+      "qualification_failure_readonly": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release44/qualification-failure-readonly44_01.json",
+        "sha256": "8216992bc5464c688d416cd33d4c32096a6ab0fa1e192a5ef1f30f0cc6ae1c7c"
+      },
+      "qualification_error_code": "history_qualification_native_batch_memory_bound_reached",
+      "qualification_outcome": "unconfirmed",
+      "qualification_elapsed_seconds": 85.625,
+      "native_single_row_payload_bytes": 154343617,
+      "native_batch_bound_bytes": 16777216,
+      "qualification_tables_empty": true,
+      "qualification_fence_count": 0,
+      "qualification_automatic_retry": false,
+      "serving_grants": {},
+      "outcome_protocol_ids": [],
+      "actual_48_opportunities_registered": false,
+      "Ready_verified": true,
+      "DEV45_status": "bounded_native_copy_evaluation_only_not_installed",
+      "original_freeze_max_bytes": 536870912,
+      "original_freeze_max_rows": 300000,
+      "original_freeze_budget_seconds": 180,
+      "combined_source_files": 69,
+      "combined_production_files": 48,
+      "ready_receipt": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release44/ready44_02.json",
+        "sha256": "d1577750b83724e3473747230384ca0df0a6c1535832c5a3a56e0c24df65c504"
+      }
+    },
+    "historical_runtime39_before44": {
+      "observed_at": "2026-10-09T19:58:12.601892+00:00",
+      "source_release": "39",
+      "runtime_release": "39",
+      "target_release": "39",
+      "runtime_state": "standard39_running_ETH_report_original_and_PC_verified_hour20_both_failed_core41_pending",
+      "schema": "0088_history_hourly_v2",
+      "services_online": 7,
+      "source_promotion": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release37/promotion37.json",
+        "sha256": "e35d2001790e7505a8cd75c32c8de4702f1055ddf251a618c081b6cb1de6ade0"
+      },
+      "build_receipt": {
+        "path": "artifacts/mr-release-b2b4-39/product-validated-builds.json",
+        "sha256": "f8214f963ad9839e4c05b84338a9e8c2d98a683a82424ae926ec778c409a665b"
+      },
+      "ready_receipt": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release39/ready39_04.json",
+        "sha256": "fb0990d5034435e5e7780b2e0b2d0c968b9df613a29072a573fbeca9759f03c8",
+        "continuous_health_proven": false
+      }
+    },
+    "last_successful_ready": {
+      "path": "artifacts/market-risk-implementation-20261007/B2/release45/ready45_02.json",
+      "sha256": "c7f2521632f4515d36bfbf089be2a1bb10a08ef0d9d3584344143b9b0cb69764"
+    },
+    "startup44_first_not_ready": {
+      "path": "artifacts/market-risk-implementation-20261007/B2/release44/ready44_01.json",
+      "sha256": "fa24a8acf71e00a36eee9d027b8a26e3d32753f529301ec2c73fc18d5f853f5b"
+    },
+    "launch_id": "20261009T235627003Z",
+    "continuous_health_proven": false,
+    "current44_legacy_report_compatibility": {
+      "status": "failed_required45_gate",
+      "run_id": "run_dbce68caf06e41f799c5a2b5a6d1c8ce",
+      "HTTP_status": 409,
+      "HTTP_elapsed_seconds": 2.4839999999967404,
+      "HTTP_receipt": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release44/old-quality44_01.json",
+        "sha256": "20b66318704f8c8cf1e20328975675bf8d2078535268bb66102b701ee5db9a9a"
+      },
+      "HTTP_body": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release44/old-quality44_01.body.json",
+        "sha256": "09a633c139c423afff9552aee63ed1a6185dbe194c05a32f26498fc138ec92f0"
+      },
+      "independent_readonly_first_cause": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release44/old-quality-firstcause44_01.json",
+        "sha256": "f7f2ca9a3ed50a4ce71338d9a1e9b88a86b4be6454f11cfbc57afbab860aa96b"
+      },
+      "error_code": "research_graph_recipe_v3_selection_changed",
+      "independent_RO_seconds": 2.4060000000172295,
+      "native_changes": [
+        0
+      ],
+      "recipe_identity": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release44/recipe-identity44_01.json",
+        "sha256": "dd9092c5cee3c97b431a6fc0683e94060e001c85ac3b9b67c8e08fdc52142f1f"
+      },
+      "saved_dependency_hash": "b154090e3147614e52248002779531f89a46f08d5c542ddb1890948bd2f480c1",
+      "current_dependency_hash": "1d024d355c37d471c99de25a325cb7195553dbca15c01346ab096b76c4b9a3ea",
+      "same_graph": false,
+      "saved_recipe_in_active_registry": false,
+      "SDK_failure_proven": false,
+      "network_failure_proven": false,
+      "official_retainer_first_cause": "static_review_in_progress",
+      "legacy_original_verification_relaxed": false,
+      "PC_evidence": {
+        ".png": {
+          "path": "artifacts/mr-pc44/eth39-compatibility-first-failure44_01.png",
+          "sha256": "ec9e6e143e1939cfc2417a9b93edc9d73898818556765180fea66cf6ec4a6437"
+        },
+        ".txt": {
+          "path": "artifacts/mr-pc44/eth39-compatibility-first-failure44_01.txt",
+          "sha256": "cc8ac156b3c8d7add152c002d99183dc5190c66a413d3a35e967bd5c48beaa47"
+        }
+      },
+      "full_PC_accepted": false,
+      "financial_qualified": false
+    },
+    "historical_runtime44_before45": {
+      "observed_at": "2026-10-09T21:56:20.727484+00:00",
+      "source_release": "44",
+      "runtime_release": "44",
+      "runtime_state": "standard44_Ready3HTTP200_7freshonline_qualification_F_serving_empty_PC_noticeChineseP_legacy_ETH_quality409_recipe_selection_changed",
+      "build_receipt": {
+        "path": "artifacts/mr-release-b2b4-44/product-validated-builds.json",
+        "sha256": "e961be925c04b3e6ec17b8f8b4bea89a3882269276717b85427598e3ed0f396f"
+      },
+      "ready_receipt": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release44/ready44_02.json",
+        "sha256": "d1577750b83724e3473747230384ca0df0a6c1535832c5a3a56e0c24df65c504"
+      },
+      "core44_preparation": {
+        "status": "installed69_prod48_migration0090_build1UI1HostP_Ready3HTTP2007fresh_qualificationF_legacy_report_compatibilityF",
+        "core41_source_seal_sha256": "88695adbeda058234843cbaa9659774dd7da419f6ff1a2efaad31abea467d7e5",
+        "core41_controls": "10P_synthetic_private",
+        "selected_core_schema_UI_files": 19,
+        "selected_production_files": 15,
+        "outcome40_bridge_final_seal_pending": false,
+        "outcome40_real_tuple_interface_defect": "corrected_and_installed44_real_registration_unverified",
+        "minimal_composition": "installed44_AST_and_explicit_launch_controls_passed",
+        "explicit_policy_launch_controls": "5_boundaries_plus_outcome_qualification_parent_passed",
+        "prestop_at": "2026-10-09T21:18:17.334404+00:00",
+        "prestop_receipt": "artifacts/market-risk-implementation-20261007/B2/release44/prestop44_01.json",
+        "actual_model_qualification_verified": false,
+        "actual_writer_hold_0_5_verified": false,
+        "held_quality_cache_included": false,
+        "report_serving_design": "docs/design/market-risk-v1/REPORT_SERVING_REDESIGN.md",
+        "report_serving_implemented": false,
+        "whole_product_accepted": false,
+        "financial_qualified": false,
+        "promotion": {
+          "path": "artifacts/market-risk-implementation-20261007/B2/release44/promotion44.json",
+          "sha256": "5c869c2003ce93261d1875a5e28ea8bac2f1699a9dbb7c7d935d1ba0debee90c"
+        },
+        "migration": {
+          "path": "artifacts/market-risk-implementation-20261007/B2/release44/migration44_02.json",
+          "sha256": "9db792de8eb337bc8ff350bb8ff69ac7e8162155784b4bd14c94506edf39101b"
+        },
+        "backup_bytes": 3916283904,
+        "new_table_count": 9,
+        "original_table_DML": 0,
+        "DB_restore": 0,
+        "build_receipt": {
+          "path": "artifacts/mr-release-b2b4-44/product-validated-builds.json",
+          "sha256": "e961be925c04b3e6ec17b8f8b4bea89a3882269276717b85427598e3ed0f396f"
+        },
+        "UI_build_attempts": 1,
+        "Host_build_attempts": 1,
+        "qualification_first_failure": {
+          "path": "artifacts/market-risk-implementation-20261007/B2/release44/qualification44_01.json",
+          "sha256": "1c25f20897c2f8be47cf22208948e20c70fe3ab3d3668054af48d155dda08d74"
+        },
+        "qualification_failure_readonly": {
+          "path": "artifacts/market-risk-implementation-20261007/B2/release44/qualification-failure-readonly44_01.json",
+          "sha256": "8216992bc5464c688d416cd33d4c32096a6ab0fa1e192a5ef1f30f0cc6ae1c7c"
+        },
+        "qualification_error_code": "history_qualification_native_batch_memory_bound_reached",
+        "qualification_outcome": "unconfirmed",
+        "qualification_elapsed_seconds": 85.625,
+        "native_single_row_payload_bytes": 154343617,
+        "native_batch_bound_bytes": 16777216,
+        "qualification_tables_empty": true,
+        "qualification_fence_count": 0,
+        "qualification_automatic_retry": false,
+        "serving_grants": {},
+        "outcome_protocol_ids": [],
+        "actual_48_opportunities_registered": false,
+        "Ready_verified": true,
+        "DEV45_status": "bounded_native_copy_evaluation_only_not_installed",
+        "original_freeze_max_bytes": 536870912,
+        "original_freeze_max_rows": 300000,
+        "original_freeze_budget_seconds": 180,
+        "combined_source_files": 69,
+        "combined_production_files": 48,
+        "ready_receipt": {
+          "path": "artifacts/market-risk-implementation-20261007/B2/release44/ready44_02.json",
+          "sha256": "d1577750b83724e3473747230384ca0df0a6c1535832c5a3a56e0c24df65c504"
+        }
+      },
+      "current44_legacy_report_compatibility": {
+        "status": "failed_required45_gate",
+        "run_id": "run_dbce68caf06e41f799c5a2b5a6d1c8ce",
+        "HTTP_status": 409,
+        "HTTP_elapsed_seconds": 2.4839999999967404,
+        "HTTP_receipt": {
+          "path": "artifacts/market-risk-implementation-20261007/B2/release44/old-quality44_01.json",
+          "sha256": "20b66318704f8c8cf1e20328975675bf8d2078535268bb66102b701ee5db9a9a"
+        },
+        "HTTP_body": {
+          "path": "artifacts/market-risk-implementation-20261007/B2/release44/old-quality44_01.body.json",
+          "sha256": "09a633c139c423afff9552aee63ed1a6185dbe194c05a32f26498fc138ec92f0"
+        },
+        "independent_readonly_first_cause": {
+          "path": "artifacts/market-risk-implementation-20261007/B2/release44/old-quality-firstcause44_01.json",
+          "sha256": "f7f2ca9a3ed50a4ce71338d9a1e9b88a86b4be6454f11cfbc57afbab860aa96b"
+        },
+        "error_code": "research_graph_recipe_v3_selection_changed",
+        "independent_RO_seconds": 2.4060000000172295,
+        "native_changes": [
+          0
+        ],
+        "recipe_identity": {
+          "path": "artifacts/market-risk-implementation-20261007/B2/release44/recipe-identity44_01.json",
+          "sha256": "dd9092c5cee3c97b431a6fc0683e94060e001c85ac3b9b67c8e08fdc52142f1f"
+        },
+        "saved_dependency_hash": "b154090e3147614e52248002779531f89a46f08d5c542ddb1890948bd2f480c1",
+        "current_dependency_hash": "1d024d355c37d471c99de25a325cb7195553dbca15c01346ab096b76c4b9a3ea",
+        "same_graph": false,
+        "saved_recipe_in_active_registry": false,
+        "SDK_failure_proven": false,
+        "network_failure_proven": false,
+        "official_retainer_first_cause": "static_review_in_progress",
+        "legacy_original_verification_relaxed": false,
+        "PC_evidence": {
+          ".png": {
+            "path": "artifacts/mr-pc44/eth39-compatibility-first-failure44_01.png",
+            "sha256": "ec9e6e143e1939cfc2417a9b93edc9d73898818556765180fea66cf6ec4a6437"
+          },
+          ".txt": {
+            "path": "artifacts/mr-pc44/eth39-compatibility-first-failure44_01.txt",
+            "sha256": "cc8ac156b3c8d7add152c002d99183dc5190c66a413d3a35e967bd5c48beaa47"
+          }
+        },
+        "full_PC_accepted": false,
+        "financial_qualified": false
+      },
+      "research_output43": {
+        "UI_status": "installed44_actual_PC_qualification_notice_and_Chinese_P_legacy_ETH_quality_compatibility_F",
+        "UI_seal": "artifacts/market-risk-implementation-20261007/B2/research-output-ui43/candidate-source-seal43_01.json",
+        "UI_seal_sha256": "54d0a06b3efc188c053c01997964d2d827f1f0ecea442fb1952240b436b4965a",
+        "quality_shape_candidate": "HOLD_actual_49.375s_vs_51s_not_2s_goal",
+        "quality_production_restored_equal_formal39": true,
+        "report_performance_accepted": false,
+        "new_formal_PC_verified": false,
+        "whole_product_accepted": false,
+        "financial_qualified": false,
+        "qualification_notice_actual_PC_verified": true,
+        "Chinese_terms_actual_PC_verified": true,
+        "PC_original_report_compatibility_verified": false,
+        "actual_PC_evidence": {
+          ".png": {
+            "path": "artifacts/mr-pc44/eth39-compatibility-first-failure44_01.png",
+            "sha256": "ec9e6e143e1939cfc2417a9b93edc9d73898818556765180fea66cf6ec4a6437"
+          },
+          ".txt": {
+            "path": "artifacts/mr-pc44/eth39-compatibility-first-failure44_01.txt",
+            "sha256": "cc8ac156b3c8d7add152c002d99183dc5190c66a413d3a35e967bd5c48beaa47"
+          }
+        }
+      },
+      "launch_id": "20261009T214711025Z"
+    },
+    "core45_actual": {
+      "source_files": 8,
+      "production_files": 5,
+      "promotion": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release45/promotion45_02.json",
+        "sha256": "f2caf467e1abbcef9e9b5a9e25370a298f327962f5c802ea1295394b43d20dfa"
+      },
+      "migrations": 0,
+      "DB_restore": 0,
+      "UI_build_attempts": 1,
+      "Host_build_attempts": 1,
+      "build": {
+        "path": "artifacts/mr-release-b2b4-45b/build-execution.json",
+        "sha256": "0fac4494b5d24f43cc5baa597b3e8e624e59631d2b3e62c7a374f6fb05be9e5f"
+      },
+      "validated_receipt": {
+        "path": "artifacts/mr-release-b2b4-45b/product-validated-builds.json",
+        "sha256": "d39109a3c61f0ee05948c464592e912f4050a99b5e4825a103d60a8df4073dbf"
+      },
+      "ready": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release45/ready45_02.json",
+        "sha256": "c7f2521632f4515d36bfbf089be2a1bb10a08ef0d9d3584344143b9b0cb69764"
+      },
+      "ready_at": "2026-10-09T23:09:06.990883+00:00",
+      "continuous_health_proven": false,
+      "first_standard45_failure": {
+        "receipt": {
+          "path": "artifacts/mr-release-b2b4-45/build-execution.json",
+          "sha256": "fae0db056f73d4817492c13645abac243841dc891a0890ac4c9fd55557af003f"
+        },
+        "retention_cause": "retention_selected_v3_not_registered",
+        "UI_attempts": 0,
+        "Host_attempts": 0,
+        "pointer_writes": 0
+      },
+      "automatic_run_closure": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release45/maintenance-cancel45_01.json",
+        "sha256": "db6ae61cf3c4bac7b35fe3b040630e3b1948dd3e2354897d3173c49eb68b9abd"
+      },
+      "future_release_sequence": [
+        "close_automatic_research_and_inflight_runs",
+        "standard_stop",
+        "freeze_selected_installation_set",
+        "exact_retention_coverage",
+        "standard_build",
+        "Ready"
+      ],
+      "retention": {
+        "receipt": {
+          "path": "artifacts/mr-release-b2b4-45b/retention/retained-recipe-preparation.json",
+          "sha256": "7015aa33ee6bd65ea7e525d8996f784d2f66eff87ae9b26947a1e056f410f06a"
+        },
+        "capture_count": 8,
+        "capture_set": {
+          "path": "artifacts/market-risk-implementation-20261007/B2/release45/capture-set45_03.json",
+          "sha256": "02b51aafcc440bf7cd3425070a4662bcd3dcac0ad73bd707ade2da8098ba90fe"
+        },
+        "run_count": 838,
+        "native_selection_count": 122,
+        "V3": 45,
+        "V2": 77,
+        "archive_count": 52,
+        "exact_installation_coverage_passed": true,
+        "every_user_report_flow_verified": false
+      },
+      "qualification": {
+        "receipt": {
+          "path": "artifacts/market-risk-implementation-20261007/B2/release45/qualification45_01.json",
+          "sha256": "5dba5917502747ad250d6bcac27384c2411f47ad5ae9159279f19f2eba163135"
+        },
+        "outcome": "unconfirmed",
+        "elapsed_seconds": 105.95299999997951,
+        "error_code": "history_qualification_retention_bound_reached",
+        "phase": "native_copy_capacity_bound",
+        "first_capacity_branch_proven": false,
+        "tables_and_fences": {
+          "path": "artifacts/market-risk-implementation-20261007/B2/release45/prestop45_04.json",
+          "sha256": "dc19c1a460fc7b75807277ca169fe0c5c2bfe3a8c38919997d89bb7e22b702b7"
+        },
+        "qualification_tables_empty": true,
+        "qualification_fence_count": 0,
+        "automatic_retry": false,
+        "model_fits": 0
+      },
+      "native_capacity_measurement": {
+        "metadata": {
+          "path": "artifacts/market-risk-implementation-20261007/B2/release45/qualification-native-size-forensics45_01.json",
+          "sha256": "b6e803583a6d054c11e099f8bab6423421f8f70bf79952671a7b3b291b5a952c"
+        },
+        "aggregate": {
+          "path": "artifacts/market-risk-implementation-20261007/B2/release45/qualification-native-size-complement45_01.json",
+          "sha256": "7e40b5747c1c0fd0dabec1a8a9d12e4818fd5637f00fe03d0ce143d570f5ebf5"
+        },
+        "rows": 254390,
+        "copy45_nominal_native_bytes": 470655492,
+        "text_blob_bytes_lower_bound": 468596556,
+        "sqlite_image_page_index_bytes": null,
+        "single_row_over512MiB_found": false
+      },
+      "serving_grants": {},
+      "outcome_protocol_ids": [],
+      "actual_48_opportunities_registered": false,
+      "actual_model_qualification_verified": false,
+      "actual_writer_hold_0_5_verified": false,
+      "actual_natural_hour_90_verified": false,
+      "full_PC_verified": false,
+      "hourly_Chinese_PC_verified": true,
+      "hourly_Chinese_PC_state": "actual23UTC_two_first_conditions_unqualified_ungranted_no_probability",
+      "financial_qualified": false,
+      "whole_product_accepted": false,
+      "history_PC": {
+        "DOM": {
+          "path": "artifacts/mr-pc45/history-status45_01.txt",
+          "sha256": "d35a653e861d243a824565a4711b8cdd251f4d6a5d9b969ffacb60f4ea04d467"
+        },
+        "screenshot": {
+          "path": "artifacts/mr-pc45/history-status45_01.png",
+          "sha256": "cb9e61e5c442d7f10ccd4e5e03f724c69053d3b2a67aaa97c783e7ea9e105c83"
+        },
+        "route": "#/history-status",
+        "routine_token_renewal_verified": true,
+        "samples_per_asset": {
+          "days": 87,
+          "low": 44,
+          "high": 43
+        },
+        "actual_hour_UTC": "2026-10-09T23:00:00Z",
+        "current_forecast_probability_shown": false,
+        "production_permission": false,
+        "formal_forward_batch_present": false,
+        "new_forecast_original_verified": false,
+        "full_PC_verified": false
+      },
+      "automatic_research_latest_readback": {
+        "receipt": {
+          "path": "artifacts/market-risk-implementation-20261007/B2/release45/automatic_research_readback45_01.json",
+          "sha256": "8f2394c5ed596ccf8ed74e3529bd3c366675f06267ce96786d8500b4fa141038"
+        },
+        "BTC": "latest_request_bound_maintenance_run_and_DSH_cancelled_with_real_terminal_at",
+        "ETH": "latest_auto_request_three_failed_study_host_terminal_unknown_at22:38:26UTC_run_id_null",
+        "maintenance_cancel_recovery_defect_proven": false,
+        "ETH_complete_Host_inactive_verified": false,
+        "future_normal_research_verified": false,
+        "future_natural_automatic_trigger_verified": false,
+        "automatic_fourth_retry": false
+      }
+    },
+    "current45_legacy_report_compatibility": {
+      "status": "actual_same_ETH39_original_and_browser_bytes_restored",
+      "run_id": "run_dbce68caf06e41f799c5a2b5a6d1c8ce",
+      "quality_HTTP_status": 200,
+      "quality_seconds": 30.64100000000326,
+      "quality_bytes": 394425,
+      "quality": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release45/old-quality45_01.json",
+        "sha256": "cb2126e0811e84d77114b3cabc88dade5d470eecc9fb5723ca139097ec675f1b"
+      },
+      "original_report": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release45/old-quality-report-bytes45_01.json",
+        "sha256": "abfa35bcf65802338a1263163c966c055915ecde973117ff3f63c9f4c1865ffe"
+      },
+      "browser_download": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release45/browser-download45_01.json",
+        "sha256": "8ae2abeac03d9a6ba029d8fa1dc74c7d66c2d063f6a2fc82fb88edd42bf18955"
+      },
+      "browser_download_verified": true,
+      "report_original_bytes": 308477,
+      "report_original_sha256": "f3c1629fd171f4b21e03afcfb6829515325d91cb4c051dfdb1644bff6211c523",
+      "same_original39": true,
+      "PC_screenshot": {
+        "path": "artifacts/mr-pc45/eth39-restored45_01.png",
+        "sha256": "0d84cc97b97b748808e73c916def778a2e94232fc9b599c9fd74f504a0403994"
+      },
+      "PC_DOM": {
+        "path": "artifacts/mr-pc45/eth39-restored45_01.txt",
+        "sha256": "0bf15f2f71714cd548109ad3981b9a73eb53fbe15a6b9d65c84ea5ce34ba3f59"
+      },
+      "performance_2s_accepted": false,
+      "all_old_reports_verified": false,
+      "full_PC_accepted": false,
+      "financial_qualified": false
+    },
+    "core46_candidate": {
+      "status": "formally_installed_buildP_qualification156.687sP_outcome48_registered_ReadyP_natural_first_hour_audit_pending",
+      "contract": "docs/design/market-risk-v1/MODEL_FREEZE_CAPACITY_DESIGN.md",
+      "production_modules": 1,
+      "source_pinned": true,
+      "original_V3_all512_rules_preserved": true,
+      "V4_native_bytes": 805306368,
+      "V4_unpacked_bytes": 1073741824,
+      "V4_staging_bytes": 2147483648,
+      "V4_packed_bytes": 536870912,
+      "compression": "ZIP_DEFLATED",
+      "compression_level": 1,
+      "original_budget_seconds": 180,
+      "original_max_rows": 300000,
+      "native_batch_bytes": 16777216,
+      "chunk_bytes": 1048576,
+      "complete_native_columns_and_originals_preserved": true,
+      "real_compression": "ZIP_DEFLATED_level1_actual232543272byte_complete_bundle",
+      "real_capacity": "complete_two_model_freeze_publish_confirm_passed_original_contract",
+      "real_180s_runtime": 156.68700000003446,
+      "formal_installed": true,
+      "qualification_passed": true,
+      "financial_qualified": false,
+      "DEV_source_sealed": true,
+      "V4_staging_scope": "this_prepare_native_image_SQLite_sidecars_pack_only",
+      "snapshot_unpack_cache_tempfile_bytes": 805306368,
+      "staging_is_global_directory_or_process_RAM_limit": false
+    },
+    "historical_runtime45_before46": {
+      "observed_at": "2026-10-09T23:11:38.288518+00:00",
+      "runtime_release": "45b",
+      "runtime_state": "standard45b_Ready3HTTP200_7fresh_legacy_report_PCbytesP_quality30.641sPerformanceF_qualification105.953sNativeCopyCapacityF_serving_protocol_empty",
+      "services_online": 7,
+      "ready_receipt": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release45/ready45_02.json",
+        "sha256": "c7f2521632f4515d36bfbf089be2a1bb10a08ef0d9d3584344143b9b0cb69764"
+      },
+      "build_receipt": {
+        "path": "artifacts/mr-release-b2b4-45b/product-validated-builds.json",
+        "sha256": "d39109a3c61f0ee05948c464592e912f4050a99b5e4825a103d60a8df4073dbf"
+      },
+      "launch_id": "20261009T230523633Z"
+    },
+    "core46_actual": {
+      "status": "formal46_ReadyP_first_natural_pair_commit_ACK_on_timeP_mature_labels_financial_unverified",
+      "promotion": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release46/promotion46_01.json",
+        "sha256": "b64c7bfab6f4cf7a4f99603c17f7ca1c154e7712a7e5a65244f70a0534fad8eb",
+        "bytes": 1588
+      },
+      "build": {
+        "path": "artifacts/mr-release-b2b4-46/build-execution.json",
+        "sha256": "342dbe131c2aa3ae6d5067b6955553441661183a52ffa4da4b43dc8c1c3061cf",
+        "bytes": 3713
+      },
+      "validated_receipt": {
+        "path": "artifacts/mr-release-b2b4-46/product-validated-builds.json",
+        "sha256": "75e0be98f2386eb955f485f390d461ba3271c71c2fb4d6ffe98619299b935027",
+        "bytes": 162519
+      },
+      "production_files": 1,
+      "total_files": 3,
+      "migrations": 0,
+      "DB_restore": 0,
+      "qualification": {
+        "receipt": {
+          "path": "artifacts/market-risk-implementation-20261007/B2/release46/qualification46_01.json",
+          "sha256": "a0ee6bc290b80566459b670f5a79db57488ca35268b43e7b2fa6d93b11c5ca4c",
+          "bytes": 25906
+        },
+        "passed": true,
+        "outcome": "published_confirmed",
+        "elapsed_seconds": 156.68700000003446,
+        "original_budget_seconds": 180,
+        "model_fits": 0,
+        "automatic_retry": false,
+        "confirmed_scopes": 2,
+        "first_confirmed_versions": [
+          1,
+          1
+        ]
+      },
+      "serving_preparation": {
+        "receipt": {
+          "path": "artifacts/market-risk-implementation-20261007/B2/release46/serving46_01.json",
+          "sha256": "4df1a907add6bd4a00cd5ea8dde22a2b77a39d96d126c5d65b15e56aba3c6c4c",
+          "bytes": 57122
+        },
+        "passed": true,
+        "elapsed_seconds": 2.51500000001397,
+        "physical_readonly": true,
+        "native_changes": 0,
+        "readback_native_rows": 6,
+        "policy_sha256": "e002a4e3f89043e9fffc936e850f12e392d2e1c938cfbb805627c48f381429a3",
+        "policy_written": true,
+        "runtime_loaded_verified": false
+      },
+      "Ready": {
+        "passed": true,
+        "receipt": {
+          "path": "artifacts/market-risk-implementation-20261007/B2/release46/ready46_03.json",
+          "sha256": "2b3ba53b045bff9a823e4ac0c90a9a91b513b91e2bca0c65aa35c40f73bc2952",
+          "bytes": 4419
+        },
+        "observed_at": "2026-10-10T00:00:09.901155+00:00",
+        "three_ready_HTTP200": true,
+        "fresh_services": 7,
+        "launch_id": "20261009T235627003Z",
+        "continuous_health_proven": false,
+        "first_warming_failures": [
+          {
+            "path": "artifacts/market-risk-implementation-20261007/B2/release46/ready46_01.json",
+            "sha256": "99caff53b3235805e40d01855b3fc3759933302899b19bb88fd7f0a7f11232ee",
+            "bytes": 3581
+          },
+          {
+            "path": "artifacts/market-risk-implementation-20261007/B2/release46/ready46_02.json",
+            "sha256": "40ccdfe15d662b8f2a7e8579f0f57352ec09f5ab8b9cde3f39967d2e1af6e4b4",
+            "bytes": 4424
+          }
+        ]
+      },
+      "transport_metrics": {
+        "receipt": {
+          "path": "artifacts/market-risk-implementation-20261007/B2/release46/qualification-transport-metrics46_01.json",
+          "sha256": "3a4bd4d66bee4ee950550bca0bbdea00bbb1e208810439639b62c7b9783a4f2a",
+          "bytes": 719
+        },
+        "passed": true,
+        "native_image_bytes": 572928000,
+        "unique_unpacked_bytes": 795373141,
+        "packed_bytes": 232543272,
+        "zip_entries": 1054,
+        "own_prepare46_residual": [],
+        "staging_peak_bytes": null,
+        "RSS_peak_bytes": null,
+        "staging_scope": "this_prepare_native_image_SQLite_sidecars_pack_only",
+        "global_process_or_RAM_limit_claimed": false
+      },
+      "outcome_registration": {
+        "receipt": {
+          "path": "artifacts/market-risk-implementation-20261007/B2/release46/outcome-registration46_01.json",
+          "sha256": "c8d8c80d624e6dae1cbde86400e71b8e2a595ebc32aa288e1cb3231176e8a0d2",
+          "bytes": 2318
+        },
+        "passed": true,
+        "elapsed_seconds": 18.01600000000326,
+        "original_budget_seconds": 120,
+        "protocol_id": "heval2_6fced3d495f21e2c05c77fbd52f05c49d0236894e745f992",
+        "first_hour": "2026-10-10 00:00:00+00:00",
+        "last_hour": "2026-10-10 23:00:00+00:00",
+        "opportunity_count": 48,
+        "separate_grant": {
+          "receipt": {
+            "path": "artifacts/market-risk-implementation-20261007/B2/release46/outcome-serving46_01.json",
+            "sha256": "a51fc35b5907563fef5a29136a4d87235a28b6b49510dfb02bf2e788e07bf719",
+            "bytes": 168372
+          },
+          "passed": true,
+          "elapsed_seconds": 0.14100000000325963,
+          "native_readbacks": 50,
+          "native_changes": 0,
+          "policy_sha256": "9318fe2fce6c026498e87dab9b5825c0b2ae008e0abba136ae93f9e2332df275",
+          "runtime_loaded_verified": false
+        },
+        "mature_labels_verified": false,
+        "old28day_unchanged": true
+      },
+      "actual_forecast_verified": true,
+      "natural_hourly90s_verified": true,
+      "writer_hold0_5_verified": false,
+      "ACK_verified": true,
+      "PC_verified": false,
+      "financial_qualified": false,
+      "whole_product_accepted": false,
+      "all_buttons_accepted": false,
+      "limited_history_PC": {
+        "DOM": {
+          "path": "artifacts/mr-pc46/outcome-registered46_01.txt",
+          "sha256": "6c73619d54bf3647793a329512aa45dbed845a72abec8f43851101ad5138659b",
+          "bytes": 10956
+        },
+        "screenshot": {
+          "path": "artifacts/mr-pc46/outcome-registered46_01.png",
+          "sha256": "e9fc37baf24f08ede54d5fcdb13d914d4c78b0bb9e002bad6b6ee1571ff53b53",
+          "bytes": 78356
+        },
+        "routine_history_auth_verified": true,
+        "formal_batch_confirmation_displayed": true,
+        "opportunities_displayed": 48,
+        "on_time_displayed": 0,
+        "mature_displayed": 0,
+        "refresh_evaluation_button_verified": true,
+        "natural_hour_PC_DOM": {
+          "path": "artifacts/mr-pc46/natural-hour46_02.txt",
+          "sha256": "c4cfdf57d362a6d0e4c6aa57f47abc4e02476ca18bfcee6d8e272451d6924f9c",
+          "bytes": 22023
+        },
+        "natural_hour_PC_screenshot": {
+          "path": "artifacts/mr-pc46/natural-hour46_02.png",
+          "sha256": "d1868ee393ed726eb86368b349cde99b5ba00e9e0070a9a0f0084da22b261daf",
+          "bytes": 100282
+        },
+        "hour_UTC": "2026-10-10T00:00:00Z",
+        "two_assets_saved_and_post_commit_verified_displayed": true,
+        "actual_native_hour_audit_verified": false,
+        "full_PC_verified": false,
+        "risk_originals": {
+          "DOM": {
+            "path": "artifacts/mr-pc46/both-risk-read46_01.txt",
+            "sha256": "a874de929a1a1b577b5d2c1e89ebb78ec23002b796330a5fec41a7c91cc496e2",
+            "bytes": 26310
+          },
+          "screenshot": {
+            "path": "artifacts/mr-pc46/both-risk-read46_01.png",
+            "sha256": "cf66b2e625ec667583c3afada6c4fef2b2cd8b253c575b31f946aa3ee0836bd5",
+            "bytes": 122034
+          },
+          "ETH_screenshot": {
+            "path": "artifacts/mr-pc46/eth-risk-read46_01.png",
+            "sha256": "61ca4197d7b2780104edc8c8d5749b40dc20269ffa266f5a36c275f51163fa3a",
+            "bytes": 109870
+          },
+          "BTC_fresh_asof_UTC": "2026-10-10T00:00:00Z",
+          "ETH_fresh_asof_UTC": "2026-10-10T00:01:00Z",
+          "both_verified_cards_displayed": 2,
+          "baseline_and_conditional_numbers_displayed": true,
+          "BTC_this_action_end_to_end_ms": 1280,
+          "ETH_exact_action_latency_ms": null,
+          "all_buttons_verified": false,
+          "financial_qualified": false
+        }
+      },
+      "first_natural_pair": {
+        "receipt": {
+          "path": "artifacts/market-risk-implementation-20261007/B2/release46/first-natural-hour-native46_02.json",
+          "sha256": "924ea80c0d548f70ad4602f649eed514a4f2a3fd6bbbf02a05ad562dcb50b733",
+          "bytes": 4083803
+        },
+        "actual_capture_passed": true,
+        "elapsed_seconds": 0.2970000000204891,
+        "native_rows": 14,
+        "native_changes": 0,
+        "producer_committed_verified": 2,
+        "V3_independent_ACK": 2,
+        "publication_on_time": 2,
+        "unknown_fence_present": false,
+        "BTC_confirmed_at_UTC": "2026-10-10T00:00:14.185056Z",
+        "ETH_confirmed_at_UTC": "2026-10-10T00:01:23.233724Z",
+        "manual_forecast": 0,
+        "backfill": 0,
+        "writer_hold_0_5_verified": false,
+        "complete_original_math_audit_reexecuted": false,
+        "PC_DOM": {
+          "path": "artifacts/mr-pc46/natural-publication46_02.txt",
+          "sha256": "02bf087df87bc9ae46439f722108e6ef419f885608f9ca730513af3b8e295521",
+          "bytes": 26507
+        },
+        "PC_screenshot": {
+          "path": "artifacts/mr-pc46/natural-publication46_02.png",
+          "sha256": "454e4a2c567dc7accc5c8c4afe79982ba7c782423f3be58e7c16391b8b705bb7",
+          "bytes": 79312
+        },
+        "PC_summary_on_time": 2,
+        "PC_summary_waiting": 46,
+        "PC_summary_unconfirmed": 0,
+        "mature_labels_verified": false,
+        "financial_qualified": false
+      }
+    },
+    "automatic_research46_review": {
+      "status": "actual_unsettled_scheduled_recheck_found_recovery_not_implemented",
+      "receipt": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release45/auto-study-host-blocker45_01.json",
+        "sha256": "d1e7825fb9b26216bc379185e1fd00423a6032bcb5fa440ececb729dbf0084e3",
+        "bytes": 70320
+      },
+      "facts": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release45/auto-study-host-blocker45_02-FACTS.md",
+        "sha256": "ebbe986062e8bb833309213132ab0007bedf20d3be0580b1d6f0ea8b36515cdc",
+        "bytes": 5722
+      },
+      "review": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release45/auto-study-host-blocker45_02-review.json",
+        "sha256": "d9f73784bad2b3c260bf4269c44cc0bb6917458b1928fd855837484d64d673e8",
+        "bytes": 2078
+      },
+      "old39_unsettled": false,
+      "claim_gate_hit": false,
+      "unsettled_run_id": "run_9057bfc965804569a6ca4a3585d9111c",
+      "saved_activity_pairs": 5,
+      "latest_saved_activity_at": "2026-10-09T22:36:02.498961Z",
+      "third_failure_at": "2026-10-09T22:38:26.489164Z",
+      "seconds_between": 143.990203,
+      "body_and_inactive_proof_verified": false,
+      "historical_first_cause_confirmed": false,
+      "normal_new_request_verified": false,
+      "natural_new_trigger_verified": false,
+      "old_failed3_rewritten": false,
+      "automatic_fourth_retry": false,
+      "saved_originals_review": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release45/auto-study-host-proof-originals45_03-review.json",
+        "sha256": "81cc40fbbda789bc24fd61179574d4a5d7a9a0168cc7e01084697063655b8d72",
+        "bytes": 15123
+      },
+      "saved_originals_facts": {
+        "path": "artifacts/market-risk-implementation-20261007/B2/release45/auto-study-host-proof-originals45_03-FACTS.md",
+        "sha256": "ffbb7d0c13267b5d8c8f0353905e681823c7105c152216f95e0bb00e1c7785ba",
+        "bytes": 2903
+      },
+      "five_saved_internal_chains_verified": true,
+      "saved_inactive_census_verified": true,
+      "latest_saved_observed_at": "2026-10-09T22:36:02.466Z",
+      "latest_saved_expires_at": "2026-10-09T22:36:32.466Z",
+      "snapshot_expired_seconds_before_third_failure": 114.023164,
+      "current_Host_scope_authenticated": false,
+      "current_full_Link_fingerprint_verified": false,
+      "current_inactive_authorized": false,
+      "collector_renewal_first_cause": "unknown_no_actual_stage_attempt_timings",
+      "DEV_minimal_fix": "sealed_not_installed",
+      "DEV_source_seal": {
+        "path": "E:\\project\\study\\codex\\dsh\\.market-risk-b2-b4\\artifacts\\market-risk-implementation-20261007\\B2\\auto-research-recovery46\\source-seal46_01.json",
+        "sha256": "8e224eb21bbfb4c9d6bbdecfd463a993a7a2d2ed53807476aa20bfd0bb6b232b",
+        "bytes": 15654
+      },
+      "private_python_controls_passed": 57,
+      "private_UI_controls_passed": 20,
+      "strict_type_passed": false,
+      "new_targeted_type_diagnostics": 0,
+      "expired_final_claim_retirement_candidate": true,
+      "actual_new_Run_verified": false
+    },
+    "report_serving46_status": {
+      "status": "finite_DEV_controls_only_closed_material_and_formal_confirmation_unverified",
+      "formal_installed": false,
+      "closed_material_proven": false,
+      "actual_2s_performance_passed": false
+    },
+    "report_material46_actual": {
+      "receipt": {
+        "path": "E:\\project\\study\\codex\\dsh\\decision-hub\\artifacts\\market-risk-implementation-20261007\\B2\\release46\\quality-native-material46_01\\receipt.json",
+        "sha256": "54685dea2382605d396f3987f5a75ce5107d11a7ea1e6f75236bbacb15929ebd",
+        "bytes": 78340
+      },
+      "observed_native_capture_complete": true,
+      "actual_queries": 3685,
+      "distinct_queries": 336,
+      "tables": 26,
+      "rows": 374,
+      "source_files": 547,
+      "python_file_opens": 5981,
+      "unresolved_SQL": 0,
+      "unknown_runtime_resources": 7,
+      "native_changes": 0,
+      "complete_material_closure": "UNKNOWN",
+      "trusted_replay": "UNKNOWN",
+      "serving_authority": false
+    },
+    "PC_mainline46_gap": {
+      "home_current_risk_bridge": "not_implemented",
+      "MRs": [
+        "MR13",
+        "MR19",
+        "MR26",
+        "MR31"
+      ],
+      "PC_home": {
+        "path": "E:\\project\\study\\codex\\dsh\\decision-hub\\artifacts\\mr-pc46\\home-current-risk-gap46_01.txt",
+        "sha256": "41003c31659fb0db6ffafd45b3bfecdbc3698ff7d17e09c8d0db50ca6efd0475",
+        "bytes": 13359
+      },
+      "old_trial_current_forecast_count": 12,
+      "old_trial_current_forecast_total": 112,
+      "old_trial_current_label_count": 4,
+      "old_trial_current_label_total": 56,
+      "fit_retrained": false,
+      "source_status": {
+        "path": "E:\\project\\study\\codex\\dsh\\decision-hub\\artifacts\\mr-pc46\\sources-status46_01.txt",
+        "sha256": "5ced9f809c5544f5f5d4c67f956c2b00d9fc46be8b0d4d849360219bb18dedb2",
+        "bytes": 47556
+      },
+      "BLS_failure": {
+        "path": "E:\\project\\study\\codex\\dsh\\decision-hub\\artifacts\\mr-pc46\\bls-source-failure46_01.txt",
+        "sha256": "2aab494ff0377e388ad75dda73be361e0ef9af939c433e7f31135018a7efc2be",
+        "bytes": 48178
+      },
+      "BLS_HTTP_status": 403,
+      "BLS_min_backoff_hours": 24,
+      "discovery_status_at_saved_DOM": "offline",
+      "latest_Ready_snapshot": {
+        "path": "E:\\project\\study\\codex\\dsh\\decision-hub\\artifacts\\market-risk-implementation-20261007\\B2\\release46\\ready46_04.json",
+        "sha256": "1bf308a3e0f1122c0c54b5aae7238336bc23d86f08a3a3760324a0ebc1cf80c9",
+        "bytes": 4419
+      },
+      "latest_Ready_fresh_online": 7,
+      "transient_first_cause": "UNKNOWN",
+      "continuous_health_verified": false
+    },
+    "local46_launcher": {
+      "check_only": {
+        "path": "E:\\project\\study\\codex\\dsh\\decision-hub\\artifacts\\market-risk-implementation-20261007\\B2\\start-local46\\root-check-only46_01.json",
+        "sha256": "2733043b965997ab828939b37da4c9da866ba2f2d1e6289ad4a73fc0e2f26d1c",
+        "bytes": 399
+      },
+      "actual_passed": true,
+      "starts": 0,
+      "stops": 0,
+      "DB": 0,
+      "HTTP": 0,
+      "builds": 0,
+      "all_versions_supported": false,
+      "full_standard_guard_executed_in_CheckOnly": false
+    }
+  }
+}

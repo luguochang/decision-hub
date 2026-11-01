@@ -27,6 +27,7 @@ class SpecialistResult(TypedDict):
     payload: dict[str, object]
     status: Literal["succeeded", "failed"]
     error_code: str | None
+    retryable: bool
 
 
 class SupervisorCandidateState(TypedDict, total=False):
@@ -175,6 +176,7 @@ def build_supervisor_candidate_graph(
                         payload={},
                         status="failed",
                         error_code=exc.error_code,
+                        retryable=exc.retryable,
                     )
                 ]
             }
@@ -185,6 +187,7 @@ def build_supervisor_candidate_graph(
                     payload=result.payload,
                     status="succeeded",
                     error_code=None,
+                    retryable=False,
                 )
             ]
         }
@@ -208,9 +211,18 @@ def build_supervisor_candidate_graph(
         return "replan" if state.get("replan_count", 0) < 1 else "coverage_failed"
 
     def coverage_failed(state: SupervisorCandidateState) -> None:
+        missing = set(state.get("missing_capabilities", []))
+        latest = {
+            item["capability_id"]: item
+            for item in state["specialist_results"]
+            if item["capability_id"] in missing
+        }
+        codes = {item["error_code"] for item in latest.values()}
         raise AgentExecutionError(
             "research_coverage_missing",
             f"required research coverage missing: {state.get('missing_capabilities', [])}",
+            retryable=bool(latest) and all(item["retryable"] for item in latest.values()),
+            cause_code=next(iter(codes)) if len(codes) == 1 else None,
         )
 
     async def synthesize(state: SupervisorCandidateState) -> dict[str, object]:

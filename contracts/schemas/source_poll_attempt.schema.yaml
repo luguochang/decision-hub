@@ -1,0 +1,149 @@
+$defs:
+  SourceContentSnapshot:
+    additionalProperties: false
+    properties:
+      http_status:
+        anyOf:
+        - type: integer
+        - type: 'null'
+        default: null
+        title: Http Status
+      parser_version:
+        title: Parser Version
+        type: string
+      content_hash:
+        anyOf:
+        - type: string
+        - type: 'null'
+        default: null
+        title: Content Hash
+      parse_status:
+        default: not_attempted
+        enum:
+        - valid
+        - invalid
+        - not_attempted
+        title: Parse Status
+        type: string
+      parsed_count:
+        anyOf:
+        - minimum: 0
+          type: integer
+        - type: 'null'
+        default: null
+        title: Parsed Count
+      upcoming_count:
+        anyOf:
+        - minimum: 0
+          type: integer
+        - type: 'null'
+        default: null
+        title: Upcoming Count
+      first_upcoming_date:
+        anyOf:
+        - type: string
+        - type: 'null'
+        default: null
+        title: First Upcoming Date
+      last_upcoming_date:
+        anyOf:
+        - type: string
+        - type: 'null'
+        default: null
+        title: Last Upcoming Date
+      coverage_status:
+        default: unknown
+        enum:
+        - available
+        - no_upcoming
+        - unknown
+        title: Coverage Status
+        type: string
+    required:
+    - parser_version
+    title: SourceContentSnapshot
+    type: object
+additionalProperties: false
+properties:
+  attempt_id:
+    title: Attempt Id
+    type: string
+  source_id:
+    title: Source Id
+    type: string
+  trigger_type:
+    title: Trigger Type
+    type: string
+  status:
+    title: Status
+    type: string
+  started_at:
+    format: date-time
+    title: Started At
+    type: string
+  completed_at:
+    anyOf:
+    - format: date-time
+      type: string
+    - type: 'null'
+    title: Completed At
+  cursor_before:
+    anyOf:
+    - type: string
+    - type: 'null'
+    title: Cursor Before
+  cursor_after:
+    anyOf:
+    - type: string
+    - type: 'null'
+    title: Cursor After
+  received_count:
+    minimum: 0
+    title: Received Count
+    type: integer
+  accepted_count:
+    minimum: 0
+    title: Accepted Count
+    type: integer
+  duplicate_count:
+    minimum: 0
+    title: Duplicate Count
+    type: integer
+  revision_count:
+    minimum: 0
+    title: Revision Count
+    type: integer
+  latency_ms:
+    anyOf:
+    - type: integer
+    - type: 'null'
+    title: Latency Ms
+  error_code:
+    anyOf:
+    - type: string
+    - type: 'null'
+    title: Error Code
+  content_snapshot:
+    anyOf:
+    - $ref: '#/$defs/SourceContentSnapshot'
+    - type: 'null'
+    default: null
+required:
+- attempt_id
+- source_id
+- trigger_type
+- status
+- started_at
+- completed_at
+- cursor_before
+- cursor_after
+- received_count
+- accepted_count
+- duplicate_count
+- revision_count
+- latency_ms
+- error_code
+title: SourcePollAttemptView
+type: object
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/source-poll-attempt.schema.json

@@ -1,0 +1,380 @@
+[
+  {
+    "name": "guards-exact",
+    "definition": "research_kernel_safeguards",
+    "value": {
+      "pit_required": true,
+      "hard_coverage_required": true,
+      "open_hard_conflicts_rejected": true,
+      "native_independent_review_required": true,
+      "directional_calibration_required": true,
+      "execution_permission_required": true,
+      "existing_kernel_gate_required": true,
+      "probability_cap": 0.65
+    },
+    "expected": true
+  },
+  {
+    "name": "integer-true",
+    "definition": "research_kernel_safeguards",
+    "value": {
+      "pit_required": 1,
+      "hard_coverage_required": true,
+      "open_hard_conflicts_rejected": true,
+      "native_independent_review_required": true,
+      "directional_calibration_required": true,
+      "execution_permission_required": true,
+      "existing_kernel_gate_required": true,
+      "probability_cap": 0.65
+    },
+    "expected": false
+  },
+  {
+    "name": "numeric-string",
+    "definition": "research_kernel_safeguards",
+    "value": {
+      "pit_required": true,
+      "hard_coverage_required": true,
+      "open_hard_conflicts_rejected": true,
+      "native_independent_review_required": true,
+      "directional_calibration_required": true,
+      "execution_permission_required": true,
+      "existing_kernel_gate_required": true,
+      "probability_cap": "0.65"
+    },
+    "expected": false
+  },
+  {
+    "name": "boolean-number",
+    "definition": "research_kernel_safeguards",
+    "value": {
+      "pit_required": true,
+      "hard_coverage_required": true,
+      "open_hard_conflicts_rejected": true,
+      "native_independent_review_required": true,
+      "directional_calibration_required": true,
+      "execution_permission_required": true,
+      "existing_kernel_gate_required": true,
+      "probability_cap": true
+    },
+    "expected": false
+  },
+  {
+    "name": "cap-over-kernel",
+    "definition": "research_kernel_safeguards",
+    "value": {
+      "pit_required": true,
+      "hard_coverage_required": true,
+      "open_hard_conflicts_rejected": true,
+      "native_independent_review_required": true,
+      "directional_calibration_required": true,
+      "execution_permission_required": true,
+      "existing_kernel_gate_required": true,
+      "probability_cap": 0.7
+    },
+    "expected": false
+  },
+  {
+    "name": "aware-scope",
+    "definition": "research_task_scope",
+    "value": {
+      "schema_version": "research-task-scope.v1",
+      "run_id": "run-contract",
+      "event_id": "event-contract",
+      "study_id": null,
+      "trigger_snapshot_id": "snapshot-original",
+      "trigger_snapshot_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6",
+      "market": "crypto",
+      "instrument": "BTC",
+      "horizon_scope": [
+        "30m",
+        "24h",
+        "72h"
+      ],
+      "domain_pack_ref": "crypto_macro.v1",
+      "execution_mode": "replay",
+      "research_mode": "current_decision",
+      "scope_kind": "event",
+      "event_family": "central_bank_speech",
+      "event_family_basis": "event",
+      "watch_id": null,
+      "full_task_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6",
+      "requirements_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6",
+      "allowed_capabilities_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6",
+      "pit_cutoff_at": "2026-10-01T12:00:00Z",
+      "deadline_at": "2026-10-01T12:30:00Z",
+      "scope_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6"
+    },
+    "expected": true
+  },
+  {
+    "name": "duplicate-horizons",
+    "definition": "research_task_scope",
+    "value": {
+      "schema_version": "research-task-scope.v1",
+      "run_id": "run-contract",
+      "event_id": "event-contract",
+      "study_id": null,
+      "trigger_snapshot_id": "snapshot-original",
+      "trigger_snapshot_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6",
+      "market": "crypto",
+      "instrument": "BTC",
+      "horizon_scope": [
+        "30m",
+        "30m",
+        "30m"
+      ],
+      "domain_pack_ref": "crypto_macro.v1",
+      "execution_mode": "replay",
+      "research_mode": "current_decision",
+      "scope_kind": "event",
+      "event_family": "central_bank_speech",
+      "event_family_basis": "event",
+      "watch_id": null,
+      "full_task_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6",
+      "requirements_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6",
+      "allowed_capabilities_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6",
+      "pit_cutoff_at": "2026-10-01T12:00:00Z",
+      "deadline_at": "2026-10-01T12:30:00Z",
+      "scope_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6"
+    },
+    "expected": false
+  },
+  {
+    "name": "naive-date",
+    "definition": "research_task_scope",
+    "value": {
+      "schema_version": "research-task-scope.v1",
+      "run_id": "run-contract",
+      "event_id": "event-contract",
+      "study_id": null,
+      "trigger_snapshot_id": "snapshot-original",
+      "trigger_snapshot_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6",
+      "market": "crypto",
+      "instrument": "BTC",
+      "horizon_scope": [
+        "30m",
+        "24h",
+        "72h"
+      ],
+      "domain_pack_ref": "crypto_macro.v1",
+      "execution_mode": "replay",
+      "research_mode": "current_decision",
+      "scope_kind": "event",
+      "event_family": "central_bank_speech",
+      "event_family_basis": "event",
+      "watch_id": null,
+      "full_task_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6",
+      "requirements_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6",
+      "allowed_capabilities_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6",
+      "pit_cutoff_at": "2026-10-01T12:00:00",
+      "deadline_at": "2026-10-01T12:30:00Z",
+      "scope_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6"
+    },
+    "expected": false
+  },
+  {
+    "name": "hash-newline",
+    "definition": "research_task_scope",
+    "value": {
+      "schema_version": "research-task-scope.v1",
+      "run_id": "run-contract",
+      "event_id": "event-contract",
+      "study_id": null,
+      "trigger_snapshot_id": "snapshot-original",
+      "trigger_snapshot_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6",
+      "market": "crypto",
+      "instrument": "BTC",
+      "horizon_scope": [
+        "30m",
+        "24h",
+        "72h"
+      ],
+      "domain_pack_ref": "crypto_macro.v1",
+      "execution_mode": "replay",
+      "research_mode": "current_decision",
+      "scope_kind": "event",
+      "event_family": "central_bank_speech",
+      "event_family_basis": "event",
+      "watch_id": null,
+      "full_task_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6\n",
+      "requirements_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6",
+      "allowed_capabilities_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6",
+      "pit_cutoff_at": "2026-10-01T12:00:00Z",
+      "deadline_at": "2026-10-01T12:30:00Z",
+      "scope_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6"
+    },
+    "expected": false
+  },
+  {
+    "name": "closed-rule",
+    "definition": "research_policy_rule",
+    "value": {
+      "rule_id": "pit",
+      "rule_version": "1.0.0",
+      "category": "evidence",
+      "phase": "commit",
+      "applies_to": [
+        "event",
+        "current_snapshot",
+        "historical_review"
+      ],
+      "blocking_for": [
+        "research_completeness",
+        "research_publication"
+      ],
+      "params": {
+        "input_basis": "frozen_task_snapshot_lineage"
+      }
+    },
+    "expected": true
+  },
+  {
+    "name": "duplicate-applies",
+    "definition": "research_policy_rule",
+    "value": {
+      "rule_id": "pit",
+      "rule_version": "1.0.0",
+      "category": "evidence",
+      "phase": "commit",
+      "applies_to": [
+        "event",
+        "event"
+      ],
+      "blocking_for": [
+        "research_completeness",
+        "research_publication"
+      ],
+      "params": {
+        "input_basis": "frozen_task_snapshot_lineage"
+      }
+    },
+    "expected": false
+  },
+  {
+    "name": "unknown-rule",
+    "definition": "research_policy_rule",
+    "value": {
+      "rule_id": "unknown",
+      "rule_version": "1.0.0",
+      "category": "evidence",
+      "phase": "commit",
+      "applies_to": [
+        "event",
+        "current_snapshot",
+        "historical_review"
+      ],
+      "blocking_for": [
+        "research_completeness",
+        "research_publication"
+      ],
+      "params": {
+        "input_basis": "frozen_task_snapshot_lineage"
+      }
+    },
+    "expected": false
+  },
+  {
+    "name": "unknown-rule-version",
+    "definition": "research_policy_rule",
+    "value": {
+      "rule_id": "pit",
+      "rule_version": "2.0",
+      "category": "evidence",
+      "phase": "commit",
+      "applies_to": [
+        "event",
+        "current_snapshot",
+        "historical_review"
+      ],
+      "blocking_for": [
+        "research_completeness",
+        "research_publication"
+      ],
+      "params": {
+        "input_basis": "frozen_task_snapshot_lineage"
+      }
+    },
+    "expected": false
+  },
+  {
+    "name": "wrong-params-for-rule",
+    "definition": "research_policy_rule",
+    "value": {
+      "rule_id": "pit",
+      "rule_version": "1.0.0",
+      "category": "evidence",
+      "phase": "commit",
+      "applies_to": [
+        "event",
+        "current_snapshot",
+        "historical_review"
+      ],
+      "blocking_for": [
+        "research_completeness",
+        "research_publication"
+      ],
+      "params": {
+        "permission_basis": "existing_permission_receipts_only"
+      }
+    },
+    "expected": false
+  },
+  {
+    "name": "extra-parameter",
+    "definition": "research_policy_rule",
+    "value": {
+      "rule_id": "pit",
+      "rule_version": "1.0.0",
+      "category": "evidence",
+      "phase": "commit",
+      "applies_to": [
+        "event",
+        "current_snapshot",
+        "historical_review"
+      ],
+      "blocking_for": [
+        "research_completeness",
+        "research_publication"
+      ],
+      "params": {
+        "input_basis": "frozen_task_snapshot_lineage",
+        "extra": true
+      }
+    },
+    "expected": false
+  },
+  {
+    "name": "overflow-offset",
+    "definition": "research_task_scope",
+    "value": {
+      "schema_version": "research-task-scope.v1",
+      "run_id": "run-contract",
+      "event_id": "event-contract",
+      "study_id": null,
+      "trigger_snapshot_id": "snapshot-original",
+      "trigger_snapshot_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6",
+      "market": "crypto",
+      "instrument": "BTC",
+      "horizon_scope": [
+        "30m",
+        "24h",
+        "72h"
+      ],
+      "domain_pack_ref": "crypto_macro.v1",
+      "execution_mode": "replay",
+      "research_mode": "current_decision",
+      "scope_kind": "event",
+      "event_family": "central_bank_speech",
+      "event_family_basis": "event",
+      "watch_id": null,
+      "full_task_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6",
+      "requirements_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6",
+      "allowed_capabilities_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6",
+      "pit_cutoff_at": "2026-10-01T12:00:00+00:99",
+      "deadline_at": "2026-10-01T12:30:00Z",
+      "scope_hash": "f7f9438fc9a356f6257a8a724ec87a1ac785b28e5f4b3aeb0037748da9e473a6"
+    },
+    "expected": false
+  }
+]

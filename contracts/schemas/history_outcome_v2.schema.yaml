@@ -1,0 +1,1299 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.local/contracts/history-outcome-v2.schema.json",
+  "title": "HistoryOutcomeStatusV2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "owner_authenticated",
+    "protocol_id",
+    "state",
+    "prepared_registered_at",
+    "independently_confirmed_registered_at",
+    "first_hour",
+    "last_hour",
+    "actual_as_of",
+    "expected_total",
+    "publication_due_count",
+    "label_due_count",
+    "publication_counts",
+    "label_counts",
+    "paired_count",
+    "latest_score",
+    "opportunities",
+    "pagination",
+    "current_originals_verified",
+    "financial_qualified",
+    "historical_pit_verified",
+    "promotion_allowed",
+    "ci",
+    "ci_status"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "history-outcome-status.v2"
+    },
+    "owner_authenticated": {
+      "type": "boolean",
+      "const": true
+    },
+    "protocol_id": {
+      "type": "string",
+      "pattern": "^heval2_[a-f0-9]{48}$"
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "prepared",
+        "active",
+        "completed",
+        "blocked"
+      ]
+    },
+    "prepared_registered_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+    },
+    "independently_confirmed_registered_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time",
+      "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+    },
+    "first_hour": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+    },
+    "last_hour": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+    },
+    "actual_as_of": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+    },
+    "expected_total": {
+      "type": "integer",
+      "const": 48
+    },
+    "publication_due_count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 48
+    },
+    "label_due_count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 48
+    },
+    "publication_counts": {
+      "$ref": "#/$defs/history_outcome_publication_counts_v2"
+    },
+    "label_counts": {
+      "$ref": "#/$defs/history_outcome_label_counts_v2"
+    },
+    "paired_count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 48
+    },
+    "latest_score": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/history_outcome_score_ref_v2"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "opportunities": {
+      "type": "array",
+      "maxItems": 30,
+      "items": {
+        "$ref": "#/$defs/history_outcome_opportunity_status_v2"
+      }
+    },
+    "pagination": {
+      "$ref": "#/$defs/history_outcome_pagination_v2"
+    },
+    "current_originals_verified": {
+      "type": "boolean",
+      "const": false
+    },
+    "financial_qualified": {
+      "type": "boolean",
+      "const": false
+    },
+    "historical_pit_verified": {
+      "type": "boolean",
+      "const": false
+    },
+    "promotion_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "ci": {
+      "type": "null"
+    },
+    "ci_status": {
+      "type": "string",
+      "const": "not_registered_for_hourly_overlapping_windows"
+    }
+  },
+  "x-history-outcome-relations": "status",
+  "$defs": {
+    "history_outcome_case_result_v2": {
+      "additionalProperties": false,
+      "properties": {
+        "opportunity_id": {
+          "type": "string",
+          "pattern": "^hopportunity2_[a-f0-9]{48}$"
+        },
+        "scope_id": {
+          "type": "string",
+          "enum": [
+            "crypto:spot:okx:BTC-USDT:trade:1m",
+            "crypto:spot:okx:ETH-USDT:trade:1m"
+          ]
+        },
+        "hour_at": {
+          "format": "date-time",
+          "title": "Hour At",
+          "type": "string",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+        },
+        "publication_state": {
+          "enum": [
+            "pending",
+            "on_time",
+            "late",
+            "off_schedule",
+            "blocked",
+            "failed",
+            "abstained",
+            "missing",
+            "unconfirmed"
+          ],
+          "title": "Publication State",
+          "type": "string"
+        },
+        "label_state": {
+          "enum": [
+            "pending_maturity",
+            "verified",
+            "partial",
+            "invalid",
+            "missing_at_deadline",
+            "late_diagnostic"
+          ],
+          "title": "Label State",
+          "type": "string"
+        },
+        "label_cutoff_at": {
+          "format": "date-time",
+          "title": "Label Cutoff At",
+          "type": "string",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+        },
+        "publication_due": {
+          "title": "Publication Due",
+          "type": "boolean"
+        },
+        "label_due": {
+          "title": "Label Due",
+          "type": "boolean"
+        },
+        "eligible_pair": {
+          "title": "Eligible Pair",
+          "type": "boolean"
+        },
+        "exclusions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Exclusions",
+          "type": "array"
+        },
+        "opportunity": {
+          "$ref": "#/$defs/outcome_original_ref_v2"
+        },
+        "publication": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/outcome_original_ref_v2"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/outcome_original_ref_v2"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "forecast": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/outcome_original_ref_v2"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "acceptance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/outcome_original_ref_v2"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "opportunity_id",
+        "scope_id",
+        "hour_at",
+        "publication_state",
+        "label_state",
+        "label_cutoff_at",
+        "publication_due",
+        "label_due",
+        "eligible_pair",
+        "exclusions",
+        "opportunity",
+        "publication",
+        "observation",
+        "forecast",
+        "acceptance"
+      ],
+      "title": "HistoryOutcomeCaseResultV2",
+      "type": "object"
+    },
+    "history_outcome_target_score_v2": {
+      "additionalProperties": false,
+      "properties": {
+        "direction": {
+          "enum": [
+            "long",
+            "short"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "threshold": {
+          "enum": [
+            "0.02",
+            "0.05"
+          ],
+          "title": "Threshold",
+          "type": "string"
+        },
+        "n_baseline": {
+          "maximum": 48,
+          "minimum": 0,
+          "title": "N Baseline",
+          "type": "integer"
+        },
+        "n_conditional": {
+          "maximum": 48,
+          "minimum": 0,
+          "title": "N Conditional",
+          "type": "integer"
+        },
+        "n_pair": {
+          "maximum": 48,
+          "minimum": 0,
+          "title": "N Pair",
+          "type": "integer"
+        },
+        "baseline_brier": {
+          "anyOf": [
+            {
+              "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d{1,3})?$",
+              "type": "string",
+              "maxLength": 96
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Baseline Brier"
+        },
+        "conditional_brier": {
+          "anyOf": [
+            {
+              "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d{1,3})?$",
+              "type": "string",
+              "maxLength": 96
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Conditional Brier"
+        },
+        "paired_gain": {
+          "anyOf": [
+            {
+              "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d{1,3})?$",
+              "type": "string",
+              "maxLength": 96
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Paired Gain"
+        },
+        "ci": {
+          "title": "Ci",
+          "type": "null"
+        },
+        "ci_status": {
+          "const": "not_registered_for_hourly_overlapping_windows",
+          "title": "Ci Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "direction",
+        "threshold",
+        "n_baseline",
+        "n_conditional",
+        "n_pair",
+        "baseline_brier",
+        "conditional_brier",
+        "paired_gain",
+        "ci",
+        "ci_status"
+      ],
+      "title": "HistoryOutcomeTargetScoreV2",
+      "type": "object",
+      "x-history-outcome-relations": "target"
+    },
+    "outcome_original_ref_v2": {
+      "additionalProperties": false,
+      "properties": {
+        "identifier": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Identifier",
+          "type": "string"
+        },
+        "payload_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Payload Hash",
+          "type": "string"
+        },
+        "original_ref": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "title": "Original Ref",
+          "type": "string"
+        },
+        "original_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Original Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "identifier",
+        "payload_hash",
+        "original_ref",
+        "original_hash"
+      ],
+      "title": "OutcomeOriginalRefV2",
+      "type": "object"
+    },
+    "history_outcome_score_v2": {
+      "additionalProperties": false,
+      "properties": {
+        "payload_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Payload Hash",
+          "type": "string"
+        },
+        "financial_qualified": {
+          "const": false,
+          "title": "Financial Qualified",
+          "type": "boolean"
+        },
+        "historical_pit_verified": {
+          "const": false,
+          "title": "Historical Pit Verified",
+          "type": "boolean"
+        },
+        "promotion_allowed": {
+          "const": false,
+          "title": "Promotion Allowed",
+          "type": "boolean"
+        },
+        "fixture_mode": {
+          "title": "Fixture Mode",
+          "type": "boolean"
+        },
+        "owner_claim": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Owner Claim",
+          "type": "string"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        },
+        "source_files": {
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "prefixItems": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              },
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            ],
+            "items": false
+          },
+          "title": "Source Files",
+          "type": "array",
+          "minItems": 1
+        },
+        "source_original_ref": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "title": "Source Original Ref",
+          "type": "string"
+        },
+        "source_original_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Source Original Hash",
+          "type": "string"
+        },
+        "produced_at": {
+          "format": "date-time",
+          "title": "Produced At",
+          "type": "string",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+        },
+        "recorded_at": {
+          "format": "date-time",
+          "title": "Recorded At",
+          "type": "string",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+        },
+        "schema_version": {
+          "const": "history-outcome-score.v2",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "score_id": {
+          "pattern": "^hscore2_[a-f0-9]{48}$",
+          "title": "Score Id",
+          "type": "string"
+        },
+        "protocol": {
+          "$ref": "#/$defs/outcome_original_ref_v2"
+        },
+        "actual_as_of": {
+          "format": "date-time",
+          "title": "Actual As Of",
+          "type": "string",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+        },
+        "expected_total": {
+          "const": 48,
+          "title": "Expected Total",
+          "type": "integer"
+        },
+        "publication_due_count": {
+          "maximum": 48,
+          "minimum": 0,
+          "title": "Publication Due Count",
+          "type": "integer"
+        },
+        "label_due_count": {
+          "maximum": 48,
+          "minimum": 0,
+          "title": "Label Due Count",
+          "type": "integer"
+        },
+        "publication_counts": {
+          "$ref": "#/$defs/history_outcome_publication_counts_v2"
+        },
+        "label_counts": {
+          "$ref": "#/$defs/history_outcome_label_counts_v2"
+        },
+        "published_count": {
+          "maximum": 48,
+          "minimum": 0,
+          "title": "Published Count",
+          "type": "integer"
+        },
+        "on_time_count": {
+          "maximum": 48,
+          "minimum": 0,
+          "title": "On Time Count",
+          "type": "integer"
+        },
+        "verified_label_count": {
+          "maximum": 48,
+          "minimum": 0,
+          "title": "Verified Label Count",
+          "type": "integer"
+        },
+        "paired_count": {
+          "maximum": 48,
+          "minimum": 0,
+          "title": "Paired Count",
+          "type": "integer"
+        },
+        "targets": {
+          "items": {
+            "$ref": "#/$defs/history_outcome_target_score_v2"
+          },
+          "maxItems": 4,
+          "minItems": 4,
+          "title": "Targets",
+          "type": "array"
+        },
+        "cases": {
+          "items": {
+            "$ref": "#/$defs/history_outcome_case_result_v2"
+          },
+          "maxItems": 48,
+          "minItems": 48,
+          "title": "Cases",
+          "type": "array"
+        },
+        "primary_target": {
+          "const": "long:0.02",
+          "title": "Primary Target",
+          "type": "string"
+        },
+        "ci": {
+          "title": "Ci",
+          "type": "null"
+        },
+        "ci_status": {
+          "const": "not_registered_for_hourly_overlapping_windows",
+          "title": "Ci Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "payload_hash",
+        "financial_qualified",
+        "historical_pit_verified",
+        "promotion_allowed",
+        "fixture_mode",
+        "owner_claim",
+        "request_id",
+        "source_files",
+        "source_original_ref",
+        "source_original_hash",
+        "produced_at",
+        "recorded_at",
+        "schema_version",
+        "score_id",
+        "protocol",
+        "actual_as_of",
+        "expected_total",
+        "publication_due_count",
+        "label_due_count",
+        "publication_counts",
+        "label_counts",
+        "published_count",
+        "on_time_count",
+        "verified_label_count",
+        "paired_count",
+        "targets",
+        "cases",
+        "primary_target",
+        "ci",
+        "ci_status"
+      ],
+      "title": "HistoryOutcomeScoreV2",
+      "type": "object",
+      "x-history-outcome-relations": "score"
+    },
+    "history_outcome_observation_v2": {
+      "additionalProperties": false,
+      "properties": {
+        "payload_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Payload Hash",
+          "type": "string"
+        },
+        "financial_qualified": {
+          "const": false,
+          "title": "Financial Qualified",
+          "type": "boolean"
+        },
+        "historical_pit_verified": {
+          "const": false,
+          "title": "Historical Pit Verified",
+          "type": "boolean"
+        },
+        "promotion_allowed": {
+          "const": false,
+          "title": "Promotion Allowed",
+          "type": "boolean"
+        },
+        "fixture_mode": {
+          "title": "Fixture Mode",
+          "type": "boolean"
+        },
+        "owner_claim": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Owner Claim",
+          "type": "string"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        },
+        "source_files": {
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "prefixItems": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              },
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            ],
+            "items": false
+          },
+          "title": "Source Files",
+          "type": "array",
+          "minItems": 1
+        },
+        "source_original_ref": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "title": "Source Original Ref",
+          "type": "string"
+        },
+        "source_original_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Source Original Hash",
+          "type": "string"
+        },
+        "produced_at": {
+          "format": "date-time",
+          "title": "Produced At",
+          "type": "string",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+        },
+        "recorded_at": {
+          "format": "date-time",
+          "title": "Recorded At",
+          "type": "string",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+        },
+        "schema_version": {
+          "const": "history-outcome-observation.v2",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "observation_id": {
+          "pattern": "^hobservation2_[a-f0-9]{48}$",
+          "title": "Observation Id",
+          "type": "string"
+        },
+        "protocol": {
+          "$ref": "#/$defs/outcome_original_ref_v2"
+        },
+        "opportunity": {
+          "$ref": "#/$defs/outcome_original_ref_v2"
+        },
+        "publication": {
+          "$ref": "#/$defs/outcome_original_ref_v2"
+        },
+        "scope_id": {
+          "type": "string",
+          "enum": [
+            "crypto:spot:okx:BTC-USDT:trade:1m",
+            "crypto:spot:okx:ETH-USDT:trade:1m"
+          ]
+        },
+        "label_cutoff_at": {
+          "format": "date-time",
+          "title": "Label Cutoff At",
+          "type": "string",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+        },
+        "window_start_at": {
+          "format": "date-time",
+          "title": "Window Start At",
+          "type": "string",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+        },
+        "window_end_at": {
+          "format": "date-time",
+          "title": "Window End At",
+          "type": "string",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+        },
+        "label_deadline_at": {
+          "format": "date-time",
+          "title": "Label Deadline At",
+          "type": "string",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+        },
+        "observed_at": {
+          "format": "date-time",
+          "title": "Observed At",
+          "type": "string",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+        },
+        "accepted_at": {
+          "type": "null"
+        },
+        "attempt": {
+          "maximum": 4,
+          "minimum": 1,
+          "title": "Attempt",
+          "type": "integer"
+        },
+        "classification": {
+          "enum": [
+            "pending_maturity",
+            "verified",
+            "partial",
+            "invalid",
+            "missing_at_deadline",
+            "late_diagnostic"
+          ],
+          "title": "Classification",
+          "type": "string"
+        },
+        "reason_code": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Reason Code",
+          "type": "string"
+        },
+        "anchor_status": {
+          "enum": [
+            "verified",
+            "unknown"
+          ],
+          "title": "Anchor Status",
+          "type": "string"
+        },
+        "anchor_price": {
+          "anyOf": [
+            {
+              "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d{1,3})?$",
+              "type": "string",
+              "maxLength": 96
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Anchor Price"
+        },
+        "observed_count": {
+          "maximum": 1440,
+          "minimum": 0,
+          "title": "Observed Count",
+          "type": "integer"
+        },
+        "expected_count": {
+          "const": 1440,
+          "title": "Expected Count",
+          "type": "integer"
+        },
+        "pending_count": {
+          "maximum": 1440,
+          "minimum": 0,
+          "title": "Pending Count",
+          "type": "integer"
+        },
+        "window_status": {
+          "enum": [
+            "pending",
+            "complete",
+            "partial",
+            "unknown"
+          ],
+          "title": "Window Status",
+          "type": "string"
+        },
+        "mae_long": {
+          "anyOf": [
+            {
+              "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d{1,3})?$",
+              "type": "string",
+              "maxLength": 96
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mae Long"
+        },
+        "mae_short": {
+          "anyOf": [
+            {
+              "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d{1,3})?$",
+              "type": "string",
+              "maxLength": 96
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mae Short"
+        },
+        "path_semantic_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Path Semantic Hash",
+          "type": "string"
+        },
+        "path_manifest_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Path Manifest Hash",
+          "type": "string"
+        },
+        "observation_original_ref": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "title": "Observation Original Ref",
+          "type": "string"
+        },
+        "observation_original_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Observation Original Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "payload_hash",
+        "financial_qualified",
+        "historical_pit_verified",
+        "promotion_allowed",
+        "fixture_mode",
+        "owner_claim",
+        "request_id",
+        "source_files",
+        "source_original_ref",
+        "source_original_hash",
+        "produced_at",
+        "recorded_at",
+        "schema_version",
+        "observation_id",
+        "protocol",
+        "opportunity",
+        "publication",
+        "scope_id",
+        "label_cutoff_at",
+        "window_start_at",
+        "window_end_at",
+        "label_deadline_at",
+        "observed_at",
+        "accepted_at",
+        "attempt",
+        "classification",
+        "reason_code",
+        "anchor_status",
+        "anchor_price",
+        "observed_count",
+        "expected_count",
+        "pending_count",
+        "window_status",
+        "mae_long",
+        "mae_short",
+        "path_semantic_hash",
+        "path_manifest_hash",
+        "observation_original_ref",
+        "observation_original_hash"
+      ],
+      "title": "HistoryOutcomeObservationV2",
+      "type": "object",
+      "x-history-outcome-relations": "observation"
+    },
+    "history_outcome_publication_counts_v2": {
+      "title": "HistoryOutcomePublicationCountsV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pending",
+        "on_time",
+        "late",
+        "off_schedule",
+        "blocked",
+        "failed",
+        "abstained",
+        "missing",
+        "unconfirmed"
+      ],
+      "properties": {
+        "pending": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 48
+        },
+        "on_time": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 48
+        },
+        "late": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 48
+        },
+        "off_schedule": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 48
+        },
+        "blocked": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 48
+        },
+        "failed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 48
+        },
+        "abstained": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 48
+        },
+        "missing": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 48
+        },
+        "unconfirmed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 48
+        }
+      }
+    },
+    "history_outcome_label_counts_v2": {
+      "title": "HistoryOutcomeLabelCountsV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pending_maturity",
+        "verified",
+        "partial",
+        "invalid",
+        "missing_at_deadline",
+        "late_diagnostic"
+      ],
+      "properties": {
+        "pending_maturity": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 48
+        },
+        "verified": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 48
+        },
+        "partial": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 48
+        },
+        "invalid": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 48
+        },
+        "missing_at_deadline": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 48
+        },
+        "late_diagnostic": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 48
+        }
+      }
+    },
+    "history_outcome_pagination_v2": {
+      "title": "HistoryOutcomePaginationV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "offset",
+        "limit",
+        "total"
+      ],
+      "properties": {
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 47
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30
+        },
+        "total": {
+          "type": "integer",
+          "const": 48
+        }
+      }
+    },
+    "history_outcome_score_ref_v2": {
+      "additionalProperties": false,
+      "properties": {
+        "identifier": {
+          "type": "string",
+          "pattern": "^hscore2_[a-f0-9]{48}$"
+        },
+        "payload_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Payload Hash",
+          "type": "string"
+        },
+        "original_ref": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "title": "Original Ref",
+          "type": "string"
+        },
+        "original_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Original Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "identifier",
+        "payload_hash",
+        "original_ref",
+        "original_hash"
+      ],
+      "title": "HistoryOutcomeScoreRefV2",
+      "type": "object"
+    },
+    "history_outcome_opportunity_status_v2": {
+      "title": "HistoryOutcomeOpportunityStatusV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "opportunity_id",
+        "asset",
+        "scope_id",
+        "asset_label",
+        "hour_at",
+        "actual_cutoff_at",
+        "publication_state",
+        "label_state",
+        "state",
+        "attempts",
+        "reason_code"
+      ],
+      "properties": {
+        "opportunity_id": {
+          "type": "string",
+          "pattern": "^hopportunity2_[a-f0-9]{48}$"
+        },
+        "asset": {
+          "type": "string",
+          "enum": [
+            "BTC",
+            "ETH"
+          ]
+        },
+        "scope_id": {
+          "type": "string",
+          "enum": [
+            "crypto:spot:okx:BTC-USDT:trade:1m",
+            "crypto:spot:okx:ETH-USDT:trade:1m"
+          ]
+        },
+        "asset_label": {
+          "type": "string",
+          "enum": [
+            "比特币",
+            "以太坊"
+          ]
+        },
+        "hour_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+        },
+        "actual_cutoff_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+        },
+        "publication_state": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "on_time",
+            "late",
+            "off_schedule",
+            "blocked",
+            "failed",
+            "abstained",
+            "missing",
+            "unconfirmed"
+          ]
+        },
+        "label_state": {
+          "type": "string",
+          "enum": [
+            "pending_maturity",
+            "verified",
+            "partial",
+            "invalid",
+            "missing_at_deadline",
+            "late_diagnostic"
+          ]
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "ready",
+            "running",
+            "completed",
+            "blocked",
+            "unconfirmed"
+          ]
+        },
+        "attempts": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4
+        },
+        "reason_code": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "x-history-outcome-relations": "opportunity"
+    },
+    "history_outcome_score_reply_v2": {
+      "title": "HistoryOutcomeScoreReplyV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "owner_authenticated",
+        "current_originals_verified",
+        "protocol_id",
+        "score"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "history-outcome-score-reply.v2"
+        },
+        "owner_authenticated": {
+          "type": "boolean",
+          "const": true
+        },
+        "current_originals_verified": {
+          "type": "boolean",
+          "const": true
+        },
+        "protocol_id": {
+          "type": "string",
+          "pattern": "^heval2_[a-f0-9]{48}$"
+        },
+        "score": {
+          "$ref": "#/$defs/history_outcome_score_v2"
+        }
+      },
+      "x-history-outcome-relations": "reply"
+    },
+    "history_outcome_observation_reply_v2": {
+      "title": "HistoryOutcomeObservationReplyV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "owner_authenticated",
+        "current_originals_verified",
+        "protocol_id",
+        "observation"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "history-outcome-observation-reply.v2"
+        },
+        "owner_authenticated": {
+          "type": "boolean",
+          "const": true
+        },
+        "current_originals_verified": {
+          "type": "boolean",
+          "const": true
+        },
+        "protocol_id": {
+          "type": "string",
+          "pattern": "^heval2_[a-f0-9]{48}$"
+        },
+        "observation": {
+          "$ref": "#/$defs/history_outcome_observation_v2"
+        }
+      },
+      "x-history-outcome-relations": "reply"
+    }
+  },
+  "$comment": "Runtime guards enforce exact UTC, fixed census and paired eligibility. Originals remain unchanged; acceptance is a separate original."
+}

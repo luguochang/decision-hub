@@ -1,0 +1,221 @@
+你正在接手 Decision Hub 项目。请在原系统上继续完成需求、必要代码修复、自测和记录。不要从零重建、换前端或从 T-000 重新开始；不要把上一轮“主流程恢复完成”理解为整个项目已经交付。
+
+一、工作目录与本次续接目标
+
+唯一主工作目录：E:/project/study/codex/dsh/decision-hub
+
+先核对最新交接和现场状态，再建立一个具体、可验收的阶段目标。推荐优先完成 P3 概率确定性审核与 P6 基准率/模型概率解释面板，然后补齐 P4/P5、多事件预测闭环，最后推进其他期限、PAPER、长期质量门和正式发布。
+
+总控计划中的全部需求仍需逐项处理。常规实现决策根据代码和证据自主裁决、记录后继续，不要每个小问题都询问用户，也不要完成一个小任务就强制结束会话。只在涉及删除数据、提交/推送代码、正式发布等需要新授权的操作时按现有约束处理。
+
+二、先读文档，注意区分最新结论与历史记录
+
+1. E:/project/study/codex/dsh/decision-hub/AGENTS.md
+   用途：当前授权、原系统渐进修复约束、真实研究期间冻结源码。以最新用户授权和当前续接段为准，不机械套用已被覆盖的早期重建规则。
+
+2. E:/project/study/codex/dsh/decision-hub/docs/diagnosis-2026-10-23/HANDOFF_RECOVERY_CURRENT_2026-10-29.md
+   用途：当前交接入口。先读顶部“本轮最终续接”，页尾历史中的 running、待执行、409、目标 active 不代表最新状态。
+
+3. E:/project/study/codex/dsh/decision-hub/docs/diagnosis-2026-10-23/RESEARCH_RECOVERY_RESULT_2026-10-29.md
+   用途：已经完成什么、实际测试与报告证据、执行者犯过的错误、仍未完成的需求。
+
+4. E:/project/study/codex/dsh/decision-hub/docs/diagnosis-2026-10-23/DEVELOPMENT_WORKFLOW.md
+   用途：成功的源码开发、局部编译、启动、停止与验证方法。日常开发不要回到约80分钟的完整发布存证。
+
+5. E:/project/study/codex/dsh/decision-hub/docs/diagnosis-2026-10-23/PROBABILITY_BASE_RATE_PLAN.md
+   用途：P3/P4/P5/P6 的需求与进展。此文件只能追加，不重写前面轮次。
+
+6. E:/project/study/codex/dsh/decision-hub/docs/diagnosis-2026-10-23/VERIFICATION.md
+   用途：验收标准，特别是第4节真实研究技术验收；它不能替代长期质量和金融资格。
+
+7. E:/project/study/codex/dsh/decision-hub/docs/diagnosis-2026-10-23/EVENT_REQUIREMENTS_COVERAGE_2026-10-28.md
+   用途：CPI 与其他事件的需求—实现—真实验收对照。其他事件同样需要预测，不能因为界面主要显示 CPI 就删掉其他事件需求。
+
+8. E:/project/study/codex/dsh/decision-hub/docs/diagnosis-2026-10-23/STATUS_RECONCILIATION.md
+   用途：总控状态、不同任务编号体系、已有失败库存及 PAPER 落地差距。
+
+9. E:/project/study/codex/dsh/decision-hub/docs/diagnosis-2026-10-23/RESEARCH_RECOVERY_PLAN_2026-10-28.md
+   用途：上一阶段恢复计划与范围来源。是否完成必须结合最新结果，不能按旧“待办”重复执行。
+
+10. E:/project/study/codex/dsh/decision-hub/docs/diagnosis-2026-10-23/HANDOFF_TO_CODEX_2026-10-28.md
+    用途：原始交接与需求来源。其中的运行状态是历史快照，不能覆盖第2、3份文档的新证据。
+
+11. E:/project/study/codex/dsh/decision-hub/docs/diagnosis-2026-10-23/CODEX_LOG.md
+    用途：逐步执行记录、失败、退出码、裁决和证据路径。只能追加；先读最新记录，排查时按编号定位，避免把整个长日志读进上下文。
+
+12. E:/project/study/codex/dsh/decision-hub/docs/design/decision-product-control-2026-10-17/00_MASTER_CONTROL.md
+13. E:/project/study/codex/dsh/decision-hub/docs/v3/TASK_MASTER_LIST.md
+14. E:/project/study/codex/dsh/decision-hub/docs/v3/STATUS.md
+    用途：核对总控与任务覆盖。不同计划的任务编号不能直接混算，局部通过不能把55个任务或整个项目改成完成。
+
+先完整理解当前入口、开发方式和本次目标涉及的需求/验收章节；历史日志和大JSON按索引提取关键字段，不要全文灌入上下文。
+
+三、上一轮已经验证的事实
+
+以下是2026-10-29交接时的证据，不是你接手时的实时在线保证：
+
+1. 已恢复原系统的 BTC/ETH 4h 研究与历史报告读取。两次真实研究各约41分钟，不能把模型/工具等待时间说成编译时间。
+   BTC Run：run_09fc0ef0a2fc4444a812b8df05167fef
+   BTC Artifact：art_aac19b93f010489db1377121a2c90134
+   原终态为 degraded，不能改名成功。
+   ETH Run：run_dff19351d7b84c6e8291199c96a0a377
+   ETH Artifact：art_12bfd8ce4a2a4ad1ac30026cfe84158a
+   原终态为 completed，仍有6个soft gaps。
+   两份概率均精确保留各自冻结90d prior，未证明模型预测增益，金融/执行资格仍false。
+
+2. R5j修复root/child认证数据在最终传递中丢失的问题。42个TS与127个Python运行项通过，真实原件派生离线链通过。它不是新的真实v5研究报告；live writer/lease、插入幂等、同v5延迟inspect/cancel尚未实测，不得写成通过。
+
+3. R5k修复改Python后旧报告GET409的问题。保留当前执行的manifest校验，DEV只读作用域使用保存时的精确原代码消费者读取历史原件，没有伪装正式release/registry或删掉校验。
+
+4. R5k新增49个用例：48PASS、1个symlink平台SKIP、0FAIL/setup。Ruff五个新增源/测试文件0诊断，新helper严格类型检查实际2文件0错误/警告。它不等于全仓测试或全仓strict全绿。
+
+5. 生产factory与完整Query实际回放成功；原builder自然重算旧ac519身份。两份报告各7项、合计14项原件对照通过，6个非空事务均真实BEGIN、query_only、changes0、同数据库。之后正常owner API两份报告各13项检查通过，旧409已闭合。
+
+6. start10当时运行，7服务online、API/DSH ready。源码启动到首次观察全部ready约198秒，是采样上界；本次没有完整发布打包，两个局部编译log/stamp未变化。旧报告深度验证仍约一分钟，读取性能尚未优化。
+
+7. 六份具名正式保护文件SHA未变，96个选定源/测试/SDK文件及模型设置哈希未变。原业务库存仍9failed、1cancelled、1degraded、1completed；旧失败、负评与取消都保留。
+
+关键证据的绝对路径：
+E:/project/study/codex/dsh/decision-hub/artifacts/incremental-delivery-20261023/d28-research-recovery/live/btc-r5k-final-authenticated-report.json
+E:/project/study/codex/dsh/decision-hub/artifacts/incremental-delivery-20261023/d28-research-recovery/live/eth-r5k-final-authenticated-report.json
+E:/project/study/codex/dsh/decision-hub/artifacts/incremental-delivery-20261023/d28-research-recovery/live/start10/ready.json
+E:/project/study/codex/dsh/decision-hub/artifacts/incremental-delivery-20261023/d28-research-recovery/live/start10/final-status.json
+E:/project/study/codex/dsh/decision-hub/artifacts/incremental-delivery-20261023/d28-research-recovery/coverage-semantics/r5j/actual-replay/FINAL_SUMMARY.md
+E:/project/study/codex/dsh/decision-hub/artifacts/incremental-delivery-20261023/d28-research-recovery/coverage-semantics/r5k-historical-reader/unit-attempt05-result.md
+E:/project/study/codex/dsh/decision-hub/artifacts/incremental-delivery-20261023/d28-research-recovery/coverage-semantics/r5k-historical-reader/final-integrity.json
+E:/project/study/codex/dsh/decision-hub/artifacts/incremental-delivery-20261023/d28-research-recovery/coverage-semantics/r5k-historical-reader/review-final-live.md
+E:/project/study/codex/dsh/decision-hub/artifacts/incremental-delivery-20261023/d28-research-recovery/coverage-semantics/r5k-historical-reader/actual2-evidence/SUCCESSFUL_COMMAND.md
+D:/DH-r5k-actual2/RESULT.md
+D:/DH-r5k-u5/result.json
+D:/DH-r5k-static5/
+
+四、没有完成的需求，不得漏掉
+
+1. P3：与基准率差距都在2个百分点内且没有调整理由时，确定性标记base_rate_only；偏离超过15个百分点且没有证据引用时确定性退回。现有提示词不能替代确定性审核。
+2. P4：BTC幅度来自冻结90d各p50已证明；完整绝对价格带、numeric anchor与界面接线仍待完成。
+3. P5：baseline log-loss、旧记录明确“无对照”、真实到期评分与四周证据未完成。
+4. P6：基准率与模型概率并列、偏离量/理由、仅基准率标记及对应合同/语义/界面验证未齐。
+5. 多事件：专用预测producer/query/render主要覆盖CPI九格。PCE、就业、FOMC等有部分日历/selector/共享接缝，各族“事前概率→独审→发布→结果回看”未全验；CPI自身也不能因此宣布完整闭环验收。日历列出事件不等于已经实现预测。
+6. 其他期限/六组合、连续14自然日合格率≥90%、四周评分、≥10笔PAPER及费用/资金费、失败回放/retention、正式发布仍未完成。不能用改时间、批量回填或合成数据替代自然时间和真实证据。
+7. A4原1030项跨版本库存为944PASS/81FAIL/3ERROR/2SKIP，0未观察。核对完成不等于失败修好；不要再无理由重复原250补测或整个1030库存。81个测试FAIL与旧两源81条类型诊断不是同一件事。
+8. start04停止退出窗口竞态未修；正式发布存证的增量优化未做，旧归档预算约195KB仅是历史观察、本轮未复测。
+
+五、开发方式：不要每改一点就完整打包
+
+PowerShell7可执行文件：
+C:/Users/90603/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe
+
+先检查此程序存在、主版本≥7。不要用Windows PowerShell5.1运行依赖-AsHashtable的脚本。
+
+命令均在以下目录执行：
+Set-Location -LiteralPath 'E:/project/study/codex/dsh/decision-hub'
+
+先查现场状态，不拿历史PID或以下状态文件中的running单独当在线证据：
+E:/project/study/codex/dsh/decision-hub/data/development/default/runtime/processes.json
+
+& 'C:/Users/90603/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' -NoProfile -File 'E:/project/study/codex/dsh/decision-hub/infra/dsh/status-dev.ps1'
+
+仅在没有已有实例、端口无冲突且确需启动时：
+& 'C:/Users/90603/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' -NoProfile -File 'E:/project/study/codex/dsh/decision-hub/infra/dsh/run-dev.ps1' -DevelopmentRoot 'E:/project/study/codex/dsh/decision-hub/data/development/default'
+
+需要长期保持实例运行、让长日志落盘时，优先使用上一轮成功的观察包装，使用新的唯一attempt，不复用start10：
+& 'C:/Users/90603/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' -NoProfile -File 'E:/project/study/codex/dsh/decision-hub/artifacts/incremental-delivery-20261023/d28-research-recovery/observe-development.ps1' -Attempt ('start' + [DateTimeOffset]::UtcNow.ToUnixTimeSeconds())
+
+保持这个外层观察进程运行，记录工具session和PID出生身份，不要后台拉起后立刻结束父进程。先确认没有现存实例，再在上述两种启动方法中选一种执行，不能两种都启动。
+
+需要停止时，先确认没有运行中的真实研究，再执行：
+& 'C:/Users/90603/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' -NoProfile -File 'E:/project/study/codex/dsh/decision-hub/infra/dsh/stop-dev.ps1'
+
+前端：http://localhost:5173
+API：http://127.0.0.1:18047
+DSH：http://127.0.0.1:18097
+
+前端用Vite；后端/插件/合同及参与recipe的资料变更时，确认研究空闲→官方停止→局部修复/检查→源码重启。插件由官方缓存检查决定是否局部编译，不默认强制重编。后台Start-Process使用-WindowStyle Hidden，保留启动日志和进程身份。
+
+当前任务不得调用：
+E:/project/study/codex/dsh/decision-hub/infra/dsh/build-product.ps1
+
+该完整发布存证留给后续明确授权的正式发布。不要因本地开发重新陷入全仓/旧版本归档扫描。不要为已有成功再重复付费研究；涉及新行为的真实验证必须先有本地证据和审查。
+
+六、必须保护的实现边界
+
+当前精确源码快照目录：
+E:/project/study/codex/dsh/decision-hub/data/development/default/runtime/history-snapshots/
+
+旧两报告对应身份：ac519bc186586fa81652f8b5b2dc54cf1108626535bc5378492f1cc76bcae183
+上一轮当前身份：4b9b9f5b95996c632d9d65444a74832e3dcd554770b46f10ff3eb5f7f7b19b68
+
+只按保存manifest核对应小闭包。当前512文件、旧509文件，不扫描189个归档，不在读请求里把当前代码冒充旧版本。该方案要求Python改动后官方源码重启并冻结源码再发新Run；不能运行中热改Python后直接发新研究。
+
+Windows长路径由native IO处理，逻辑descriptor/index/manifest保持原路径。仅仓库普通源文件leaf可按SHA读入hardlink；快照目标/index/祖先/数据库仍严格拒绝hardlink，symlink/reparse仍拒绝。不要为省事全局放宽守卫、拆改真实仓库链接、修改旧hash或关闭原current-implementation校验。
+
+相关生产代码：
+E:/project/study/codex/dsh/decision-hub/packages/kernel/decision_hub_kernel/application/development_history_snapshot.py
+E:/project/study/codex/dsh/decision-hub/packages/kernel/decision_hub_kernel/application/development_history_reader.py
+E:/project/study/codex/dsh/decision-hub/packages/kernel/decision_hub_kernel/application/research_graph_history_versions.py
+E:/project/study/codex/dsh/decision-hub/packages/kernel/decision_hub_kernel/application/perpetual_saved_report.py
+E:/project/study/codex/dsh/decision-hub/apps/hub_api/decision_settings_routes.py
+E:/project/study/codex/dsh/decision-hub/apps/hub_api/main.py
+
+相关回归测试：
+E:/project/study/codex/dsh/decision-hub/tests/decision_product/test_development_history.py
+E:/project/study/codex/dsh/decision-hub/tests/decision_product/test_development_history_scope.py
+E:/project/study/codex/dsh/decision-hub/tests/decision_product/development_history_test_support.py
+
+这些是需要保护的已验证能力，不是让你在做P3/P6时无理由再次重构它们。
+
+七、磁盘与历史数据
+
+E盘曾实际满到0字节，交接最后只剩约437MB；接手后必须重新检查，不把旧余量当实时值。新增测试临时目录、长日志和大fixture放D盘短路径的新目录。不得复用会被pytest清理的旧basetemp，不删除旧失败现场。
+
+下列旧测试输出要保留：
+D:/DH-r5k-u2/
+D:/DH-r5k-u3/
+D:/DH-r5k-u4/
+D:/DH-r5k-u5/
+D:/DH-r5k-actual1/
+D:/DH-r5k-actual2/
+
+本轮失败writer隔离副本已原样迁移并有独立校验备份：
+D:/DH-r5k-space-20261029T043927Z/preserved-fixtures/btc-derived-source.sqlite3
+D:/DH-r5k-space-20261029T043927Z/preserved-fixtures/btc-derived-source.verified-backup.sqlite3
+
+原路径旁的定位文件：
+E:/project/study/codex/dsh/decision-hub/artifacts/incremental-delivery-20261023/d28-research-recovery/coverage-semantics/r5j/actual-replay/private/btc-derived-source.sqlite3.location.json
+
+该副本不是开发真库或正式库；三份完整SHA已校一致。另两份本轮readerfixture做了透明NTFS压缩，逻辑字节/SHA相同。不要把路径迁移误判为丢失，不要复制回E把空间再次占满。
+
+禁止写入、清理或迁移以下正式目录：
+E:/project/study/codex/dsh/decision-hub/data/core-live-20260913/
+E:/project/study/codex/dsh/decision-hub/data/dsh-live/
+E:/project/study/codex/dsh/decision-hub/data/product-local/
+
+禁止删除历史数据、伪造概率或accepted证据、改旧Run状态/时间/hash、放宽质量/新鲜度/审核门槛、git commit/push。凭据、模型设置原文、Cookie和认证URL不得输出到聊天或公开日志。需要新授权的不可逆操作先解释并请求，不用泛化确认阻塞常规工作。
+
+八、不要重复上一位执行者的错误
+
+1. 不把正式80分钟存证用于日常开发，不通过延长超时或反复换参数掩盖失败。
+2. 不仅测helper/producer；改跨端链路要覆盖真实Host/DTO/Python消费者/public Query，最后必要时再验正常owner API。
+3. clone测试会丢失真实源metadata；必须核实际文件属性，不能凭推测归因provider、权限或数据丢失。
+4. 保留首次失败、真实退出码和最后40行。fixture/setup/tool错误与产品错误分开；推测明确标“推测”。不要把未执行或平台SKIP算PASS。
+5. 不把局部严格类型通过称全仓通过，不把日历有事件称已经预测，不把历史prior称预测增益，不把离线派生报告称真实新报告。
+6. 纯owned文件的行长/AST/Ruff只读检查可以并行；实际源码身份检查、业务回放和真实研究须稳定冻结。避免格式问题也让全员反复等待。
+7. 出错先停该步骤、落盘证据、定位具体谓词。修改前写排查/裁决，先RED再GREEN；真实付费失败后必须原件离线复现和独立审查，再考虑新请求。不要无限盲重试或每次都要求用户做管理员系统操作。
+
+九、执行与记录交付
+
+读完先简要报告：当前现场状态、真正已完成的内容、仍缺需求、本次具体目标、允许修改的绝对路径和验收标准，然后在已有授权内推进实现与自测。任务范围明确，独立工作可并行，同一源码不得多人同时修改。
+
+每完成一个步骤就立即追加事实、修改原因、命令、退出码、测试结果、失败与下一步到：
+E:/project/study/codex/dsh/decision-hub/docs/diagnosis-2026-10-23/CODEX_LOG.md
+E:/project/study/codex/dsh/decision-hub/docs/diagnosis-2026-10-23/PROBABILITY_BASE_RATE_PLAN.md
+
+新证据在下列已有证据根下创建独立新子目录，长日志优先D盘并在这里留下小索引；不要覆盖上一轮输出：
+E:/project/study/codex/dsh/decision-hub/artifacts/incremental-delivery-20261023/d28-research-recovery/
+
+当前入口和需求状态及时维护：
+E:/project/study/codex/dsh/decision-hub/docs/diagnosis-2026-10-23/HANDOFF_RECOVERY_CURRENT_2026-10-29.md
+E:/project/study/codex/dsh/decision-hub/docs/diagnosis-2026-10-23/STATUS_RECONCILIATION.md
+E:/project/study/codex/dsh/decision-hub/docs/diagnosis-2026-10-23/EVENT_REQUIREMENTS_COVERAGE_2026-10-28.md
+
+最终报告要写清：改了什么、为什么、如何自测、实际通过/失败/跳过数量、证据绝对路径、你的错误与纠正、剩余需求和下一执行入口。明确区分“本轮目标完成”和“整个项目完成”，不要再让接手者靠猜测恢复现场。

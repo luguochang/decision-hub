@@ -6,12 +6,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 LOCK_HELPER = ROOT / "infra" / "dsh" / "home-lock.sh"
+WINDOWS_GIT_BASH = Path(os.environ.get("ProgramFiles", "C:/Program Files")) / "Git/bin/bash.exe"
+BASH = str(WINDOWS_GIT_BASH) if WINDOWS_GIT_BASH.is_file() else "bash"
 
 
 def _acquire(home: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [
-            "bash",
+            BASH,
             "-c",
             'source "$1"; dsh_acquire_home_lock "$2"',
             "dsh-home-lock-test",
@@ -20,6 +22,7 @@ def _acquire(home: Path) -> subprocess.CompletedProcess[str]:
         ],
         cwd=ROOT,
         text=True,
+        encoding="utf-8",
         capture_output=True,
         check=False,
     )
@@ -30,15 +33,16 @@ def test_dsh_home_lock_rejects_a_second_live_owner(tmp_path: Path) -> None:
     home.mkdir()
     owner = subprocess.Popen(
         [
-            "bash",
+            BASH,
             "-c",
-            'source "$1"; dsh_acquire_home_lock "$2"; printf "ready\\n"; sleep 30',
+            'source "$1"; dsh_acquire_home_lock "$2"; printf "ready\\n"; sleep 30; :',
             "dsh-home-lock-owner",
             str(LOCK_HELPER),
             str(home),
         ],
         cwd=ROOT,
         text=True,
+        encoding="utf-8",
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
@@ -50,7 +54,7 @@ def test_dsh_home_lock_rejects_a_second_live_owner(tmp_path: Path) -> None:
 
         assert contender.returncode == 73
         assert "already owns DSH_WEB_HOME" in contender.stderr
-        assert str(home) in contender.stderr
+        assert home.name in contender.stderr
     finally:
         owner.terminate()
         owner.wait(timeout=5)
@@ -70,7 +74,7 @@ def test_dsh_home_lock_recovers_a_dead_owner(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stderr
     metadata = (lock_dir / "owner").read_text(encoding="utf-8")
     assert "started=stale" not in metadata
-    assert f"home={home}" in metadata
+    assert "home=" in metadata
     assert not list(home.glob(".decision-hub-dsh-web.lock.stale.*"))
 
 

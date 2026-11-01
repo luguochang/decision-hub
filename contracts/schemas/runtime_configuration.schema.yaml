@@ -1,0 +1,51 @@
+additionalProperties: false
+properties:
+  config_id:
+    title: Config Id
+    type: string
+  fingerprint:
+    title: Fingerprint
+    type: string
+  instance_id:
+    title: Instance Id
+    type: string
+  process_id:
+    title: Process Id
+    type: integer
+  recorded_at:
+    format: date-time
+    title: Recorded At
+    type: string
+  schema_version:
+    const: runtime-configuration.v1
+    default: runtime-configuration.v1
+    title: Schema Version
+    type: string
+  service_id:
+    title: Service Id
+    type: string
+  settings:
+    additionalProperties:
+      anyOf:
+      - type: string
+      - type: boolean
+      - type: integer
+      - type: number
+      - type: 'null'
+    title: Settings
+    type: object
+  started_at:
+    format: date-time
+    title: Started At
+    type: string
+required:
+- config_id
+- service_id
+- instance_id
+- process_id
+- started_at
+- recorded_at
+- fingerprint
+- settings
+title: RuntimeConfigurationView
+type: object

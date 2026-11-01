@@ -7,9 +7,23 @@ from typing import Literal, cast
 
 from pydantic import ValidationError
 
-from packages.contracts_py.decision_hub_contracts import ErrorProvenance, ResearchTraceEvent
+from packages.contracts_py.decision_hub_contracts import (
+    ErrorProvenance,
+    ResearchSessionRequest,
+    ResearchTraceEvent,
+)
+from packages.kernel.decision_hub_kernel.application.research_workflow_checkpoints import (
+    CHECKPOINT_REFERENCE,
+    native_workflow_checkpoints,
+)
+from packages.kernel.decision_hub_kernel.ports.research_synthesis_protocol import synthesis_protocol
 
 from .client import DshSdkNotification
+from .tool_result_attestation import (
+    extract_attested_decision_synthesis_captures,
+    extract_attested_perpetual_synthesis_captures,
+    extract_attested_synthesis_candidates,
+)
 
 type TraceEventType = Literal[
     "session_started",
@@ -39,12 +53,33 @@ def map_notifications(
     run_id: str,
     research_session_id: str,
     received_at: datetime | None = None,
+    request: ResearchSessionRequest | None = None,
 ) -> list[ResearchTraceEvent]:
     fallback_time = received_at or datetime.now(UTC)
     traces: list[ResearchTraceEvent] = []
     tool_names: dict[str, str] = {}
+    protocol = synthesis_protocol(request.output_schema_ref) if request is not None else "legacy"
+    extractor = (
+        extract_attested_decision_synthesis_captures
+        if protocol == "decision" else extract_attested_synthesis_candidates
+    )
+    synthesis_accepted = bool(extract_attested_perpetual_synthesis_captures(_active_generation_notifications(notifications),
+        expected_session_id=research_session_id, request=request)) if protocol == "decision_v2" else bool(
+        extractor(
+            _active_generation_notifications(notifications),
+            expected_session_id=research_session_id,
+        )
+    )
+    checkpoints = native_workflow_checkpoints(
+        notifications, request=request, run_id=run_id, session_id=research_session_id,
+    )
     for notification in notifications:
-        mapped = _map_notification(notification, fallback_time, tool_names)
+        mapped = _map_notification(
+            notification,
+            fallback_time,
+            tool_names,
+            synthesis_accepted=synthesis_accepted,
+        )
         if mapped is None:
             continue
         (
@@ -74,6 +109,18 @@ def map_notifications(
                 error=error,
             )
         )
+        native_event = notification.payload.get("event")
+        native_seq = native_event.get("seq") if isinstance(native_event, Mapping) else None
+        proof = checkpoints.get(native_seq) if type(native_seq) is int else None
+        if proof is not None:
+            traces.append(ResearchTraceEvent(
+                schema_version="research-trace-event.v1", run_id=run_id,
+                research_session_id=research_session_id, sequence_no=len(traces),
+                event_type="synthesis_started",
+                occurred_at=_occurred_at(notification.payload, fallback_time),
+                stage="synthesis", summary=proof, reference_type=CHECKPOINT_REFERENCE,
+                reference_id=reference_id, status="running", error_code=None, error=None,
+            ))
     return traces
 
 
@@ -81,6 +128,8 @@ def _map_notification(
     notification: DshSdkNotification,
     fallback_time: datetime,
     tool_names: dict[str, str],
+    *,
+    synthesis_accepted: bool,
 ) -> tuple[str, str, str, str | None, str | None, str, str | None, ErrorProvenance | None] | None:
     payload = notification.payload
     if notification.method == "subagent.started":
@@ -149,6 +198,17 @@ def _map_notification(
     tool_name = _string(event_data, "toolName", "name")
     if event_type == "tool/call" and reference_id is not None and tool_name is not None:
         tool_names[reference_id] = tool_name
+    if event_type == "tool/call" and tool_name in {"subagent", "dsh.internal.subagent"}:
+        return (
+            "subagent_started",
+            "independent_review",
+            "An independent reviewer subagent started.",
+            "dsh_event",
+            reference_id,
+            "running",
+            None,
+            None,
+        )
     tool_name = tool_name or (tool_names.get(reference_id) if reference_id else None) or "tool"
 
     if event_type == "agent/inbox/spliced":
@@ -186,11 +246,30 @@ def _map_notification(
         )
     if event_type in {"tool/result", "tool/call-result"}:
         failed = _tool_result_failed(event_data)
-        error = (
-            _tool_error_provenance(event_data, reference_id, tool_name)
-            if failed
-            else None
-        )
+        if tool_name in {"subagent", "dsh.internal.subagent"}:
+            return (
+                "subagent_completed",
+                "independent_review",
+                "The independent reviewer subagent failed."
+                if failed
+                else "The independent reviewer subagent returned a receipt.",
+                "dsh_event",
+                reference_id,
+                "failed" if failed else "succeeded",
+                "dsh_subagent_failed" if failed else None,
+                ErrorProvenance(
+                    error_code="dsh_subagent_failed",
+                    origin="dsh",
+                    cause_code=None,
+                    capability_id=None,
+                    tool_call_id=reference_id,
+                    retryable=False,
+                    deadline_ms=None,
+                )
+                if failed
+                else None,
+            )
+        error = _tool_error_provenance(event_data, reference_id, tool_name) if failed else None
         return (
             "tool_failed" if failed else "tool_completed",
             "acquiring_evidence",
@@ -204,11 +283,14 @@ def _map_notification(
     if event_type in {"step/end", "agent/step-end"}:
         reason = event_data.get("reason")
         reason_kind = _string(reason, "kind") if isinstance(reason, Mapping) else None
-        succeeded = reason_kind in {None, "completed", "tool-calls"}
+        controlled_synthesis_stop = reason_kind == "aborted" and synthesis_accepted
+        succeeded = reason_kind in {None, "completed", "tool-calls"} or controlled_synthesis_stop
         return (
             "model_step_completed",
             "acquiring_evidence",
-            "The research manager completed a model step."
+            "The research manager completed after submitting attested synthesis."
+            if controlled_synthesis_stop
+            else "The research manager completed a model step."
             if succeeded
             else "The research manager stopped without a completed model step.",
             "dsh_event",
@@ -230,11 +312,16 @@ def _map_notification(
     if event_type == "turn/end":
         reason = event_data.get("reason")
         reason_kind = _string(reason, "kind") if isinstance(reason, Mapping) else None
-        succeeded = reason_kind == "completed"
+        controlled_synthesis_stop = reason_kind == "aborted" and synthesis_accepted
+        succeeded = reason_kind == "completed" or controlled_synthesis_stop
         return (
             "round_completed",
             "synthesis",
-            "The DSH turn completed." if succeeded else "The DSH turn stopped without completion.",
+            "The DSH turn completed after attested synthesis."
+            if controlled_synthesis_stop
+            else "The DSH turn completed."
+            if succeeded
+            else "The DSH turn stopped without completion.",
             "dsh_event",
             reference_id,
             "succeeded" if succeeded else "degraded",
@@ -252,6 +339,30 @@ def _map_notification(
             ),
         )
     return None
+
+
+def _active_generation_notifications(
+    notifications: Sequence[DshSdkNotification],
+) -> Sequence[DshSdkNotification]:
+    """Exclude accepted tool receipts retained from an older continuation."""
+
+    for index in range(len(notifications) - 1, -1, -1):
+        notification = notifications[index]
+        if notification.method != "session.event":
+            continue
+        event = notification.payload.get("event")
+        if not isinstance(event, Mapping) or event.get("type") != "user/message":
+            continue
+        data = event.get("data")
+        if not isinstance(data, Mapping):
+            continue
+        # Native context, compaction and child notices use user/message too.
+        # Only an actual user input starts a new generation. Unsourced inputs
+        # retain the legacy boundary; an invalid user RPC still fails binding.
+        source = data.get("source")
+        if "source" not in data or isinstance(source, Mapping) and source.get("kind") == "user":
+            return notifications[index:]
+    return notifications
 
 
 def _tool_call_id(data: Mapping[str, object]) -> str | None:
@@ -377,6 +488,14 @@ def _occurred_at(payload: Mapping[str, object], fallback: datetime) -> datetime:
     candidates: list[object] = [payload.get("occurredAt"), payload.get("timestamp")]
     if isinstance(event, Mapping):
         candidates.extend((event.get("occurredAt"), event.get("timestamp")))
+        # DSH Web/archive event.time is epoch milliseconds, not an ISO string.
+        # Ignoring it collapses an entire round onto the same fallback timestamp.
+        milliseconds = event.get("time")
+        if isinstance(milliseconds, (int, float)) and not isinstance(milliseconds, bool):
+            try:
+                return datetime.fromtimestamp(float(milliseconds) / 1000, tz=UTC)
+            except (OverflowError, OSError, ValueError):
+                pass
     for value in candidates:
         if not isinstance(value, str):
             continue

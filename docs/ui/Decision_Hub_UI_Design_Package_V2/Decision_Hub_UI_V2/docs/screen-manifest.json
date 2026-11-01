@@ -1,0 +1,638 @@
+[
+  {
+    "number": 1,
+    "device": "desktop",
+    "id": "home",
+    "title": "研究指挥台",
+    "description": "获取建议、事件、任务与选中报告的统一工作台",
+    "route": "#/home?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/01_home.png",
+    "content_height": 1277,
+    "full_path": "screens/desktop/01_home_full.png"
+  },
+  {
+    "number": 2,
+    "device": "desktop",
+    "id": "compose",
+    "title": "获取最新操作建议",
+    "description": "空输入使用固定 BTC / 宏观研究模板",
+    "route": "#/compose?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/02_compose.png",
+    "content_height": 1080
+  },
+  {
+    "number": 3,
+    "device": "desktop",
+    "id": "submitting",
+    "title": "提交中",
+    "description": "输入保留、按钮锁定、同一意图幂等提交",
+    "route": "#/submitting?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/03_submitting.png",
+    "content_height": 1080
+  },
+  {
+    "number": 4,
+    "device": "desktop",
+    "id": "queued",
+    "title": "研究已排队",
+    "description": "Run 已创建；离开页面不取消任务",
+    "route": "#/queued?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/04_queued.png",
+    "content_height": 1080
+  },
+  {
+    "number": 5,
+    "device": "desktop",
+    "id": "researching",
+    "title": "正在研究",
+    "description": "轮次、工具数与最近活动，不伪造完成百分比",
+    "route": "#/researching?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/05_researching.png",
+    "content_height": 1080
+  },
+  {
+    "number": 6,
+    "device": "desktop",
+    "id": "failed",
+    "title": "研究失败",
+    "description": "错误来源、错误码、可重试性及原输入",
+    "route": "#/failed?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/06_failed.png",
+    "content_height": 1080
+  },
+  {
+    "number": 7,
+    "device": "desktop",
+    "id": "runs",
+    "title": "Research Runs",
+    "description": "搜索、状态筛选、证据覆盖、父子任务",
+    "route": "#/runs?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/07_runs.png",
+    "content_height": 1080
+  },
+  {
+    "number": 8,
+    "device": "desktop",
+    "id": "calendar-all",
+    "title": "宏观事件 · 全部",
+    "description": "事件账本与来源采集状态分离",
+    "route": "#/calendar-all?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/08_calendar-all.png",
+    "content_height": 1312,
+    "full_path": "screens/desktop/08_calendar-all_full.png"
+  },
+  {
+    "number": 9,
+    "device": "desktop",
+    "id": "calendar-upcoming",
+    "title": "宏观事件 · 即将发生",
+    "description": "示例风险窗口与发布时间",
+    "route": "#/calendar-upcoming?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/09_calendar-upcoming.png",
+    "content_height": 1312,
+    "full_path": "screens/desktop/09_calendar-upcoming_full.png"
+  },
+  {
+    "number": 10,
+    "device": "desktop",
+    "id": "calendar-history",
+    "title": "宏观事件 · 历史发布",
+    "description": "尚未采集历史发布；不是未来事件的复制",
+    "route": "#/calendar-history?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/10_calendar-history.png",
+    "content_height": 1312,
+    "full_path": "screens/desktop/10_calendar-history_full.png"
+  },
+  {
+    "number": 11,
+    "device": "desktop",
+    "id": "event",
+    "title": "事件详情抽屉",
+    "description": "来源、前值、预期、实际、意外、版本记录",
+    "route": "#/event?preview=1&run=demo-r01&event=event-01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/11_event.png",
+    "content_height": 1312,
+    "full_path": "screens/desktop/11_event_full.png"
+  },
+  {
+    "number": 12,
+    "device": "desktop",
+    "id": "report",
+    "title": "研究报告",
+    "description": "方向、行动候选、概率和权限分别呈现",
+    "route": "#/report?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/12_report.png",
+    "content_height": 1838,
+    "full_path": "screens/desktop/12_report_full.png"
+  },
+  {
+    "number": 13,
+    "device": "desktop",
+    "id": "report-incomplete",
+    "title": "结论不完整",
+    "description": "研究已结束；synthesis_incomplete 明确提示",
+    "route": "#/report-incomplete?preview=1&run=demo-r05",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/13_report-incomplete.png",
+    "content_height": 1838,
+    "full_path": "screens/desktop/13_report-incomplete_full.png"
+  },
+  {
+    "number": 14,
+    "device": "desktop",
+    "id": "technical",
+    "title": "技术详情",
+    "description": "八类结构化审计模块，不展示私有逐字思维链",
+    "route": "#/technical?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/14_technical.png",
+    "content_height": 1717,
+    "full_path": "screens/desktop/14_technical_full.png"
+  },
+  {
+    "number": 15,
+    "device": "desktop",
+    "id": "evidence",
+    "title": "证据详情抽屉",
+    "description": "来源身份、质量、时间及证据关联",
+    "route": "#/evidence?preview=1&run=demo-r01&evidence=EV-001",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/15_evidence.png",
+    "content_height": 1838,
+    "full_path": "screens/desktop/15_evidence_full.png"
+  },
+  {
+    "number": 16,
+    "device": "desktop",
+    "id": "graph",
+    "title": "全屏分析链路",
+    "description": "分组、缩放、平移、适配与小地图",
+    "route": "#/graph?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/16_graph.png",
+    "content_height": 1080
+  },
+  {
+    "number": 17,
+    "device": "desktop",
+    "id": "graph-node",
+    "title": "图谱节点检查器",
+    "description": "节点、关系与证据在同一 Run 下联动",
+    "route": "#/graph-node?preview=1&run=demo-r01&node=round-2",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/17_graph-node.png",
+    "content_height": 1080
+  },
+  {
+    "number": 18,
+    "device": "desktop",
+    "id": "library",
+    "title": "研究资料库",
+    "description": "资料版本、审核状态与关联 Run",
+    "route": "#/library?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/18_library.png",
+    "content_height": 1080
+  },
+  {
+    "number": 19,
+    "device": "desktop",
+    "id": "upload",
+    "title": "上传资料",
+    "description": "支持格式、元数据、隐私与文件校验",
+    "route": "#/upload?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/19_upload.png",
+    "content_height": 1080
+  },
+  {
+    "number": 20,
+    "device": "desktop",
+    "id": "document-uploading",
+    "title": "资料上传中",
+    "description": "本地模拟进度；没有实际上传",
+    "route": "#/document-uploading?preview=1&run=demo-r01&doc=preview-doc",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/20_document-uploading.png",
+    "content_height": 1080
+  },
+  {
+    "number": 21,
+    "device": "desktop",
+    "id": "document-parsing",
+    "title": "资料解析中",
+    "description": "结构提取进度与原文保留提示",
+    "route": "#/document-parsing?preview=1&run=demo-r01&doc=preview-doc",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/21_document-parsing.png",
+    "content_height": 1080
+  },
+  {
+    "number": 22,
+    "device": "desktop",
+    "id": "document-quality",
+    "title": "资料质量不足",
+    "description": "硬缺口阻止资料进入研究",
+    "route": "#/document-quality?preview=1&run=demo-r01&doc=preview-doc",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/22_document-quality.png",
+    "content_height": 1080
+  },
+  {
+    "number": 23,
+    "device": "desktop",
+    "id": "document-review",
+    "title": "语义修正审核",
+    "description": "逐条接受 / 拒绝，敏感语义变化明确阻断",
+    "route": "#/document-review?preview=1&run=demo-r01&doc=preview-doc",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/23_document-review.png",
+    "content_height": 1430,
+    "full_path": "screens/desktop/23_document-review_full.png"
+  },
+  {
+    "number": 24,
+    "device": "desktop",
+    "id": "document-confirm",
+    "title": "确认审核范围",
+    "description": "全部差异已处理；显式确认后生成新版本",
+    "route": "#/document-confirm?preview=1&run=demo-r01&doc=preview-doc",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/24_document-confirm.png",
+    "content_height": 1430,
+    "full_path": "screens/desktop/24_document-confirm_full.png"
+  },
+  {
+    "number": 25,
+    "device": "desktop",
+    "id": "document-confirmed",
+    "title": "质量复检中",
+    "description": "人工确认不能绕过质量门",
+    "route": "#/document-confirmed?preview=1&run=demo-r01&doc=preview-doc",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/25_document-confirmed.png",
+    "content_height": 1080
+  },
+  {
+    "number": 26,
+    "device": "desktop",
+    "id": "document-ready",
+    "title": "可用于研究",
+    "description": "版本已确认且质量门通过",
+    "route": "#/document-ready?preview=1&run=demo-r01&doc=preview-doc",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/26_document-ready.png",
+    "content_height": 1080
+  },
+  {
+    "number": 27,
+    "device": "desktop",
+    "id": "document-linked",
+    "title": "资料已连接",
+    "description": "资料到新 Run 以及新 Run 到资料的双向入口",
+    "route": "#/document-linked?preview=1&run=demo-r01&doc=preview-doc",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/27_document-linked.png",
+    "content_height": 1080
+  },
+  {
+    "number": 28,
+    "device": "desktop",
+    "id": "document-failed",
+    "title": "资料解析失败",
+    "description": "文件保留；恢复与重试入口",
+    "route": "#/document-failed?preview=1&run=demo-r01&doc=preview-doc",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/28_document-failed.png",
+    "content_height": 1080
+  },
+  {
+    "number": 29,
+    "device": "desktop",
+    "id": "home-loading",
+    "title": "工作台加载中",
+    "description": "按 worker、日历、任务分别反馈",
+    "route": "#/home-loading?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/29_home-loading.png",
+    "content_height": 1080
+  },
+  {
+    "number": 30,
+    "device": "desktop",
+    "id": "home-unknown",
+    "title": "服务状态未知",
+    "description": "未知不渲染成健康",
+    "route": "#/home-unknown?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/30_home-unknown.png",
+    "content_height": 1360,
+    "full_path": "screens/desktop/30_home-unknown_full.png"
+  },
+  {
+    "number": 31,
+    "device": "desktop",
+    "id": "home-degraded",
+    "title": "来源降级",
+    "description": "来源、影响范围、最后成功与下次检查",
+    "route": "#/home-degraded?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/31_home-degraded.png",
+    "content_height": 1368,
+    "full_path": "screens/desktop/31_home-degraded_full.png"
+  },
+  {
+    "number": 32,
+    "device": "desktop",
+    "id": "home-empty",
+    "title": "暂无研究任务",
+    "description": "下一步明确，不填入假报告",
+    "route": "#/home-empty?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/32_home-empty.png",
+    "content_height": 1080
+  },
+  {
+    "number": 33,
+    "device": "desktop",
+    "id": "sources",
+    "title": "服务与数据源",
+    "description": "运行健康与来源质量独立显示",
+    "route": "#/sources?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/33_sources.png",
+    "content_height": 1080
+  },
+  {
+    "number": 34,
+    "device": "desktop",
+    "id": "states",
+    "title": "组件与状态规范",
+    "description": "颜色、图标、控件、反馈及状态边界",
+    "route": "#/states?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/34_states.png",
+    "content_height": 1911,
+    "full_path": "screens/desktop/34_states_full.png"
+  },
+  {
+    "number": 35,
+    "device": "desktop",
+    "id": "dsh",
+    "title": "DSH · 技术轨迹",
+    "description": "内部只读排查；带当前 Run 返回",
+    "route": "#/dsh?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/35_dsh.png",
+    "content_height": 1360,
+    "full_path": "screens/desktop/35_dsh_full.png"
+  },
+  {
+    "number": 36,
+    "device": "desktop",
+    "id": "dsh-conversation",
+    "title": "DSH · 对话摘要",
+    "description": "公开运行摘要，不暴露逐字思维链",
+    "route": "#/dsh-conversation?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/36_dsh-conversation.png",
+    "content_height": 1080
+  },
+  {
+    "number": 37,
+    "device": "desktop",
+    "id": "dsh-research",
+    "title": "DSH · 主动研究",
+    "description": "子任务与失败记录",
+    "route": "#/dsh-research?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/37_dsh-research.png",
+    "content_height": 1080
+  },
+  {
+    "number": 38,
+    "device": "desktop",
+    "id": "dsh-report",
+    "title": "DSH · 原生报告",
+    "description": "技术原生记录不代替 Hub 用户结论",
+    "route": "#/dsh-report?preview=1&run=demo-r01",
+    "viewport": [
+      1440,
+      1080
+    ],
+    "path": "screens/desktop/38_dsh-report.png",
+    "content_height": 1080
+  },
+  {
+    "number": 1,
+    "device": "mobile",
+    "id": "home",
+    "title": "研究指挥台",
+    "description": "获取建议、事件、任务与选中报告的统一工作台",
+    "route": "#/home?preview=1&run=demo-r01",
+    "viewport": [
+      390,
+      844
+    ],
+    "path": "screens/mobile/01_home.png",
+    "content_height": 2882,
+    "full_path": "screens/mobile/01_home_full.png"
+  },
+  {
+    "number": 2,
+    "device": "mobile",
+    "id": "report",
+    "title": "研究报告",
+    "description": "方向、行动候选、概率和权限分别呈现",
+    "route": "#/report?preview=1&run=demo-r01",
+    "viewport": [
+      390,
+      844
+    ],
+    "path": "screens/mobile/02_report.png",
+    "content_height": 3187,
+    "full_path": "screens/mobile/02_report_full.png"
+  },
+  {
+    "number": 3,
+    "device": "mobile",
+    "id": "calendar-all",
+    "title": "宏观事件 · 全部",
+    "description": "事件账本与来源采集状态分离",
+    "route": "#/calendar-all?preview=1&run=demo-r01",
+    "viewport": [
+      390,
+      844
+    ],
+    "path": "screens/mobile/03_calendar-all.png",
+    "content_height": 1788,
+    "full_path": "screens/mobile/03_calendar-all_full.png"
+  },
+  {
+    "number": 4,
+    "device": "mobile",
+    "id": "document-review",
+    "title": "语义修正审核",
+    "description": "逐条接受 / 拒绝，敏感语义变化明确阻断",
+    "route": "#/document-review?preview=1&run=demo-r01&doc=preview-doc",
+    "viewport": [
+      390,
+      844
+    ],
+    "path": "screens/mobile/04_document-review.png",
+    "content_height": 2237,
+    "full_path": "screens/mobile/04_document-review_full.png"
+  },
+  {
+    "number": 5,
+    "device": "mobile",
+    "id": "graph-node",
+    "title": "图谱节点检查器",
+    "description": "节点、关系与证据在同一 Run 下联动",
+    "route": "#/graph-node?preview=1&run=demo-r01&node=round-2",
+    "viewport": [
+      390,
+      844
+    ],
+    "path": "screens/mobile/05_graph-node.png",
+    "content_height": 844
+  },
+  {
+    "number": 6,
+    "device": "mobile",
+    "id": "dsh",
+    "title": "DSH · 技术轨迹",
+    "description": "内部只读排查；带当前 Run 返回",
+    "route": "#/dsh?preview=1&run=demo-r01",
+    "viewport": [
+      390,
+      844
+    ],
+    "path": "screens/mobile/06_dsh.png",
+    "content_height": 2122,
+    "full_path": "screens/mobile/06_dsh_full.png"
+  }
+]

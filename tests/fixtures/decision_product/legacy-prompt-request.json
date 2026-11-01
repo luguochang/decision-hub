@@ -1,0 +1,82 @@
+{
+  "schema_version": "research-session-request.v1",
+  "request_id": "request-r2-r01",
+  "run_id": "run-r2-r01",
+  "event_id": "event-warsh",
+  "trigger_snapshot_id": "snapshot-trigger",
+  "domain_pack_ref": "crypto_macro.v1",
+  "role_profile_ref": "crypto_macro.manager.v1",
+  "execution_mode": "replay",
+  "research_mode": "current_decision",
+  "task_policy_ref": null,
+  "context_manifest": null,
+  "pit_cutoff_at": "2026-08-29T12:00:00Z",
+  "current_round": 1,
+  "evidence_refs": [
+    "evidence-transcript"
+  ],
+  "input_evidence": [
+    {
+      "evidence_id": "evidence-transcript",
+      "kind": "transcript",
+      "authority": "unverified",
+      "source_id": "manual-transcript",
+      "source_url": null,
+      "published_at": "2026-08-29T11:59:00Z",
+      "observed_at": "2026-08-29T11:59:59Z",
+      "received_at": "2026-08-29T12:00:00Z",
+      "content_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "excerpt": "A central-bank official discussed inflation risks."
+    }
+  ],
+  "evidence_requirements": [
+    {
+      "requirement_id": "event_identity",
+      "description": "Verify the event identity from an authoritative source.",
+      "importance": "hard",
+      "source_priority": [
+        "official"
+      ],
+      "authority_floor": "official",
+      "preferred_capabilities": [
+        "replay.research"
+      ],
+      "freshness_seconds": 3600,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "confidence_cap": 0.45,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    }
+  ],
+  "target_gaps": [],
+  "event_watch": null,
+  "event_window_samples": [],
+  "allowed_capabilities": [
+    "replay.research"
+  ],
+  "execution_budget": {
+    "max_evidence_rounds": 3,
+    "max_tool_calls": 12,
+    "max_subagents": 6,
+    "total_deadline_seconds": 180,
+    "per_tool_timeout_seconds": 20,
+    "per_model_step_timeout_seconds": 60,
+    "max_structured_repairs": 1,
+    "max_estimated_cost_usd": 1.0
+  },
+  "deadline_at": "2026-08-29T12:03:00Z",
+  "output_schema_ref": "research-session-result.v1",
+  "repair_instructions": null
+}

@@ -13,6 +13,9 @@ from packages.contracts_py.decision_hub_contracts import (
     EvidenceRequirement,
     FactEnvelope,
 )
+from packages.kernel.decision_hub_kernel.decision.relationship_gate import (
+    validate_baseline_after,
+)
 
 
 class EvidenceSufficiencyError(ValueError):
@@ -302,6 +305,11 @@ def _semantic_assessment(
         return reason, {item.evidence_id for item in valid}, {
             item.independence_group for item in valid
         }
+    relationship_reason = _relationship_assessment(requirement, valid)
+    if relationship_reason is not None:
+        return relationship_reason, {item.evidence_id for item in valid}, {
+            item.independence_group for item in valid
+        }
     venues = {item.venue for item in valid if item.venue}
     if requirement.venue_required and len(venues) < (requirement.minimum_venues or 1):
         return "semantic_mismatch", {item.evidence_id for item in valid}, {
@@ -311,3 +319,138 @@ def _semantic_assessment(
     if len(groups) < (requirement.minimum_independence_groups or 1):
         return "insufficient_sources", {item.evidence_id for item in valid}, groups
     return None, {item.evidence_id for item in valid}, groups
+
+
+def _relationship_assessment(
+    requirement: EvidenceRequirement,
+    facts: list[FactEnvelope],
+) -> GapReason | None:
+    """Require event-window anchors to come from one logical observable.
+
+    Aggregate offset checks alone can accidentally combine a baseline from one
+    instrument/source with an after value from another.  Grouping first and
+    passing each candidate pair through the relationship gate keeps the check
+    provider-neutral while preserving requirements that only have one side of a
+    window (for example a baseline-only policy fact).
+    """
+
+    required_offsets = set(requirement.required_event_offsets or [])
+    baseline_offsets = required_offsets & {"baseline", "t-5m", "t-1h"}
+    after_offsets = required_offsets & {"t0", "after", "t+1m", "t+5m"}
+    if not baseline_offsets or not after_offsets:
+        return None
+
+    anchor_field = _relationship_anchor_field(requirement.required_fields or [])
+    if anchor_field is None:
+        return None
+    groups: dict[tuple[str | None, str | None, str | None, str, str], list[FactEnvelope]] = (
+        defaultdict(list)
+    )
+    for fact in facts:
+        groups[
+            (
+                fact.metric_family,
+                fact.instrument,
+                fact.venue,
+                fact.source_id,
+                fact.independence_group,
+            )
+        ].append(fact)
+
+    families = set(requirement.required_metric_families or [])
+    for family in families or {None}:
+        family_groups = [
+            group
+            for key, group in groups.items()
+            if family is None or key[0] == family
+        ]
+        if any(
+            _group_has_relationship(
+                group,
+                anchor_field=anchor_field,
+                baseline_offsets=baseline_offsets,
+                after_offsets=after_offsets,
+                derived_fields=set(requirement.required_fields or []) - {anchor_field},
+            )
+            for group in family_groups
+        ):
+            continue
+        return "semantic_mismatch"
+    return None
+
+
+def _relationship_anchor_field(required_fields: list[str]) -> str | None:
+    for preferred in ("level", "price", "open_interest", "baseline"):
+        if preferred in required_fields:
+            return preferred
+    return required_fields[0] if required_fields else None
+
+
+def _group_has_relationship(
+    facts: list[FactEnvelope],
+    *,
+    anchor_field: str,
+    baseline_offsets: set[str],
+    after_offsets: set[str],
+    derived_fields: set[str],
+) -> bool:
+    baseline_facts = [
+        fact
+        for fact in facts
+        if fact.field == anchor_field and fact.event_offset in baseline_offsets
+    ]
+    after_facts = [
+        fact
+        for fact in facts
+        if fact.field == anchor_field and fact.event_offset in after_offsets
+    ]
+    for baseline in baseline_facts:
+        for after in after_facts:
+            event_id_valid, event_id = _relationship_event_id(baseline, after)
+            if not event_id_valid:
+                continue
+            try:
+                validate_baseline_after(
+                    baseline,
+                    after,
+                    event_id=None if event_id is None else event_id,
+                )
+            except ValueError:
+                continue
+            return True
+    for baseline in baseline_facts:
+        for after in facts:
+            if (
+                after.field not in derived_fields
+                or after.field not in {"event_return", "open_interest_delta", "delta"}
+                or after.event_offset not in after_offsets
+                or after.window_start_at is None
+                or after.window_end_at is None
+                or after.observed_at < baseline.observed_at
+                or not (after.window_start_at <= baseline.observed_at <= after.window_end_at)
+            ):
+                continue
+            event_id_valid, _event_id = _relationship_event_id(baseline, after)
+            if event_id_valid:
+                return True
+    return False
+
+
+def _relationship_event_id(
+    baseline: FactEnvelope,
+    after: FactEnvelope,
+) -> tuple[bool, str | None]:
+    values: list[str | None] = []
+    for fact in (baseline, after):
+        value = fact.attributes.get("event_id")
+        if value is None:
+            values.append(None)
+        elif isinstance(value, str) and value.strip():
+            values.append(value.strip())
+        else:
+            return False, None
+    if any(value is not None for value in values) and (
+        values[0] is None or values[1] is None or values[0] != values[1]
+    ):
+        return False, None
+    return True, values[0]

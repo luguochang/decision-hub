@@ -23,13 +23,14 @@ from packages.kernel.decision_hub_kernel.application.research_evidence import (
     research_evidence_content_hash,
     research_evidence_instance_id,
 )
+from packages.provider_adapters.research.raw_capture import CapturingAsyncClient
 
 JsonFetcher = Callable[[str], Awaitable[Mapping[str, object]]]
 
 
 async def _fetch_json(url: str) -> Mapping[str, object]:
     try:
-        async with httpx.AsyncClient(timeout=10, follow_redirects=True) as client:
+        async with CapturingAsyncClient(timeout=10, follow_redirects=True) as client:
             response = await client.get(url)
             response.raise_for_status()
             payload = response.json()
@@ -44,7 +45,9 @@ async def _fetch_json(url: str) -> Mapping[str, object]:
     except httpx.HTTPStatusError as exc:
         status = exc.response.status_code
         raise ResearchCapabilityError(
-            "provider_rate_limited" if status == 429 else "provider_upstream_unavailable"
+            "provider_rate_limited"
+            if status == 429
+            else "provider_upstream_unavailable"
             if status >= 500
             else "provider_request_rejected",
             f"order-book provider returned HTTP {status}",
@@ -71,6 +74,18 @@ async def _fetch_json(url: str) -> Mapping[str, object]:
     return payload
 
 
+_CROWDING_SYMBOLS = {
+    "ETH": "ETH-USDT-SWAP",
+    "ETHUSDT": "ETH-USDT-SWAP",
+    "ETH-USDT": "ETH-USDT-SWAP",
+    "ETH-USDT-SWAP": "ETH-USDT-SWAP",
+    "BTC": "BTC-USDT-SWAP",
+    "BTCUSDT": "BTC-USDT-SWAP",
+    "BTC-USDT": "BTC-USDT-SWAP",
+    "BTC-USDT-SWAP": "BTC-USDT-SWAP",
+}
+
+
 class CryptoCrowdingResearchAdapter:
     """Normalize a public exchange order book into a typed crowding proxy.
 
@@ -82,6 +97,9 @@ class CryptoCrowdingResearchAdapter:
 
     capability_id = "market.crypto_crowding"
     supported_modes = frozenset({"live"})
+    supported_symbols = frozenset(_CROWDING_SYMBOLS)
+    symbols_required = True
+    max_symbols = 1
     supported_fields = frozenset({"crowding_signal", "book_imbalance", "bid_depth", "ask_depth"})
 
     def __init__(
@@ -206,6 +224,14 @@ class CryptoCrowdingResearchAdapter:
             # 4004 before any provider fallback can be evaluated.
             market = symbol.replace("-USDT-SWAP", "USDT")
             return f"{self.base_url}/v2/futures/depth?market={market}&limit=20&interval=0.01"
+        if self.exchange == "gateio":
+            contract = symbol.replace("-USDT-SWAP", "_USDT")
+            return f"{self.base_url}/api/v4/futures/usdt/order_book?contract={contract}&limit=20"
+        if self.exchange == "htx":
+            contract = symbol.replace("-USDT-SWAP", "-USDT")
+            return (
+                f"{self.base_url}/linear-swap-ex/market/depth?contract_code={contract}&type=step0"
+            )
         raise ResearchCapabilityError(
             "provider_configuration_invalid",
             "unsupported crowding exchange",
@@ -215,16 +241,11 @@ class CryptoCrowdingResearchAdapter:
 
 
 def _symbol(symbols: Sequence[str]) -> str:
-    aliases = {
-        "BTC": "BTC-USDT-SWAP",
-        "BTCUSDT": "BTC-USDT-SWAP",
-        "BTC-USDT": "BTC-USDT-SWAP",
-        "BTC-USDT-SWAP": "BTC-USDT-SWAP",
-    }
+    aliases = _CROWDING_SYMBOLS
     if len(symbols) != 1 or symbols[0].upper() not in aliases:
         raise ResearchCapabilityError(
             "research_symbols_required",
-            "crowding capability requires one audited BTC perpetual symbol",
+            "crowding capability requires one audited BTC or ETH perpetual symbol",
             retryable=False,
             origin="provider",
         )
@@ -234,7 +255,14 @@ def _symbol(symbols: Sequence[str]) -> str:
 def _depths(payload: Mapping[str, object]) -> tuple[Decimal, Decimal]:
     """Read common OKX/CoinEx depth shapes without retaining raw order-book rows."""
 
-    data: object = payload.get("data")
+    # Gate returns ``asks``/``bids`` at the top level; HTX wraps the same
+    # arrays under ``tick``.  Keep the normalizer explicit so a malformed
+    # payload cannot be mistaken for a zero imbalance.
+    data: object = payload
+    if isinstance(payload.get("tick"), Mapping):
+        data = payload.get("tick")
+    elif "asks" not in payload and "bids" not in payload:
+        data = payload.get("data")
     if isinstance(data, list):
         data = data[0] if data else None
     if isinstance(data, Mapping):
@@ -268,7 +296,7 @@ def _levels(raw: object) -> list[Decimal]:
     result: list[Decimal] = []
     for level in raw[:100]:
         if isinstance(level, Mapping):
-            size = level.get("sz") or level.get("quantity") or level.get("amount")
+            size = level.get("sz") or level.get("s") or level.get("quantity") or level.get("amount")
         elif isinstance(level, (list, tuple)) and len(level) >= 2:
             size = level[1]
         else:

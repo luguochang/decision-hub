@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import asyncio
 import hmac
 import json
+import logging
+import traceback
 from typing import Literal
 
 from mcp.server.mcpserver import MCPServer
@@ -12,6 +15,7 @@ from starlette.responses import JSONResponse
 
 from packages.contracts_py.decision_hub_contracts import (
     ErrorProvenance,
+    ResearchCapabilityInvocation,
     ResearchCapabilityQuery,
     ResearchCapabilityResult,
 )
@@ -21,14 +25,46 @@ from packages.kernel.decision_hub_kernel.application.research_evidence import (
 from packages.kernel.decision_hub_kernel.ports.research import ResearchCapabilityGateway
 
 RESEARCH_CAPABILITY_HTTP_PATH = "/decision-hub/v1/research-capabilities/execute"
+RESEARCH_CATALOG_HTTP_PATH = "/decision-hub/v1/research-capabilities/catalog"
+RESEARCH_INVOCATION_HTTP_PATH = "/decision-hub/v1/research-capabilities/invoke-live"
 _BRIDGE_KEY_HEADER = "x-decision-hub-bridge-key"
 _MAX_HTTP_BODY_BYTES = 256_000
+_LOGGER = logging.getLogger(__name__)
+
+
+def _baseline_failure_diagnostic(error: Exception, identity) -> dict:
+    """Keep failure locations and native codes; never SQL, messages or locals."""
+    chain = []
+    seen = set()
+    current: BaseException | None = error
+    while current is not None and id(current) not in seen and len(chain) < 8:
+        seen.add(id(current))
+        frames = [{"module": frame.f_globals.get("__name__", "unknown"),
+                   "function": frame.f_code.co_name, "line": line}
+                  for frame, line in traceback.walk_tb(current.__traceback__)]
+        item = {"class": type(current).__name__, "module": type(current).__module__,
+                "frames": frames[-12:]}
+        code = getattr(current, "sqlite_errorcode", None)
+        name = getattr(current, "sqlite_errorname", None)
+        if type(code) is int:
+            item["sqlite_errorcode"] = code
+        if isinstance(name, str) and len(name) <= 64:
+            item["sqlite_errorname"] = name
+        chain.append(item)
+        original = getattr(current, "orig", None)
+        current = (original if isinstance(original, BaseException)
+                   else current.__cause__ or current.__context__)
+    return {"schema_version": "research-baseline-failure-diagnostic.v1",
+            "run_id": identity.run_id, "research_session_id": identity.research_session_id,
+            "generation": identity.generation, "exception_chain": chain}
 
 
 def build_research_mcp_server(
     gateway: ResearchCapabilityGateway,
     *,
     bridge_key: str | None = None,
+    query_catalog: dict | None = None,
+    baseline_service=None,
 ) -> MCPServer:
     """Expose only the canonical read-only research capability boundary."""
 
@@ -74,6 +110,8 @@ def build_research_mcp_server(
         window_start_at: str | None = None,
         window_end_at: str | None = None,
         requested_event_offsets: list[str] | None = None,
+        evidence_ref: str | None = None,
+        content_ref: str | None = None,
     ) -> ResearchCapabilityResult:
         try:
             request = ResearchCapabilityQuery.model_validate(
@@ -99,6 +137,8 @@ def build_research_mcp_server(
                     "window_start_at": window_start_at,
                     "window_end_at": window_end_at,
                     "requested_event_offsets": requested_event_offsets or [],
+                    "evidence_ref": evidence_ref,
+                    "content_ref": content_ref,
                 }
             )
             return await gateway.execute(request)
@@ -114,6 +154,7 @@ def build_research_mcp_server(
                 raise ToolError(f"{code} provenance={payload}") from exc
             raise ToolError(str(code)) from exc
 
+    @server.custom_route(RESEARCH_INVOCATION_HTTP_PATH, methods=["POST"])
     @server.custom_route(RESEARCH_CAPABILITY_HTTP_PATH, methods=["POST"])
     async def research_capability_http(request: Request) -> JSONResponse:
         if not bridge_key:
@@ -153,7 +194,9 @@ def build_research_mcp_server(
                     status_code=413,
                     cause_code="body_limit_exceeded",
                 )
-            query = ResearchCapabilityQuery.model_validate(json.loads(raw_body))
+            managed = request.url.path == RESEARCH_INVOCATION_HTTP_PATH
+            contract = ResearchCapabilityInvocation if managed else ResearchCapabilityQuery
+            query = contract.model_validate(json.loads(raw_body))
         except (ValidationError, ValueError, json.JSONDecodeError, UnicodeDecodeError):
             return _http_error(
                 "research_capability_query_invalid",
@@ -161,7 +204,16 @@ def build_research_mcp_server(
                 cause_code="canonical_validation_failed",
             )
         try:
-            result = await gateway.execute(query)
+            if managed:
+                invoke = getattr(gateway, "invoke_live", None)
+                if invoke is None:
+                    return _http_error(
+                        "research_invocation_unavailable", status_code=503,
+                        cause_code="durable_gateway_required",
+                    )
+                result = await invoke(query)
+            else:
+                result = await gateway.execute(query)
         except ResearchCapabilityError as exc:
             return JSONResponse(
                 exc.provenance().model_dump(mode="json"),
@@ -175,6 +227,70 @@ def build_research_mcp_server(
                 retryable=True,
             )
         return JSONResponse(result.model_dump(mode="json"), status_code=200)
+
+    @server.custom_route("/decision-hub/v1/research-capabilities/baseline", methods=["POST"])
+    async def research_baseline_http(request: Request) -> JSONResponse:
+        # Internal Host pre-step only; deliberately not registered as a model Tool.
+        supplied = request.headers.get(_BRIDGE_KEY_HEADER, "")
+        if not bridge_key or not supplied or not hmac.compare_digest(supplied, bridge_key):
+            return _http_error("research_tool_unauthorized", status_code=401,
+                               cause_code="bridge_key_mismatch")
+        if baseline_service is None:
+            return _http_error("research_baseline_unavailable", status_code=503,
+                               cause_code="durable_baseline_required")
+        from packages.kernel.decision_hub_kernel.ports.research_baseline import BaselineRequest
+        try:
+            raw = await request.body()
+            if len(raw) > 4096:
+                return _http_error("research_baseline_request_too_large", status_code=413,
+                                   cause_code="identity_body_limit")
+            identity = BaselineRequest.model_validate_json(raw)
+        except (ValidationError, ValueError):
+            return _http_error("research_baseline_request_invalid", status_code=422,
+                               cause_code="canonical_validation_failed")
+        try:
+            result = await baseline_service.deliver(identity)
+        except ValueError as exc:
+            return _http_error("research_baseline_failed", status_code=409,
+                               cause_code=str(exc)[:256])
+        except Exception as exc:
+            try:
+                _LOGGER.error("research_baseline_operation_failed %s",
+                              json.dumps(_baseline_failure_diagnostic(exc, identity),
+                                         sort_keys=True, separators=(",", ":")))
+            except Exception:
+                # Diagnostics must not replace the existing failure response.
+                pass
+            return _http_error("research_baseline_unavailable", status_code=503,
+                               cause_code="baseline_operation_unavailable", retryable=True)
+        return JSONResponse(result.model_dump(mode="json"))
+
+    @server.custom_route(RESEARCH_CATALOG_HTTP_PATH, methods=["GET"])
+    async def research_catalog_http(request: Request) -> JSONResponse:
+        supplied = request.headers.get(_BRIDGE_KEY_HEADER, "")
+        if not bridge_key or not supplied or not hmac.compare_digest(supplied, bridge_key):
+            return _http_error(
+                "research_tool_unauthorized", status_code=401, cause_code="bridge_key_mismatch"
+            )
+        if query_catalog is None:
+            return _http_error(
+                "research_catalog_unavailable", status_code=503, cause_code="catalog_not_configured"
+            )
+        session_id = request.query_params.get("research_session_id")
+        if session_id is not None:
+            scope_reader = getattr(gateway, "scoped_query_catalog", None)
+            if scope_reader is None:
+                return _http_error("research_catalog_scope_unavailable", status_code=503,
+                                   cause_code="scope_reader_unavailable")
+            try:
+                if not session_id or len(session_id) > 128:
+                    raise ValueError("invalid_session_id")
+                scoped = await asyncio.to_thread(scope_reader, query_catalog, session_id)
+            except (ValueError, KeyError, TypeError):
+                return _http_error("research_catalog_scope_invalid", status_code=409,
+                                   cause_code="frozen_scope_not_verified")
+            return JSONResponse(scoped)
+        return JSONResponse(query_catalog)
 
     return server
 

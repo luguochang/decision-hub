@@ -1,0 +1,12 @@
+{
+  "fixture_kind": "authenticated_native_protocol_and_real_private_SQL_controlled_synthetic_business_output",
+  "run_id": "run_0af22931ea4e4fd69689cbf21896cb13",
+  "view_bytes": 536181,
+  "view_sha256": "a992e436cbe049a29e91867f3b94c10f7919c9ac8f2d76c0dc4346b0c177309f",
+  "source_view_path": "D:\\DH-q043-ls01\\pytest-temp\\test_lawful_native_report_proj0\\lawful-native-saved-action-report.json",
+  "generation_proof_path": "D:\\DecisionHub-v3-development\\evidence\\legacy-sdk-review\\saved-action-lawful-ls01\\success-proof.json",
+  "generation_proof_sha256": "7814ecd0e7562d77ed4bb042bcedb782c0f8cb6504174cbc0a60bad913ee7485",
+  "exact_original_view_bytes_retained": true,
+  "live_Provider_Host_PAPER_or_financial_qualification": false,
+  "limits": "This is the complete original same-Run output of the already recorded native+SQL test, not a paid/live Provider report. Permanent tests only use relative assets and do not depend on these provenance paths."
+}

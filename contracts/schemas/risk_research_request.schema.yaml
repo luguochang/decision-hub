@@ -1,0 +1,50 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/risk_research_request.schema.json
+title: RiskResearchRequestContracts
+$defs:
+  risk_research_command:
+    type: object
+    additionalProperties: false
+    properties:
+      request_id: {type: string, minLength: 1, maxLength: 128}
+    required: [request_id]
+  risk_research_request:
+    type: object
+    additionalProperties: false
+    properties:
+      schema_version: {type: string, const: risk-research-request.v1}
+      request_id: {type: string, minLength: 1}
+      scope_id: {type: string, minLength: 1}
+      instrument: {type: string, enum: [BTC-USDT, ETH-USDT]}
+      status: {type: string, enum: [pending_admission, claiming, queued, completed, failed]}
+      run_id: {type: [string, 'null'], minLength: 1}
+      run_status: {type: [string, 'null']}
+      created_at: {type: string, format: date-time}
+      available_at: {type: string, format: date-time}
+      attempts: {type: integer, minimum: 0, maximum: 3}
+      error_code: {type: [string, 'null']}
+      trigger_refs: {type: array, items: {type: string, minLength: 1}}
+    required: [schema_version, request_id, scope_id, instrument, status, run_id, run_status, created_at, available_at, attempts, error_code, trigger_refs]
+  risk_research_status:
+    type: object
+    additionalProperties: false
+    properties:
+      schema_version: {type: string, const: risk-research-status.v1}
+      scope_id: {type: string, minLength: 1}
+      enabled: {type: boolean}
+      as_of: {type: string, format: date-time}
+      request: {anyOf: [{$ref: '#/$defs/risk_research_request'}, {type: 'null'}]}
+    required: [schema_version, scope_id, enabled, as_of, request]
+  risk_research_owner_receipt:
+    type: object
+    additionalProperties: false
+    properties:
+      schema_version: {type: string, const: risk-research-owner-receipt.v1}
+      owner_id: {type: string, minLength: 1, maxLength: 128}
+      scope_id: {type: string, minLength: 1}
+      command_id: {type: string, minLength: 1, maxLength: 128}
+      accepted_at: {type: string, format: date-time}
+      as_of: {type: string, format: date-time}
+      request: {$ref: '#/$defs/risk_research_request'}
+      next_automatic_request: {anyOf: [{$ref: '#/$defs/risk_research_request'}, {type: 'null'}]}
+    required: [schema_version, owner_id, scope_id, command_id, accepted_at, as_of, request, next_automatic_request]

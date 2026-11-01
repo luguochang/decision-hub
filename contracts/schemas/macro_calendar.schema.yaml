@@ -1,0 +1,337 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/macro-calendar.schema.json
+title: MacroCalendar
+$defs:
+  macro_event_payload:
+    additionalProperties: false
+    description: Point-in-time macro event fields carried by calendar/release sources.
+    properties:
+      external_event_id:
+        maxLength: 256
+        minLength: 1
+        title: External Event Id
+        type: string
+      family:
+        maxLength: 128
+        minLength: 1
+        title: Family
+        type: string
+      scheduled_at:
+        format: date-time
+        title: Scheduled At
+        type: string
+      scheduled_date:
+        anyOf:
+        - format: date
+          type: string
+        - type: 'null'
+        default: null
+        title: Scheduled Date
+      time_precision:
+        default: unknown
+        enum:
+        - exact
+        - date
+        - unknown
+        title: Time Precision
+        type: string
+      source_timezone:
+        anyOf:
+        - maxLength: 64
+          type: string
+        - type: 'null'
+        default: null
+        title: Source Timezone
+      source_authority:
+        default: official
+        maxLength: 32
+        minLength: 1
+        title: Source Authority
+        type: string
+      unit:
+        anyOf:
+        - maxLength: 32
+          type: string
+        - type: 'null'
+        default: null
+        title: Unit
+      prior_value:
+        anyOf:
+        - type: number
+        - type: 'null'
+        default: null
+        title: Prior Value
+      consensus_value:
+        anyOf:
+        - type: number
+        - type: 'null'
+        default: null
+        title: Consensus Value
+      actual_value:
+        anyOf:
+        - type: number
+        - type: 'null'
+        default: null
+        title: Actual Value
+      vintage_at:
+        anyOf:
+        - format: date-time
+          type: string
+        - type: 'null'
+        default: null
+        title: Vintage At
+      revision_flag:
+        default: false
+        title: Revision Flag
+        type: boolean
+      status:
+        default: scheduled
+        pattern: ^(scheduled|released|revised|cancelled)$
+        title: Status
+        type: string
+    required:
+    - external_event_id
+    - family
+    - scheduled_at
+    title: MacroEventPayload
+    type: object
+  macro_event_view:
+    additionalProperties: false
+    properties:
+      schema_version:
+        const: macro-event-view.v1
+        default: macro-event-view.v1
+        title: Schema Version
+        type: string
+      macro_event_id:
+        minLength: 1
+        title: Macro Event Id
+        type: string
+      family:
+        minLength: 1
+        title: Family
+        type: string
+      scheduled_at:
+        anyOf:
+        - format: date-time
+          type: string
+        - type: 'null'
+        title: Scheduled At
+      scheduled_date:
+        anyOf:
+        - format: date
+          type: string
+        - type: 'null'
+        default: null
+        title: Scheduled Date
+      time_precision:
+        default: unknown
+        enum:
+        - exact
+        - date
+        - unknown
+        title: Time Precision
+        type: string
+      source_timezone:
+        anyOf:
+        - type: string
+        - type: 'null'
+        default: null
+        title: Source Timezone
+      invalidated_at:
+        anyOf:
+        - format: date-time
+          type: string
+        - type: 'null'
+        default: null
+        title: Invalidated At
+      correction_ref:
+        anyOf:
+        - type: string
+        - type: 'null'
+        default: null
+        title: Correction Ref
+      source_id:
+        minLength: 1
+        title: Source Id
+        type: string
+      source_url:
+        anyOf:
+        - type: string
+        - type: 'null'
+        default: null
+        title: Source Url
+      source_authority:
+        minLength: 1
+        title: Source Authority
+        type: string
+      unit:
+        anyOf:
+        - type: string
+        - type: 'null'
+        default: null
+        title: Unit
+      prior_value:
+        anyOf:
+        - type: number
+        - type: 'null'
+        default: null
+        title: Prior Value
+      consensus_value:
+        anyOf:
+        - type: number
+        - type: 'null'
+        default: null
+        title: Consensus Value
+      actual_value:
+        anyOf:
+        - type: number
+        - type: 'null'
+        default: null
+        title: Actual Value
+      surprise:
+        anyOf:
+        - type: number
+        - type: 'null'
+        default: null
+        title: Surprise
+      surprise_z:
+        anyOf:
+        - type: number
+        - type: 'null'
+        default: null
+        title: Surprise Z
+      revision_flag:
+        default: false
+        title: Revision Flag
+        type: boolean
+      status:
+        enum:
+        - scheduled
+        - released
+        - revised
+        - cancelled
+        title: Status
+        type: string
+      updated_at:
+        format: date-time
+        title: Updated At
+        type: string
+    required:
+    - macro_event_id
+    - family
+    - scheduled_at
+    - source_id
+    - source_authority
+    - status
+    - updated_at
+    title: MacroEventView
+    type: object
+  macro_event_vintage_view:
+    additionalProperties: false
+    description: Immutable point-in-time release used by calendar history and review.
+    properties:
+      schema_version:
+        const: macro-event-vintage-view.v1
+        default: macro-event-vintage-view.v1
+        title: Schema Version
+        type: string
+      vintage_id:
+        minLength: 1
+        title: Vintage Id
+        type: string
+      macro_event_id:
+        minLength: 1
+        title: Macro Event Id
+        type: string
+      observed_at:
+        format: date-time
+        title: Observed At
+        type: string
+      scheduled_at:
+        anyOf:
+        - format: date-time
+          type: string
+        - type: 'null'
+        default: null
+        title: Scheduled At
+      scheduled_date:
+        anyOf:
+        - format: date
+          type: string
+        - type: 'null'
+        default: null
+        title: Scheduled Date
+      time_precision:
+        default: unknown
+        enum:
+        - exact
+        - date
+        - unknown
+        title: Time Precision
+        type: string
+      source_timezone:
+        anyOf:
+        - type: string
+        - type: 'null'
+        default: null
+        title: Source Timezone
+      prior_value:
+        anyOf:
+        - type: number
+        - type: 'null'
+        default: null
+        title: Prior Value
+      consensus_value:
+        anyOf:
+        - type: number
+        - type: 'null'
+        default: null
+        title: Consensus Value
+      actual_value:
+        anyOf:
+        - type: number
+        - type: 'null'
+        default: null
+        title: Actual Value
+      surprise:
+        anyOf:
+        - type: number
+        - type: 'null'
+        default: null
+        title: Surprise
+      surprise_z:
+        anyOf:
+        - type: number
+        - type: 'null'
+        default: null
+        title: Surprise Z
+      revision_flag:
+        default: false
+        title: Revision Flag
+        type: boolean
+      status:
+        enum:
+        - scheduled
+        - released
+        - revised
+        - cancelled
+        title: Status
+        type: string
+      payload_hash:
+        pattern: ^[a-f0-9]{64}$
+        title: Payload Hash
+        type: string
+      created_at:
+        format: date-time
+        title: Created At
+        type: string
+    required:
+    - vintage_id
+    - macro_event_id
+    - observed_at
+    - status
+    - payload_hash
+    - created_at
+    title: MacroEventVintageView
+    type: object

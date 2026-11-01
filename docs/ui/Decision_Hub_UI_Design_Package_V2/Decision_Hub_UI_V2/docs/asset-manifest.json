@@ -1,0 +1,2522 @@
+[
+  {
+    "path": "assets/backgrounds/hero-landscape.png",
+    "format": "png",
+    "bytes": 76054,
+    "role": "decorative-crop",
+    "source": "本次会话设计图的精确裁剪",
+    "sha256": "761e8022315626132aec2f48a8291787a8f89032b6af1f258e06283284a9b5fd",
+    "pixels": [
+      568,
+      130
+    ]
+  },
+  {
+    "path": "assets/features/png/audit@2x.png",
+    "format": "png",
+    "bytes": 5475,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "6210430c6421551edcf1840ba2479e7fce2d4c04a4eda6828f94526b1abedb5e",
+    "pixels": [
+      128,
+      128
+    ]
+  },
+  {
+    "path": "assets/features/png/calendar@2x.png",
+    "format": "png",
+    "bytes": 5249,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "1677f5804f98c34b2066ff855e8adbf01c764eada6acb748568a0096529fa3df",
+    "pixels": [
+      128,
+      128
+    ]
+  },
+  {
+    "path": "assets/features/png/counter@2x.png",
+    "format": "png",
+    "bytes": 5522,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "8584a594d638d4b784d26ee5d17e90e13a392a05f1010108647ccf70e228d034",
+    "pixels": [
+      128,
+      128
+    ]
+  },
+  {
+    "path": "assets/features/png/coverage@2x.png",
+    "format": "png",
+    "bytes": 6906,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "04f98ee17418ec6734aefaaf0713407b9db2464a5a1045428870f5e2004a6f86",
+    "pixels": [
+      128,
+      128
+    ]
+  },
+  {
+    "path": "assets/features/png/empty@2x.png",
+    "format": "png",
+    "bytes": 4541,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "cfb885529e81eb46131427794975dc17adf47f6ca720c4ca8967dda880676bf3",
+    "pixels": [
+      128,
+      128
+    ]
+  },
+  {
+    "path": "assets/features/png/evidence@2x.png",
+    "format": "png",
+    "bytes": 5089,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "dfbfa0d6e3503650e85e28a39d44fdc06b7eac6672389b46e51c9628ba43f5b1",
+    "pixels": [
+      128,
+      128
+    ]
+  },
+  {
+    "path": "assets/features/png/gate@2x.png",
+    "format": "png",
+    "bytes": 6024,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "f41672698178e1729af0b9788175374f50e3d7a04aa86658e6147b4940721fc6",
+    "pixels": [
+      128,
+      128
+    ]
+  },
+  {
+    "path": "assets/features/png/library@2x.png",
+    "format": "png",
+    "bytes": 5334,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "e8bd80f3263bfdd0fa4b96186d1a051f5274b782330fbdf8df272b1a679ad7b4",
+    "pixels": [
+      128,
+      128
+    ]
+  },
+  {
+    "path": "assets/features/png/research@2x.png",
+    "format": "png",
+    "bytes": 4842,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "9e245e937cb6e5ee43bfb2e8ff352169520b777b63361aae581dbf3155b77213",
+    "pixels": [
+      128,
+      128
+    ]
+  },
+  {
+    "path": "assets/features/png/success@2x.png",
+    "format": "png",
+    "bytes": 6016,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "9ca022efed047599ca9bc38bf01de2e71dcf57bd8e38fe4cbdee9fd107294e4a",
+    "pixels": [
+      128,
+      128
+    ]
+  },
+  {
+    "path": "assets/features/png/trace@2x.png",
+    "format": "png",
+    "bytes": 5077,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "53c58f77012e84cceabcc07bb3eb07b2462e2fb3e04ae828743cc573c2a589a4",
+    "pixels": [
+      128,
+      128
+    ]
+  },
+  {
+    "path": "assets/features/png/upload@2x.png",
+    "format": "png",
+    "bytes": 4634,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "70f53c4e601a324bbb21046d88ba794bb4babfe794372ad5120808dc765c2a6f",
+    "pixels": [
+      128,
+      128
+    ]
+  },
+  {
+    "path": "assets/features/svg/audit.svg",
+    "format": "svg",
+    "bytes": 724,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "1f8f4c5b7ef614129eff04b1bc6513a0a1e636e8c15efd5abe0cd95c56988e06",
+    "viewBox": "0 0 64 64",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/features/svg/calendar.svg",
+    "format": "svg",
+    "bytes": 707,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "4cd84a5fbe5ee7a4c0ea91b32b25e91450b6b365a20287d84d1cec2fbb9bf9d2",
+    "viewBox": "0 0 64 64",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/features/svg/counter.svg",
+    "format": "svg",
+    "bytes": 663,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "43bd34a97c5ee97f32f387a807a34cc555a5730ee9dac3cb8eefab73d9a76bba",
+    "viewBox": "0 0 64 64",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/features/svg/coverage.svg",
+    "format": "svg",
+    "bytes": 696,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "cd50b28faad7d61b652ab962ddd7d7ed3f6d53204657464f8fb9e4082f1194df",
+    "viewBox": "0 0 64 64",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/features/svg/empty.svg",
+    "format": "svg",
+    "bytes": 637,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "92cc744b79011b8ab8ad19668cc7215af5f16317067ec3a750ff86b554903725",
+    "viewBox": "0 0 64 64",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/features/svg/evidence.svg",
+    "format": "svg",
+    "bytes": 713,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "b99fa381300f4563079ad4e5bafdf5930cc8bb234716eb5d80cde150c90e1d6a",
+    "viewBox": "0 0 64 64",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/features/svg/gate.svg",
+    "format": "svg",
+    "bytes": 679,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "2f3f84149953d05c3726834233314eeb36b7049b28b82af3c53e7700db9ba307",
+    "viewBox": "0 0 64 64",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/features/svg/library.svg",
+    "format": "svg",
+    "bytes": 688,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "a9b65b4d185d0933e3fab09104e191d65e720295bde1cea1155787c705030850",
+    "viewBox": "0 0 64 64",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/features/svg/research.svg",
+    "format": "svg",
+    "bytes": 646,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "2448ad881dc70a710491e0079b62d4bebfe5f86696e0478278450289cdc3ac33",
+    "viewBox": "0 0 64 64",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/features/svg/success.svg",
+    "format": "svg",
+    "bytes": 659,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "65306a00104b4a6e39f27eaf2612aed7da1391ae15cb771c800e2514988a1f7a",
+    "viewBox": "0 0 64 64",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/features/svg/trace.svg",
+    "format": "svg",
+    "bytes": 637,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "efcd508e836eafad25c5e5523bad6ae280f1383485511989c7c09281101a92d8",
+    "viewBox": "0 0 64 64",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/features/svg/upload.svg",
+    "format": "svg",
+    "bytes": 648,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "48178b7ac5b2889e7fc43dbee21a6f210d2ecc8f2bd35d26652c35d4b7c4b568",
+    "viewBox": "0 0 64 64",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/png/24/activity.png",
+    "format": "png",
+    "bytes": 468,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "21926a819e235449a694e67875b9088f7642a1219997cc6acebb980eff978c85",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/arrow.png",
+    "format": "png",
+    "bytes": 286,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "b4d572bb02db539364851b1577316fa236dd1175dcde1e09e3b054b9351c441b",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/back.png",
+    "format": "png",
+    "bytes": 272,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "9c5d5d94a459c094649197d0e77b866ffc4e76429cac2af5dff9ccabeb39fa06",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/bar.png",
+    "format": "png",
+    "bytes": 272,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "bbf533e69095f2bcec8f9d2b3f2f3de058b22ec26ea55194078cd42f560758c6",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/bell.png",
+    "format": "png",
+    "bytes": 596,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "50b4aa6fea006745019f01130cce468b10e28a10aebcc24ab2a5b2f7c4c3f5db",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/bolt.png",
+    "format": "png",
+    "bytes": 666,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "44dd96c07dfd0f9ea29e24b22c0828ea68551ee90e4c283b5acf90d864a5cad3",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/book.png",
+    "format": "png",
+    "bytes": 576,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "ffc2bc73d71d0dd8b498ac05037866b978e47d621f431b79937d13a5f554285a",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/branch.png",
+    "format": "png",
+    "bytes": 559,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "e975d72d8cf309374253e752d6686e56a02e2001630119e08bd72e8524371516",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/calendar.png",
+    "format": "png",
+    "bytes": 444,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "f0420c9e27cda8910728eba5695115832c62a1473626bbc65bcb451eff458e94",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/chart.png",
+    "format": "png",
+    "bytes": 498,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "b281eeb7e4db8ccf2e9a17740d1ff776a3c2ed078f55d6755485c9aa570b6bfb",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/check-circle.png",
+    "format": "png",
+    "bytes": 828,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "c3a5ef57f9a9eefba8d116d86bd6a070f9b4bbc7ddc82c08e07c300d1cc1d53a",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/check.png",
+    "format": "png",
+    "bytes": 275,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "6fb33900c63f703f28c11926de5c66cb866afafe5dd95e613cccd5f67aa06535",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/chevron.png",
+    "format": "png",
+    "bytes": 295,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "67b1efeabd2e7383d1328baf101f4113a8cbe9f2e762b12280cef80018f55e6c",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/clock.png",
+    "format": "png",
+    "bytes": 784,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "dc2b4ab8fc1f3d7ddfd2806a9eb557d06cafc4bda5731482f8e78a8dbb3cadc2",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/close.png",
+    "format": "png",
+    "bytes": 364,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "b75b59d75af011bc7efc95dff6c362469b59a2dba8fecbc8d6833f4ccf7c80a4",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/code.png",
+    "format": "png",
+    "bytes": 534,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "778fb632b0abcff874f9286dc6f9ae945dd14625c1077f598acea5be01458f31",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/copy.png",
+    "format": "png",
+    "bytes": 416,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "2105aba37efe59a4b415d39ee3cd6fb258399275f1e23190c7cc6b424172d4fe",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/database.png",
+    "format": "png",
+    "bytes": 721,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "303831c680fc08e1098210ddd4be0e29404ba46d0afafb99eb7492a57d377036",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/diff.png",
+    "format": "png",
+    "bytes": 292,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "95f898eed847d5753f3252267b015694aa8ae040a7caceb4f78e188737c1ea77",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/down.png",
+    "format": "png",
+    "bytes": 279,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "e069dd75a213c61d7641643c8e0d69e737bd309d2bdee903dad99763b0924d80",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/download.png",
+    "format": "png",
+    "bytes": 354,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "c2b59ca635db8399b1dea9de5ab223e008d402dc470735ae4c382ee0d2f8d396",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/expand.png",
+    "format": "png",
+    "bytes": 390,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "e3eb0cac05741b3cd034f7ce99632e8da23abae7330c88e9bf67479eea2677d4",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/external.png",
+    "format": "png",
+    "bytes": 442,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "754061667acd767971c83a2632cc14857ddecba2d9f4c5d1527099edf3a5265e",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/eye.png",
+    "format": "png",
+    "bytes": 675,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "20f021ed8503b835f8b8a7ab1d997c6ad821fb879d5bff63e7b468a1ea719d41",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/file-clock.png",
+    "format": "png",
+    "bytes": 708,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "d340e7b88b5f8fcd0f71b3f609f2b669a21223555d4f06ec3bce127426354f59",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/file.png",
+    "format": "png",
+    "bytes": 442,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "854403082f1f4af376b8b676832a8fcf6d0d478af0ecf66e5065f808a0f1ecd3",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/filter.png",
+    "format": "png",
+    "bytes": 526,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "56ff6f88323e6473e8dca12bcb06774ebf72ee1a230a8720038a266d452e4502",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/fit.png",
+    "format": "png",
+    "bytes": 254,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "4a31b9da1b009dc4d7409b8525f2f7a7809d743730d68ef0f8a5d8664eadeeca",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/flag.png",
+    "format": "png",
+    "bytes": 345,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "4c1b95804fde1fb6681250438a04ade44c7ac99f7602f3a0a2f8be7760df27ec",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/folder.png",
+    "format": "png",
+    "bytes": 297,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "0ce5ca922c4f6d831c83064615d8fcc867292c3435771b0bb5117d2ec43b8550",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/globe.png",
+    "format": "png",
+    "bytes": 900,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "260341a71d88fa9364534d0b73bc1dfcc927081ab8826ad7a6b5aba7bd4fa227",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/graph.png",
+    "format": "png",
+    "bytes": 387,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "403112e44647ffb6cab6299439f0df04037eb7c298c7272ee02c974d24149214",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/grid.png",
+    "format": "png",
+    "bytes": 318,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "64cbaf0c0e1309baa65eff760e44823c0d65d10617ee9213d42e20fc79431919",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/hand.png",
+    "format": "png",
+    "bytes": 721,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "a221a8547f0539b3839a8f8f18448971bbf8bc58a7cfbe99d18eb0ad48adc20c",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/heart.png",
+    "format": "png",
+    "bytes": 457,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "1b6ec6763a61983019ac58652e4245b70590b5a88f5e662edfa0bda6d911ebbc",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/image.png",
+    "format": "png",
+    "bytes": 685,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "6a58171b583dd110fd1841172f64bd08dd48f2c805471a0e526f26e021467db9",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/info.png",
+    "format": "png",
+    "bytes": 731,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "5660c0f680a63e49bdeb1971364e6bcb115c706784ba684683eb585ab01c7f86",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/layers.png",
+    "format": "png",
+    "bytes": 343,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "0863810db21e95a91f1fd7b3413e8a0790e6d97eaf45e18eda1cecf3c921f5df",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/library.png",
+    "format": "png",
+    "bytes": 342,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "4a9d317d3db4cd82665fac08fb578d831a04db8362e9ff5705a44fe4ab781259",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/link.png",
+    "format": "png",
+    "bytes": 787,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "17cbe32401ab9e87c94c8e9754c0f6b92fed6e7dc6dc9a4e835bea46d80fee05",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/lock.png",
+    "format": "png",
+    "bytes": 512,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "096cd9f29566a6ff4f7c8119698a6dd0280bd301bd11c332c03fd8798d8e5444",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/mail.png",
+    "format": "png",
+    "bytes": 581,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "c4bd802f0d2a05f8dba743de85d93c6766afe57dbe47d083c591d9b158a76091",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/menu.png",
+    "format": "png",
+    "bytes": 136,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "f9e627596eb8755e0f2e558b36e5fd604376a6d46a389b1ad976fdf19b95169d",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/minus.png",
+    "format": "png",
+    "bytes": 130,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "9a831e6977ee1ad1f7638bc36ce6e74ef4106370f2c8045361598eecdb884cef",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/more.png",
+    "format": "png",
+    "bytes": 180,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "1bc290303dc89ba2d5835daf8172d498e9734b798bffc32e45b6bf6a56685654",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/paperclip.png",
+    "format": "png",
+    "bytes": 582,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "a2841de03f4134672bc16fe8fdd52ce76d6cb395fb24261b0f1eccc358a7243c",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/play.png",
+    "format": "png",
+    "bytes": 489,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "fd870bdb9388a296a90a6dbf69769f0866a5c4a4bfbde17fb69c199c1936a6a8",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/plus.png",
+    "format": "png",
+    "bytes": 188,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "29c997fd6df5124ed4b6d47d233aa5377287224a74c8920a2390c9b16a3df7b5",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/refresh.png",
+    "format": "png",
+    "bytes": 666,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "06fe5ab0648acfcb4ace42fbf72d84a24a7caf90ad860bfdb28b6b4ce4e21a95",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/review.png",
+    "format": "png",
+    "bytes": 606,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "8c274fe4081c0b87c2e86d945c0ba28e5ec36df5673d1a85185378771a08c15d",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/runs.png",
+    "format": "png",
+    "bytes": 217,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "74abf9045d29a32a5f615bda0cc4a2dfafd35c7bb3c917a7a2efb6b481596036",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/search.png",
+    "format": "png",
+    "bytes": 595,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "c68ae7f892812232b79df80aa5c68aa6ebb5ee742cf09cf1fc0d2d1093d3380d",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/send.png",
+    "format": "png",
+    "bytes": 844,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "cfe7c53469a9c1896752c901f98f225add95c9a608563f0fc1c5d17f1e6ab734",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/settings.png",
+    "format": "png",
+    "bytes": 755,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "8c7a7809845938215d985a8d2284aba23253a27743a80837ec17ee4bb71d9e7c",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/shield-check.png",
+    "format": "png",
+    "bytes": 738,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "f1cda85c328ee286bbae7d4f33b2f6fd5a8d3dbcff3db7733ed486cbb27ade2c",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/shield.png",
+    "format": "png",
+    "bytes": 616,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "c8fb5b4c2ebd9be19c27af87a544dcde2bf21b6476350eaa3f891ebacf313271",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/sort.png",
+    "format": "png",
+    "bytes": 398,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "19d488fd5e6e875419a5b2f68983d7581c62b7702144ccf89bb082fa27df78ce",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/spark.png",
+    "format": "png",
+    "bytes": 602,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "1b3f0c0fe0949617410d614a681b1410c1a0c09f0ca559dec116555fc98d6415",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/stop.png",
+    "format": "png",
+    "bytes": 761,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "818021a9b6fa5e40adb7e12d429db1a38b15d1ca14d6ef9fec8feb42e1207fe2",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/target.png",
+    "format": "png",
+    "bytes": 1041,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "940cf39a2e1cdc08d7b069e7a9dcf5ceea8697d8b27c33b06bbd6bbc58cd4837",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/upload.png",
+    "format": "png",
+    "bytes": 371,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "8f282c08cc59e9087aabc6ef4a763d280895c3708029bdcf10a9a79b2f01a00a",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/user.png",
+    "format": "png",
+    "bytes": 634,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "82be42fc76b02ac8d52ae3229ede050d3c17df4f02b00a4fafce841cde6c06f4",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/users.png",
+    "format": "png",
+    "bytes": 780,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "574f5a6272e51a6b2d194b8d18bbb8090b2be26c618cc45325a35e1ae66f1c91",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/24/warning.png",
+    "format": "png",
+    "bytes": 659,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "e46c57b4f37902dcbae96d662a4f0ee8646dc4ef2584c4c9f29de41efb88f056",
+    "pixels": [
+      24,
+      24
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/activity.png",
+    "format": "png",
+    "bytes": 833,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "2301f4ac52fa10cf1a075bdfa2094207e6c07e790a0f253f54abfe55ab07bfd9",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/arrow.png",
+    "format": "png",
+    "bytes": 434,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "d3f7b4ad3f14e3e48c1ab53aaa4e71f242cc33c8f4e52cbb98a85f90ddd30fbd",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/back.png",
+    "format": "png",
+    "bytes": 455,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "b52e7e6c49a2d3587701189f8aa0907efe407114c5decd3301f34d9101e7e658",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/bar.png",
+    "format": "png",
+    "bytes": 482,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "360ccf1b048d0f1a63a272c5f720c7abca4db3e5e3656a334a1ff400fd6a554b",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/bell.png",
+    "format": "png",
+    "bytes": 1246,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "35d5f659df571320afb287bf7fad7ca3984a91e3e2b4dc14827249321406ff05",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/bolt.png",
+    "format": "png",
+    "bytes": 1233,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "505b1e25a088eca098ab2e0e7dfbd19e5672f79d5edb773b6ded01eb20c2b846",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/book.png",
+    "format": "png",
+    "bytes": 1010,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "f96a6e59a90ac8f916962fc76ff0a7074c96a305f0ea3990bfb10d44663f89d2",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/branch.png",
+    "format": "png",
+    "bytes": 1110,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "3722dc28d7f5fe36bdf22e7138e870cab3918114301a2b6c53d742b59faecb1c",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/calendar.png",
+    "format": "png",
+    "bytes": 827,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "1d3971bb94e5394334fad721b337767b0f1a3edcdfe3c07e9dc1c0c39c0676c7",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/chart.png",
+    "format": "png",
+    "bytes": 909,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "97d9821d94cbc98029a510930a60f3c2a8c2d098024236f273cb724c4bcad0b5",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/check-circle.png",
+    "format": "png",
+    "bytes": 1664,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "97fac502a869371c6b861cdf89e383d7b00457153855ce4905f849985b5c9db0",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/check.png",
+    "format": "png",
+    "bytes": 457,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "9fe0da6ebeba016301857f08dfda3c72faf33e912eda256812c329d851ec30d8",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/chevron.png",
+    "format": "png",
+    "bytes": 465,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "331d784f825af306fe33b7b60168b6b1d879afc1dff17573939f926e1378dd52",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/clock.png",
+    "format": "png",
+    "bytes": 1595,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "00e90c5c4e1146ab9422e3ef56b08fa436aed1259dc9e456421d9e296a994bba",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/close.png",
+    "format": "png",
+    "bytes": 611,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "ebaf73a7a32197cf94d8f365ce8410113d61d55031c57035270e7dc733e1b772",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/code.png",
+    "format": "png",
+    "bytes": 943,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "f9ce4eca49e62a4ef2394d1b830c439499f3f206511f3ebb67b82a35167e552e",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/copy.png",
+    "format": "png",
+    "bytes": 771,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "e776fcdd759c8ba74d667332ace1fc1be14929cc487f3bc98538d49a21e9aaf2",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/database.png",
+    "format": "png",
+    "bytes": 1484,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "dbb8e8bde9c52927889ea4609fde4ba1704afae784b431df0da9ea3216a6209b",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/diff.png",
+    "format": "png",
+    "bytes": 500,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "05ae8266d9e8e7fe13469241e1bbbed9548593243cab810804b38a3662076dcc",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/down.png",
+    "format": "png",
+    "bytes": 405,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "5086a2ca3c9998e2f8f75eda4df5319456a52aca8341cac329492cbc49503ab8",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/download.png",
+    "format": "png",
+    "bytes": 592,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "73c62d719c5237be46d7c9c846544366d377fc89ba5ac21b40c655c5b087d5f5",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/expand.png",
+    "format": "png",
+    "bytes": 586,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "8eae63c66bf3bda38e0ee2bbd660def4b31caedbf49d1a2fa8c90f5430a96c15",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/external.png",
+    "format": "png",
+    "bytes": 778,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "f129e6d0e5d687b32f96d68cd525f494ec4a501383fcc94c89e724723cec06a2",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/eye.png",
+    "format": "png",
+    "bytes": 1571,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "de1580d8554287c0cc30ab18581d2a38cfdd8932827939e927776cedf2390b10",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/file-clock.png",
+    "format": "png",
+    "bytes": 1503,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "59ae0b090fb0cf22d702ddd7579e1b64c84755250317ee0fc89c9cdc5e442d2a",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/file.png",
+    "format": "png",
+    "bytes": 785,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "2f0d615f85de8af42a40687b512f8b90c9336c9b77350e493c4a3a782a658149",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/filter.png",
+    "format": "png",
+    "bytes": 905,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "72277723c0cd8af9389fd65478e49918c5425dd57729f707a94cfa41eeb0acac",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/fit.png",
+    "format": "png",
+    "bytes": 394,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "482c5e622cee4b08cc9318dc1d2f6fa272a69fa4d061670b258e7a22a08a7805",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/flag.png",
+    "format": "png",
+    "bytes": 624,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "fdb0c811a60d9476a2e9cf53050af95ff31c73abb3e6d00f7fe3951d9cc4bb6b",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/folder.png",
+    "format": "png",
+    "bytes": 512,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "a1b70192b746023f7d935c13c7592b95993c1ea86846f0226a6e2f4cfafc6c19",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/globe.png",
+    "format": "png",
+    "bytes": 1867,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "2ef84eb8157c49764282cd8fac49976f0e875e4bafaae9bfa2fcd17a5fb4d1ca",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/graph.png",
+    "format": "png",
+    "bytes": 725,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "c1b9c52b33cfeb279886decd5f4fb027f896af4cf3954292ae246ce524133cb9",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/grid.png",
+    "format": "png",
+    "bytes": 531,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "eb41d64462d28456a5f9fd277bdfe26781ba409f240b16e628c8137a98f89160",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/hand.png",
+    "format": "png",
+    "bytes": 1411,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "06d402450b7ab6f43128d97f8b95f9cff7c91ff7811608bfa0ce0d063dfb7fb1",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/heart.png",
+    "format": "png",
+    "bytes": 836,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "f7c36a4187b7d024eb1a491dae5212e94efbbc64e66c6061182f24c792ba7d15",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/image.png",
+    "format": "png",
+    "bytes": 1399,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "d19f603a0383c15b57fd100ad1aaacde19e8616b4495b064915e72893dfb93d5",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/info.png",
+    "format": "png",
+    "bytes": 1547,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "99fde8ebf26fa7b8e8f0d6df983a278601d19177119c5ba4f8f2c2183b3abab4",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/layers.png",
+    "format": "png",
+    "bytes": 514,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "8def9284c013ac961865bc7bb26943a6f24c1d20e68e7b7e1e7fe864f456adc4",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/library.png",
+    "format": "png",
+    "bytes": 539,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "7bd154d2a2d0bc1cd1767fe00ddd9138746dd304a6cd58344659bf35ed5297de",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/link.png",
+    "format": "png",
+    "bytes": 1494,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "f1969fb030a3c5225a12a8d11a344b77c998a1223c3af56816fe60f92bf29cbb",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/lock.png",
+    "format": "png",
+    "bytes": 983,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "f0a9a6ba47097e4b4d438577a985d23022b7605f6b78cf301abf7eccaa2db194",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/mail.png",
+    "format": "png",
+    "bytes": 1117,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "edf3e4c16efeb973cb630cf41e1bc55bd61f9387e5dd9bac2ac6b720c5532227",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/menu.png",
+    "format": "png",
+    "bytes": 219,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "db313229c94f5161d1ac5ad554113ba16688527c9a58621711e05bbe02da6c9a",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/minus.png",
+    "format": "png",
+    "bytes": 201,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "aa2e0ad6d1be2f49780d7078bfe4b7b4f38eba03c7870a3103eeb19cd9bcef3d",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/more.png",
+    "format": "png",
+    "bytes": 280,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "a502ffdf3dfad774b6d376079b1025862457f34535d2b832c70ea87aad46313e",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/paperclip.png",
+    "format": "png",
+    "bytes": 1018,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "94d2fe0df6bd604e4b04dcaea8c3b5afa0120b440f39ab4db8c39aabc5fa8756",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/play.png",
+    "format": "png",
+    "bytes": 755,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "1209d81fb4b1ea9e36a52dd7c55412b61b187162d902221b1d0b52d7df08b59a",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/plus.png",
+    "format": "png",
+    "bytes": 325,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "fada258329bab8740f85485ad775b01dac5342e74e1df14ebdbe65f8d1d34733",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/refresh.png",
+    "format": "png",
+    "bytes": 1333,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "1bfa49606c6be1e024b336134252a81b4585f923cd7c7750c76a09f2b2fa6ae7",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/review.png",
+    "format": "png",
+    "bytes": 1132,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "747260949433e663bab012e8b4c91b247d55f388282dae440498d3dddba7036d",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/runs.png",
+    "format": "png",
+    "bytes": 374,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "2b7a48086edeae6b4aba3774786d10221f645acf52f2102dec6a6761e28bcc27",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/search.png",
+    "format": "png",
+    "bytes": 1210,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "c96b3971cc9dfbd9006ec8b94ae393adcb80bad4a28030cc51aa01347b625954",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/send.png",
+    "format": "png",
+    "bytes": 1685,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "afa9e6ac528a8dde18db7877180e04680a46ce17f5a65e43047afea4fa618ab0",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/settings.png",
+    "format": "png",
+    "bytes": 1518,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "635889770b536f84cd766a4ddffadb5435ef6616ee86a52b68c5988754df214d",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/shield-check.png",
+    "format": "png",
+    "bytes": 1507,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "d7164e00fa9b638b890fc7e36a43f4e2e122007f4196b92d194efea9acf345ad",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/shield.png",
+    "format": "png",
+    "bytes": 1298,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "1c0f3df1cc8dcb1850c60899986383d91c3d4db6b316fe06c1cbfb46463937b1",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/sort.png",
+    "format": "png",
+    "bytes": 659,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "eea797f7287ca0b8198bb16a44402f8957e33e7df4cc8ef515567843333294f3",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/spark.png",
+    "format": "png",
+    "bytes": 1270,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "1cd824a1c07b3c3dd28d9ed58a00cb2e5628857fe007a5695d56af6b7263df51",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/stop.png",
+    "format": "png",
+    "bytes": 1539,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "258b440d3e7f5bd09fb7fefcfc7a8869d415e700217f4b7e24be6d0bc84c77a6",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/target.png",
+    "format": "png",
+    "bytes": 2210,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "f6100faf646117e0b6a93de484fd1393f7aadbf3d97d9683113bf05d47c205aa",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/upload.png",
+    "format": "png",
+    "bytes": 593,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "a5ac167703eb6c47eeebe08b76a723e8814fa13519ceb4ec2b6a3367a43e375d",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/user.png",
+    "format": "png",
+    "bytes": 1364,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "a74ab92090d8d07f62ca6a583d5e239a322da56eed130a6701ef724c5e6cd455",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/users.png",
+    "format": "png",
+    "bytes": 1618,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "d69f8b51855a2ce2b0bb13953122b9615797a17468da8cc5ebf5c87f88dd363d",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/png/48/warning.png",
+    "format": "png",
+    "bytes": 1101,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "406307e41675d2759904f9c9b3f5af38e85845aa847543b9e0af74bd2ead1cab",
+    "pixels": [
+      48,
+      48
+    ]
+  },
+  {
+    "path": "assets/icons/sprite.svg",
+    "format": "svg",
+    "bytes": 7990,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "7b4397fa13f2970445b85ae5b9b718903a0e866dc0d23a5e944e3ebbfa4aad04",
+    "viewBox": null,
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/activity.svg",
+    "format": "svg",
+    "bytes": 241,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "971c72d199a2b509f06d2acbb21ec00043a8fea6e95474ae09ce4571b32e542b",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/arrow.svg",
+    "format": "svg",
+    "bytes": 237,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "622028970a5ed79de0af76a433e70c036801ea0471ce26e161c98966fdb3cd5a",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/back.svg",
+    "format": "svg",
+    "bytes": 237,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "abaab8f55b6f2565d7035377fdc92a8be57eea7d55f96527d676de6f3cbae7cf",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/bar.svg",
+    "format": "svg",
+    "bytes": 348,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "6828d36d6ccc26630ea12b5850414e89a87082b50b8187bbc67d0fb4d63fa0b8",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/bell.svg",
+    "format": "svg",
+    "bytes": 270,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "436d1274b0bfe3c3d84e243501891c42f12e8a8d13bfa6e0e2445419639f83c1",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/bolt.svg",
+    "format": "svg",
+    "bytes": 246,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "abccb57c70942da7b9d8485b7e7ceae41d0a3690fc9f8dddb1a1f5b8e01f0a1d",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/book.svg",
+    "format": "svg",
+    "bytes": 288,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "e0e9ae7ded4e46fd2c4ca057ee31b0e0caa2c13537d776103da3cf7d69e52679",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/branch.svg",
+    "format": "svg",
+    "bytes": 332,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "1be897e3b92d03f473e5bf6869251f82b4f3ea4a97adb0cffb0a18a3d96abdd1",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/calendar.svg",
+    "format": "svg",
+    "bytes": 311,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "015f2070382bcd522c12d0459a138457ace9c064ccfae4befa14494c54d6e1b2",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/chart.svg",
+    "format": "svg",
+    "bytes": 252,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "9682a8844dbe5d195dcb30468825411747ad644ec26fafb484670cdea2078ce5",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/check-circle.svg",
+    "format": "svg",
+    "bytes": 267,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "39adbc4d57ac44bf72fca47c6159112b31871bc32ba86a800c4debcd7627b249",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/check.svg",
+    "format": "svg",
+    "bytes": 230,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "12c88cad1750123e7e6b86ba1f4ac59cbd500a3acbafe49a94e1f13e293eaa65",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/chevron.svg",
+    "format": "svg",
+    "bytes": 230,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "b45a46bf8c973b7b5b17c28d8383e1bc929f73d7e1d81a17255fcba538644e79",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/clock.svg",
+    "format": "svg",
+    "bytes": 258,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "9bba1218018fed835611a95d12521fd4372373b013425ce3ca8db2408a3ff95a",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/close.svg",
+    "format": "svg",
+    "bytes": 236,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "33c8c58f5ff62384fe478f63c3a21560aa533b7efc09d6b97777225b154c4b8c",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/code.svg",
+    "format": "svg",
+    "bytes": 251,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "525262f283c190bc920b573a755b16082e108d020bad81e524e5707a42a39c7a",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/copy.svg",
+    "format": "svg",
+    "bytes": 278,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "8227dfb0857cf9add2b1a7d9bf7f35733272ae756f24b8b2f4b029c4025ae850",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/database.svg",
+    "format": "svg",
+    "bytes": 300,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "7fddb2db4e4d2ce7d7f951a984d3897b0458ffbd2a354dfe912142a3cee6be7d",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/diff.svg",
+    "format": "svg",
+    "bytes": 270,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "46c6e77478ffe9db490b068bde389264ee6bcce0fa34fa97aaf11c301a03dd9a",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/down.svg",
+    "format": "svg",
+    "bytes": 227,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "c463fe7a040715e759a46b77d7e76b62f7260711ae5c2b27038eb790d84fd75b",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/download.svg",
+    "format": "svg",
+    "bytes": 253,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "8848a9b509b16da4076b1240ce6f9ad480a2578ca9a9ce19af5e442dabea3da1",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/expand.svg",
+    "format": "svg",
+    "bytes": 256,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "eff348bc64838c4a84cbc4282243a6aa2a8a7292f3e42482f5e2f7f69681b17b",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/external.svg",
+    "format": "svg",
+    "bytes": 310,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "2d295e2c4fd18ec80e72a26b10039362d621b23e73645798f4bd62b3d2c83391",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/eye.svg",
+    "format": "svg",
+    "bytes": 289,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "f777844440e04add7b7df9cd32e695f8d250c434cd4e18e15488a871494dc16f",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/file-clock.svg",
+    "format": "svg",
+    "bytes": 303,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "0611fcbbef8f596e1176ead3f9482758b2bdf7490ac6d69df4f2bc1751d2f67e",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/file.svg",
+    "format": "svg",
+    "bytes": 313,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "69fca2f7e7285a974911ee91c6c4e873e80a140b14c94faeaad39113aedd7324",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/filter.svg",
+    "format": "svg",
+    "bytes": 244,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "bcaba46bb232db7410a9c4fab6b1a6b9a8d0cc52a1f90242cb660bb96f7d50e9",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/fit.svg",
+    "format": "svg",
+    "bytes": 251,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "1300649acd04c0c1fad0d3c5e3d60e4ff61afae363a31564517a3f064483d79e",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/flag.svg",
+    "format": "svg",
+    "bytes": 236,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "0331db9889a44b826082664916ac6ea8509fb05fc183accee9bace49c5f7e9bd",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/folder.svg",
+    "format": "svg",
+    "bytes": 239,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "64b569556d299b49b60520d6cabf6f9e15a0a6cc5678f7fd325fa0a43d6919c6",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/globe.svg",
+    "format": "svg",
+    "bytes": 310,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "e76940f45c314693abc545a3c035f28f7c6ba3b447291cd8f6e81e95e546951f",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/graph.svg",
+    "format": "svg",
+    "bytes": 381,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "857ae0faaa16e64b762e42ac3675a7764cfb8f7318cd6c2cb04899f49fa17c35",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/grid.svg",
+    "format": "svg",
+    "bytes": 403,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "86308584d0739d44a095362d7cc454f241ff6735979c0502fa1b7fcbcffa8f64",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/hand.svg",
+    "format": "svg",
+    "bytes": 311,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "41f7329988d1b614a381016e968b55f51188d544ff5cf81764db3195638bd1f6",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/heart.svg",
+    "format": "svg",
+    "bytes": 238,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "701a925cc33f1592183f5e2a2e248f358ff2ebf90e247f9c14aa2d88f373f644",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/image.svg",
+    "format": "svg",
+    "bytes": 315,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "d43e455e92bebb0a623324e509798a4da8d485a8c718ce664199f35661570787",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/info.svg",
+    "format": "svg",
+    "bytes": 263,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "6b3c9fcd06668d66fa7e961ba1b6a80b45696b5116cf8f1d1be3d065e002d14a",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/layers.svg",
+    "format": "svg",
+    "bytes": 272,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "2574835fc1a0b6be7d9e996feba4a7dff501bbf86b99cbf88e8ad66dff3705cb",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/library.svg",
+    "format": "svg",
+    "bytes": 250,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "4248e91cd992abb488e73640c2d7d0df17ed0222cd2689f103c11e07b9ad9955",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/link.svg",
+    "format": "svg",
+    "bytes": 301,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "e1aa965971d44480a8126db6bd62349dbbeb1e20942d868471d5253bd1a9f5b8",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/lock.svg",
+    "format": "svg",
+    "bytes": 296,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "ec9c0b45a202841e544532493cdafc109dab05a2395d55177cc7402daf4f4c73",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/mail.svg",
+    "format": "svg",
+    "bytes": 276,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "4ea8a5b4ea2a2d3c0afab14ecb07e1046157a47769765ec3cd5f3aefd2ee9e33",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/menu.svg",
+    "format": "svg",
+    "bytes": 238,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "7538ba2fcc0b7ca9c92863b71d2aed47c654896cc7afde04da07f9ffad64ec62",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/minus.svg",
+    "format": "svg",
+    "bytes": 224,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "7411916f63e635dbfccca65c6e43fb6347bad9a877fb2caf3dc6cf0843eb9ed6",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/more.svg",
+    "format": "svg",
+    "bytes": 295,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "31f24ec164cc0b2a1485649d44baf98e3a6117b17611160354af6b9f3df0320d",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/paperclip.svg",
+    "format": "svg",
+    "bytes": 268,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "1aaed80e652156fad8a0b450a2e969a82110b31636d51a2b69a8e3946f449be3",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/play.svg",
+    "format": "svg",
+    "bytes": 232,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "132891dfd270287af9ee051d124383e69db521c93d719655d57420ab9e38f162",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/plus.svg",
+    "format": "svg",
+    "bytes": 231,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "df99788369584d1667c8d7ae2376a9f13f5dbd14a69016097c881db623e8c37c",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/refresh.svg",
+    "format": "svg",
+    "bytes": 297,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "2d1be45b1f3da3e58e03300576b61a2c96fb4384abe7b08bd89ae675b26271fa",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/review.svg",
+    "format": "svg",
+    "bytes": 326,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "8ad9229212451fe9a319a6afec3f471d8ca3f19bd80d653273eafd9e47adc8dc",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/runs.svg",
+    "format": "svg",
+    "bytes": 327,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "bceec1eaeaebf81ac2c2ca803581cdbff3af564f3f60c5d55172e7a4513fa110",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/search.svg",
+    "format": "svg",
+    "bytes": 258,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "e0552ff0f8ff81f679482036233125e2cd52918070f5120d4b9657341f4091fe",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/send.svg",
+    "format": "svg",
+    "bytes": 250,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "59262c75f5ed06b27653e5b62072c5338ed9ca6e68023977125539ceb4140335",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/settings.svg",
+    "format": "svg",
+    "bytes": 318,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "2dd1d2557e6e77344b18d2136b4bbbc97e6cb7abe6c2c2ff26dcfb98557422d2",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/shield-check.svg",
+    "format": "svg",
+    "bytes": 287,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "b44c5c31bb11442a9edb6165a224c34ed2ac76c8c8f357aa414fabd68dd7c989",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/shield.svg",
+    "format": "svg",
+    "bytes": 285,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "bcd678bd94901e582aaa1bd1488faa11d1496df0f5daaeda13d7a033a8a8c2dc",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/sort.svg",
+    "format": "svg",
+    "bytes": 256,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "41c701b78783cbc2108d0918e3e35f8ef1478e8d4d31ee84b09d15cccdb10905",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/spark.svg",
+    "format": "svg",
+    "bytes": 292,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "1690b82a1009c85e96724d81a56f44697429d10ac6be04bbafc8454e56943723",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/stop.svg",
+    "format": "svg",
+    "bytes": 256,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "3056699a90711520049ccc050998a80536bf574ccd8c62883d4dfaa3bc4dd7c7",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/target.svg",
+    "format": "svg",
+    "bytes": 298,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "657cee53fae85b67b6f2253a6db1c14e426a50e7c0a65495d1e0aa3ca85b1d25",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/upload.svg",
+    "format": "svg",
+    "bytes": 250,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "c10e946f6630c2f7ed6b2b9a7e07a4b2fa27e2a991816582f460cbab8a422128",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/user.svg",
+    "format": "svg",
+    "bytes": 273,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "bc7b486e9a16caa778ee6ed51c53c9362eb9836ea9706e103ec4b24f31e46db1",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/users.svg",
+    "format": "svg",
+    "bytes": 314,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "c46bb556cb0e553f45d0e8eea1a10bc17f008d11219e1d315ca3007474d4665d",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/icons/svg/warning.svg",
+    "format": "svg",
+    "bytes": 266,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "a4ec15c9b932ffdb2b4e635f0a6e6bd446328e6272b467892db988cde2a94cf0",
+    "viewBox": "0 0 24 24",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/logo.svg",
+    "format": "svg",
+    "bytes": 508,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "fbfa0f840822dd34fa1769878c8b65e1969bc3fc63fb62c12f499dc14b805c11",
+    "viewBox": "0 0 64 64",
+    "genuine_vector": true
+  },
+  {
+    "path": "assets/logo@2x.png",
+    "format": "png",
+    "bytes": 6280,
+    "role": "interface-asset",
+    "source": "本交付可编辑源码的程序化矢量实现",
+    "sha256": "cc1573008ffa0d555811f4a190aa362ea348590b0c984dd636a112866dd16772",
+    "pixels": [
+      128,
+      128
+    ]
+  },
+  {
+    "path": "assets/reference-crops/cta-reference.png",
+    "format": "png",
+    "bytes": 39903,
+    "role": "reference-only",
+    "source": "本次会话设计图的精确裁剪",
+    "sha256": "094fe71d284249cea1d57c12416f51517e594fc0eca8577ff1164b430f3031de",
+    "pixels": [
+      356,
+      103
+    ]
+  },
+  {
+    "path": "assets/reference-crops/evidence-reference.png",
+    "format": "png",
+    "bytes": 26559,
+    "role": "reference-only",
+    "source": "本次会话设计图的精确裁剪",
+    "sha256": "05da4713983ae4ea41a0db2588fa9b57367e107cff95d6fd17d172b2bf7d5912",
+    "pixels": [
+      278,
+      100
+    ]
+  },
+  {
+    "path": "assets/reference-crops/logo-reference.png",
+    "format": "png",
+    "bytes": 2261,
+    "role": "reference-only",
+    "source": "本次会话设计图的精确裁剪",
+    "sha256": "dd274dd79b787e8467317f7de18b94f288513b380bb2b4e692e901c57bd950bd",
+    "pixels": [
+      35,
+      36
+    ]
+  }
+]

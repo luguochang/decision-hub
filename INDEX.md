@@ -1,8 +1,8 @@
 # Decision Hub 工程入口
 
-项目简介见 [README](README.md)，阶段执行状态见 [ROADMAP](docs/ROADMAP.md)，逐任务实施约束见 [EXECUTION_PLAN](docs/EXECUTION_PLAN.md)。
+当前入口见[总控](docs/design/decision-product-control-2026-10-17/00_MASTER_CONTROL.md)、[实施记录](docs/design/decision-product-control-2026-10-17/EXECUTION_LOG.md)。2026-10-18用户已批准review-5/OKX方案并恢复实施，当前D1主链恢复中。下列ROADMAP、EXECUTION_PLAN及历史阶段用于需求与证据继承，不能替代当前任务和验收结果。
 
-## 当前状态
+## 历史状态快照（当前状态见顶部）
 
 Decision Hub 已完成 R0/R1/R2/R2-L、R2-R-00 至 R2-R-06E、[DSH-NATIVE-CORE](docs/stages/DSH_NATIVE_WEB_PRODUCT_CORE.md)、[PRODUCT-CLOSEOUT-01](docs/stages/PRODUCT_CLOSEOUT_01_DSH_NATIVE_TRADER_PILOT.md) 和 PD-04..06 runtime closeout 的工程/运行验收。2026-09-03 的 D2 官方 DeepSeek Live 复验已跑通到诚实终态，但 synthesis 安全失败，不能写成方向性分析成功；证据见 [D2 真实验收记录](docs/evaluations/DSH_DEEPSEEK_LIVE_FLOW_ACCEPTANCE_2026-09-03.md)。官方 DSH Web 已从真实页面完成主动补证、可信账本、同一 Session 轨迹和代码 Gate；当前可作为单 owner、单机、只读的 `research_only` 试用入口。Fixed 仍 active，DSH 仍是 candidate/shadow；这不代表预测准确、盈利、自动交易或 Promotion。PD-07 仍需未来事件/事实价值观察，具体见 [PD-07 前瞻价值观察阶段卡](docs/stages/PD_07_PROSPECTIVE_VALUE_OBSERVATION.md)。D2 专属桌面/移动浏览器资产、DOM/console 和最终质量门已收口。
 

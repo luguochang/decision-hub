@@ -1,0 +1,49 @@
+{
+  "schema_version": "history-hourly-status.v2",
+  "owner_authenticated": true,
+  "observed_at": "2026-10-09T16:02:05Z",
+  "cadence_seconds": 3600,
+  "worker_configured": true,
+  "automatic_retry": false,
+  "current_forecast_originals_verified": false,
+  "financial_qualified": false,
+  "historical_pit_verified": false,
+  "scopes": [
+    {
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "state": "blocked",
+      "hour_at": "2026-10-09T16:00:00Z",
+      "cutoff_at": "2026-10-09T16:02:00Z",
+      "started_at": "2026-10-09T16:02:05Z",
+      "deadline_at": "2026-10-09T16:03:35Z",
+      "completed_at": "2026-10-09T16:02:05Z",
+      "slot_id": "hhour2_c0499ac873b7e2313f91cbfb42af22bde072f3382cda7fcf",
+      "forecast_id": null,
+      "model_id": null,
+      "reason_code": "history_hourly_trusted_model_not_configured",
+      "reason_label": "尚无服务器授权的可信模型；历史完整样本需至少60天，波动高低组各30天，不能直接生成概率。",
+      "fixture_mode": true,
+      "fence_present": false
+    },
+    {
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "state": "unconfirmed",
+      "hour_at": "2026-10-09T16:00:00Z",
+      "cutoff_at": "2026-10-09T16:02:00Z",
+      "started_at": null,
+      "deadline_at": null,
+      "completed_at": null,
+      "slot_id": "hhour2_883881b2227202db97b8dbc5d6d277cf9f279b7a5228b569",
+      "forecast_id": null,
+      "model_id": null,
+      "reason_code": "history_hourly_unconfirmed_fence_requires_reconciliation",
+      "reason_label": "上次提交或回执尚未确认；自动生产已暂停，需要核对已保存结果，不能自动重写。",
+      "fixture_mode": true,
+      "fence_present": true
+    }
+  ]
+}

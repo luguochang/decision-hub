@@ -1,12 +1,42 @@
 # Decision Hub
 
+> 当前入口（2026-10-18）：[事前决策产品总控](docs/design/decision-product-control-2026-10-17/00_MASTER_CONTROL.md)与[实施记录](docs/design/decision-product-control-2026-10-17/EXECUTION_LOG.md)。用户已批准review-5及OKX永续建议/纸面验证并恢复实施，当前D1真实主链恢复中；产品尚未签收。下方旧阶段的“当前/完成/唯一下一步”只对其日期及范围成立，不覆盖本入口。
+
+> 10月10日历史：正式55曾在线，完整报告/复查未通过；记录见[两天多执行复盘](docs/design/market-risk-v1/PROGRESS_REVIEW_2026-10-10.md)。原需求沿[原33项清单](docs/design/market-risk-v1/IMPLEMENTATION_CHECKLIST.md)由新总控继承，不因换入口删除。
+
+> 历史16b/17记录：16b标准构建/启动通过，BTC输入回传超时，旧ETH完整原件保存但质量仍有缺口；原O04/复查失败保留。该历史记录不代表当前55运行状态。
+
 Decision Hub 是一个可插拔、可审计的事件驱动决策智能平台。
 
 它将文本、会议转写、官方信息、新闻和其他事件来源统一转换为结构化证据，再通过可替换的 Runtime、LangGraph 研究图、确定性 Gate、Forecast、Outcome 和 Evaluation，生成可回放、可解释、可评估、人工可控的决策支持结果。
 
 首期聚焦宏观事件对 BTC 及其他市场资产的影响，但核心架构不绑定加密货币。后续可以增加 A 股、美股、供应链、行业研究或 PPT 等独立 Domain Pack，而不复制 Product Kernel，也不把某个 Agent Harness 作为业务账本。
 
-## 当前状态
+## 历史状态（2026-10-08及以前）
+
+**当前仍处于 PC 工程验收，完整产品尚未交付。** 行情、路径、监控、研究、报告、资料、主题、反馈、历史与管理主线保留。当前运行版本、已证结果和具体失败以“当前任务”及33项清单为准；旧版本运行记录属于历史，服务在线不能替代真实报告和预测效果验收。
+
+以[市场风险V1交付入口](docs/design/market-risk-v1/README.md)、[当前任务](docs/design/market-risk-v1/CURRENT_FOCUS.md)及[33项清单](docs/design/market-risk-v1/IMPLEMENTATION_CHECKLIST.md)为当前依据。
+
+- [八层技术设计与架构](docs/design/market-risk-v1/TECHNICAL_DESIGN.md)
+- [验收标准与指标](docs/design/market-risk-v1/ACCEPTANCE_AND_METRICS.md)
+- [PC用户手册](docs/design/market-risk-v1/PC_USER_GUIDE.md)
+- [发布与实际自测记录](docs/design/market-risk-v1/B2_B4_RELEASE_RUNBOOK.md)
+- [全项目PRD与原功能分层](docs/product/DECISION_HUB_FULL_PRODUCT_PRD_2026-09-26.md)
+- [历史整改台账](docs/plan/ARCHITECTURE_REMEDIATION_EXECUTION_LOG.md)（历史原件，不作为当前接续指令）
+- [本机运行与恢复](docs/operations/LOCAL_PRODUCT_RECOVERY.md)
+
+Windows 日常打开已有产品，在仓库根目录运行：
+
+```powershell
+.venv/Scripts/python.exe -c "from tools.full_product_acceptance import ensure_product; print(ensure_product())"
+```
+
+正常入口：<http://127.0.0.1:8047/>。先核对来源、发现与研究通道各自状态。已在线时复用现有服务；冷启动行为和已知问题见运行手册，不反复启动多套栈。
+
+## 历史阶段记录
+
+以下是当时日期与范围内的工程或试点结果。`completed`、`pilot_ready` 及当时“下一阶段”不覆盖上面的当前实现与交付判断；当前实施以市场风险V1的当前任务和33项清单为准。
 
 `R0 Owner Production Core` 已完成（提交 `2ee2f8d`）：文本输入到决策、预测、结果评估、观测、恢复、回放和备份自测的纵向链已能在本地运行；外部 GPT-5.5 Responses 兼容性 canary 已通过，业务 Gate 仍保持独立裁决。
 
@@ -32,8 +62,8 @@ candidate/shadow；Search timeout、FRED stale 和未知成本被如实保留，
 ## 文档入口
 
 - [工程索引](INDEX.md)
-- [当前状态短上下文](docs/context/CURRENT_STATE.md) 与 [当前有效决策索引](docs/context/CURRENT_DECISIONS.md)
-- [产品交付控制书与最终验收包](docs/product/PRODUCT_DELIVERY_CONTROL_BOOK_2026-09-01.md)（当前唯一执行/收口入口）
+- [历史状态短上下文](docs/context/CURRENT_STATE.md) 与 [既有决策索引](docs/context/CURRENT_DECISIONS.md)（当前整改状态见上方台账）
+- [9 月 1 日产品交付控制书与当时验收包](docs/product/PRODUCT_DELIVERY_CONTROL_BOOK_2026-09-01.md)（历史执行入口）
 - [E2-L 官方 DSH Web 真实产品验收记录](docs/evaluations/E2L_LIVE_PRODUCT_ACCEPTANCE_2026-09-01.md)
 - [2026-09-02 DSH Live Attestation 修复与真实运行记录](docs/evaluations/DSH_LIVE_RESEARCH_ATTESTATION_FIX_2026-09-02.md)
 - [产品架构基线](DECISION_HUB_PRODUCT_ARCHITECTURE_V1.md)
@@ -60,6 +90,8 @@ candidate/shadow；Search timeout、FRED stale 和未知成本被如实保留，
 - [ADR 目录](docs/decisions/README.md)，包括 [R1 adapter 边界](docs/decisions/ADR-0003-r1-realtime-plugin-boundary.md)
 - [模块地图](docs/modules/README.md)
 - [本地运行手册](docs/runbooks/local-development.md)
+- [当前运行与使用引导（2026-09-13）](docs/user-guides/DECISION_HUB_CURRENT_USAGE_2026-09-13.md)
+- [当前可用功能与截图引导（2026-09-14）](docs/user-guides/DECISION_HUB_SCREENSHOT_WALKTHROUGH_2026-09-14.md)
 
 ## 本地开发
 
@@ -75,7 +107,9 @@ pnpm --dir apps/decision-desk test
 pnpm --dir apps/decision-desk build
 ```
 
-### 运行真实 DSH 产品入口
+### 历史 DSH 原生入口与开发说明
+
+下述说明保留原生入口和开发环境的历史用法。当前 Windows 日常产品入口、默认真实运行配置与按钮，以本页顶部及最新 PC 用户手册为准。
 
 ```bash
 ./infra/dsh/run-product.sh

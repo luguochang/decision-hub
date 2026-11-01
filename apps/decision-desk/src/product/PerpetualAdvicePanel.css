@@ -1,0 +1,13 @@
+.perpetual-advice-panel { margin: 1.25rem 0; padding: 1rem; border: 1px solid var(--border-color, #344155); border-radius: .75rem; }
+.perpetual-advice-panel h3 { margin-top: 0; }
+.perpetual-advice-choice { padding: 1rem; margin-bottom: 1rem; border: 1px solid #b9d3c6; border-radius: .65rem; background: #f1f8f4; color: #263c33; }
+.perpetual-advice-choice h4 { margin: 0 0 .5rem; font-size: 1.15rem; }
+.perpetual-advice-panel p { line-height: 1.6; overflow-wrap: anywhere; }
+.perpetual-advice-limit { border-left: 3px solid #d7a853; padding-left: .75rem; }
+.perpetual-advice-table { overflow-x: auto; }
+.perpetual-advice-table table { width: 100%; border-collapse: collapse; }
+.perpetual-advice-table th, .perpetual-advice-table td { padding: .7rem; text-align: left; border-bottom: 1px solid var(--border-color, #344155); white-space: nowrap; }
+.perpetual-advice-table th small { display: block; font-weight: normal; }
+.perpetual-advice-probabilities { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+.perpetual-advice-panel pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.perpetual-advice-panel details { margin: .8rem 0; }

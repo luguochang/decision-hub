@@ -481,6 +481,7 @@ def test_responses_web_search_uses_sources_and_domain_filter() -> None:
     assert request["include"] == ["web_search_call.action.sources"]
     assert request["reasoning"] == {"effort": "low"}
     assert request["max_output_tokens"] == 768
+    assert request["tool_choice"] == "required"
     assert request["tools"] == [
         {
             "type": "web_search",
@@ -545,6 +546,26 @@ def test_responses_web_search_rejects_sources_without_bound_citations() -> None:
         asyncio.run(transport.search(_query()))
 
     assert captured.value.error_code == "search_no_attributed_sources"
+
+
+def test_responses_web_search_can_opt_in_to_fetch_required_locators() -> None:
+    source_url = "https://www.federalreserve.gov/newsevents/speech/example.htm"
+    payload = _responses_payload(
+        sources=[{"type": "url", "url": source_url, "title": "Unbound source"}],
+        citations=[],
+    )
+    result = asyncio.run(
+        OpenAIResponsesWebSearchTransport(
+            client=_FakeOpenAIClient(payload),
+            model="gpt-5.5",
+            allow_locator_only=True,
+            clock=lambda: COMPLETED_AT,
+        ).search(_query())
+    )
+
+    assert len(result.evidence) == 1
+    assert str(result.evidence[0].source_url) == source_url
+    assert result.evidence[0].snippet.startswith("Locator only; fetch this URL")
 
 
 def test_responses_web_search_binds_each_citation_to_its_exact_text_span() -> None:

@@ -46,7 +46,7 @@ $defs:
     required: [request_id, target_type, target_id, created_by, verdict, notes]
     properties:
       request_id: {type: string, minLength: 1}
-      target_type: {type: string, enum: [run, memo, experiment, candidate, experience, failure_pattern]}
+      target_type: {type: string, enum: [run, report_revision, memo, experiment, candidate, experience, failure_pattern]}
       target_id: {type: string, minLength: 1}
       created_by: {type: string, minLength: 1}
       verdict: {type: string, enum: [useful, not_useful, incorrect, needs_review]}
@@ -58,7 +58,7 @@ $defs:
     properties:
       feedback_id: {type: string, minLength: 1}
       request_id: {type: string, minLength: 1}
-      target_type: {type: string, enum: [run, memo, experiment, candidate, experience, failure_pattern]}
+      target_type: {type: string, enum: [run, report_revision, memo, experiment, candidate, experience, failure_pattern]}
       target_id: {type: string, minLength: 1}
       created_by: {type: string, minLength: 1}
       verdict: {type: string, enum: [useful, not_useful, incorrect, needs_review]}
@@ -99,7 +99,7 @@ $defs:
       leakage_audit: {type: string, enum: [passed, failed]}
       authorization: {type: string, minLength: 1}
       visibility: {type: string, enum: [owner_only]}
-      source_mode: {type: string, enum: [fixture, prospective]}
+      source_mode: {type: string, enum: [fixture, reconstructed_fixture, prospective]}
       window_start_at: {type: string, format: date-time}
       window_end_at: {type: string, format: date-time}
       event_family_counts:
@@ -112,6 +112,7 @@ $defs:
     additionalProperties: false
     required: [candidate_id, candidate_type, content_hash, version, parent_version, status, created_at, content_ref, source]
     properties:
+      execution_scope: {type: [string, 'null'], enum: [directional_synthesis, research_harness, null]}
       candidate_id: {type: string, minLength: 1}
       candidate_type: {type: string, enum: [strategy, runtime, profile, doctrine, provider_policy]}
       content_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
@@ -126,6 +127,7 @@ $defs:
     additionalProperties: false
     required: [experiment_id, dataset_id, baseline_ref, candidate_refs, status, created_at, strategy_version, runtime_id, runtime_version, provider_id, model, schema_version, random_seed, randomness_policy, deadline_seconds, max_cost_usd]
     properties:
+      execution_scope: {type: [string, 'null'], enum: [directional_synthesis, research_harness, null]}
       experiment_id: {type: string, minLength: 1}
       dataset_id: {type: string, minLength: 1}
       baseline_ref: {type: string, minLength: 1}

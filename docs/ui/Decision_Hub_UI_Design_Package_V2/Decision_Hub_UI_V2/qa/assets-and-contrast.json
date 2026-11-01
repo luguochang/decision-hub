@@ -1,0 +1,65 @@
+{
+  "contrast_scope": "8 semantic foreground/background pairs only; not a complete WCAG audit",
+  "contrast": [
+    {
+      "label": "正文",
+      "foreground": "#122247",
+      "background": "#ffffff",
+      "ratio": 15.61,
+      "at_least_4_5": true
+    },
+    {
+      "label": "辅助正文",
+      "foreground": "#516585",
+      "background": "#ffffff",
+      "ratio": 5.92,
+      "at_least_4_5": true
+    },
+    {
+      "label": "说明文字",
+      "foreground": "#637593",
+      "background": "#ffffff",
+      "ratio": 4.67,
+      "at_least_4_5": true
+    },
+    {
+      "label": "主色文字",
+      "foreground": "#2563eb",
+      "background": "#ffffff",
+      "ratio": 5.17,
+      "at_least_4_5": true
+    },
+    {
+      "label": "成功状态",
+      "foreground": "#087a55",
+      "background": "#eafaf4",
+      "ratio": 4.96,
+      "at_least_4_5": true
+    },
+    {
+      "label": "警告状态",
+      "foreground": "#9c5907",
+      "background": "#fff5e5",
+      "ratio": 5.06,
+      "at_least_4_5": true
+    },
+    {
+      "label": "错误状态",
+      "foreground": "#bc3049",
+      "background": "#fff0f3",
+      "ratio": 5.2,
+      "at_least_4_5": true
+    },
+    {
+      "label": "紫色状态",
+      "foreground": "#703cd2",
+      "background": "#f2edff",
+      "ratio": 5.61,
+      "at_least_4_5": true
+    }
+  ],
+  "svg_files": 78,
+  "svg_parse_errors": [],
+  "raster_wrapped_as_svg": 0,
+  "no_font_files": true
+}

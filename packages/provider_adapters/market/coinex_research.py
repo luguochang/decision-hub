@@ -5,7 +5,6 @@ from collections.abc import Awaitable, Callable, Mapping
 from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 
-import httpx
 from pydantic import AnyUrl
 
 from packages.contracts_py.decision_hub_contracts import (
@@ -23,12 +22,13 @@ from packages.kernel.decision_hub_kernel.application.research_evidence import (
     research_evidence_content_hash,
     research_evidence_instance_id,
 )
+from packages.provider_adapters.research.raw_capture import CapturingAsyncClient
 
 JsonFetcher = Callable[[str], Awaitable[Mapping[str, object]]]
 
 
 async def _fetch_json(url: str) -> Mapping[str, object]:
-    async with httpx.AsyncClient(timeout=20, follow_redirects=True) as client:
+    async with CapturingAsyncClient(timeout=20, follow_redirects=True) as client:
         response = await client.get(url)
         response.raise_for_status()
         payload = response.json()
@@ -64,6 +64,13 @@ class CoinExMarketResearchAdapter:
         "BTC-USDT-SWAP": "BTCUSDT",
         "BTCUSDT": "BTCUSDT",
     }
+
+    symbols_required = True
+    max_symbols = 1
+
+    @property
+    def supported_symbols(self):
+        return frozenset(self._symbol_aliases)
 
     def __init__(
         self,
@@ -141,9 +148,7 @@ class CoinExMarketResearchAdapter:
             freshness_status="unknown",
             conflict_group=None,
         )
-        metric_family = (
-            "crypto.spot" if fields <= self._spot_fields else "crypto.derivatives"
-        )
+        metric_family = "crypto.spot" if fields <= self._spot_fields else "crypto.derivatives"
         field_aliases = {"spot_price": "price", "spot_volume": "volume"}
         field_units = {
             "spot_price": "usdt",
@@ -194,9 +199,7 @@ class CoinExMarketResearchAdapter:
         return set(self._derivatives_fields)
 
     @staticmethod
-    def _values(
-        fields: set[str], rows: Mapping[str, Mapping[str, object]]
-    ) -> dict[str, object]:
+    def _values(fields: set[str], rows: Mapping[str, Mapping[str, object]]) -> dict[str, object]:
         result: dict[str, object] = {}
         spot = rows.get("spot", {})
         futures = rows.get("futures", {})
@@ -288,9 +291,7 @@ def _fact(
     )
     return FactEnvelope(
         schema_version="fact-envelope.v1",
-        fact_id=research_fact_instance_id(
-            evidence_id=evidence_id, payload_hash=payload_hash
-        ),
+        fact_id=research_fact_instance_id(evidence_id=evidence_id, payload_hash=payload_hash),
         evidence_id=evidence_id,
         requirement_id=query.requirement_id,
         metric_family=metric_family,

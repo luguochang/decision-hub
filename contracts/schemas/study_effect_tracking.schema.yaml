@@ -1,0 +1,440 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.local/contracts/study_effect_tracking.schema.json",
+  "title": "StudyEffectTrackingContracts",
+  "$defs": {
+    "study_effect_tracking_command": {
+      "title": "StudyEffectTrackingCommand",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "request_id",
+        "revision_id"
+      ]
+    },
+    "study_effect_tracking_plan_ref": {
+      "title": "StudyEffectTrackingPlanRef",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "horizon": {
+          "type": "string",
+          "enum": [
+            "30m",
+            "24h",
+            "72h"
+          ]
+        },
+        "outlook_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "job_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "producer_request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "plan_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "scope_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "stable_recipe_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "strategy_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "market": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "instrument": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "horizon",
+        "outlook_id",
+        "job_id",
+        "producer_request_id",
+        "plan_hash",
+        "scope_hash",
+        "stable_recipe_hash",
+        "strategy_version",
+        "market",
+        "instrument"
+      ]
+    },
+    "study_effect_tracking_missing_window": {
+      "title": "StudyEffectTrackingMissingWindow",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "horizon": {
+          "type": "string",
+          "enum": [
+            "30m",
+            "24h",
+            "72h"
+          ]
+        },
+        "reason_code": {
+          "type": "string",
+          "const": "effect_tracking_window_unavailable"
+        }
+      },
+      "required": [
+        "horizon",
+        "reason_code"
+      ]
+    },
+    "study_effect_tracking_receipt": {
+      "title": "StudyEffectTrackingReceipt",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "study-effect-tracking-receipt.v1"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "owner_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "study_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "source_run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "artifact_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "start_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "plans": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/study_effect_tracking_plan_ref"
+          },
+          "minItems": 1,
+          "maxItems": 3
+        },
+        "missing_windows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/study_effect_tracking_missing_window"
+          },
+          "minItems": 0,
+          "maxItems": 3
+        },
+        "probability_qualified": {
+          "type": "boolean",
+          "const": false
+        }
+      },
+      "required": [
+        "schema_version",
+        "request_id",
+        "owner_id",
+        "study_id",
+        "revision_id",
+        "source_run_id",
+        "artifact_id",
+        "recorded_at",
+        "start_at",
+        "end_at",
+        "plans",
+        "missing_windows",
+        "probability_qualified"
+      ]
+    },
+    "study_effect_tracking_window_status": {
+      "title": "StudyEffectTrackingWindowStatus",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "plan": {
+          "$ref": "#/$defs/study_effect_tracking_plan_ref"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "running",
+            "waiting",
+            "completed",
+            "retry"
+          ]
+        },
+        "attempt": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "next_attempt_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "production_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "production_state": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "passed",
+                "failed",
+                "waiting"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "captured_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "captured_count": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 512
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "effective_count": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 512
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "excluded_count": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 512
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "probability_qualified": {
+          "type": "boolean",
+          "const": false
+        }
+      },
+      "required": [
+        "plan",
+        "status",
+        "attempt",
+        "next_attempt_at",
+        "error_code",
+        "production_id",
+        "production_state",
+        "captured_at",
+        "captured_count",
+        "effective_count",
+        "excluded_count",
+        "reasons",
+        "probability_qualified"
+      ]
+    },
+    "study_effect_tracking_group": {
+      "title": "StudyEffectTrackingGroup",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "receipt": {
+          "$ref": "#/$defs/study_effect_tracking_receipt"
+        },
+        "windows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/study_effect_tracking_window_status"
+          },
+          "minItems": 1,
+          "maxItems": 3
+        }
+      },
+      "required": [
+        "receipt",
+        "windows"
+      ]
+    },
+    "study_effect_tracking_status": {
+      "title": "StudyEffectTrackingStatus",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "study-effect-tracking-status.v1"
+        },
+        "study_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "owner_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/study_effect_tracking_group"
+          },
+          "minItems": 0,
+          "maxItems": 12
+        },
+        "more_available": {
+          "type": "boolean"
+        },
+        "probability_qualified": {
+          "type": "boolean",
+          "const": false
+        }
+      },
+      "required": [
+        "schema_version",
+        "study_id",
+        "owner_id",
+        "groups",
+        "more_available",
+        "probability_qualified"
+      ]
+    },
+    "study_effect_tracking_request_status": {
+      "title": "StudyEffectTrackingRequestStatus",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": { "type": "string", "const": "study-effect-tracking-request-status.v1" },
+        "request_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "owner_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "study_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "revision_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "source_run_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "artifact_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "state": { "type": "string", "enum": ["accepted", "running", "retrying", "completed", "failed"] },
+        "accepted_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" },
+        "next_attempt_at": { "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }] },
+        "attempts": { "type": "integer", "minimum": 0 },
+        "error_code": { "anyOf": [{ "type": "string", "minLength": 1, "maxLength": 128 }, { "type": "null" }] },
+        "final_receipt": { "anyOf": [{ "$ref": "#/$defs/study_effect_tracking_receipt" }, { "type": "null" }] },
+        "can_retry": { "type": "boolean" }
+      },
+      "required": ["schema_version", "request_id", "owner_id", "study_id", "revision_id", "source_run_id", "artifact_id", "state", "accepted_at", "updated_at", "next_attempt_at", "attempts", "error_code", "final_receipt", "can_retry"]
+    }
+  }
+}

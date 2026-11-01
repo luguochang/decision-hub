@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.local/contracts/research_market.schema.json",
+  "title": "ResearchMarketContracts",
+  "$defs": {
+    "research_market_scope": {
+      "title": "ResearchMarketScope",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "scope_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "market": {
+          "type": "string",
+          "minLength": 1
+        },
+        "instrument": {
+          "type": "string",
+          "minLength": 1
+        },
+        "instrument_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "venue": {
+          "type": "string",
+          "minLength": 1
+        },
+        "quote_currency": {
+          "type": "string",
+          "minLength": 1
+        },
+        "price_unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_timezone": {
+          "type": "string",
+          "minLength": 1
+        },
+        "calendar_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "domain_pack_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "research_enabled": {
+          "type": "boolean"
+        },
+        "outcome_enabled": {
+          "type": "boolean"
+        },
+        "supported_horizons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "blocking_reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "scope_id",
+        "label",
+        "market",
+        "instrument",
+        "instrument_kind",
+        "venue",
+        "quote_currency",
+        "price_unit",
+        "source_timezone",
+        "calendar_ref",
+        "domain_pack_ref",
+        "research_enabled",
+        "outcome_enabled",
+        "supported_horizons",
+        "blocking_reasons"
+      ]
+    },
+    "research_market_catalog": {
+      "title": "ResearchMarketCatalog",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "registry_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/research_market_scope"
+          }
+        }
+      },
+      "required": [
+        "registry_version",
+        "items"
+      ]
+    }
+  }
+}

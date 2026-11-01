@@ -1,4 +1,4 @@
-schema_version: crypto-macro-evidence-policy.v2
+schema_version: crypto-macro-evidence-policy.v3
 pack_id: crypto_macro.v1
 event_classes:
   - central_bank_speech
@@ -6,6 +6,27 @@ event_classes:
   - inflation_release
   - labor_release
   - geopolitical_shock
+  - crypto_market_snapshot
+# Rates, USD and listed cross-assets are closed during many weekend geopolitical
+# shocks. They remain requested as useful confirmation, but cannot block a
+# decision when no event-time market exists. The always-open BTC spot and
+# derivatives windows remain hard requirements for this event family.
+event_requirement_overrides:
+  geopolitical_shock:
+    expectation_pricing: soft
+    macro_transmission: soft
+  # A current market snapshot has no policy event or t-5m/t+1m event window.
+  # The daily direction view may be formed from spot, daily history and the
+  # market-regime rule.  Derivatives remain an execution-level requirement:
+  # their absence must block leveraged/entry authorization without erasing
+  # the daily direction view.  The query layer projects that separate gate.
+  crypto_market_snapshot:
+    event_identity: soft
+    policy_or_data_delta: soft
+    expectation_pricing: soft
+    macro_transmission: soft
+    derivatives_crowding: soft
+    market_regime_context: hard
 requirements:
   - requirement_id: event.identity
     canonical_requirement_id: event_identity
@@ -68,7 +89,10 @@ requirements:
     accepted_metric_families: [macro.policy_expectation]
     required_metric_families: [macro.policy_expectation]
     required_fields: [level, delta]
-    required_event_offsets: [t-5m, t+1m]
+    # Event-outcome contracts commonly close before the release. Compare the
+    # final tradable pre-event probability with a labeled prior baseline instead
+    # of fabricating a post-release quote after the contract has closed.
+    required_event_offsets: [baseline, t-5m]
     unit_policy: field_map.v1
     field_units: {level: [probability, percent, bps, yield_percent], delta: [percentage_point, bps]}
     minimum_venues: 1
@@ -200,3 +224,118 @@ requirements:
     minimum_independence_groups: 1
     allowed_delay_classes: [realtime, delayed]
     semantic_policy_ref: crypto_macro.fact_semantics.v1#counter_thesis
+  - requirement_id: market.history
+    canonical_requirement_id: market_regime_context
+    description: Build a reproducible BTC daily trend baseline from at least 60 completed candles for the next seven natural days.
+    importance: soft
+    minimum_fact: false
+    source_priority: [exchange]
+    allowed_fallbacks: []
+    preferred_capabilities: [data.historical]
+    freshness_seconds: 86400
+    minimum_independent_sources: 1
+    authority_floor: exchange
+    confidence_cap: 0.75
+    accepted_metric_families: [crypto.spot.history]
+    required_metric_families: [crypto.spot.history]
+    required_fields: [period_close, sma_20, sma_60, return_20_pct, realized_vol_20_pct, volume_ratio_20, rolling_high_20, rolling_low_20, row_count]
+    required_event_offsets: []
+    unit_policy: field_map.v1
+    field_units: {period_close: [usdt], sma_20: [usdt], sma_60: [usdt], return_20_pct: [percent], realized_vol_20_pct: [percent], volume_ratio_20: [ratio], rolling_high_20: [usdt], rolling_low_20: [usdt], row_count: [count]}
+    minimum_venues: 1
+    venue_required: true
+    minimum_independence_groups: 1
+    allowed_delay_classes: [historical]
+    semantic_policy_ref: crypto_macro.fact_semantics.v1#market_regime_context
+  - requirement_id: market.narrative
+    canonical_requirement_id: market_narrative
+    description: Find one current approved macro or market-sentiment source that could explain or falsify the BTC market move, then fetch the exact source before using it as context.
+    importance: soft
+    minimum_fact: false
+    source_priority: [official, audited_aggregator, verified_web]
+    allowed_fallbacks: [web.fetch]
+    preferred_capabilities: [web.search]
+    freshness_seconds: 86400
+    minimum_independent_sources: 1
+    authority_floor: verified_web
+    confidence_cap: 0.65
+    accepted_metric_families: []
+    required_metric_families: []
+    required_fields: []
+    required_event_offsets: []
+    unit_policy: null
+    field_units: {}
+    minimum_venues: 1
+    venue_required: false
+    minimum_independence_groups: 1
+    allowed_delay_classes: []
+    semantic_policy_ref: null
+  - requirement_id: usd.reserves
+    canonical_requirement_id: usd_reserve_balances
+    description: Bank reserve balance weekly average ending Wednesday; WRESBAL is one liquidity component, not total USD liquidity.
+    importance: soft
+    minimum_fact: false
+    source_priority: [official]
+    allowed_fallbacks: []
+    preferred_capabilities: [official.macro]
+    freshness_seconds: 1209600
+    minimum_independent_sources: 1
+    authority_floor: official
+    confidence_cap: 0.65
+    accepted_metric_families: [macro.reserve_balances]
+    required_metric_families: [macro.reserve_balances]
+    required_fields: [level]
+    required_event_offsets: []
+    unit_policy: field_map.v1
+    field_units: {level: [million_usd]}
+    minimum_venues: 1
+    venue_required: false
+    minimum_independence_groups: 1
+    allowed_delay_classes: [delayed]
+    semantic_policy_ref: crypto_macro.fact_semantics.v1#usd_reserve_balances
+  - requirement_id: rates.real_10y
+    canonical_requirement_id: real_yield_10y
+    description: Latest 10-year inflation-indexed Treasury real yield (DFII10); never nominal DGS10/TNX.
+    importance: soft
+    minimum_fact: false
+    source_priority: [official]
+    allowed_fallbacks: []
+    preferred_capabilities: [official.macro]
+    freshness_seconds: 604800
+    minimum_independent_sources: 1
+    authority_floor: official
+    confidence_cap: 0.65
+    accepted_metric_families: [macro.real_yield]
+    required_metric_families: [macro.real_yield]
+    required_fields: [level]
+    required_event_offsets: []
+    unit_policy: field_map.v1
+    field_units: {level: [yield_percent]}
+    minimum_venues: 1
+    venue_required: false
+    minimum_independence_groups: 1
+    allowed_delay_classes: [delayed]
+    semantic_policy_ref: crypto_macro.fact_semantics.v1#real_yield_10y
+  - requirement_id: inflation.compensation_10y
+    canonical_requirement_id: inflation_compensation_10y
+    description: Latest 10-year market breakeven inflation compensation (T10YIE), not pure expected inflation or policy pricing.
+    importance: soft
+    minimum_fact: false
+    source_priority: [official]
+    allowed_fallbacks: []
+    preferred_capabilities: [official.macro]
+    freshness_seconds: 604800
+    minimum_independent_sources: 1
+    authority_floor: official
+    confidence_cap: 0.65
+    accepted_metric_families: [macro.inflation_compensation]
+    required_metric_families: [macro.inflation_compensation]
+    required_fields: [level]
+    required_event_offsets: []
+    unit_policy: field_map.v1
+    field_units: {level: [percent]}
+    minimum_venues: 1
+    venue_required: false
+    minimum_independence_groups: 1
+    allowed_delay_classes: [delayed]
+    semantic_policy_ref: crypto_macro.fact_semantics.v1#inflation_compensation_10y

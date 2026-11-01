@@ -1,0 +1,48 @@
+schema_version: domain-pack-manifest.v1
+pack_id: crypto_macro
+version: 1.2.0
+product_extension_ref: decision.v1
+doctrine_ref: doctrine/causal-chain.md
+evidence_policy_ref: evidence/source_manifest.yaml
+gate_policy_ref: gates/prepared.yaml
+evaluation_policy_ref: evaluations/prepared.yaml
+role_profile_refs:
+  - profiles/manager.yaml
+  - profiles/counter-thesis.yaml
+  - profiles/data-quality.yaml
+capability_refs:
+  - web.search
+  - web.search.tavily
+  - web.fetch
+  - browser.readback
+  - document.readback
+  - data.historical
+  - official.macro
+  - spot_market_facts
+  - market.crypto_derivatives
+  - market.crypto_crowding
+  - market.cross_asset
+  - macro.cross_asset_intraday
+  - macro.expectation_pricing
+  - replay.research
+horizons: [30m, 24h, 72h]
+execution_budget:
+  schema_version: research-execution-budget.v2
+  closing_reserve_seconds: 900
+  # Use the contract ceiling for evidence/tool fan-out. The wall-clock and
+  # spend values remain explicit so a long research run is observable rather
+  # than silently cut off by an arbitrary one-round default.
+  max_evidence_rounds: 10
+  max_tool_calls: 100
+  max_subagents: 32
+  # BTC/ETH daily spot uses this prepared pack; general/event work stays on 1.1.0.
+  # New Tasks freeze this 60-minute whole-research limit and the explicit 15-minute
+  # finalization reserve. Normal22 used about 21 minutes before its first Provider
+  # input; the old 30-minute total left no legal acquisition window at that point.
+  # Finish as soon as sufficient, never idle to exhaust the budget. Per-call limits,
+  # evidence/cost/permission gates and all previously frozen Tasks remain unchanged.
+  total_deadline_seconds: 3600
+  per_tool_timeout_seconds: 120
+  per_model_step_timeout_seconds: 600
+  max_structured_repairs: 3
+  max_estimated_cost_usd: 10.0

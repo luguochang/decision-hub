@@ -171,3 +171,83 @@ def test_fact_store_rejects_wrong_evidence_lineage_and_future_receipt(tmp_path: 
             facts=[_fact(received_at=NOW + timedelta(seconds=1))],
             cutoff_at=NOW,
         )
+
+
+def test_fact_store_derives_auditable_open_interest_change_from_two_live_samples(
+    tmp_path: Path,
+) -> None:
+    database = _database(tmp_path)
+    with database.session() as session:
+        first_evidence = session.get(ResearchEvidenceRecord, "evidence-fact")
+        assert first_evidence is not None
+        first_evidence.requirement_id = "derivatives_crowding"
+        first_evidence.observed_at = NOW - timedelta(minutes=2)
+        first_evidence.received_at = NOW - timedelta(minutes=2)
+        session.add(
+            ResearchEvidenceRecord(
+                evidence_id="evidence-fact-2",
+                run_id="run-fact",
+                capability_id="market.crypto_derivatives",
+                requirement_id="derivatives_crowding",
+                kind="market",
+                authority="exchange",
+                source_id="coinex-public",
+                source_url="https://api.coinex.com/v2/futures/ticker",
+                published_at=None,
+                observed_at=NOW,
+                received_at=NOW,
+                content_hash="2" * 64,
+                excerpt="second typed open-interest fact",
+                structured_payload_ref=None,
+                tool_call_id="call-2",
+                research_session_id="session-fact",
+                round=2,
+                quality="accepted",
+                freshness_status="fresh",
+                conflict_group=None,
+                accepted_at=NOW,
+            )
+        )
+    store = ResearchFactStore(database)
+    first = _fact(
+        fact_id="fact-oi-1",
+        requirement_id="derivatives_crowding",
+        metric_family="crypto.derivatives",
+        field="open_interest",
+        venue="coinex",
+        value="100",
+        unit="btc",
+        observed_at=NOW - timedelta(minutes=2),
+        received_at=NOW - timedelta(minutes=2),
+    )
+    second = first.model_copy(
+        update={
+            "fact_id": "fact-oi-2",
+            "evidence_id": "evidence-fact-2",
+            "value": "110",
+            "observed_at": NOW,
+            "received_at": NOW,
+            "payload_hash": "3" * 64,
+        }
+    )
+
+    assert [item.field for item in store.accept_facts(
+        run_id="run-fact",
+        capability_id="market.crypto_derivatives",
+        facts=[first],
+        cutoff_at=NOW,
+    )] == ["open_interest"]
+    accepted = store.accept_facts(
+        run_id="run-fact",
+        capability_id="market.crypto_derivatives",
+        facts=[second],
+        cutoff_at=NOW,
+    )
+
+    assert [item.field for item in accepted] == ["open_interest", "open_interest_delta"]
+    delta = accepted[1]
+    assert delta.value == "10.0"
+    assert delta.unit == "percent"
+    assert delta.window_start_at == NOW - timedelta(minutes=2)
+    assert delta.window_end_at == NOW
+    assert delta.attributes["baseline_evidence_id"] == "evidence-fact"

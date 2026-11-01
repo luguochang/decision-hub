@@ -1,0 +1,141 @@
+{
+  "schema_version": "research-rubric-policy.v2",
+  "rubric_id": "crypto_macro.prepared.rubric",
+  "rubric_version": "2.0.0",
+  "checks": [
+    {
+      "rule_id": "causal-chain-structure",
+      "rule_version": "1.0.0",
+      "category": "decision_quality",
+      "phase": "finalization",
+      "applies_to": [
+        "event",
+        "current_snapshot",
+        "historical_review"
+      ],
+      "blocking_for": [],
+      "params": {
+        "input_basis": "causal_links_and_accepted_refs"
+      }
+    },
+    {
+      "rule_id": "causal-quality-review",
+      "rule_version": "1.0.0",
+      "category": "decision_quality",
+      "phase": "finalization",
+      "applies_to": [
+        "event",
+        "current_snapshot",
+        "historical_review"
+      ],
+      "blocking_for": [],
+      "params": {
+        "proof_basis": "independent_causal_semantic_receipt"
+      }
+    },
+    {
+      "rule_id": "counter-thesis-quality-review",
+      "rule_version": "1.0.0",
+      "category": "decision_quality",
+      "phase": "finalization",
+      "applies_to": [
+        "event",
+        "current_snapshot",
+        "historical_review"
+      ],
+      "blocking_for": [],
+      "params": {
+        "proof_basis": "independent_counter_semantic_receipt"
+      }
+    },
+    {
+      "rule_id": "horizon-contract",
+      "rule_version": "1.0.0",
+      "category": "decision_quality",
+      "phase": "finalization",
+      "applies_to": [
+        "event",
+        "current_snapshot",
+        "historical_review"
+      ],
+      "blocking_for": [
+        "research_completeness",
+        "research_publication"
+      ],
+      "params": {
+        "reference_basis": "decision_snapshot_or_case_cutoff",
+        "signature_version": "research-horizon-contract.v1"
+      }
+    },
+    {
+      "rule_id": "probability-provenance",
+      "rule_version": "1.0.0",
+      "category": "decision_quality",
+      "phase": "finalization",
+      "applies_to": [
+        "event",
+        "current_snapshot",
+        "historical_review"
+      ],
+      "blocking_for": [
+        "research_completeness",
+        "research_publication"
+      ],
+      "params": {
+        "receipt_basis": "kernel_strategy_calibration",
+        "no_direction_outcome": "no_direction_claim_not_calibration_pass"
+      }
+    },
+    {
+      "rule_id": "kernel-cap",
+      "rule_version": "1.0.0",
+      "category": "decision_quality",
+      "phase": "finalization",
+      "applies_to": [
+        "event",
+        "current_snapshot",
+        "historical_review"
+      ],
+      "blocking_for": [
+        "research_completeness",
+        "research_publication"
+      ],
+      "params": {
+        "maximum_subjective_probability": 0.65
+      }
+    },
+    {
+      "rule_id": "execution-permission",
+      "rule_version": "1.0.0",
+      "category": "execution",
+      "phase": "finalization",
+      "applies_to": [
+        "event",
+        "current_snapshot",
+        "historical_review"
+      ],
+      "blocking_for": [
+        "execution_permission"
+      ],
+      "params": {
+        "permission_basis": "existing_permission_receipts_only"
+      }
+    }
+  ],
+  "prospective_metrics": [
+    "brier_score",
+    "direction_accuracy",
+    "mfe",
+    "mae",
+    "net_return_after_cost"
+  ],
+  "operational_metrics": [
+    "latency_ms",
+    "tool_calls",
+    "subagents",
+    "tokens",
+    "estimated_cost_usd",
+    "recovery_count"
+  ],
+  "promotion_policy": "owner_review_required_replay_not_profitability"
+}

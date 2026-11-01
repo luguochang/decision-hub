@@ -121,6 +121,7 @@ class DshResearchRuntime:
                 run_id=request.run_id,
                 research_session_id=repair_run.session_id,
                 received_at=datetime.now(UTC),
+                request=request,
             )
             if any(item.event_type == "tool_started" for item in repair_traces):
                 raise AgentExecutionError(
@@ -239,6 +240,7 @@ def _traces(
         run_id=request.run_id,
         research_session_id=run.session_id,
         received_at=received_at,
+        request=request,
     )
 
 

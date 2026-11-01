@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import inspect
 import json
 import time
@@ -10,6 +9,10 @@ from datetime import UTC, datetime
 from typing import cast
 
 from packages.contracts_py.decision_hub_contracts.models import CandidateProposal
+from packages.kernel.decision_hub_kernel.application.candidate_execution import (
+    RULES,
+    execution_error,
+)
 from packages.kernel.decision_hub_kernel.ports.runtime import (
     AgentExecutionError,
     AgentRequest,
@@ -18,6 +21,12 @@ from packages.kernel.decision_hub_kernel.ports.runtime import (
     AgentUsage,
 )
 from packages.runtime_adapters.errors import map_runtime_error
+from packages.runtime_adapters.execution_recipe import (
+    assert_recipe,
+    canonical_recipe,
+    recipe_hash,
+    runtime_recipe,
+)
 
 RuntimeCallable = Callable[
     [AgentRequest],
@@ -26,31 +35,47 @@ RuntimeCallable = Callable[
 
 
 class CandidateConfigurationRuntime:
-    """Apply an immutable CandidateProposal to an existing runtime.
-
-    The wrapper changes the actual AgentRequest rather than merely relabelling an
-    unchanged runtime. Provider and harness adapters can therefore consume the same
-    candidate instructions without the evaluation layer knowing their implementation.
-    """
+    """Compile the closed directional rules; proposal prose is display-only metadata."""
 
     def __init__(self, base: AgentRuntime, proposal: CandidateProposal) -> None:
+        if error := execution_error(proposal):
+            raise AgentExecutionError(
+                error, "Candidate has no supported directional execution rules.",
+            )
         self._base = base
-        self.proposal = proposal
-        digest = hashlib.sha256(
-            proposal.model_dump_json().encode("utf-8")
-        ).hexdigest()[:16]
+        self._proposal_json = canonical_recipe(proposal.model_dump(mode="json", exclude_none=True))
+        self._base_recipe_json = canonical_recipe(runtime_recipe(base))
+        self._recipe_json = canonical_recipe({
+            "schema_version": "execution-recipe.v1",
+            "runtime_id": f"candidate-config:{base.runtime_id}",
+            "adapter_version": "candidate-config.v3",
+            "live_attestable": json.loads(self._base_recipe_json)["live_attestable"],
+            "base": json.loads(self._base_recipe_json),
+            "proposal": json.loads(self._proposal_json),
+        })
         self.runtime_id = f"candidate-config:{self._base.runtime_id}"
-        self.runtime_version = f"candidate-config.v1:{digest}"
+        identity = recipe_hash(json.loads(self._recipe_json))[:24]
+        self.runtime_version = f"candidate-config.v3:{identity}"
         self.max_attempts = self._base.max_attempts
         self.cost_budget = self._base.cost_budget
 
+    @property
+    def proposal(self) -> CandidateProposal:
+        return CandidateProposal.model_validate_json(self._proposal_json)
+
+    def execution_recipe(self) -> dict:
+        assert_recipe(self._base, json.loads(self._base_recipe_json))
+        if (self.max_attempts != self._base.max_attempts
+                or self.cost_budget != self._base.cost_budget):
+            raise AgentExecutionError(
+                "runtime_recipe_changed", "candidate execution limits changed",
+            )
+        return json.loads(self._recipe_json)
+
     async def execute(self, request: AgentRequest) -> AgentResult:
-        instructions = (
-            f"Candidate type: {self.proposal.candidate_type}",
-            f"Candidate version: {self.proposal.version}",
-            f"Candidate summary: {self.proposal.summary}",
-            *(f"Candidate change: {item}" for item in self.proposal.changes),
-        )
+        self.execution_recipe()
+        proposal = self.proposal
+        instructions = tuple(RULES[rule][1] for rule in proposal.execution_rules or ())
         result = await self._base.execute(
             AgentRequest(
                 role=request.role,

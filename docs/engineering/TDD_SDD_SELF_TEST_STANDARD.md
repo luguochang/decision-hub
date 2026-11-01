@@ -1,5 +1,7 @@
 # Decision Hub TDD / SDD 与自测规范
 
+> 2026-10-17适用补充：以下R0例子及30m/spot口径保留为旧合同；当前产品与新版本按[00](../design/decision-product-control-2026-10-17/00_MASTER_CONTROL.md)、[02](../design/decision-product-control-2026-10-17/02_DECISION_METHOD_AND_EVALUATION.md)。验证层次/范围/停止规则以[12 §3](../design/decision-product-control-2026-10-17/12_ENGINEERING_READINESS_AND_DELIVERY.md)和05直接门为准；必要受影响回归与正式候选检查保留，相同有效证据不重复全量执行，低影响文档修改不写镜像测试。当前实施暂停。
+
 版本：`TDD-SDD-2026-08-26.v1`
 适用范围：R0 文本输入到决策、预测、结果评估的纵向链；未来来源、领域 Pack、Runtime 和前端模块也必须遵守本规范。
 

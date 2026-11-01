@@ -12,10 +12,11 @@ from packages.contracts_py.decision_hub_contracts.models import (
     ExperimentManifest,
     ExperimentResultView,
 )
+from packages.evals.fixture_audit import sample_content_key
 from packages.kernel.decision_hub_kernel.ports.runtime import AgentRuntime
-from tools.replay.run_fixture import ReplayFixture, run_fixture
+from tools.replay.run_fixture import ReplayFixture, run_fixture, validate_replay_labels
 
-SCORER_VERSION = "evaluation.aggregate.v1"
+SCORER_VERSION = "evaluation.aggregate.v3"
 
 
 class EvaluationRun:
@@ -111,12 +112,17 @@ class EvaluationRunner:
         if tuple(dataset.fixture_refs) != tuple(str(path) for path in fixture_paths):
             raise ValueError("evaluation_leakage")
         family_counts = Counter[str]()
+        sample_keys: set[str] = set()
         for path in fixture_paths:
             expected_hash = dataset.fixture_hashes.get(str(path))
             actual_hash = hashlib.sha256(path.read_bytes()).hexdigest()
             if expected_hash != actual_hash:
                 raise ValueError("evaluation_leakage")
-            fixture = ReplayFixture.model_validate_json(path.read_text())
+            fixture = ReplayFixture.model_validate_json(path.read_text(encoding="utf-8"))
+            sample_key = sample_content_key(fixture)
+            if sample_key in sample_keys:
+                raise ValueError("evaluation_duplicate_sample")
+            sample_keys.add(sample_key)
             if fixture.split != dataset.split:
                 raise ValueError("evaluation_leakage")
             received_at = fixture.received_at
@@ -136,6 +142,7 @@ class EvaluationRunner:
                 for outcome in fixture.outcomes
             ):
                 raise ValueError("evaluation_leakage")
+            validate_replay_labels(fixture)
             family_counts[fixture.observation.event_hint or "unknown"] += 1
         if dict(family_counts) != dataset.event_family_counts:
             raise ValueError("evaluation_leakage")
@@ -151,7 +158,8 @@ class EvaluationRunner:
         evaluations = [
             value for report in reports if isinstance(value := report.get("evaluation_count"), int)
         ]
-        sample_count = sum(evaluations)
+        # Horizons from one observation are correlated, not independent samples.
+        sample_count = sum(value > 0 for value in evaluations)
         briers = [
             float(value)
             for report in reports
@@ -175,7 +183,8 @@ class EvaluationRunner:
         for report in reports:
             event_family = str(report.get("event_family") or "unknown")
             raw_count = report.get("evaluation_count")
-            family_counts[event_family] += max(1, raw_count if isinstance(raw_count, int) else 0)
+            if isinstance(raw_count, int) and raw_count > 0:
+                family_counts[event_family] += 1
             raw_failures = report.get("failure_counts")
             if isinstance(raw_failures, dict):
                 failures.update({str(key): int(value) for key, value in raw_failures.items()})

@@ -24,7 +24,10 @@ from packages.contracts_py.decision_hub_contracts.models import (
     ExperimentManifest,
     PromotionReviewRequest,
 )
+from packages.evals.fixture_audit import validate_fixture_splits
 from packages.evals.runner import EvaluationRunner
+from packages.evals.stage_receipts import EvaluationStageReceipts
+from packages.kernel.decision_hub_kernel.application.candidate_execution import require_executable
 from packages.kernel.decision_hub_kernel.application.evolution import (
     EvolutionAssetService,
     dataset_manifest_hash,
@@ -35,15 +38,18 @@ from packages.kernel.decision_hub_kernel.application.live_observation import (
     EvolutionJobService,
     EvolutionTriggerScanner,
 )
+from packages.kernel.decision_hub_kernel.application.planning_decisions import planning_decision
 from packages.kernel.decision_hub_kernel.ports.runtime import (
     AgentExecutionError,
     AgentRuntime,
 )
+from packages.orchestration.langgraph.evolution_diagnostics import AuditedPlanningRuntime
 from packages.orchestration.langgraph.graphs.supervisor_graph import (
     SupervisorCandidateState,
     build_supervisor_candidate_graph,
 )
 from packages.runtime_adapters.candidate_runtime import CandidateConfigurationRuntime
+from packages.runtime_adapters.langgraph_agent.evolution import PlanningDecision
 from tools.replay.run_fixture import ReplayFixture
 
 Stage = Literal["replay", "holdout", "shadow"]
@@ -86,7 +92,14 @@ class SupervisorEvolutionPlanner:
         deadline_seconds: int = 180,
         checkpointer: Checkpointer = None,
         clock: Callable[[], datetime] = lambda: datetime.now(UTC),
+        database=None,
     ) -> None:
+        self.runtime, self.database = runtime, database
+        self.available_capabilities, self.required_capabilities = (
+            available_capabilities,
+            required_capabilities,
+        )
+        self.checkpointer = checkpointer
         self.graph = build_supervisor_candidate_graph(
             runtime,
             available_capabilities=available_capabilities,
@@ -115,8 +128,35 @@ class SupervisorEvolutionPlanner:
         config: RunnableConfig | None = None
         if self.checkpointed:
             config = {"configurable": {"thread_id": f"evolution:{context.job_id}:plan"}}
-        result = await self.graph.ainvoke(state, config=config)
-        raw = result.get("candidate")
+        graph = self.graph
+        if self.database is not None:
+            graph = build_supervisor_candidate_graph(
+                AuditedPlanningRuntime(self.database, self.runtime, context.job_id),
+                available_capabilities=self.available_capabilities,
+                required_capabilities=self.required_capabilities,
+                checkpointer=self.checkpointer,
+            )
+        saved = planning_decision(self.database, context.job_id) if self.database else None
+        if saved is not None:
+            raw = saved
+        else:
+            result = await graph.ainvoke(state, config=config)
+            raw = result.get("candidate")
+        if isinstance(raw, dict) and "outcome" in raw:
+            decision = PlanningDecision.model_validate(raw)
+            if not set(decision.evidence_refs).issubset(context.evidence_refs):
+                raise ValueError("candidate_evidence_out_of_scope")
+            if (decision.outcome == "candidate") != (decision.candidate is not None):
+                raise ValueError("planning_decision_inconsistent")
+            if decision.candidate:
+                require_executable(decision.candidate)
+                if not set(decision.candidate.evidence_refs).issubset(context.evidence_refs):
+                    raise ValueError("candidate_evidence_out_of_scope")
+            if self.database:
+                planning_decision(self.database, context.job_id, decision.model_dump(mode="json"))
+            if decision.candidate is None:
+                return None
+            raw = decision.candidate.model_dump(mode="json")
         if raw is None or (isinstance(raw, dict) and raw.get("no_candidate") is True):
             return None
         try:
@@ -135,6 +175,7 @@ class SupervisorEvolutionPlanner:
             proposal = proposal.model_copy(
                 update={"parent_version": context.active_candidate_version}
             )
+        require_executable(proposal)
         return proposal
 
 
@@ -144,28 +185,29 @@ class CandidateArtifactStore:
     def __init__(self, root: Path) -> None:
         self.root = root
 
-    def persist(
-        self, job: EvolutionJobView, proposal: CandidateProposal
-    ) -> tuple[str, str, str]:
+    def persist(self, job: EvolutionJobView, proposal: CandidateProposal) -> tuple[str, str, str]:
         payload = {
             "schema_version": "candidate-artifact.v1",
             "job_id": job.job_id,
             "domain_pack_ref": job.domain_pack_ref,
-            "proposal": proposal.model_dump(mode="json"),
+            "proposal": proposal.model_dump(mode="json", exclude_none=True),
         }
         body = json.dumps(payload, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
-        content_hash = hashlib.sha256(body.encode()).hexdigest()
+        encoded = body.encode("utf-8")
+        content_hash = hashlib.sha256(encoded).hexdigest()
         identity = hashlib.sha256(f"{job.job_id}:{content_hash}".encode()).hexdigest()
         candidate_id = f"candidate_{identity[:24]}"
         directory = self.root / "candidates"
         directory.mkdir(parents=True, exist_ok=True)
         path = directory / f"{candidate_id}.json"
         if path.exists():
-            if path.read_text() != body:
+            if path.read_bytes() != encoded:
                 raise ValueError("candidate_artifact_conflict")
         else:
             temporary = directory / f".{candidate_id}.{os.getpid()}.tmp"
-            temporary.write_text(body)
+            # Hash and persist the exact same bytes. Text-mode writes translate
+            # newlines on Windows and previously invalidated the stored hash.
+            temporary.write_bytes(encoded)
             os.replace(temporary, path)
         return candidate_id, content_hash, str(path)
 
@@ -173,7 +215,7 @@ class CandidateArtifactStore:
         path = self.root / "candidates" / f"{candidate_id}.json"
         if not path.is_file():
             raise ValueError("candidate_artifact_not_found")
-        payload = json.loads(path.read_text())
+        payload = json.loads(path.read_bytes())
         if (
             payload.get("schema_version") != "candidate-artifact.v1"
             or payload.get("job_id") != job.job_id
@@ -183,6 +225,8 @@ class CandidateArtifactStore:
         return CandidateProposal.model_validate(payload.get("proposal"))
 
     def load_candidate(self, candidate: CandidateVersion) -> CandidateProposal:
+        if candidate.execution_scope not in (None, "directional_synthesis"):
+            raise ValueError("candidate_execution_scope_mismatch")
         """Load an already registered candidate for use as a future active baseline."""
         if candidate.content_ref is None:
             raise ValueError("candidate_artifact_not_found")
@@ -199,6 +243,8 @@ class CandidateArtifactStore:
         proposal = CandidateProposal.model_validate(payload.get("proposal"))
         if proposal.version != candidate.version:
             raise ValueError("candidate_artifact_version_mismatch")
+        if proposal.execution_scope != candidate.execution_scope:
+            raise ValueError("candidate_artifact_scope_mismatch")
         return proposal
 
 
@@ -230,6 +276,9 @@ class FixtureEvaluationPlanFactory:
         self.deadline_seconds = deadline_seconds
         self.max_cost_usd = max_cost_usd
 
+    def validate(self) -> None:
+        validate_fixture_splits(self.fixtures)
+
     def build(
         self,
         job: EvolutionJobView,
@@ -238,14 +287,17 @@ class FixtureEvaluationPlanFactory:
         baseline_version: str,
         proposal: CandidateProposal,
     ) -> Sequence[EvolutionStagePlan]:
+        if candidate.execution_scope not in (None, "directional_synthesis"):
+            raise ValueError("candidate_execution_scope_mismatch")
+        if candidate.execution_scope != proposal.execution_scope:
+            raise ValueError("candidate_artifact_scope_mismatch")
+        self.validate()
         if set(self.fixtures) != {"replay", "holdout", "shadow"}:
             raise ValueError("evaluation_stage_coverage_missing")
         baseline_runtime = self._baseline_runtime(baseline_id, baseline_version)
         if candidate.parent_version != baseline_version:
             raise ValueError("candidate_parent_version_mismatch")
-        candidate_runtime = CandidateConfigurationRuntime(
-            self.candidate_base_runtime, proposal
-        )
+        candidate_runtime = CandidateConfigurationRuntime(self.candidate_base_runtime, proposal)
         if (
             candidate_runtime.runtime_id == baseline_runtime.runtime_id
             and candidate_runtime.runtime_version == baseline_runtime.runtime_version
@@ -284,12 +336,12 @@ class FixtureEvaluationPlanFactory:
         families = Counter(item.observation.event_hint or "unknown" for item in fixtures)
         start = min(item.received_at for item in fixtures) - timedelta(seconds=1)
         end = max(item.received_at for item in fixtures) + timedelta(seconds=1)
-        seed = json.dumps(
-            {"stage": stage, "hashes": hashes}, sort_keys=True, separators=(",", ":")
-        )
+        seed = json.dumps({"stage": stage, "hashes": hashes}, sort_keys=True, separators=(",", ":"))
         suffix = hashlib.sha256(seed.encode()).hexdigest()[:20]
         dataset_id = f"dataset_{stage}_{suffix}"
-        source_mode = "prospective" if stage == "shadow" else "fixture"
+        # A file placed in the shadow directory is still historical fixture input.
+        # Only a separate live collection path can attest a prospective window.
+        source_mode = "fixture"
         cutoff_rule = "published_at <= observed_at <= received_at"
         dataset = EvaluationDatasetManifest(
             dataset_id=dataset_id,
@@ -317,11 +369,10 @@ class FixtureEvaluationPlanFactory:
             event_family_counts=dict(families),
             created_at=job.created_at,
         )
-        experiment_identity = hashlib.sha256(
-            f"{job.job_id}:{stage}:{suffix}".encode()
-        ).hexdigest()
+        experiment_identity = hashlib.sha256(f"{job.job_id}:{stage}:{suffix}".encode()).hexdigest()
         experiment_id = f"experiment_{experiment_identity[:24]}"
         experiment = ExperimentManifest(
+            execution_scope="directional_synthesis",
             experiment_id=experiment_id,
             dataset_id=dataset_id,
             baseline_ref=baseline_id,
@@ -353,9 +404,7 @@ class FixtureEvaluationPlanFactory:
             },
         )
 
-    def _baseline_runtime(
-        self, baseline_id: str, baseline_version: str
-    ) -> AgentRuntime:
+    def _baseline_runtime(self, baseline_id: str, baseline_version: str) -> AgentRuntime:
         if self.assets is None:
             if baseline_version != self.baseline_version:
                 raise ValueError("baseline_version_mismatch")
@@ -363,6 +412,8 @@ class FixtureEvaluationPlanFactory:
         baseline = self.assets.get_candidate(baseline_id)
         if baseline is None:
             raise ValueError("evolution_baseline_not_found")
+        if baseline.execution_scope not in (None, "directional_synthesis"):
+            raise ValueError("baseline_execution_scope_mismatch")
         if baseline.version != baseline_version:
             raise ValueError("baseline_version_mismatch")
         if baseline.content_ref is None:
@@ -407,8 +458,13 @@ class EvolutionJobExecutor:
         self.assets = assets
         self.evaluation_plans = evaluation_plans
         self.evaluation_runner = evaluation_runner
+        self.stage_receipts = EvaluationStageReceipts(assets.database, clock=clock)
         self.experiences = experiences
         self.clock = clock
+
+    async def _call_sync(self, function, *args, **kwargs):
+        """Default preserves legacy execution; opt-in workers can offload I/O."""
+        return function(*args, **kwargs)
 
     async def tick(
         self,
@@ -417,14 +473,24 @@ class EvolutionJobExecutor:
         lease_seconds: int = 300,
         retry_backoff_seconds: int = 60,
     ) -> EvolutionJobView | None:
-        self.scanner.scan()
-        job = self.jobs.claim(worker_id, lease_seconds=lease_seconds)
+        await self._call_sync(self.scanner.scan)
+        if isinstance(self.evaluation_plans, FixtureEvaluationPlanFactory):
+            try:
+                await self._call_sync(self.evaluation_plans.validate)
+            except ValueError:
+                pass  # Existing waiting jobs keep their candidate and do not consume attempts.
+            else:
+                await self._call_sync(
+                    self.jobs.resume_waiting_inputs, self.scanner.policy.domain_pack_ref
+                )
+        job = await self._call_sync(self.jobs.claim, worker_id, lease_seconds=lease_seconds)
         if job is None:
             return None
         try:
             return await self._execute(job, worker_id, lease_seconds)
         except AgentExecutionError as exc:
-            return self.jobs.fail(
+            return await self._call_sync(
+                self.jobs.fail,
                 job.job_id,
                 worker_id,
                 error_code=exc.error_code,
@@ -433,7 +499,8 @@ class EvolutionJobExecutor:
             )
         except (PermissionError, ValidationError, ValueError) as exc:
             code = str(exc) or "evolution_job_invalid"
-            return self.jobs.fail(
+            return await self._call_sync(
+                self.jobs.fail,
                 job.job_id,
                 worker_id,
                 error_code=code,
@@ -441,7 +508,8 @@ class EvolutionJobExecutor:
                 backoff_seconds=retry_backoff_seconds,
             )
         except Exception:
-            return self.jobs.fail(
+            return await self._call_sync(
+                self.jobs.fail,
                 job.job_id,
                 worker_id,
                 error_code="evolution_job_failed",
@@ -453,6 +521,8 @@ class EvolutionJobExecutor:
         self, job: EvolutionJobView, worker_id: str, lease_seconds: int
     ) -> EvolutionJobView:
         planning_context = self.context.build(job)
+        if job.candidate_id is None and not planning_context.evidence_refs:
+            return self.jobs.advance(job.job_id, worker_id, stage="plan", status="completed")
         if job.candidate_id is not None:
             candidate = self.assets.get_candidate(job.candidate_id)
             if candidate is None:
@@ -472,12 +542,15 @@ class EvolutionJobExecutor:
                 lease_seconds,
             )
             if proposal is None:
-                return self.jobs.advance(
-                    job.job_id, worker_id, stage="plan", status="completed"
-                )
+                return self.jobs.advance(job.job_id, worker_id, stage="plan", status="completed")
+            if proposal.execution_scope not in (None, "directional_synthesis"):
+                raise ValueError("candidate_execution_scope_mismatch")
+            proposal = proposal.model_copy(update={"execution_scope": "directional_synthesis"})
+            require_executable(proposal)
             candidate_id, content_hash, content_ref = self.artifacts.persist(job, proposal)
             candidate = self.assets.register_candidate(
                 CandidateVersion(
+                    execution_scope=proposal.execution_scope,
                     candidate_id=candidate_id,
                     candidate_type=proposal.candidate_type,
                     content_hash=content_hash,
@@ -495,6 +568,7 @@ class EvolutionJobExecutor:
             stage="candidate",
             candidate_id=candidate.candidate_id,
         )
+        require_executable(proposal)
         baseline_id = planning_context.active_candidate_id
         baseline_version = planning_context.active_candidate_version
         if baseline_id is None or baseline_version is None:
@@ -503,6 +577,19 @@ class EvolutionJobExecutor:
             raise ValueError("candidate_parent_version_mismatch")
         if self.experiences is not None:
             self.experiences.create_from_job(job, proposal)
+
+        if isinstance(self.evaluation_plans, FixtureEvaluationPlanFactory):
+            try:
+                self.evaluation_plans.validate()
+            except ValueError as exc:
+                return self.jobs.advance(
+                    job.job_id,
+                    worker_id,
+                    stage="candidate",
+                    status="waiting_inputs",
+                    candidate_id=candidate.candidate_id,
+                    waiting_reason=str(exc),
+                )
 
         experiment_refs: list[str] = []
         result_refs: list[str] = []
@@ -513,6 +600,17 @@ class EvolutionJobExecutor:
             if stage not in {"replay", "holdout", "shadow"}:
                 raise ValueError("evaluation_stage_invalid")
             typed_stage = cast(Stage, stage)
+            if stage == "shadow" and plan.dataset.source_mode != "prospective":
+                return self.jobs.advance(
+                    job.job_id,
+                    worker_id,
+                    stage="shadow",
+                    status="waiting_inputs",
+                    candidate_id=candidate.candidate_id,
+                    experiment_refs=experiment_refs,
+                    result_refs=result_refs,
+                    waiting_reason="prospective_evaluation_required",
+                )
             self.jobs.advance(
                 job.job_id,
                 worker_id,
@@ -522,6 +620,14 @@ class EvolutionJobExecutor:
             )
             self.assets.register_dataset(plan.dataset)
             experiment = self.assets.register_experiment(plan.experiment)
+            completed = self.stage_receipts.completed(plan)
+            if completed is not None:
+                result_refs.extend(
+                    r.result_id for r in completed if r.candidate_id == candidate.candidate_id
+                )
+                experiment_refs.append(experiment.experiment_id)
+                self.assets.set_experiment_status(experiment.experiment_id, "completed")
+                continue
             self.assets.set_experiment_status(experiment.experiment_id, "running")
             try:
                 evaluation = await self._with_lease(
@@ -539,12 +645,20 @@ class EvolutionJobExecutor:
             except Exception:
                 self.assets.set_experiment_status(experiment.experiment_id, "failed")
                 raise
+            self.stage_receipts.complete(plan, evaluation.results)
             for result in evaluation.results:
                 stored = self.assets.record_result(result)
                 if stored.candidate_id == candidate.candidate_id:
                     result_refs.append(stored.result_id)
             self.assets.set_experiment_status(experiment.experiment_id, "completed")
             experiment_refs.append(experiment.experiment_id)
+            self.jobs.advance(
+                job.job_id,
+                worker_id,
+                stage=typed_stage,
+                experiment_refs=experiment_refs,
+                result_refs=result_refs,
+            )
 
         self.assets.review_promotion(
             job.domain_pack_ref,
@@ -584,14 +698,15 @@ class EvolutionJobExecutor:
 
         operation_task = asyncio.ensure_future(operation)
         renew_task = asyncio.create_task(renew())
-        done, _ = await asyncio.wait(
-            {operation_task, renew_task}, return_when=asyncio.FIRST_COMPLETED
-        )
-        if renew_task in done:
+        try:
+            done, _ = await asyncio.wait(
+                {operation_task, renew_task}, return_when=asyncio.FIRST_COMPLETED
+            )
+            if renew_task in done:
+                await renew_task
+                raise RuntimeError("evolution_lease_renewer_stopped")
+            return await operation_task
+        finally:
             operation_task.cancel()
-            await asyncio.gather(operation_task, return_exceptions=True)
-            await renew_task
-            raise RuntimeError("evolution_lease_renewer_stopped")
-        renew_task.cancel()
-        await asyncio.gather(renew_task, return_exceptions=True)
-        return await operation_task
+            renew_task.cancel()
+            await asyncio.gather(operation_task, renew_task, return_exceptions=True)

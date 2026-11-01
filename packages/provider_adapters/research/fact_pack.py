@@ -1,14 +1,18 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime
 from pathlib import Path
 from typing import Literal, cast
 
 import yaml
 
-from packages.contracts_py.decision_hub_contracts import EvidenceCandidate, EvidenceRequirement
+from packages.contracts_py.decision_hub_contracts import (
+    EvidenceCandidate,
+    EvidenceRequirement,
+    FactEnvelope,
+)
 from packages.kernel.decision_hub_kernel.decision.sufficiency import (
     assess_evidence_sufficiency,
 )
@@ -40,7 +44,7 @@ class FactRequirement:
     venue_required: bool
     minimum_independence_groups: int
     allowed_delay_classes: tuple[str, ...]
-    semantic_policy_ref: str
+    semantic_policy_ref: str | None
 
     def as_contract_requirement(self) -> EvidenceRequirement:
         return EvidenceRequirement(
@@ -85,9 +89,20 @@ class CryptoMacroFactPack:
     network, infer market direction, or relax the Kernel Gate.
     """
 
-    schema_version = "crypto-macro-evidence-policy.v2"
+    schema_version = "crypto-macro-evidence-policy.v3"
 
-    def __init__(self, requirements: Iterable[FactRequirement]) -> None:
+    def __init__(
+        self,
+        requirements: Iterable[FactRequirement],
+        *,
+        event_classes: Iterable[str],
+        event_requirement_overrides: Mapping[str, Mapping[str, str]],
+        instrument: str = "BTC-USDT-SWAP",
+    ) -> None:
+        if instrument not in {"BTC-USDT-SWAP", "BTC-USDT", "ETH-USDT", "ETH-USDT-SWAP"}:
+            raise ValueError("crypto_macro_fact_pack_instrument_not_supported")
+        self.instrument = instrument
+        self.asset = instrument.split("-")[0]
         values = tuple(requirements)
         ids = [item.requirement_id for item in values]
         canonical_ids = [item.canonical_requirement_id for item in values]
@@ -99,18 +114,54 @@ class CryptoMacroFactPack:
         self._all_requirements = {item.canonical_requirement_id: item for item in values}
         self._all_by_id = {item.requirement_id: item for item in values}
         self._by_id = {item.requirement_id: item for item in self.requirements}
+        classes = tuple(event_classes)
+        if not classes or len(classes) != len(set(classes)):
+            raise ValueError("crypto_macro_source_manifest_event_classes_invalid")
+        unknown_families = set(event_requirement_overrides) - set(classes)
+        if unknown_families:
+            raise ValueError("crypto_macro_source_manifest_event_overrides_invalid")
+        normalized_overrides: dict[str, dict[str, Literal["hard", "soft"]]] = {}
+        for event_family, overrides in event_requirement_overrides.items():
+            normalized: dict[str, Literal["hard", "soft"]] = {}
+            for requirement_id, importance in overrides.items():
+                if requirement_id not in self._all_requirements or importance not in {
+                    "hard",
+                    "soft",
+                }:
+                    raise ValueError("crypto_macro_source_manifest_event_overrides_invalid")
+                normalized[requirement_id] = cast(Literal["hard", "soft"], importance)
+            if not normalized:
+                raise ValueError("crypto_macro_source_manifest_event_overrides_invalid")
+            normalized_overrides[event_family] = normalized
+        self.event_classes = classes
+        self._event_requirement_overrides = normalized_overrides
 
     @classmethod
-    def from_pack(cls, pack_root: Path) -> CryptoMacroFactPack:
+    def from_pack(
+        cls, pack_root: Path, *, instrument: str = "BTC-USDT-SWAP"
+    ) -> CryptoMacroFactPack:
         path = pack_root / "evidence" / "source_manifest.yaml"
         try:
             raw = yaml.safe_load(path.read_text(encoding="utf-8"))
         except (OSError, yaml.YAMLError) as exc:
             raise ValueError("crypto_macro_source_manifest_invalid") from exc
+        return cls.from_manifest(raw, instrument=instrument)
+
+    @classmethod
+    def from_manifest(
+        cls, raw: object, *, instrument: str = "BTC-USDT-SWAP"
+    ) -> CryptoMacroFactPack:
+        """Parse the exact saved policy, without rereading a changed file."""
         if not isinstance(raw, Mapping) or raw.get("schema_version") != cls.schema_version:
             raise ValueError("crypto_macro_source_manifest_invalid")
         entries = raw.get("requirements")
-        if not isinstance(entries, list):
+        event_classes = raw.get("event_classes")
+        event_requirement_overrides = raw.get("event_requirement_overrides", {})
+        if (
+            not isinstance(entries, list)
+            or not isinstance(event_classes, list)
+            or not isinstance(event_requirement_overrides, Mapping)
+        ):
             raise ValueError("crypto_macro_source_manifest_invalid")
         parsed: list[FactRequirement] = []
         for item in entries:
@@ -135,11 +186,15 @@ class CryptoMacroFactPack:
                         ),
                         authority_floor=_required_str(item, "authority_floor"),
                         confidence_cap=_required_float(item, "confidence_cap"),
-                        accepted_metric_families=_required_tuple(item, "accepted_metric_families"),
+                        accepted_metric_families=_required_tuple(
+                            item, "accepted_metric_families", allow_empty=True
+                        ),
                         required_metric_families=_required_tuple(
                             item, "required_metric_families", allow_empty=True
                         ),
-                        required_fields=_required_tuple(item, "required_fields"),
+                        required_fields=_required_tuple(
+                            item, "required_fields", allow_empty=True
+                        ),
                         required_event_offsets=_required_tuple(
                             item, "required_event_offsets", allow_empty=True
                         ),
@@ -150,13 +205,34 @@ class CryptoMacroFactPack:
                         minimum_independence_groups=_required_int(
                             item, "minimum_independence_groups"
                         ),
-                        allowed_delay_classes=_required_tuple(item, "allowed_delay_classes"),
-                        semantic_policy_ref=_required_str(item, "semantic_policy_ref"),
+                        allowed_delay_classes=_required_tuple(
+                            item, "allowed_delay_classes", allow_empty=True
+                        ),
+                        semantic_policy_ref=_optional_str(item, "semantic_policy_ref"),
                     )
                 )
             except (TypeError, ValueError) as exc:
                 raise ValueError("crypto_macro_source_manifest_invalid") from exc
-        return cls(parsed)
+        parsed_overrides: dict[str, dict[str, str]] = {}
+        try:
+            for event_family, overrides in event_requirement_overrides.items():
+                if not isinstance(event_family, str) or not event_family.strip():
+                    raise ValueError("event_family")
+                if not isinstance(overrides, Mapping):
+                    raise ValueError("event_requirement_overrides")
+                parsed_overrides[event_family.strip()] = {
+                    _required_mapping_key(requirement_id): _required_importance(importance)
+                    for requirement_id, importance in overrides.items()
+                }
+            parsed_event_classes = _string_tuple(event_classes, "event_classes")
+            return cls(
+                parsed,
+                event_classes=parsed_event_classes,
+                event_requirement_overrides=parsed_overrides,
+                instrument=instrument,
+            )
+        except (TypeError, ValueError) as exc:
+            raise ValueError("crypto_macro_source_manifest_invalid") from exc
 
     def requirement(self, requirement_id: str) -> FactRequirement:
         try:
@@ -174,6 +250,145 @@ class CryptoMacroFactPack:
         """Return the complete policy from the single Pack-owned manifest."""
 
         return tuple(item.as_contract_requirement() for item in self._all_requirements.values())
+
+    def contract_requirements_for_event(
+        self, event_family: str | None
+    ) -> tuple[EvidenceRequirement, ...]:
+        """Apply Pack-owned importance rules for a known event family.
+
+        Unknown or absent families retain the conservative default policy. The
+        override changes only hard/soft importance; source and semantic gates
+        remain identical.
+        """
+
+        policy_family = (
+            "crypto_market_snapshot"
+            if _is_crypto_market_snapshot_family(event_family)
+            else event_family or ""
+        )
+        overrides = self._event_requirement_overrides.get(policy_family, {})
+        projected: list[EvidenceRequirement] = []
+        for item in self._all_requirements.values():
+            if (item.canonical_requirement_id in {
+                "usd_reserve_balances", "real_yield_10y", "inflation_compensation_10y",
+            } and policy_family != "crypto_market_snapshot"):
+                # Fixed current-decision slice; do not invent event-time or vintage obligations.
+                continue
+            if (
+                item.canonical_requirement_id == "market_narrative"
+                and policy_family != "crypto_market_snapshot"
+            ):
+                # The fixed narrative lookup belongs to the latest BTC advice
+                # entry. Other event families already have their own official
+                # discovery plan and must not inherit this extra web route.
+                continue
+            if policy_family == "crypto_market_snapshot" and item.canonical_requirement_id in {
+                "event_identity",
+                "policy_or_data_delta",
+                "expectation_pricing",
+                "counter_thesis",
+            }:
+                # A point-in-time market question has no external policy event to
+                # identify or compare. Counter-thesis is a synthesis obligation,
+                # not a source acquisition target. Keeping these items in the
+                # evidence plan produced irrelevant gaps and wasted tool calls.
+                continue
+            selected = replace(
+                item,
+                importance=overrides.get(item.canonical_requirement_id, item.importance),
+            )
+            if policy_family == "crypto_market_snapshot":
+                if item.canonical_requirement_id == "crypto_spot_confirmation":
+                    selected = replace(
+                        selected,
+                        description=(
+                            f"Observe the current {self.asset} spot price and volume snapshot "
+                            "from at least two independent exchange venues."
+                        ),
+                        required_fields=("price", "volume"),
+                        required_event_offsets=(),
+                        minimum_independent_sources=2,
+                        minimum_venues=2,
+                        minimum_independence_groups=2,
+                    )
+                elif item.canonical_requirement_id == "macro_transmission":
+                    # A current daily-direction request has no event-relative
+                    # t-5m/t+1m anchor.  Require a completed-daily rates/USD
+                    # snapshot and five-session change instead.  This remains
+                    # soft and research-level; an aggregator cannot authorize
+                    # execution or stand in for an official policy release.
+                    selected = replace(
+                        selected,
+                        description=(
+                            "Observe completed-daily US 10Y yield and USD-index "
+                            "levels plus their five-session changes."
+                        ),
+                        freshness_seconds=259200,
+                        minimum_independent_sources=1,
+                        authority_floor="audited_aggregator",
+                        required_fields=("level", "change_5d"),
+                        required_event_offsets=(),
+                        field_units={
+                            "level": ("yield_percent", "index"),
+                            "change_5d": ("bps", "percent"),
+                        },
+                        minimum_independence_groups=2,
+                        allowed_delay_classes=("realtime", "delayed"),
+                    )
+                elif item.canonical_requirement_id == "cross_asset_confirmation":
+                    selected = replace(
+                        selected,
+                        description=(
+                            "Observe completed-daily equity and volatility levels "
+                            "plus their five-session returns."
+                        ),
+                        freshness_seconds=259200,
+                        minimum_independent_sources=1,
+                        authority_floor="audited_aggregator",
+                        required_metric_families=(
+                            "cross_asset.equity",
+                            "cross_asset.volatility",
+                        ),
+                        required_fields=("level", "return_5d"),
+                        required_event_offsets=(),
+                        field_units={
+                            "level": ("price", "index", "spread_bps"),
+                            "return_5d": ("percent",),
+                        },
+                        minimum_independence_groups=2,
+                        allowed_delay_classes=("realtime", "delayed"),
+                    )
+                elif item.canonical_requirement_id == "derivatives_crowding":
+                    selected = replace(
+                        selected,
+                        description=(
+                            "Observe current funding, open interest and its change, "
+                            "basis and crowding across at least two independent "
+                            "exchange venues."
+                        ),
+                        required_fields=(
+                            "funding_rate",
+                            "open_interest",
+                            "open_interest_delta",
+                            "basis",
+                            "crowding_signal",
+                        ),
+                        required_event_offsets=(),
+                        minimum_independent_sources=2,
+                        minimum_venues=2,
+                        minimum_independence_groups=2,
+                    )
+            if self.asset == "ETH":
+                selected = replace(
+                    selected,
+                    description=selected.description.replace("BTC", "ETH"),
+                    field_units={
+                        key: tuple("eth" if unit == "btc" else unit for unit in units)
+                        for key, units in selected.field_units.items()
+                    },
+                )
+            projected.append(selected.as_contract_requirement())
+        return tuple(projected)
 
     @property
     def requirement_aliases(self) -> dict[str, str]:
@@ -196,11 +411,18 @@ class CryptoMacroFactPack:
         evidence: Iterable[EvidenceCandidate],
         *,
         cutoff_at: datetime,
+        facts: Iterable[FactEnvelope] = (),
     ) -> FactPackAssessment:
         values = tuple(evidence)
+        typed_facts = tuple(facts)
         requirements = [item.as_contract_requirement() for item in self.minimum_requirements]
         # Candidate records use the canonical requirement IDs from the contract.
-        coverage = assess_evidence_sufficiency(requirements, values, cutoff_at=cutoff_at)
+        coverage = assess_evidence_sufficiency(
+            requirements,
+            values,
+            cutoff_at=cutoff_at,
+            facts=typed_facts,
+        )
         covered = tuple(
             item.requirement_id
             for item in self.minimum_requirements
@@ -216,6 +438,17 @@ class CryptoMacroFactPack:
             covered_requirement_ids=covered,
             missing_requirement_ids=missing,
         )
+
+
+def _is_crypto_market_snapshot_family(event_family: str | None) -> bool:
+    if event_family is None:
+        return False
+    normalized = event_family.strip().lower().replace("-", "_")
+    return normalized in {
+        "crypto_market_snapshot",
+        "btc_market_snapshot",
+        "market_snapshot",
+    } or normalized.startswith("btc_current_snapshot")
 
 
 def _required_str(values: Mapping[str, object], key: str) -> str:
@@ -285,3 +518,24 @@ def _required_tuple(
     if len(result) != len(raw) or len(set(result)) != len(result):
         raise ValueError(key)
     return result
+
+
+def _string_tuple(raw: object, key: str) -> tuple[str, ...]:
+    if not isinstance(raw, list) or not raw:
+        raise ValueError(key)
+    result = tuple(item.strip() for item in raw if isinstance(item, str) and item.strip())
+    if len(result) != len(raw) or len(result) != len(set(result)):
+        raise ValueError(key)
+    return result
+
+
+def _required_mapping_key(value: object) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError("event_requirement_overrides")
+    return value.strip()
+
+
+def _required_importance(value: object) -> str:
+    if value not in {"hard", "soft"}:
+        raise ValueError("event_requirement_overrides")
+    return cast(str, value)

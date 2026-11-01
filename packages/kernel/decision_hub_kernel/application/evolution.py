@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from collections import defaultdict
 from collections.abc import Callable, Sequence
 from datetime import datetime, timedelta
@@ -28,6 +29,9 @@ from packages.contracts_py.decision_hub_contracts.models import (
     PromotionMetricDeltaView,
     PromotionReviewRequest,
     PromotionReviewView,
+)
+from packages.kernel.decision_hub_kernel.application.candidate_execution import (
+    candidate_execution_error,
 )
 from packages.kernel.decision_hub_kernel.persistence.db import (
     ActivePointerRecord,
@@ -96,6 +100,43 @@ def dataset_manifest_value(row: EvaluationDatasetRecord, key: str) -> object | N
     return json.loads(row.manifest_json).get(key)
 
 
+def checked_promotion_manifest(row: EvaluationDatasetRecord) -> EvaluationDatasetManifest | None:
+    """Recheck persisted metadata; an earlier successful registration is not sufficient."""
+    try:
+        manifest = EvaluationDatasetManifest.model_validate_json(row.manifest_json)
+        expected = dataset_manifest_hash(
+            manifest.split, manifest.fixture_refs, manifest.cutoff_rule,
+            fixture_hashes=manifest.fixture_hashes, label_rule=manifest.label_rule,
+            leakage_audit=manifest.leakage_audit, authorization=manifest.authorization,
+            visibility=manifest.visibility, source_mode=manifest.source_mode,
+            window_start_at=manifest.window_start_at, window_end_at=manifest.window_end_at,
+            event_family_counts=manifest.event_family_counts,
+        )
+        valid = (
+            row.dataset_id == manifest.dataset_id and row.split == manifest.split
+            and row.manifest_hash == manifest.manifest_hash == expected
+            and manifest.leakage_audit == "passed"
+            and manifest.window_start_at < manifest.window_end_at
+            and len(set(manifest.fixture_refs)) == len(manifest.fixture_refs)
+            and set(manifest.fixture_hashes) == set(manifest.fixture_refs)
+        )
+        return manifest if valid else None
+    except (ValueError, TypeError):
+        return None
+
+
+def valid_family_counts(raw: str, sample_count: int) -> dict[str, int] | None:
+    try:
+        counts = json.loads(raw)
+        if (not isinstance(counts, dict)
+                or any(type(v) is not int or v < 0 for v in counts.values())
+                or sum(counts.values()) > sample_count):
+            return None
+        return counts
+    except (ValueError, TypeError):
+        return None
+
+
 class EvolutionAssetService:
     def __init__(self, database: Database, *, clock: Callable[[], datetime] = utcnow) -> None:
         self.database = database
@@ -159,7 +200,8 @@ class EvolutionAssetService:
             existing = session.get(CandidateVersionRecord, candidate.candidate_id)
             if existing:
                 stored = self._candidate(existing)
-                if stored.content_hash != candidate.content_hash:
+                if (stored.content_hash != candidate.content_hash
+                        or stored.execution_scope != candidate.execution_scope):
                     raise ValueError("candidate_request_reused")
                 return stored
             session.add(CandidateVersionRecord(**candidate.model_dump()))
@@ -181,6 +223,12 @@ class EvolutionAssetService:
             refs = (experiment.baseline_ref, *experiment.candidate_refs)
             if any(session.get(CandidateVersionRecord, ref) is None for ref in refs):
                 raise ValueError("experiment_candidate_not_found")
+            for ref in refs:
+                scope = session.get(CandidateVersionRecord, ref).execution_scope
+                if scope is not None and scope != experiment.execution_scope:
+                    raise ValueError("experiment_execution_scope_mismatch")
+                if experiment.execution_scope == "research_harness" and scope is None:
+                    raise ValueError("experiment_candidate_scope_unknown")
             existing = session.get(ExperimentRecord, experiment.experiment_id)
             if existing:
                 stored = self._experiment(existing)
@@ -191,6 +239,7 @@ class EvolutionAssetService:
                 return stored
             session.add(
                 ExperimentRecord(
+                    execution_scope=experiment.execution_scope,
                     experiment_id=experiment.experiment_id,
                     dataset_id=experiment.dataset_id,
                     baseline_ref=experiment.baseline_ref,
@@ -299,6 +348,16 @@ class EvolutionAssetService:
             )
 
         candidate = session.get(CandidateVersionRecord, candidate_id)
+        record(
+            "candidate.execution_scope",
+            candidate is not None and candidate.execution_scope == "directional_synthesis",
+            "candidate_execution_scope_not_directional",
+            "This pointer selects directional synthesis only; Harness deployment is separate.",
+        )
+        execution_problem = candidate_execution_error(candidate, domain_pack_ref)
+        record("candidate.executable_changes", execution_problem is None,
+               execution_problem or "passed",
+               "Only verified compiled directional rules can enter this pointer.")
         candidate_ready = candidate is not None and candidate.status in {
             "candidate",
             "experimental",
@@ -373,21 +432,29 @@ class EvolutionAssetService:
         if experiment is None:
             record("experiment.lineage", False, "experiment_not_found", "experiment missing")
             return
+        record(
+            "experiment.execution_scope",
+            experiment.execution_scope == "directional_synthesis",
+            "evaluation_execution_scope_mismatch",
+            "Harness evidence cannot promote a directional synthesis pointer.",
+        )
         dataset = session.get(EvaluationDatasetRecord, experiment.dataset_id)
-        baseline = (
+        baselines = (
             session.query(ExperimentResultRecord)
             .filter_by(
                 experiment_id=experiment.experiment_id,
                 candidate_id=experiment.baseline_ref,
             )
-            .one_or_none()
+            .all()
         )
+        baseline = baselines[0] if len(baselines) == 1 else None
         lineage_valid = (
             dataset is not None
             and baseline is not None
             and result.candidate_id in json.loads(experiment.candidate_refs_json)
             and dataset.split in {"replay", "holdout", "shadow"}
             and (result.stage is None or result.stage == dataset.split)
+            and baseline.stage == dataset.split
         )
         record(
             "experiment.lineage",
@@ -396,6 +463,13 @@ class EvolutionAssetService:
             f"experiment={experiment.experiment_id}, dataset={experiment.dataset_id}",
         )
         if not lineage_valid or dataset is None or baseline is None:
+            return
+        manifest = checked_promotion_manifest(dataset)
+        record(
+            "dataset.integrity", manifest is not None, "promotion_dataset_integrity_invalid",
+            "registered dataset metadata, hash, unique inputs and aware timestamps must agree",
+        )
+        if manifest is None:
             return
         stage = cast(Literal["replay", "holdout", "shadow"], dataset.split)
         stages.add(stage)
@@ -406,88 +480,117 @@ class EvolutionAssetService:
             f"{stage} experiment status is {experiment.status}",
         )
         record(
+            "sample.counting_method",
+            result.scorer_version != "evaluation.aggregate.v1"
+            and baseline.scorer_version != "evaluation.aggregate.v1",
+            "promotion_legacy_horizon_counting",
+            "legacy aggregate v1 counts horizons as samples; rerun with aggregate v3",
+        )
+        record(
+            "sample.scorer", result.scorer_version == baseline.scorer_version
+            == "evaluation.aggregate.v3", "promotion_scorer_unrecognized",
+            "both methods require material-level counting and candidate-specific market scoring",
+        )
+        record(
             "sample.minimum",
-            result.sample_count >= 100,
+            result.sample_count >= 100 and baseline.sample_count >= 100,
             "promotion_sample_count_insufficient",
-            f"{stage} sample count is {result.sample_count}; minimum is 100",
+            f"{stage} candidate={result.sample_count}, "
+            f"baseline={baseline.sample_count}; minimum=100",
+        )
+        record(
+            "sample.comparable_count",
+            result.sample_count == baseline.sample_count
+            and result.sample_count <= len(manifest.fixture_refs),
+            "promotion_sample_cohort_mismatch",
+            "both methods must have equal scored counts within the registered input count",
         )
         record(
             "safety.zero",
-            result.safety_violations == 0,
+            result.safety_violations == baseline.safety_violations == 0,
             "promotion_safety_violation",
-            f"{stage} safety violations: {result.safety_violations}",
+            f"{stage} candidate={result.safety_violations}, baseline={baseline.safety_violations}",
         )
-        result_families = json.loads(result.event_family_counts_json)
+        result_families = valid_family_counts(result.event_family_counts_json, result.sample_count)
+        baseline_families = valid_family_counts(
+            baseline.event_family_counts_json, baseline.sample_count,
+        )
         family_coverage = all(
-            result_families.get(family, 0) >= 30
-            for family, count in dataset_manifest_event_families(dataset).items()
-            if count >= 30
+            counts is not None and set(counts) <= set(manifest.event_family_counts)
+            and all(counts.get(family, 0) >= 30
+                    for family, count in manifest.event_family_counts.items() if count >= 30)
+            for counts in (result_families, baseline_families)
         )
         record(
             "event_family.minimum",
             family_coverage,
             "promotion_event_family_insufficient",
-            f"{stage} event-family counts: {result_families}",
+            f"{stage} candidate={result_families}, baseline={baseline_families}",
         )
-        source_mode = dataset_manifest_value(dataset, "source_mode")
-        window_start_raw = dataset_manifest_value(dataset, "window_start_at")
-        window_end_raw = dataset_manifest_value(dataset, "window_end_at")
-        window_valid = isinstance(window_start_raw, str) and isinstance(window_end_raw, str)
-        prospective_valid = True
-        completed_window = False
-        if window_valid:
-            window_start = datetime.fromisoformat(cast(str, window_start_raw))
-            window_end = datetime.fromisoformat(cast(str, window_end_raw))
-            if stage == "shadow":
-                prospective_valid = (
-                    source_mode == "prospective" and window_end - window_start >= timedelta(days=30)
-                )
-            elif stage == "holdout":
-                prospective_valid = source_mode in {"fixture", "prospective"}
-            now = self.clock()
-            if now.tzinfo is not None and window_end.tzinfo is None:
-                window_end = window_end.replace(tzinfo=now.tzinfo)
-            completed_window = window_end <= now
+        source_mode = manifest.source_mode
+        window_start, window_end = manifest.window_start_at, manifest.window_end_at
+        prospective_valid = (
+            source_mode == "prospective" and window_end - window_start >= timedelta(days=30)
+            if stage == "shadow" else source_mode == "fixture"
+        )
+        completed_window = window_end <= as_utc(self.clock())
         record(
             "dataset.mode_window",
-            window_valid and prospective_valid and completed_window,
+            prospective_valid and completed_window,
             "promotion_dataset_window_invalid",
-            f"{stage} source={source_mode}, window={window_start_raw}..{window_end_raw}",
+            f"{stage} source={source_mode}, window={window_start}..{window_end}",
         )
+        brier_values_valid = all(
+            value is not None and math.isfinite(value) and 0 <= value <= 1
+            for value in (result.brier_score, baseline.brier_score)
+        )
+        record("metric.brier_valid", brier_values_valid, "promotion_brier_invalid",
+               "both methods require finite Brier scores between zero and one")
         brier_valid = (
-            result.brier_score is not None
+            brier_values_valid and result.brier_score is not None
             and baseline.brier_score is not None
             and result.brier_score <= baseline.brier_score + 0.02
         )
         record(
             "metric.brier_noninferior",
             brier_valid,
-            "promotion_brier_inferior",
+            "promotion_brier_inferior" if brier_values_valid else "promotion_brier_invalid",
             f"{stage} candidate={result.brier_score}, baseline={baseline.brier_score}",
         )
-        latency_valid = result.p95_latency_ms is not None and result.p95_latency_ms <= 180_000
+        latency_valid = all(
+            value is not None and 0 <= value <= 180_000
+            for value in (result.p95_latency_ms, baseline.p95_latency_ms)
+        )
         record(
             "latency.deadline",
             latency_valid,
             "promotion_latency_exceeded",
-            f"{stage} p95={result.p95_latency_ms}ms; deadline=180000ms",
+            f"{stage} candidate={result.p95_latency_ms}, baseline={baseline.p95_latency_ms}; ms",
         )
-        cost_valid = baseline.cost_usd is None or (
-            result.cost_usd is not None and result.cost_usd <= baseline.cost_usd * 1.25
+        cost_known = all(
+            value is not None and math.isfinite(value) and value >= 0
+            for value in (result.cost_usd, baseline.cost_usd)
+        )
+        record("cost.known", cost_known, "promotion_cost_unknown_or_invalid",
+               "both methods require known, finite, non-negative evaluation costs")
+        cost_valid = (
+            cost_known and baseline.cost_usd is not None and result.cost_usd is not None
+            and result.cost_usd <= baseline.cost_usd * 1.25
         )
         record(
             "cost.ceiling",
             cost_valid,
-            "promotion_cost_exceeded",
+            "promotion_cost_exceeded" if cost_known else "promotion_cost_unknown_or_invalid",
             f"{stage} candidate={result.cost_usd}, baseline={baseline.cost_usd}",
         )
         brier_delta = (
             result.brier_score - baseline.brier_score
-            if result.brier_score is not None and baseline.brier_score is not None
+            if brier_values_valid
+            and result.brier_score is not None and baseline.brier_score is not None
             else None
         )
         cost_ratio = None
-        if baseline.cost_usd is not None:
+        if cost_known and baseline.cost_usd is not None:
             if baseline.cost_usd > 0 and result.cost_usd is not None:
                 cost_ratio = result.cost_usd / baseline.cost_usd
             elif baseline.cost_usd == 0 and result.cost_usd == 0:
@@ -498,13 +601,14 @@ class EvolutionAssetService:
                 result_id=result.result_id,
                 baseline_result_id=baseline.result_id,
                 sample_count=result.sample_count,
-                candidate_brier_score=result.brier_score,
-                baseline_brier_score=baseline.brier_score,
+                candidate_brier_score=result.brier_score if brier_values_valid else None,
+                baseline_brier_score=baseline.brier_score if brier_values_valid else None,
                 brier_delta=brier_delta,
-                candidate_cost_usd=result.cost_usd,
-                baseline_cost_usd=baseline.cost_usd,
+                candidate_cost_usd=result.cost_usd if cost_known else None,
+                baseline_cost_usd=baseline.cost_usd if cost_known else None,
                 cost_ratio=cost_ratio,
-                p95_latency_ms=result.p95_latency_ms,
+                p95_latency_ms=(result.p95_latency_ms if result.p95_latency_ms is not None
+                                and result.p95_latency_ms >= 0 else None),
                 safety_violations=result.safety_violations,
             )
         )
@@ -561,6 +665,13 @@ class EvolutionAssetService:
             candidate = session.get(CandidateVersionRecord, request.candidate_id)
             if candidate is None:
                 raise ValueError("candidate_not_found")
+            if request.decision in {"promote", "rollback"}:
+                if candidate.execution_scope is None:
+                    raise PermissionError("candidate_execution_scope_unknown")
+                if candidate.execution_scope != "directional_synthesis":
+                    raise PermissionError("research_harness_deployment_required")
+                if error := candidate_execution_error(candidate, domain_pack_ref):
+                    raise PermissionError(error)
             pointer = (
                 session.query(ActivePointerRecord)
                 .filter_by(domain_pack_ref=domain_pack_ref)
@@ -799,22 +910,29 @@ class EvolutionAssetService:
         with self.database.session() as session:
             sources: dict[str, list[str]] = defaultdict(list)
             impacts: dict[str, str] = {}
-            for run in session.query(RunRecord).filter(RunRecord.error_code.is_not(None)):
-                assert run.error_code is not None
-                sources[run.error_code].append(f"run:{run.run_id}")
-                impacts[run.error_code] = "run_failed_or_degraded"
-            for feedback in session.query(FeedbackRecord).filter(
+            for error_code, run_id in session.query(RunRecord.error_code, RunRecord.run_id).filter(
+                RunRecord.error_code.is_not(None)
+            ):
+                assert error_code is not None
+                sources[error_code].append(f"run:{run_id}")
+                impacts[error_code] = "run_failed_or_degraded"
+            for verdict, feedback_id in session.query(
+                FeedbackRecord.verdict, FeedbackRecord.feedback_id
+            ).filter(
                 FeedbackRecord.verdict.in_(("incorrect", "not_useful", "needs_review"))
             ):
-                code = f"feedback_{feedback.verdict}"
-                sources[code].append(f"feedback:{feedback.feedback_id}")
-                impacts[code] = f"owner_marked_{feedback.verdict}"
+                code = f"feedback_{verdict}"
+                sources[code].append(f"feedback:{feedback_id}")
+                impacts[code] = f"owner_marked_{verdict}"
+            # Read and serialize the full census before the first mutation.
+            # Per-pattern queries used to autoflush the preceding update and
+            # hold SQLite's only writer through the rest of the historical scan.
+            records = {
+                row.failure_code: row for row in session.query(FailurePatternRecord).all()
+            }
+            encoded = {code: json.dumps(sorted(refs)) for code, refs in sources.items()}
             for error_code, source_refs in sources.items():
-                record = (
-                    session.query(FailurePatternRecord)
-                    .filter_by(failure_code=error_code)
-                    .one_or_none()
-                )
+                record = records.get(error_code)
                 if record is None:
                     record = FailurePatternRecord(
                         pattern_id=f"failure:{error_code}",
@@ -827,15 +945,20 @@ class EvolutionAssetService:
                         updated_at=self.clock(),
                     )
                     session.add(record)
+                    records[error_code] = record
                 count = len(source_refs)
+                if (record.occurrence_count == count and record.impact == impacts[error_code]
+                        and record.source_refs_json == encoded[error_code]):
+                    continue
                 if record.status in {"closed", "mitigated"} and count > record.occurrence_count:
                     record.status = "regressed"
                 record.occurrence_count = count
                 record.impact = impacts[error_code]
-                record.source_refs_json = json.dumps(sorted(source_refs))
+                record.source_refs_json = encoded[error_code]
                 record.updated_at = self.clock()
+            result = [self._failure(row) for row in records.values()]
             session.flush()
-            return [self._failure(row) for row in session.query(FailurePatternRecord).all()]
+            return result
 
     def create_experience(self, request: ExperienceCreate) -> ExperienceView:
         """Persist a structured lesson without promoting it to a strategy."""
@@ -974,6 +1097,21 @@ class EvolutionAssetService:
             )
             return [self._decision_view(row) for row in rows]
 
+    def decision_receipt(
+        self, domain_pack_ref: str, request_id: str, *, owner: str
+    ) -> PromotionDecisionResult:
+        """Read the original command receipt without executing another decision."""
+        with self.database.session() as session:
+            row = (
+                session.query(PromotionDecisionRecord)
+                .filter_by(domain_pack_ref=domain_pack_ref, request_id=request_id, owner=owner)
+                .one_or_none()
+            )
+            if row is None:
+                raise ValueError("promotion_decision_not_found")
+            # This is the pointer recorded at decision time, not today's pointer.
+            return self._decision_result(row)
+
     def set_experiment_status(self, experiment_id: str, status: str) -> ExperimentManifest:
         if status not in {"registered", "running", "completed", "failed"}:
             raise ValueError("experiment_status_invalid")
@@ -1028,6 +1166,7 @@ class EvolutionAssetService:
             candidate = session.get(CandidateVersionRecord, candidate_id)
             if candidate is None:
                 candidate = CandidateVersionRecord(
+                    execution_scope="directional_synthesis",
                     candidate_id=candidate_id,
                     candidate_type="strategy",
                     content_hash=content_hash,
@@ -1086,6 +1225,7 @@ class EvolutionAssetService:
         return CandidateVersion.model_validate(
             {
                 "candidate_id": row.candidate_id,
+                "execution_scope": row.execution_scope,
                 "candidate_type": row.candidate_type,
                 "content_hash": row.content_hash,
                 "version": row.version,
@@ -1104,6 +1244,7 @@ class EvolutionAssetService:
         return ExperimentManifest.model_validate(
             {
                 "experiment_id": row.experiment_id,
+                "execution_scope": row.execution_scope,
                 "dataset_id": row.dataset_id,
                 "baseline_ref": row.baseline_ref,
                 "candidate_refs": json.loads(row.candidate_refs_json),

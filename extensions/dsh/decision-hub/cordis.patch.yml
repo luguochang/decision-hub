@@ -16,6 +16,7 @@
         clientPlugin: true
         requireClientPlugin: true
         callbackTimeoutMs: !!js Number(process.env.DECISION_HUB_DSH_CALLBACK_TIMEOUT_MS ?? 5000)
+        modelBindingTimeoutMs: !!js Number(process.env.DECISION_HUB_DSH_MODEL_BINDING_TIMEOUT_MS ?? 30000)
         callbackAttempts: !!js Number(process.env.DECISION_HUB_DSH_CALLBACK_ATTEMPTS ?? 3)
         runtimeMode: !!js process.env.DECISION_HUB_DSH_RUNTIME_MODE
         sourceCommit: !!js process.env.DECISION_HUB_DSH_SOURCE_COMMIT

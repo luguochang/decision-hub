@@ -1,0 +1,63 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/source_history.schema.json
+title: SourceHistoryContracts
+$defs:
+  SourceDayView:
+    additionalProperties: false
+    properties:
+      source_id:
+        title: Source Id
+        type: string
+      day:
+        title: Day
+        type: string
+      status:
+        title: Status
+        type: string
+      attempts:
+        minimum: 0
+        title: Attempts
+        type: integer
+      accepted:
+        minimum: 0
+        title: Accepted
+        type: integer
+      revisions:
+        minimum: 0
+        title: Revisions
+        type: integer
+    required:
+    - source_id
+    - day
+    - status
+    - attempts
+    - accepted
+    - revisions
+    title: SourceDayView
+    type: object
+  source_history_view:
+    additionalProperties: false
+    properties:
+      start_at:
+        format: date-time
+        title: Start At
+        type: string
+      end_at:
+        format: date-time
+        title: End At
+        type: string
+      timezone:
+        default: UTC
+        title: Timezone
+        type: string
+      items:
+        items:
+          $ref: '#/$defs/SourceDayView'
+        title: Items
+        type: array
+    required:
+    - start_at
+    - end_at
+    - items
+    title: SourceHistoryView
+    type: object

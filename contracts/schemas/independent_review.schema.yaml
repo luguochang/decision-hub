@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.local/contracts/independent_review.schema.json",
+  "title": "IndependentReviewContracts",
+  "description": "Model-owned structured findings about an exact frozen candidate. No model field can supply source_result_hash, producer authentication, native proof refs or financial qualification. Full receipt hashes retain issues; the old public six-field Review is a distinct projection.",
+  "$defs": {
+    "independent_review_issue_v2": {
+      "title": "IndependentReviewIssueV2",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "issue_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "critical",
+            "important",
+            "minor"
+          ]
+        },
+        "blocking_scope": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "direction",
+              "path_risk",
+              "execution",
+              "report"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 4,
+          "uniqueItems": true
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "maxItems": 256,
+          "uniqueItems": true
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "answered",
+            "rejected",
+            "deferred"
+          ]
+        },
+        "disposition": {
+          "type": "string",
+          "enum": [
+            "accepted",
+            "rebutted",
+            "unresolved"
+          ]
+        },
+        "resolution_evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "maxItems": 256,
+          "uniqueItems": true
+        },
+        "effect_on_direction": {
+          "type": "string",
+          "enum": [
+            "unchanged",
+            "increased",
+            "reduced",
+            "reversed",
+            "unknown"
+          ]
+        },
+        "effect_on_tail_risk": {
+          "type": "string",
+          "enum": [
+            "unchanged",
+            "increased",
+            "reduced",
+            "reversed",
+            "unknown"
+          ]
+        },
+        "effect_on_monitor": {
+          "type": "string",
+          "enum": [
+            "unchanged",
+            "increased",
+            "reduced",
+            "reversed",
+            "unknown"
+          ]
+        },
+        "effect_on_report": {
+          "type": "string",
+          "enum": [
+            "unchanged",
+            "increased",
+            "reduced",
+            "reversed",
+            "unknown"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        }
+      },
+      "required": [
+        "issue_id",
+        "severity",
+        "blocking_scope",
+        "evidence_refs",
+        "status",
+        "disposition",
+        "resolution_evidence_refs",
+        "effect_on_direction",
+        "effect_on_tail_risk",
+        "effect_on_monitor",
+        "effect_on_report",
+        "reason"
+      ]
+    },
+    "independent_review_receipt_v2": {
+      "title": "IndependentReviewReceiptV2",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "independent-review-receipt.v2"
+        },
+        "role": {
+          "type": "string",
+          "const": "independent_reviewer"
+        },
+        "target_claim": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200000
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "maxItems": 256,
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "challenge": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "accepted",
+            "bounded",
+            "requires_new_evidence",
+            "rejected"
+          ]
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 16000
+          },
+          "maxItems": 128
+        },
+        "reviewer_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/independent_review_issue_v2"
+          },
+          "maxItems": 64
+        }
+      },
+      "required": [
+        "schema_version",
+        "role",
+        "target_claim",
+        "evidence_refs",
+        "challenge",
+        "resolution",
+        "limitations",
+        "reviewer_version",
+        "issues"
+      ]
+    }
+  }
+}

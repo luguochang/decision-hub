@@ -1,0 +1,62 @@
+[
+  {
+    "accepted_at": "2026-10-18T12:00:10Z",
+    "command": {
+      "expected_state_version": 1,
+      "horizon": "24h",
+      "interval_seconds": 3600,
+      "operation": "pause",
+      "partition": {
+        "account_id": "declared-account",
+        "account_kind": "user_declared",
+        "instrument_id": "okx:BTC-USDT-SWAP",
+        "profile_ref": "decision-profile:okx-usdt-linear-paper-net-isolated-1x.v1"
+      },
+      "request_id": "schedule-pause-1",
+      "schema_version": "perpetual-research-schedule-command.v1",
+      "settings_binding_policy": "follow_current_saved_head"
+    },
+    "command_hash": "a8f2cac3190f97ee1592dd1fc7215306beac2f9d0e03b2124dc34bd3e33f720b",
+    "owner_id": "binding-owner",
+    "payload_hash": "e6f098d1e71a4f77b63858d7981f19e93001187a3fe5756553d3c990c810cbe3",
+    "request_id": "schedule-pause-1",
+    "revision": {
+      "hash": "e6f098d1e71a4f77b63858d7981f19e93001187a3fe5756553d3c990c810cbe3",
+      "ref": "perpschedulecmd_608f28ceccfeb2aea52ac529eb261026beed3e384c9688f17be8193509fdc907"
+    },
+    "schedule_id": "perpschedule_cc7cc2f48aeb405e5a3dbc999eed2dbcc5a2aae857f43b908d1cfe8d9e8ee86a",
+    "schema_version": "perpetual-research-schedule-receipt.v1",
+    "state": "paused",
+    "state_version": 2
+  },
+  {
+    "accepted_at": "2026-10-18T12:00:10Z",
+    "command": {
+      "expected_state_version": 0,
+      "horizon": "24h",
+      "interval_seconds": 3600,
+      "operation": "enable",
+      "partition": {
+        "account_id": "declared-account",
+        "account_kind": "user_declared",
+        "instrument_id": "okx:BTC-USDT-SWAP",
+        "profile_ref": "decision-profile:okx-usdt-linear-paper-net-isolated-1x.v1"
+      },
+      "request_id": "schedule-enable-0",
+      "schema_version": "perpetual-research-schedule-command.v1",
+      "settings_binding_policy": "follow_current_saved_head"
+    },
+    "command_hash": "596e9aad5cf6778ef15b8820d1ab9fa320b0d16046d8edad6f08003186227af9",
+    "owner_id": "binding-owner",
+    "payload_hash": "33c7515466e956c69b66281bd2c9b8aec3d19204ecc5d0e138f8fa8c5440fe53",
+    "request_id": "schedule-enable-0",
+    "revision": {
+      "hash": "33c7515466e956c69b66281bd2c9b8aec3d19204ecc5d0e138f8fa8c5440fe53",
+      "ref": "perpschedulecmd_777b81d69a335b4f233b129609d7821786f4491a264f16aaf14709586422e505"
+    },
+    "schedule_id": "perpschedule_cc7cc2f48aeb405e5a3dbc999eed2dbcc5a2aae857f43b908d1cfe8d9e8ee86a",
+    "schema_version": "perpetual-research-schedule-receipt.v1",
+    "state": "active",
+    "state_version": 1
+  }
+]

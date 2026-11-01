@@ -8,8 +8,11 @@ from email.message import EmailMessage
 from pydantic import BaseModel, ConfigDict, Field, SecretStr
 
 from packages.kernel.decision_hub_kernel.ports.sources import (
+    NotificationEnvelopeV2,
+    NotificationEnvelopeV3,
     NotificationMessage,
     NotificationResult,
+    verify_notification_envelope,
 )
 
 
@@ -36,7 +39,11 @@ class SMTPNotificationAdapter:
         self.config = config
         self.sender = sender or _send
 
-    async def deliver(self, message: NotificationMessage) -> NotificationResult:
+    async def deliver(
+        self, message: NotificationMessage | NotificationEnvelopeV2 | NotificationEnvelopeV3
+    ) -> NotificationResult:
+        if isinstance(message, (NotificationEnvelopeV2, NotificationEnvelopeV3)):
+            message = verify_notification_envelope(message)
         email = EmailMessage()
         email["From"] = self.config.sender
         email["To"] = self.config.recipient

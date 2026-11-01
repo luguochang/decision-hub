@@ -11,6 +11,8 @@
     "forceConsistentCasingInFileNames": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "baseUrl": ".",
+    "paths": { "@decision-hub/contracts-ts": ["../../packages/contracts_ts/src/index.ts"] },
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,

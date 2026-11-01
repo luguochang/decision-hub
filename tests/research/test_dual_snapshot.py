@@ -351,6 +351,28 @@ def test_decision_snapshot_is_distinct_linked_and_immutable(tmp_path: Path) -> N
         )
 
 
+def test_search_locator_stays_candidate_until_source_is_fetched(tmp_path: Path) -> None:
+    database, _trigger_snapshot_id = _database(tmp_path)
+    service = ResearchEvidenceService(database)
+    locator = _candidate().model_copy(
+        update={"kind": "web", "authority": "search_derived"}
+    )
+    requirement = _requirement().model_copy(
+        update={"source_priority": ["search_derived"], "authority_floor": "search_derived"}
+    )
+
+    admitted = service.accept_candidates(
+        run_id="run-1",
+        capability_id="web.search",
+        candidates=[locator],
+        requirements={requirement.requirement_id: requirement},
+        cutoff_at=DECISION_AT,
+    )
+
+    assert admitted[0].quality == "candidate"
+    assert admitted[0].freshness_status == "fresh"
+
+
 def test_decision_snapshot_rejects_evidence_from_another_run(tmp_path: Path) -> None:
     database, trigger_snapshot_id = _database(tmp_path)
     with database.session() as session:

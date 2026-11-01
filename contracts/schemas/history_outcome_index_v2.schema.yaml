@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$ref": "#/$defs/history_outcome_index_v2",
+  "$defs": {
+    "history_outcome_index_item_v2": {
+      "title": "HistoryOutcomeIndexItemV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol_id",
+        "prepared_registered_at",
+        "independently_confirmed_registered_at",
+        "first_hour",
+        "last_hour",
+        "expected_total",
+        "state",
+        "fixture_mode"
+      ],
+      "properties": {
+        "protocol_id": {
+          "type": "string",
+          "pattern": "^heval2_[a-f0-9]{48}$"
+        },
+        "prepared_registered_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+        },
+        "independently_confirmed_registered_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+        },
+        "first_hour": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:00:00(?:\\.0{1,6})?(?:Z|\\+00:00)$"
+        },
+        "last_hour": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:00:00(?:\\.0{1,6})?(?:Z|\\+00:00)$"
+        },
+        "expected_total": {
+          "type": "integer",
+          "const": 48
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "prepared",
+            "confirmed"
+          ]
+        },
+        "fixture_mode": {
+          "type": "boolean",
+          "const": false
+        }
+      },
+      "x-outcome-index-relation": "item"
+    },
+    "history_outcome_index_v2": {
+      "title": "HistoryOutcomeIndexV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "owner_authenticated",
+        "actual_as_of",
+        "evaluations",
+        "current_originals_verified",
+        "financial_qualified",
+        "promotion_allowed"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "history-outcome-index.v2"
+        },
+        "owner_authenticated": {
+          "type": "boolean",
+          "const": true
+        },
+        "actual_as_of": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+        },
+        "evaluations": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "$ref": "#/$defs/history_outcome_index_item_v2"
+          }
+        },
+        "current_originals_verified": {
+          "type": "boolean",
+          "const": false
+        },
+        "financial_qualified": {
+          "type": "boolean",
+          "const": false
+        },
+        "promotion_allowed": {
+          "type": "boolean",
+          "const": false
+        }
+      },
+      "x-outcome-index-relation": "index"
+    }
+  }
+}

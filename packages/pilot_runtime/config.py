@@ -21,6 +21,7 @@ class PilotSettings(BaseSettings):
     pilot_mode: bool = False
     sources_enabled: bool = False
     market_enabled: bool = False
+    action_review_enabled: bool = False
     notification_channel: NotificationChannel = "local"
     auto_trade: bool = False
     smtp_host: str | None = None

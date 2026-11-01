@@ -45,6 +45,26 @@ def test_pack_source_registry_resolves_canonical_requirement_from_manifest() -> 
     assert registry.canonical_requirement_id("event_identity") == "event_identity"
 
 
+def test_market_narrative_can_fetch_only_an_approved_official_source() -> None:
+    registry = ResearchSourceRegistry.from_pack(PACK_ROOT)
+
+    source = registry.require(
+        "https://www.federalreserve.gov/newsevents/speech/example.htm",
+        usage="fetch",
+        requirement_id="market_narrative",
+    )
+    assert source.source_ref == "fed.monetary_policy"
+    assert source.authority == "official"
+
+    with pytest.raises(ResearchSourceRegistryError) as raised:
+        registry.require(
+            "https://www.reuters.com/markets/example",
+            usage="fetch",
+            requirement_id="market_narrative",
+        )
+    assert raised.value.error_code == "research_source_not_approved"
+
+
 @pytest.mark.parametrize(
     "url",
     [

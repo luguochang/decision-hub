@@ -28,6 +28,19 @@ from packages.query_views.operations import OperationsQueryService
 NOW = datetime(2026, 8, 29, 4, 0, tzinfo=UTC)
 
 
+@pytest.mark.parametrize("version", ["", "   ", "0.1.2-alpha.2"])
+def test_dsh_operations_empty_version_does_not_prevent_api_start(tmp_path, monkeypatch, version):
+    monkeypatch.setenv("DECISION_HUB_LLM_ENABLED", "0")
+    monkeypatch.setenv("DECISION_HUB_OPERATIONS_RESEARCH_RUNTIME", "dsh-web")
+    monkeypatch.setenv("DECISION_HUB_DSH_SOURCE_VERSION", version)
+    database = Database(f"sqlite+pysqlite:///{tmp_path / 'dsh-version.sqlite3'}")
+    with TestClient(create_app(database, source_connectors=[])) as client:
+        assert client.get("/health/ready").status_code == 200
+        runtime = client.get("/v1/operations").json()["runtime"]
+    assert runtime["runtime_id"] == "dsh-web"
+    assert runtime["runtime_version"] == (version.strip() or "dsh-web-live")
+
+
 def test_operations_api_reports_real_api_and_absent_workers_without_fake_state(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -47,6 +60,9 @@ def test_operations_api_reports_real_api_and_absent_workers_without_fake_state(
     assert services["hub-realtime-worker"]["instance_id"] is None
     assert services["hub-realtime-worker"]["heartbeat_at"] is None
     assert services["hub-evolution-worker"]["status"] == "offline"
+    for service_id in ["hub-research-priority-worker", "hub-documents", "hub-historical-worker"]:
+        assert services[service_id]["status"] == "offline"
+        assert services[service_id]["heartbeat_at"] is None
     assert body["runtime"] == {
         "runtime_id": "fake",
         "runtime_version": "fake.v1",

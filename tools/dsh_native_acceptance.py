@@ -9,6 +9,7 @@ import shutil
 import signal
 import socket
 import subprocess
+import sys
 import time
 import uuid
 from collections.abc import Callable
@@ -20,8 +21,30 @@ from typing import Literal
 import httpx
 
 ROOT = Path(__file__).resolve().parents[1]
-PYTHON = ROOT / ".venv" / "bin" / "python"
-RUN_ROOT = ROOT / "tmp" / "dsh-native-core"
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from packages.kernel.decision_hub_kernel.application.fact_store import (  # noqa: E402
+    research_fact_instance_id,
+    research_fact_payload_hash,
+)
+
+PYTHON = (
+    ROOT / ".venv" / (Path("Scripts") / "python.exe" if os.name == "nt" else Path("bin") / "python")
+)
+GIT_BASH = (
+    Path(os.environ.get("PROGRAMFILES", "C:/Program Files")) / "Git" / "bin" / "bash.exe"
+    if os.name == "nt"
+    else Path("bash")
+)
+# DSH encodes the absolute workspace path into its on-disk Session directory.
+# Keep Windows acceptance runs under a short temp root so that the resulting
+# ``sessions/<workspace>/<session>`` path remains below Win32's legacy limit.
+RUN_ROOT = (
+    Path(os.environ.get("SystemDrive", "C:") + "/") / "dsh-native-core"
+    if os.name == "nt"
+    else ROOT / "tmp" / "dsh-native-core"
+)
 UPSTREAM = ROOT / ".cache" / "dsh-upstream" / "source"
 UPSTREAM_LOCK = json.loads((ROOT / "infra" / "dsh" / "upstream.lock.json").read_text())
 REPLAY_PLUGIN = UPSTREAM / "packages" / "test-support" / "llm-replay"
@@ -47,7 +70,17 @@ class ManagedProcess:
 
     def stop(self) -> None:
         if self.process.poll() is None:
-            self.process.terminate()
+            if os.name == "nt":
+                # ``run-web.sh`` is a Git Bash wrapper around a Node process.
+                # Terminating only the wrapper leaves Node holding the DSH
+                # profile lock, so restarts fail with ``DSH_WEB_HOME`` busy.
+                subprocess.run(
+                    ["taskkill", "/PID", str(self.process.pid), "/T", "/F"],
+                    capture_output=True,
+                    check=False,
+                )
+            else:
+                self.process.terminate()
             try:
                 self.process.wait(timeout=10)
             except subprocess.TimeoutExpired:
@@ -149,18 +182,19 @@ class ScenarioRuntime:
         # long-lived response as a timeout.
         _wait_port(self.mcp_port, timeout=45)
         self._web_command = [
-            str(ROOT / "infra" / "dsh" / "run-web.sh"),
+            *([str(GIT_BASH)] if os.name == "nt" else []),
+            _shell_path(ROOT / "infra" / "dsh" / "run-web.sh"),
             "--port",
             str(self.web_port),
             "--patch",
-            str(REPLAY_PATCH),
+            _shell_path(REPLAY_PATCH),
         ]
         self._web_env = {
             **self._common_env,
-            "DSH_WEB_HOME": str(self.web_home),
-            "DSH_REPLAY_PLUGIN": str(REPLAY_PLUGIN),
-            "DSH_SNAPSHOT_FILE": str(snapshot),
-            "DSH_SNAPSHOT_OVERRIDE": str(override),
+            "DSH_WEB_HOME": _shell_path(self.web_home),
+            "DSH_REPLAY_PLUGIN": _shell_path(REPLAY_PLUGIN),
+            "DSH_SNAPSHOT_FILE": _shell_path(snapshot),
+            "DSH_SNAPSHOT_OVERRIDE": _shell_path(override),
             "DSH_REPLAY_PACE_MS": str(self.replay_pace_ms),
             "DECISION_HUB_API_URL": f"http://127.0.0.1:{self.api_port}",
             "DECISION_HUB_DESK_URL": f"http://127.0.0.1:{self.api_port}",
@@ -171,11 +205,10 @@ class ScenarioRuntime:
             "DECISION_HUB_DSH_RUNTIME_MODE": "replay",
             "DECISION_HUB_DSH_SOURCE_COMMIT": str(UPSTREAM_LOCK["commit"]),
             "DECISION_HUB_DSH_SOURCE_VERSION": str(UPSTREAM_LOCK["source_version"]),
-            "DECISION_HUB_DSH_WORKSPACE_CWD": str(self.workspace),
+            "DECISION_HUB_DSH_WORKSPACE_CWD": _shell_path(self.workspace),
             "DECISION_HUB_RESEARCH_MCP_URL": f"http://127.0.0.1:{self.mcp_port}/mcp",
             "DECISION_HUB_RESEARCH_TOOL_URL": (
-                f"http://127.0.0.1:{self.mcp_port}"
-                "/decision-hub/v1/research-capabilities/execute"
+                f"http://127.0.0.1:{self.mcp_port}/decision-hub/v1/research-capabilities/execute"
             ),
         }
         self._start_web()
@@ -189,7 +222,7 @@ class ScenarioRuntime:
             raise RuntimeError(
                 f"hub research worker exited {worker.returncode}: {_tail(worker.stderr)}"
             )
-        return self.collect_result(run_id)
+        return self.collect_result(run_id, finalize_missing_session=True)
 
     def admit_observation(self, *, variant: str | None = None) -> str:
         observation_time = datetime.now(UTC) - timedelta(seconds=1)
@@ -273,10 +306,7 @@ class ScenarioRuntime:
         )
 
     def restart_hub_api(self) -> None:
-        if any(
-            item.name == "hub-api" and item.process.poll() is None
-            for item in self.processes
-        ):
+        if any(item.name == "hub-api" and item.process.poll() is None for item in self.processes):
             self.stop_process("hub-api")
         self._restart_generation += 1
         self._start_hub_api(log_name=f"hub-api-restart-{self._restart_generation}")
@@ -299,9 +329,7 @@ class ScenarioRuntime:
         )
         self.stop_process("research-mcp")
         self._restart_generation += 1
-        self._start_research_mcp(
-            log_name=f"research-mcp-refresh-{self._restart_generation}"
-        )
+        self._start_research_mcp(log_name=f"research-mcp-refresh-{self._restart_generation}")
         _wait_port(self.mcp_port, timeout=45)
 
     def _start_web(
@@ -456,7 +484,13 @@ class ScenarioRuntime:
             timeout=240,
         )
 
-    def collect_result(self, run_id: str, *, artifact_prefix: str = "") -> ScenarioResult:
+    def collect_result(
+        self,
+        run_id: str,
+        *,
+        artifact_prefix: str = "",
+        finalize_missing_session: bool = False,
+    ) -> ScenarioResult:
         prefix = f"{artifact_prefix}-" if artifact_prefix else ""
         with httpx.Client(timeout=30, trust_env=False) as client:
             detail_response = client.get(
@@ -464,9 +498,7 @@ class ScenarioRuntime:
             )
             detail_response.raise_for_status()
             detail = detail_response.json()
-            product_response = client.get(
-                f"http://127.0.0.1:{self.api_port}/v1/runs/{run_id}"
-            )
+            product_response = client.get(f"http://127.0.0.1:{self.api_port}/v1/runs/{run_id}")
             product_response.raise_for_status()
             product_run = product_response.json()
             link_response = client.get(f"http://127.0.0.1:{self.api_port}/v1/dsh/sessions/{run_id}")
@@ -486,9 +518,33 @@ class ScenarioRuntime:
         dsh_session_id = str(link["dsh_session_id"])
         if host_result.get("dsh_session_id") != dsh_session_id:
             raise AssertionError("DSH Host result and Hub link disagree on session identity")
-        session_log = find_session_log(self.web_home, dsh_session_id)
+        try:
+            session_log = find_session_log(self.web_home, dsh_session_id)
+        except RuntimeError:
+            if not finalize_missing_session:
+                raise
+            if any(
+                item.name == "dsh-web" and item.process.poll() is None for item in self.processes
+            ):
+                self.stop_process("dsh-web")
+            session_log = find_session_log(self.web_home, dsh_session_id)
         session_copy = self.artifacts / f"{dsh_session_id}{''.join(session_log.suffixes)}"
-        shutil.copy2(session_log, session_copy)
+        try:
+            _copy_session_log(session_log, session_copy)
+        except FileNotFoundError:
+            if not finalize_missing_session:
+                raise
+            # A no-op/stale replay can flush its compressed archive only when
+            # the Web process closes. All authoritative HTTP payloads are
+            # already captured above, so close Web once and copy the finalized
+            # archive without affecting the returned business result.
+            if any(
+                item.name == "dsh-web" and item.process.poll() is None for item in self.processes
+            ):
+                self.stop_process("dsh-web")
+            session_log = find_session_log(self.web_home, dsh_session_id)
+            session_copy = self.artifacts / f"{dsh_session_id}{''.join(session_log.suffixes)}"
+            _copy_session_log(session_log, session_copy)
         detail_path = self.artifacts / f"{prefix}hub-run-detail.json"
         detail_path.write_text(json.dumps(detail, ensure_ascii=False, indent=2), encoding="utf-8")
         product_path = self.artifacts / f"{prefix}hub-product-run.json"
@@ -619,10 +675,356 @@ def research_archive(scenario: Scenario) -> dict[str, object]:
             }
             for source in sources
         ]
-        queries.append(
-            {"query": f"native:{scenario}:{requirement}", "evidence_candidates": candidates}
-        )
+        entry: dict[str, object] = {
+            "query": f"native:{scenario}:{requirement}",
+            "evidence_candidates": candidates,
+        }
+        if scenario == "success":
+            entry["facts"] = _native_success_facts(requirement, candidates, observed)
+        queries.append(entry)
     return {"schema_version": "research-replay-fixtures.v1", "queries": queries}
+
+
+def _native_success_facts(
+    requirement: str,
+    candidates: list[dict[str, object]],
+    observed: datetime,
+) -> list[dict[str, object]]:
+    """Build typed facts for the replay acceptance's publish scenario.
+
+    The native acceptance fixture predates the Pack's semantic fact Gate. Keep
+    it deterministic and self-contained by supplying the smallest valid fact
+    set for each requirement; stale/partial scenarios intentionally remain
+    evidence-only and do not gain synthetic coverage.
+    """
+
+    before = observed - timedelta(minutes=5)
+    after = observed - timedelta(minutes=4)
+    event_id = "dsh-native-success-event"
+    source_for = {str(item["source_id"]): str(item["evidence_id"]) for item in candidates}
+    result: list[dict[str, object]] = []
+
+    def add(
+        evidence_id: str,
+        source_id: str,
+        *,
+        family: str,
+        field: str,
+        value: object,
+        unit: str,
+        offset: str | None,
+        instrument: str | None = None,
+        venue: str | None = None,
+        at: datetime | None = None,
+        window_start: datetime | None = None,
+        window_end: datetime | None = None,
+    ) -> None:
+        attributes: dict[str, float | str | bool | None] = {"event_id": event_id}
+        payload_schema_ref = "dsh-native.fact.v1"
+        independence_group = f"{source_id}:{instrument or family}"
+        published_at = at or observed
+        payload_hash = research_fact_payload_hash(
+            requirement_id=requirement,
+            metric_family=family,
+            field=field,
+            instrument=instrument,
+            venue=venue,
+            value=value if isinstance(value, (float, str)) or value is None else str(value),
+            unit=unit,
+            window_start_at=window_start or at or observed if offset is not None else None,
+            window_end_at=window_end or at or observed if offset is not None else None,
+            event_offset=offset,
+            published_at=published_at,
+            source_id=source_id,
+            independence_group=independence_group,
+            delay_class="realtime",
+            payload_schema_ref=payload_schema_ref,
+            attributes=attributes,
+        )
+        result.append(
+            {
+                "schema_version": "fact-envelope.v1",
+                "fact_id": research_fact_instance_id(
+                    evidence_id=evidence_id, payload_hash=payload_hash
+                ),
+                "evidence_id": evidence_id,
+                "requirement_id": requirement,
+                "metric_family": family,
+                "field": field,
+                "instrument": instrument,
+                "venue": venue,
+                "value": value,
+                "unit": unit,
+                "window_start_at": (window_start or at or observed).isoformat()
+                if offset is not None
+                else None,
+                "window_end_at": (window_end or at or observed).isoformat()
+                if offset is not None
+                else None,
+                "event_offset": offset,
+                "observed_at": (at or observed).isoformat(),
+                "received_at": (at or observed).isoformat(),
+                "published_at": (at or observed).isoformat(),
+                "source_id": source_id,
+                "independence_group": f"{source_id}:{instrument or family}",
+                "quality": "candidate",
+                "delay_class": "realtime",
+                "payload_schema_ref": payload_schema_ref,
+                "payload_hash": payload_hash,
+                "attributes": attributes,
+            }
+        )
+
+    def one(source_id: str) -> str:
+        return source_for[source_id]
+
+    if requirement == "event_identity":
+        evidence_id = one("fed-event")
+        add(
+            evidence_id,
+            "fed-event",
+            family="event.identity",
+            field="event_actor",
+            value="Federal Reserve",
+            unit="text",
+            offset="t0",
+        )
+        add(
+            evidence_id,
+            "fed-event",
+            family="event.identity",
+            field="event_time",
+            value=after.isoformat(),
+            unit="datetime",
+            offset="t0",
+            at=after,
+        )
+        add(
+            evidence_id,
+            "fed-event",
+            family="event.identity",
+            field="revision_status",
+            value="original",
+            unit="text",
+            offset="t0",
+            at=after,
+        )
+    elif requirement == "policy_or_data_delta":
+        evidence_id = one("fed-policy")
+        add(
+            evidence_id,
+            "fed-policy",
+            family="policy.statement_delta",
+            field="baseline",
+            value="prior policy wording",
+            unit="text",
+            offset="baseline",
+            at=before,
+        )
+        add(
+            evidence_id,
+            "fed-policy",
+            family="policy.statement_delta",
+            field="baseline",
+            value="current policy wording",
+            unit="text",
+            offset="t0",
+            at=after,
+        )
+        add(
+            evidence_id,
+            "fed-policy",
+            family="policy.statement_delta",
+            field="current",
+            value="current policy wording",
+            unit="text",
+            offset="t0",
+            at=after,
+        )
+        add(
+            evidence_id,
+            "fed-policy",
+            family="policy.statement_delta",
+            field="delta",
+            value="wording changed",
+            unit="text",
+            offset="t0",
+            at=after,
+        )
+    elif requirement == "expectation_pricing":
+        evidence_id = one("rates-pricing")
+        add(
+            evidence_id,
+            "rates-pricing",
+            family="macro.policy_expectation",
+            field="level",
+            value=0.55,
+            unit="probability",
+            offset="baseline",
+            instrument="FED-FUNDS",
+            at=before,
+        )
+        add(
+            evidence_id,
+            "rates-pricing",
+            family="macro.policy_expectation",
+            field="level",
+            value=0.50,
+            unit="probability",
+            offset="t-5m",
+            instrument="FED-FUNDS",
+            at=before,
+        )
+        add(
+            evidence_id,
+            "rates-pricing",
+            family="macro.policy_expectation",
+            field="delta",
+            value=-0.05,
+            unit="percentage_point",
+            offset="t-5m",
+            instrument="FED-FUNDS",
+            at=before,
+        )
+    elif requirement == "macro_transmission":
+        for source_id, family, instrument, level, event_return in (
+            ("rates-yield", "macro.rates", "USY02Y", 4.2, 2.0),
+            ("usd-index", "macro.usd", "DXA", 104.0, 0.15),
+        ):
+            evidence_id = one(source_id)
+            add(
+                evidence_id,
+                source_id,
+                family=family,
+                field="level",
+                value=level,
+                unit="yield_percent" if family == "macro.rates" else "index",
+                offset="t-5m",
+                instrument=instrument,
+                at=before,
+            )
+            add(
+                evidence_id,
+                source_id,
+                family=family,
+                field="level",
+                value=level + event_return,
+                unit="yield_percent" if family == "macro.rates" else "index",
+                offset="t+1m",
+                instrument=instrument,
+                at=after,
+            )
+            add(
+                evidence_id,
+                source_id,
+                family=family,
+                field="event_return",
+                value=event_return,
+                unit="bps" if family == "macro.rates" else "percent",
+                offset="t+1m",
+                instrument=instrument,
+                at=after,
+                window_start=before,
+                window_end=after,
+            )
+    elif requirement == "cross_asset_confirmation":
+        evidence_id = one("cross-asset")
+        add(
+            evidence_id,
+            "cross-asset",
+            family="cross_asset.equity",
+            field="level",
+            value=5000.0,
+            unit="price",
+            offset="t-5m",
+            instrument="ES",
+            venue="CME",
+            at=before,
+        )
+        add(
+            evidence_id,
+            "cross-asset",
+            family="cross_asset.equity",
+            field="level",
+            value=4995.0,
+            unit="price",
+            offset="t+1m",
+            instrument="ES",
+            venue="CME",
+            at=after,
+        )
+        add(
+            evidence_id,
+            "cross-asset",
+            family="cross_asset.equity",
+            field="event_return",
+            value=-0.1,
+            unit="percent",
+            offset="t+1m",
+            instrument="ES",
+            venue="CME",
+            at=after,
+            window_start=before,
+            window_end=after,
+        )
+    elif requirement == "crypto_spot_confirmation":
+        evidence_id = one("btc-spot")
+        for field, value, unit, offset, at in (
+            ("price", 65000.0, "usdt", "t-5m", before),
+            ("price", 64900.0, "usdt", "t+1m", after),
+            ("volume", 100.0, "btc", "t+1m", after),
+            ("event_return", -0.15, "percent", "t+1m", after),
+        ):
+            add(
+                evidence_id,
+                "btc-spot",
+                family="crypto.spot",
+                field=field,
+                value=value,
+                unit=unit,
+                offset=offset,
+                instrument="BTCUSDT",
+                venue="BINANCE",
+                at=at,
+                window_start=before if field == "event_return" else None,
+                window_end=after if field == "event_return" else None,
+            )
+    elif requirement == "derivatives_crowding":
+        evidence_id = one("btc-derivatives")
+        values = {
+            "funding_rate": (0.0001, "rate"),
+            "open_interest": (120000.0, "contracts"),
+            "open_interest_delta": (-1.2, "percent"),
+            "basis": (0.002, "rate"),
+            "crowding_signal": (1.1, "ratio"),
+        }
+        for field, (value, unit) in values.items():
+            for offset, at in (("t-5m", before), ("t+1m", after)):
+                add(
+                    evidence_id,
+                    "btc-derivatives",
+                    family="crypto.derivatives",
+                    field=field,
+                    value=value,
+                    unit=unit,
+                    offset=offset,
+                    instrument="BTCUSDT-PERP",
+                    venue="BINANCE",
+                    at=at,
+                )
+    elif requirement == "counter_thesis":
+        evidence_id = one("counter-thesis")
+        add(
+            evidence_id,
+            "counter-thesis",
+            family="research.counter_thesis",
+            field="alternative_chain",
+            value="The event may already be priced and reverse on confirmation.",
+            unit="text",
+            offset=None,
+            at=observed,
+        )
+    return result
 
 
 def _replay_entries(scenario: Scenario) -> list[dict[str, object]]:
@@ -803,19 +1205,43 @@ def assert_scenario(result: ScenarioResult) -> None:
 def find_session_log(web_home: Path, session_id: str) -> Path:
     candidates = _session_logs(web_home, session_id)
     if len(candidates) != 1:
-        all_logs = list(web_home.rglob("session.jsonl*"))
+        all_logs = _session_logs(web_home, None)
         raise RuntimeError(
             f"expected one DSH JSONL for {session_id}, found {len(candidates)}; all={all_logs}"
         )
     return candidates[0]
 
 
-def _session_logs(web_home: Path, session_id: str) -> list[Path]:
-    return [
-        path
-        for path in web_home.rglob("session.jsonl*")
-        if session_id in path.parts
-    ]
+def _copy_session_log(source: Path, destination: Path) -> None:
+    """Copy a compressed Session after the Web writer's final rename."""
+
+    for attempt in range(50):
+        try:
+            shutil.copy2(source, destination)
+            return
+        except FileNotFoundError:
+            if attempt == 49:
+                raise
+            time.sleep(0.1)
+
+
+def _session_logs(web_home: Path, session_id: str | None) -> list[Path]:
+    """Find DSH Session logs without recursively walking the whole profile.
+
+    DSH stores each log at ``sessions/<encoded-workspace>/<session-id>/``.
+    A recursive scan of ``DSH_WEB_HOME`` can traverse large caches (and on
+    Windows may hit reparse points), making recovery verification appear hung.
+    """
+
+    patterns = (
+        ("sessions/*/*/session.jsonl*", "sessions/*/session.jsonl*")
+        if session_id is None
+        else (
+            f"sessions/*/{session_id}/session.jsonl*",
+            f"sessions/{session_id}/session.jsonl*",
+        )
+    )
+    return sorted({path for pattern in patterns for path in web_home.glob(pattern)})
 
 
 def _free_port() -> int:
@@ -871,9 +1297,34 @@ def _safe_log(path: Path) -> str:
     return re.sub(r"(token=)[^\s]+", r"\1[redacted]", _tail(path.read_text(errors="replace")))
 
 
+def _shell_path(path: Path) -> str:
+    """Render a workspace path for the shell that launches DSH Web.
+
+    The acceptance runner starts the repository's POSIX shell script through
+    Git Bash on Windows. Passing a native ``E:\\...`` path makes the script
+    treat it as relative and prepend its repository root, so paths owned by
+    the Web process must use Git Bash's ``/e/...`` form. Python and Hub
+    processes continue to receive native paths elsewhere in this module.
+    """
+
+    value = str(path)
+    if os.name != "nt":
+        return value
+    normalized = value.replace("\\", "/")
+    if len(normalized) >= 2 and normalized[1] == ":":
+        return f"/{normalized[0].lower()}{normalized[2:]}"
+    return normalized
+
+
 def _scenario_root(scenario: Scenario) -> Path:
     timestamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
-    return RUN_ROOT / f"{timestamp}-{scenario}-{uuid.uuid4().hex[:8]}"
+    # DSH encodes this whole root and workspace into its Session path. Keep
+    # the scenario marker compact so even ``insufficient_or_stale`` stays
+    # below the Win32 path limit when Python copies the compressed archive.
+    scenario_marker = {"success": "s", "partial_failure": "p", "insufficient_or_stale": "i"}[
+        scenario
+    ]
+    return RUN_ROOT / f"{timestamp}-{scenario_marker}-{uuid.uuid4().hex[:8]}"
 
 
 def _run_one(scenario: Scenario, *, serve: bool) -> ScenarioResult:
@@ -928,9 +1379,7 @@ def _run_recovery_acceptance() -> dict[str, object]:
         callback_failure = _wait_for_callback_failure(runtime, run_id, timeout=90)
         runtime.restart_hub_api()
 
-        reconciled_response = runtime.host_request(
-            "GET", f"/decision-hub/v1/runs/{run_id}/result"
-        )
+        reconciled_response = runtime.host_request("GET", f"/decision-hub/v1/runs/{run_id}/result")
         reconciled_response.raise_for_status()
         reconciled_result = reconciled_response.json()
         terminal_link = runtime.wait_link(
@@ -1003,9 +1452,7 @@ def _verify_web_restart(
     runtime: ScenarioRuntime,
     result: ScenarioResult,
 ) -> dict[str, object]:
-    before_response = runtime.host_request(
-        "GET", f"/decision-hub/v1/runs/{result.run_id}/result"
-    )
+    before_response = runtime.host_request("GET", f"/decision-hub/v1/runs/{result.run_id}/result")
     before_response.raise_for_status()
     before = before_response.json()
     before_logs = _session_logs(runtime.web_home, result.dsh_session_id)
@@ -1013,9 +1460,7 @@ def _verify_web_restart(
         raise AssertionError(f"expected one Session before Web restart, got {before_logs}")
 
     runtime.restart_web(label="recovery")
-    after_response = runtime.host_request(
-        "GET", f"/decision-hub/v1/runs/{result.run_id}/result"
-    )
+    after_response = runtime.host_request("GET", f"/decision-hub/v1/runs/{result.run_id}/result")
     after_response.raise_for_status()
     after = after_response.json()
     after_logs = _session_logs(runtime.web_home, result.dsh_session_id)
@@ -1060,9 +1505,7 @@ def _verify_version_rollback(
         raise AssertionError("incompatible Host did not fail the version gate")
     if readiness_body.get("error_code") != "host_version_incompatible":
         raise AssertionError(f"unexpected readiness error: {readiness_body}")
-    blocked = runtime.host_request(
-        "GET", f"/decision-hub/v1/runs/{retained.run_id}/result"
-    )
+    blocked = runtime.host_request("GET", f"/decision-hub/v1/runs/{retained.run_id}/result")
     blocked_body = blocked.json()
     if blocked.status_code != 503 or (blocked_body.get("error") or {}).get("code") != (
         "host_version_incompatible"
@@ -1072,9 +1515,7 @@ def _verify_version_rollback(
     runtime.restart_web(label="locked-rollback")
     restored = runtime.host_request("GET", "/decision-hub/v1/readiness")
     restored.raise_for_status()
-    restored_result = runtime.host_request(
-        "GET", f"/decision-hub/v1/runs/{retained.run_id}/result"
-    )
+    restored_result = runtime.host_request("GET", f"/decision-hub/v1/runs/{retained.run_id}/result")
     restored_result.raise_for_status()
     if restored_result.json().get("result_hash") != retained_result_hash:
         raise AssertionError("rollback changed the retained terminal result hash")
@@ -1083,9 +1524,7 @@ def _verify_version_rollback(
     rollback_run_id = runtime.admit_observation(variant="locked-rollback")
     worker = runtime.run_worker_once()
     if worker.returncode not in {0, 1}:
-        raise RuntimeError(
-            f"rollback worker exited {worker.returncode}: {_tail(worker.stderr)}"
-        )
+        raise RuntimeError(f"rollback worker exited {worker.returncode}: {_tail(worker.stderr)}")
     rollback_result = runtime.collect_result(
         rollback_run_id,
         artifact_prefix="locked-rollback",

@@ -34,14 +34,14 @@ def test_crypto_macro_pack_and_all_references_are_contract_valid() -> None:
     assert manifest.product_extension_ref == "decision.v1"
     assert manifest.horizons == ["30m", "24h", "72h"]
     assert manifest.execution_budget == ExecutionBudget(
-        max_evidence_rounds=3,
-        max_tool_calls=24,
-        max_subagents=6,
-        total_deadline_seconds=480,
-        per_tool_timeout_seconds=20,
-        per_model_step_timeout_seconds=150,
-        max_structured_repairs=1,
-        max_estimated_cost_usd=1.0,
+        max_evidence_rounds=10,
+        max_tool_calls=100,
+        max_subagents=32,
+        total_deadline_seconds=1800,
+        per_tool_timeout_seconds=120,
+        per_model_step_timeout_seconds=600,
+        max_structured_repairs=3,
+        max_estimated_cost_usd=10.0,
     )
 
     for relative_ref in (
@@ -76,6 +76,8 @@ def test_crypto_macro_pack_and_all_references_are_contract_valid() -> None:
     }
     assert approved == {
         "market.cross_asset",
+        "document.readback",
+        "data.historical",
         "market.crypto_derivatives",
         "market.crypto_crowding",
         "official.macro",
@@ -83,6 +85,7 @@ def test_crypto_macro_pack_and_all_references_are_contract_valid() -> None:
         "web.search",
         "web.search.tavily",
         "web.fetch",
+        "browser.readback",
     }
     review_required = {
         item.capability_id

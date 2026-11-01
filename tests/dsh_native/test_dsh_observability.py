@@ -37,3 +37,11 @@ def test_observability_is_opt_in_and_uses_official_profile_command() -> None:
     ).read_text(encoding="utf-8")
     assert "DSH_OBSERVABILITY_ENABLED=1" in canary
     assert "--exporter-down" in canary
+
+
+def test_web_launcher_uses_repository_pnpm_for_plugin_build() -> None:
+    launcher = (ROOT / "infra" / "dsh" / "run-web.sh").read_text(encoding="utf-8")
+
+    assert 'repo_pnpm="$(node -e' in launcher
+    assert '"${repo_pnpm_runner[@]}" --dir "$plugin_dir" build' in launcher
+    assert '"${pnpm_runner[@]}" --dir "$web_home/profiles/web" add' in launcher

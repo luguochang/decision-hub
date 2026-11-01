@@ -1,0 +1,391 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.local/contracts/history-forecast-index-v2.schema.json",
+  "title": "HistoryForecastIndexV2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "owner_authenticated",
+    "observed_at",
+    "current_originals_verified",
+    "financial_qualified",
+    "historical_pit_verified",
+    "scopes"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "history-forecast-index.v2"
+    },
+    "owner_authenticated": {
+      "type": "boolean",
+      "const": true
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+    },
+    "current_originals_verified": {
+      "type": "boolean",
+      "const": false
+    },
+    "financial_qualified": {
+      "type": "boolean",
+      "const": false
+    },
+    "historical_pit_verified": {
+      "type": "boolean",
+      "const": false
+    },
+    "scopes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": false,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/history_forecast_index_btc_v2"
+        },
+        {
+          "$ref": "#/$defs/history_forecast_index_eth_v2"
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "history_forecast_index_btc_v2": {
+      "title": "HistoryForecastIndexBtcV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset",
+        "scope_id",
+        "asset_label",
+        "model_id",
+        "state",
+        "forecast_id",
+        "cutoff_at",
+        "recorded_at",
+        "reason_label",
+        "probabilities"
+      ],
+      "properties": {
+        "asset": {
+          "type": "string",
+          "const": "BTC"
+        },
+        "scope_id": {
+          "type": "string",
+          "const": "crypto:spot:okx:BTC-USDT:trade:1m"
+        },
+        "asset_label": {
+          "type": "string",
+          "const": "比特币"
+        },
+        "model_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^hfit2_[a-f0-9]{48}$"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "not_granted",
+            "not_generated",
+            "verification_required"
+          ]
+        },
+        "forecast_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^hforecast2_[a-f0-9]{48}$"
+        },
+        "cutoff_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+        },
+        "recorded_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+        },
+        "reason_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "probabilities": {
+          "type": "null"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "not_granted"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "model_id": {
+                "type": "null"
+              },
+              "forecast_id": {
+                "type": "null"
+              },
+              "cutoff_at": {
+                "type": "null"
+              },
+              "recorded_at": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "not_generated"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "model_id": {
+                "type": "string"
+              },
+              "forecast_id": {
+                "type": "null"
+              },
+              "cutoff_at": {
+                "type": "null"
+              },
+              "recorded_at": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "verification_required"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "model_id": {
+                "type": "string"
+              },
+              "forecast_id": {
+                "type": "string"
+              },
+              "cutoff_at": {
+                "type": "string",
+                "pattern": "T\\d{2}:\\d{2}:00(?:\\.0{1,6})?(?:Z|\\+00:00)$"
+              },
+              "recorded_at": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ],
+      "x-forecast-index-relations": "scope"
+    },
+    "history_forecast_index_eth_v2": {
+      "title": "HistoryForecastIndexEthV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset",
+        "scope_id",
+        "asset_label",
+        "model_id",
+        "state",
+        "forecast_id",
+        "cutoff_at",
+        "recorded_at",
+        "reason_label",
+        "probabilities"
+      ],
+      "properties": {
+        "asset": {
+          "type": "string",
+          "const": "ETH"
+        },
+        "scope_id": {
+          "type": "string",
+          "const": "crypto:spot:okx:ETH-USDT:trade:1m"
+        },
+        "asset_label": {
+          "type": "string",
+          "const": "以太坊"
+        },
+        "model_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^hfit2_[a-f0-9]{48}$"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "not_granted",
+            "not_generated",
+            "verification_required"
+          ]
+        },
+        "forecast_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^hforecast2_[a-f0-9]{48}$"
+        },
+        "cutoff_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+        },
+        "recorded_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "pattern": "^(?!0000)\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?(?:Z|\\+00:00)$"
+        },
+        "reason_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "probabilities": {
+          "type": "null"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "not_granted"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "model_id": {
+                "type": "null"
+              },
+              "forecast_id": {
+                "type": "null"
+              },
+              "cutoff_at": {
+                "type": "null"
+              },
+              "recorded_at": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "not_generated"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "model_id": {
+                "type": "string"
+              },
+              "forecast_id": {
+                "type": "null"
+              },
+              "cutoff_at": {
+                "type": "null"
+              },
+              "recorded_at": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "verification_required"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "model_id": {
+                "type": "string"
+              },
+              "forecast_id": {
+                "type": "string"
+              },
+              "cutoff_at": {
+                "type": "string",
+                "pattern": "T\\d{2}:\\d{2}:00(?:\\.0{1,6})?(?:Z|\\+00:00)$"
+              },
+              "recorded_at": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ],
+      "x-forecast-index-relations": "scope"
+    }
+  },
+  "x-forecast-index-relations": "top",
+  "$comment": "Runtime guards require cutoff<=recorded<=observed, exact UTC minute cutoff; microsecond comparisons are exact in Python/TS."
+}

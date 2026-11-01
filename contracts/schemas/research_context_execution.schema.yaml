@@ -1,0 +1,1086 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.local/contracts/research_context_execution.schema.json",
+  "title": "ResearchContextExecutionContracts",
+  "description": "Required selection declarations; strict shape is not source, clock, execution or publication permission.",
+  "$defs": {
+    "research_context_selection_row_identity_v3": {
+      "title": "ResearchContextSelectionRowIdentityV3",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "output_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^ctxsel_[a-f0-9]{64}$"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^context_select\\.r[1-9][0-9]?\\.a[1-9][0-9]{0,9}$"
+        },
+        "row_schema_version": {
+          "type": "string",
+          "const": "research-context-selection.v3"
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        }
+      },
+      "required": [
+        "output_id",
+        "run_id",
+        "role",
+        "row_schema_version",
+        "payload_hash",
+        "recorded_at"
+      ]
+    },
+    "research_context_execution_row_identity_v3": {
+      "title": "ResearchContextExecutionRowIdentityV3",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "output_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^dsh_execution_request:[1-9][0-9]{0,9}$"
+        },
+        "row_schema_version": {
+          "type": "string",
+          "const": "dsh-execution-request.v3"
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        }
+      },
+      "required": [
+        "output_id",
+        "run_id",
+        "role",
+        "row_schema_version",
+        "payload_hash",
+        "recorded_at"
+      ]
+    },
+    "research_required_context_selection_binding_v1": {
+      "title": "ResearchRequiredContextSelectionBindingV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "type": "string",
+          "const": "required_before_rpc"
+        },
+        "selection_schema": {
+          "type": "string",
+          "const": "research-context-selection.v3"
+        },
+        "ranking_rules_ref": {
+          "type": "string",
+          "const": "research-context.relevance-authority-recency.v2"
+        },
+        "time_rule_ref": {
+          "type": "string",
+          "const": "research-context.received-cutoff.v1"
+        },
+        "first_selection_row": {
+          "$ref": "#/$defs/research_context_selection_row_identity_v3"
+        },
+        "first_selection_payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "first_selection_full_request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "first_selection_full_request_hash_kind": {
+          "type": "string",
+          "const": "canonical_research_session_request.v1"
+        }
+      },
+      "required": [
+        "mode",
+        "selection_schema",
+        "ranking_rules_ref",
+        "time_rule_ref",
+        "first_selection_row",
+        "first_selection_payload_hash",
+        "first_selection_full_request_hash",
+        "first_selection_full_request_hash_kind"
+      ]
+    },
+    "research_execution_method_definition_v3": {
+      "title": "ResearchExecutionMethodDefinitionV3",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "research-execution-method.v3"
+        },
+        "runtime_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:.*\\S)?$"
+        },
+        "runtime_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:.*\\S)?$"
+        },
+        "profile_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:.*\\S)?$"
+        },
+        "prompt_policy_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "upstream_identity": {
+          "allOf": [
+            {
+              "$ref": "dsh_host_bridge.schema.yaml#/$defs/dsh_upstream_identity"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "source_commit": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{40}$",
+                  "minLength": 40,
+                  "maxLength": 40
+                },
+                "source_version": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128,
+                  "pattern": "^\\S(?:.*\\S)?$"
+                },
+                "plugin_build_hash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$",
+                  "minLength": 64,
+                  "maxLength": 64
+                },
+                "package_versions": {
+                  "type": "object",
+                  "minProperties": 0,
+                  "maxProperties": 64,
+                  "propertyNames": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^\\S(?:.*\\S)?$"
+                  },
+                  "additionalProperties": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^\\S(?:.*\\S)?$"
+                  }
+                }
+              },
+              "required": [
+                "source_commit",
+                "source_version",
+                "plugin_build_hash",
+                "package_versions"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "domain_pack_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:.*\\S)?$"
+        },
+        "role_profile_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:.*\\S)?$"
+        },
+        "execution_mode": {
+          "type": "string",
+          "enum": [
+            "live",
+            "replay"
+          ]
+        },
+        "research_mode": {
+          "type": "string",
+          "enum": [
+            "historical_review",
+            "current_decision"
+          ]
+        },
+        "context_policy_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "allowed_capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^\\S(?:.*\\S)?$"
+          },
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true
+        },
+        "execution_budget": {
+          "anyOf": [
+            {"$ref": "agentic_research.schema.yaml#/$defs/execution_budget"},
+            {"$ref": "agentic_research.schema.yaml#/$defs/execution_budget_v2"}
+          ]
+        },
+        "deadline_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "output_schema_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "pattern": "^\\S(?:.*\\S)?$"
+        },
+        "workspace_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "pattern": "^\\S(?:.*\\S)?$"
+        },
+        "agent_preset": {
+          "type": "string",
+          "const": "decision-research"
+        },
+        "permission_ref": {
+          "type": "string",
+          "const": "decision-hub://permissions/research-only"
+        },
+        "provider_configuration_attested": {
+          "type": "boolean",
+          "const": false
+        },
+        "evolution_pointer_consumed": {
+          "type": "boolean",
+          "const": false
+        },
+        "candidate_id": {
+          "type": "null"
+        },
+        "research_policy_renderer_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "research_policy_prompt_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "bundle": {
+          "$ref": "research_execution_binding.schema.yaml#/$defs/research_prepared_bundle_identity"
+        },
+        "policy_binding": {
+          "$ref": "research_policy.schema.yaml#/$defs/research_policy_method_binding"
+        },
+        "first_execution_request_hash_kind": {
+          "type": "string",
+          "const": "canonical_research_session_request.v1"
+        },
+        "request_pack_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "context_selection_binding": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/research_required_context_selection_binding_v1"
+            },
+            {
+              "$ref": "#/$defs/research_required_context_selection_binding_v2"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "runtime_id",
+        "runtime_version",
+        "profile_ref",
+        "prompt_policy_hash",
+        "upstream_identity",
+        "domain_pack_ref",
+        "role_profile_ref",
+        "execution_mode",
+        "research_mode",
+        "context_policy_hash",
+        "allowed_capabilities",
+        "execution_budget",
+        "deadline_at",
+        "output_schema_ref",
+        "workspace_ref",
+        "agent_preset",
+        "permission_ref",
+        "provider_configuration_attested",
+        "evolution_pointer_consumed",
+        "candidate_id",
+        "research_policy_renderer_hash",
+        "research_policy_prompt_hash",
+        "bundle",
+        "policy_binding",
+        "first_execution_request_hash_kind",
+        "request_pack_hash",
+        "context_selection_binding"
+      ]
+    },
+    "research_execution_method_receipt_v3": {
+      "title": "ResearchExecutionMethodReceiptV3",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "research-execution-method.v3"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:.*\\S)?$"
+        },
+        "request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "request_hash_kind": {
+          "type": "string",
+          "const": "dsh_link_identity.v1"
+        },
+        "method_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "definition": {
+          "$ref": "#/$defs/research_execution_method_definition_v3"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        }
+      },
+      "required": [
+        "schema_version",
+        "run_id",
+        "request_hash",
+        "request_hash_kind",
+        "method_hash",
+        "definition",
+        "recorded_at"
+      ]
+    },
+    "research_execution_request_receipt_v3": {
+      "title": "ResearchExecutionRequestReceiptV3",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "dsh-execution-request.v3"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:.*\\S)?$"
+        },
+        "dsh_session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "turn_kind": {
+          "type": "string",
+          "enum": [
+            "research_round",
+            "synthesis_repair"
+          ]
+        },
+        "link_request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "link_request_hash_kind": {
+          "type": "string",
+          "const": "dsh_link_identity.v1"
+        },
+        "task_request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "task_request_hash_kind": {
+          "type": "string",
+          "const": "canonical_research_session_request.v1"
+        },
+        "request": {
+          "$ref": "agentic_research.schema.yaml#/$defs/research_session_request"
+        },
+        "request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "request_hash_kind": {
+          "type": "string",
+          "const": "canonical_research_session_request.v1"
+        },
+        "execution_request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "execution_request_hash_kind": {
+          "type": "string",
+          "const": "dsh_link_identity.v1"
+        },
+        "first_execution_request_full_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "first_execution_request_full_hash_kind": {
+          "type": "string",
+          "const": "canonical_research_session_request.v1"
+        },
+        "method_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "bundle_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "current_selection_row": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/research_context_selection_row_identity_v3"
+            },
+            {
+              "$ref": "#/$defs/research_context_selection_row_identity_v4"
+            }
+          ]
+        },
+        "current_selection_payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "schema_version",
+        "run_id",
+        "dsh_session_id",
+        "request_id",
+        "generation",
+        "turn_kind",
+        "link_request_hash",
+        "link_request_hash_kind",
+        "task_request_hash",
+        "task_request_hash_kind",
+        "request",
+        "request_hash",
+        "request_hash_kind",
+        "execution_request_hash",
+        "execution_request_hash_kind",
+        "first_execution_request_full_hash",
+        "first_execution_request_full_hash_kind",
+        "method_hash",
+        "bundle_hash",
+        "recorded_at",
+        "current_selection_row",
+        "current_selection_payload_hash"
+      ]
+    },
+    "research_context_selection_execution_link_v2": {
+      "title": "ResearchContextSelectionExecutionLinkV2",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "research-context-selection-execution-link.v2"
+        },
+        "link_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 72,
+          "pattern": "^ctxlink_[a-f0-9]{64}$"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "selection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 71,
+          "pattern": "^ctxsel_[a-f0-9]{64}$"
+        },
+        "selection_row_identity": {
+          "$ref": "#/$defs/research_context_selection_row_identity_v3"
+        },
+        "selection_payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "graph_round": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "turn_kind": {
+          "type": "string",
+          "enum": [
+            "research_round",
+            "synthesis_repair"
+          ]
+        },
+        "dsh_session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "first_link_request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "first_link_request_hash_kind": {
+          "type": "string",
+          "const": "dsh_link_identity.v1"
+        },
+        "original_task_request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "original_task_request_hash_kind": {
+          "type": "string",
+          "const": "canonical_research_session_request.v1"
+        },
+        "bundle_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "selection_full_request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "selection_full_request_hash_kind": {
+          "type": "string",
+          "const": "canonical_research_session_request.v1"
+        },
+        "actual_execution_full_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "actual_execution_full_hash_kind": {
+          "type": "string",
+          "const": "canonical_research_session_request.v1"
+        },
+        "actual_execution_reduced_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "actual_execution_reduced_hash_kind": {
+          "type": "string",
+          "const": "dsh_link_identity.v1"
+        },
+        "method_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "execution_row_identity": {
+          "$ref": "#/$defs/research_context_execution_row_identity_v3"
+        },
+        "prompt_integrity_row_identity": {
+          "$ref": "research_context_selection.schema.yaml#/$defs/research_context_integrity_row_identity_v1"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "link_payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "link_payload_hash_kind": {
+          "type": "string",
+          "const": "canonical_context_selection_execution_link.v2"
+        },
+        "first_execution_request_full_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "first_execution_request_full_hash_kind": {
+          "type": "string",
+          "const": "canonical_research_session_request.v1"
+        }
+      },
+      "required": [
+        "schema_version",
+        "link_id",
+        "run_id",
+        "event_id",
+        "selection_id",
+        "selection_row_identity",
+        "selection_payload_hash",
+        "graph_round",
+        "generation",
+        "turn_kind",
+        "dsh_session_id",
+        "request_id",
+        "first_link_request_hash",
+        "first_link_request_hash_kind",
+        "original_task_request_hash",
+        "original_task_request_hash_kind",
+        "bundle_hash",
+        "selection_full_request_hash",
+        "selection_full_request_hash_kind",
+        "actual_execution_full_hash",
+        "actual_execution_full_hash_kind",
+        "actual_execution_reduced_hash",
+        "actual_execution_reduced_hash_kind",
+        "method_hash",
+        "execution_row_identity",
+        "prompt_integrity_row_identity",
+        "recorded_at",
+        "link_payload_hash",
+        "link_payload_hash_kind",
+        "first_execution_request_full_hash",
+        "first_execution_request_full_hash_kind"
+      ],
+      "x-max-canonical-utf8-bytes": 16384
+    },
+    "research_context_selection_row_identity_v4": {
+      "title": "ResearchContextSelectionRowIdentityV4",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "output_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^ctxsel_[a-f0-9]{64}$"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^context_select\\.r[1-9][0-9]?\\.a[1-9][0-9]{0,9}$"
+        },
+        "row_schema_version": {
+          "type": "string",
+          "const": "research-context-selection.v4"
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        }
+      },
+      "required": [
+        "output_id",
+        "run_id",
+        "role",
+        "row_schema_version",
+        "payload_hash",
+        "recorded_at"
+      ]
+    },
+    "research_required_context_selection_binding_v2": {
+      "title": "ResearchRequiredContextSelectionBindingV2",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "type": "string",
+          "const": "required_before_rpc"
+        },
+        "selection_schema": {
+          "type": "string",
+          "const": "research-context-selection.v4"
+        },
+        "ranking_rules_ref": {
+          "type": "string",
+          "const": "research-context.relevance-authority-recency-protected.v3"
+        },
+        "time_rule_ref": {
+          "type": "string",
+          "const": "research-context.received-cutoff.v1"
+        },
+        "first_selection_row": {
+          "$ref": "#/$defs/research_context_selection_row_identity_v4"
+        },
+        "first_selection_payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "first_selection_full_request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "first_selection_full_request_hash_kind": {
+          "type": "string",
+          "const": "canonical_research_session_request.v1"
+        }
+      },
+      "required": [
+        "mode",
+        "selection_schema",
+        "ranking_rules_ref",
+        "time_rule_ref",
+        "first_selection_row",
+        "first_selection_payload_hash",
+        "first_selection_full_request_hash",
+        "first_selection_full_request_hash_kind"
+      ]
+    },
+    "research_context_selection_execution_link_v3": {
+      "title": "ResearchContextSelectionExecutionLinkV3",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "research-context-selection-execution-link.v3"
+        },
+        "link_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 72,
+          "pattern": "^ctxlink_[a-f0-9]{64}$"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "selection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 71,
+          "pattern": "^ctxsel_[a-f0-9]{64}$"
+        },
+        "selection_row_identity": {
+          "$ref": "#/$defs/research_context_selection_row_identity_v4"
+        },
+        "selection_payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "graph_round": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "turn_kind": {
+          "type": "string",
+          "enum": [
+            "research_round",
+            "synthesis_repair"
+          ]
+        },
+        "dsh_session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "first_link_request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "first_link_request_hash_kind": {
+          "type": "string",
+          "const": "dsh_link_identity.v1"
+        },
+        "original_task_request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "original_task_request_hash_kind": {
+          "type": "string",
+          "const": "canonical_research_session_request.v1"
+        },
+        "bundle_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "selection_full_request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "selection_full_request_hash_kind": {
+          "type": "string",
+          "const": "canonical_research_session_request.v1"
+        },
+        "actual_execution_full_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "actual_execution_full_hash_kind": {
+          "type": "string",
+          "const": "canonical_research_session_request.v1"
+        },
+        "actual_execution_reduced_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "actual_execution_reduced_hash_kind": {
+          "type": "string",
+          "const": "dsh_link_identity.v1"
+        },
+        "method_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "execution_row_identity": {
+          "$ref": "#/$defs/research_context_execution_row_identity_v3"
+        },
+        "prompt_integrity_row_identity": {
+          "$ref": "research_context_selection.schema.yaml#/$defs/research_context_integrity_row_identity_v1"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "link_payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "link_payload_hash_kind": {
+          "type": "string",
+          "const": "canonical_context_selection_execution_link.v3"
+        },
+        "first_execution_request_full_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "first_execution_request_full_hash_kind": {
+          "type": "string",
+          "const": "canonical_research_session_request.v1"
+        }
+      },
+      "required": [
+        "schema_version",
+        "link_id",
+        "run_id",
+        "event_id",
+        "selection_id",
+        "selection_row_identity",
+        "selection_payload_hash",
+        "graph_round",
+        "generation",
+        "turn_kind",
+        "dsh_session_id",
+        "request_id",
+        "first_link_request_hash",
+        "first_link_request_hash_kind",
+        "original_task_request_hash",
+        "original_task_request_hash_kind",
+        "bundle_hash",
+        "selection_full_request_hash",
+        "selection_full_request_hash_kind",
+        "actual_execution_full_hash",
+        "actual_execution_full_hash_kind",
+        "actual_execution_reduced_hash",
+        "actual_execution_reduced_hash_kind",
+        "method_hash",
+        "execution_row_identity",
+        "prompt_integrity_row_identity",
+        "recorded_at",
+        "link_payload_hash",
+        "link_payload_hash_kind",
+        "first_execution_request_full_hash",
+        "first_execution_request_full_hash_kind"
+      ],
+      "x-max-canonical-utf8-bytes": 16384
+    }
+  }
+}

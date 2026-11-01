@@ -7,10 +7,16 @@ import pytest
 from packages.evals.research_dataset import load_research_evaluation_dataset
 from tools.research_evaluation.run_runtime_comparison import (
     DEFAULT_DATASET,
+    _budget,
     main,
     require_live_authorization,
     select_case,
 )
+
+
+def test_live_comparison_preserves_room_for_slow_structured_model_steps() -> None:
+    assert _budget(420, 1.0).per_model_step_timeout_seconds == 240
+    assert _budget(90, 1.0).per_model_step_timeout_seconds == 90
 
 
 def test_live_comparison_requires_explicit_authorization(

@@ -2,8 +2,9 @@
 set -euo pipefail
 
 # Single-owner product launcher. It starts the Hub control plane and workers in
-# one compose project, then exposes the pinned official DSH Web as the only
-# user-facing URL. Replay remains an explicit acceptance command.
+# one compose project, then exposes the Decision Desk as the business UI and
+# the pinned official DSH Web as the optional trajectory/debug console. Replay
+# remains an explicit acceptance command.
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 compose_file="$repo_root/compose.yaml"
 dsh_port="${DSH_PRODUCT_PORT:-3080}"
@@ -46,6 +47,7 @@ export DECISION_HUB_DSH_CALLBACK_KEY="$callback_key"
 export DECISION_HUB_DSH_CALLBACK_SECRET="$callback_key"
 export DECISION_HUB_DSH_RESEARCH_TOOL_KEY="$research_tool_key"
 export DECISION_HUB_DSH_WORKSPACE_CWD="$workspace_cwd"
+export DECISION_HUB_SKILL_DIR="${DECISION_HUB_SKILL_DIR:-$repo_root/packs/crypto_macro/skills}"
 export DECISION_HUB_DSH_RUNTIME_MODE=live
 export DECISION_HUB_DSH_WEB_URL="${DECISION_HUB_DSH_WEB_URL:-http://127.0.0.1:$dsh_port}"
 # The Web process runs on the host while the research worker runs in Compose.
@@ -58,7 +60,23 @@ export DECISION_HUB_API_URL="${DECISION_HUB_API_URL:-http://127.0.0.1:$api_port}
 export DECISION_HUB_DESK_URL="${DECISION_HUB_DESK_URL:-$DECISION_HUB_API_URL}"
 export DECISION_HUB_RESEARCH_RUNTIME=dsh-web
 export DECISION_HUB_RESEARCH_EXECUTION_MODE=live
-research_capabilities="${DECISION_HUB_RESEARCH_CAPABILITIES:-official.macro,market.cross_asset,market.crypto_derivatives,web.fetch}"
+default_capabilities="official.macro,market.cross_asset,market.crypto_derivatives,web.fetch,document.readback,data.historical"
+search_canary_status="${DECISION_HUB_SEARCH_CANARY_STATUS:-}"
+if [[ -z "$search_canary_status" && -f "$credential_file" ]]; then
+  while IFS='=' read -r name value; do
+    if [[ "$name" == "DECISION_HUB_SEARCH_CANARY_STATUS" ]]; then
+      search_canary_status="${value%\"}"
+      search_canary_status="${search_canary_status#\"}"
+      search_canary_status="${search_canary_status%\'}"
+      search_canary_status="${search_canary_status#\'}"
+      break
+    fi
+  done < "$credential_file"
+fi
+if [[ "$search_canary_status" == "passed" ]]; then
+  default_capabilities="$default_capabilities,web.search"
+fi
+research_capabilities="${DECISION_HUB_RESEARCH_CAPABILITIES:-$default_capabilities}"
 research_capabilities="${research_capabilities//[[:space:]]/}"
 if [[ -z "$research_capabilities" ]]; then
   echo "live product requires at least one approved research capability" >&2
@@ -150,7 +168,7 @@ then
   exit 1
 fi
 
-echo "Starting official DSH Web; this is the only user-facing URL." >&2
+echo "Starting official DSH Web; it is the internal research/trajectory console." >&2
 web_log="$(mktemp -t decision-hub-dsh-web.XXXXXX.log)"
 cookie_jar="$(mktemp -t decision-hub-dsh-cookie.XXXXXX)"
 "$repo_root/infra/dsh/run-live-web.sh" --port "$dsh_port" >"$web_log" 2>&1 &
@@ -223,6 +241,9 @@ if [[ "$research_worker_running" != true ]]; then
 fi
 
 printf 'DSH_URL=%s\n' "$dsh_url"
+printf 'DSH_TRAJECTORY_URL=%s\n' "$dsh_url"
+printf 'DECISION_DESK_URL=%s/\n' "${DECISION_HUB_DESK_URL%/}"
+printf 'USER_ENTRY=DECISION_DESK_URL\n'
 printf 'COMPOSE_PROJECT=%s\n' "$compose_project"
 printf 'TRADER_WORKSPACE=%s\n' "$workspace_cwd"
 printf 'Product is ready. Keep this process running while using the DSH Web URL.\n'

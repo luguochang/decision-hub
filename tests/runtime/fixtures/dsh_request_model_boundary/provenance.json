@@ -1,0 +1,33 @@
+{
+  "schema_version": "controlled-host-regression-fixtures.v1",
+  "run_id": "run_c5f94b84c83c431cb6df0385e0d43b84",
+  "dsh_session_id": "dsh_aa703d32ef76ecedb30714c68bf00d009d916cce7cbaf35c610e1ac5da324611",
+  "source_attempt": "D:/DH-host-q043nh06",
+  "source_database": "D:/DH-host-q043nh06/hub-data/db/decision_hub.sqlite3",
+  "source_query": "run_role_outputs WHERE run_id=? AND role IN (dsh_execution_request:1,research_execution_method), mode=ro",
+  "common_secret_fields_or_patterns_present": false,
+  "nested_JSON_strings_scanned": true,
+  "controlled_replay": true,
+  "live_provider_or_financial_qualification": false,
+  "original_error": "ResearchSessionResult.context_manifest model_type, original340B kept in independent evidence",
+  "files": [
+    {
+      "file": "execution-request.json",
+      "bytes": 15816,
+      "sha256": "c584349231fe00fc33b038856bb12e802d170b2f5cab256d6e36d420f0a25390",
+      "Main_destination": "tests/runtime/fixtures/dsh_request_model_boundary/execution-request.json"
+    },
+    {
+      "file": "host-result.json",
+      "bytes": 145822,
+      "sha256": "446d39a95128c387aebe5fd14c3fb5c30faeaad01c643995630a668c2acde4ec",
+      "Main_destination": "tests/runtime/fixtures/dsh_request_model_boundary/host-result.json"
+    },
+    {
+      "file": "method.json",
+      "bytes": 5635,
+      "sha256": "d1f22aab0f446638b69bb86bdf215dffdab7fe29195226f9216ab912fca78e1f",
+      "Main_destination": "tests/runtime/fixtures/dsh_request_model_boundary/method.json"
+    }
+  ]
+}

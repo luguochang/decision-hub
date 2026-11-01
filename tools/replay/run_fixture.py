@@ -6,7 +6,7 @@ import hashlib
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -20,16 +20,20 @@ from packages.kernel.decision_hub_kernel.ports.runtime import AgentRuntime
 from packages.orchestration.langgraph import build_analyze_text_service
 from packages.runtime_adapters.replay_runtime.runtime import ReplayAgentRuntime
 
+REPLAY_SCORER_VERSION = "replay.direction.v2"
+
 
 class ReplayOutcome(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
     horizon: str
     return_pct: float
-    direction_correct: bool
+    # Legacy labels remain readable, but never determine a candidate's score.
+    direction_correct: bool | None = None
+    return_basis: Literal["market"] | None = None
     available_at: datetime
-    fees: float = 0
-    slippage: float = 0
+    fees: float = Field(default=0, ge=0)
+    slippage: float = Field(default=0, ge=0)
     quality_status: str = "fixture"
 
 
@@ -46,7 +50,10 @@ class ReplayFixture(BaseModel):
 class ReplayReport(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    schema_version: str = "replay-report.v1"
+    schema_version: str = "replay-report.v2"
+    scorer_version: str = REPLAY_SCORER_VERSION
+    scored_outcomes: list[dict[str, Any]] = Field(default_factory=list)
+    abstention_count: int = 0
     fixture_id: str
     split: str
     snapshot_cutoff_at: str | None
@@ -72,6 +79,20 @@ class ReplayReport(BaseModel):
     evidence_coverage: float | None = None
     directional_accuracy: float | None = None
     failure_counts: dict[str, int] = Field(default_factory=dict)
+
+
+def validate_replay_labels(data: ReplayFixture) -> None:
+    if len({item.horizon for item in data.outcomes}) != len(data.outcomes):
+        raise ValueError("replay_duplicate_outcome_horizon")
+    for item in data.outcomes:
+        if item.return_basis != "market":
+            raise ValueError("replay_market_return_basis_required")
+        if (
+            data.received_at.tzinfo is None
+            or item.available_at.tzinfo is None
+            or item.available_at <= data.received_at
+        ):
+            raise ValueError("replay_outcome_time_invalid")
 
 
 def _artifact_fingerprint(artifact: Any) -> str | None:
@@ -110,7 +131,8 @@ async def run_fixture(
     strategy_version: str = "baseline.v1",
     runtime: AgentRuntime | None = None,
 ) -> dict[str, object]:
-    data = ReplayFixture.model_validate_json(fixture.read_text())
+    data = ReplayFixture.model_validate_json(fixture.read_text(encoding="utf-8"))
+    validate_replay_labels(data)
     database = Database(f"sqlite+pysqlite:///{database_path}")
     database.create_all()
     selected_runtime = runtime or ReplayAgentRuntime()
@@ -124,19 +146,47 @@ async def run_fixture(
     inspector = database.get_run_inspector(run_id)
     if run is None or inspector is None:
         raise RuntimeError("replay did not produce a run inspector")
-    forecasts_by_horizon = {
-        item.horizon: item for item in inspector.artifact.forecasts
-    } if inspector.artifact else {}
+    forecasts_by_horizon = (
+        {item.horizon: item for item in inspector.artifact.forecasts} if inspector.artifact else {}
+    )
     outcomes = OutcomeService(database)
+    scored_outcomes = []
+    abstention_count = 0
     for label in data.outcomes:
         forecast = forecasts_by_horizon.get(label.horizon)
         if forecast is None:
             raise ValueError(f"fixture outcome has no forecast horizon: {label.horizon}")
+        directional_return = (
+            label.return_pct
+            if forecast.direction.value == "long"
+            else -label.return_pct
+            if forecast.direction.value == "short"
+            else None
+        )
+        scored_outcomes.append(
+            {
+                "horizon": label.horizon,
+                "available_at": label.available_at.isoformat(),
+                "market_return_pct": label.return_pct,
+                "direction": forecast.direction.value,
+                "probability": forecast.probability,
+                "directional_return_pct": directional_return,
+                "direction_correct": directional_return > 0
+                if directional_return is not None
+                else None,
+                "fees": label.fees,
+                "slippage": label.slippage,
+                "excluded_reason": "abstention" if directional_return is None else None,
+            }
+        )
+        if directional_return is None:
+            abstention_count += 1
+            continue
         outcomes.record(
             OutcomeCreate(
                 forecast_id=forecast.forecast_id,
-                return_pct=label.return_pct,
-                direction_correct=label.direction_correct,
+                return_pct=directional_return,
+                direction_correct=directional_return > 0,
                 fees=label.fees,
                 slippage=label.slippage,
                 quality_status=label.quality_status,
@@ -146,8 +196,7 @@ async def run_fixture(
     if inspector is None:
         raise RuntimeError("replay inspector disappeared after outcome evaluation")
     mean_brier_score = (
-        sum(item.brier_score for item in inspector.evaluations)
-        / len(inspector.evaluations)
+        sum(item.brier_score for item in inspector.evaluations) / len(inspector.evaluations)
         if inspector.evaluations
         else None
     )
@@ -157,12 +206,12 @@ async def run_fixture(
         else None
     )
     report = ReplayReport(
+        scored_outcomes=scored_outcomes,
+        abstention_count=abstention_count,
         fixture_id=data.fixture_id,
         split=data.split,
         snapshot_cutoff_at=(
-            inspector.snapshot_cutoff_at.isoformat()
-            if inspector.snapshot_cutoff_at
-            else None
+            inspector.snapshot_cutoff_at.isoformat() if inspector.snapshot_cutoff_at else None
         ),
         snapshot_hash=inspector.snapshot_hash,
         strategy_version=strategy_version,
@@ -173,24 +222,16 @@ async def run_fixture(
         gate_status=run.gate_status.value if run.gate_status else None,
         latency_ms=run.latency_ms,
         cost_usd=run.cost_usd,
-        cost_status=(
-            "estimated"
-            if run.cost_usd is not None
-            else "unknown"
-        ),
+        cost_status=("estimated" if run.cost_usd is not None else "unknown"),
         call_count=len(inspector.calls),
         evaluation_count=inspector.evaluation_count,
         mean_brier_score=mean_brier_score,
         net_return_pct=net_return_pct,
         forecast_horizons=(
-            [item.horizon for item in inspector.artifact.forecasts]
-            if inspector.artifact
-            else []
+            [item.horizon for item in inspector.artifact.forecasts] if inspector.artifact else []
         ),
         error_codes=sorted(
-            {
-                item.error_code for item in inspector.calls if item.error_code is not None
-            }
+            {item.error_code for item in inspector.calls if item.error_code is not None}
         ),
         artifact_fingerprint=_artifact_fingerprint(inspector.artifact),
         stage=data.split if data.split in {"replay", "holdout", "shadow"} else "replay",
@@ -198,8 +239,7 @@ async def run_fixture(
         evidence_coverage=(
             min(
                 1.0,
-                len(inspector.artifact.citations)
-                / max(1, len(inspector.artifact.facts)),
+                len(inspector.artifact.citations) / max(1, len(inspector.artifact.facts)),
             )
             if inspector.artifact
             else None
@@ -219,6 +259,9 @@ async def run_fixture(
     )
     return {
         "fixture_id": data.fixture_id,
+        "scorer_version": report.scorer_version,
+        "scored_outcomes": report.scored_outcomes,
+        "abstention_count": report.abstention_count,
         "event_id": event_id,
         "run_id": run_id,
         "admitted": admitted,

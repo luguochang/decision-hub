@@ -5,6 +5,7 @@ import hashlib
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, cast
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -12,6 +13,7 @@ from apps.hub_worker.composition import build_research_worker
 from apps.hub_worker.research import DurableResearchWorker, ResearchRequestFactory
 from packages.contracts_py.decision_hub_contracts import (
     ObservationCreate,
+    ResearchReview,
     ResearchSessionRequest,
     ResearchSessionResult,
 )
@@ -21,6 +23,13 @@ from packages.kernel.decision_hub_kernel.application.commit import CommitDecisio
 from packages.kernel.decision_hub_kernel.application.event_watch import EventWatchService
 from packages.kernel.decision_hub_kernel.application.research_evidence import (
     research_evidence_content_hash,
+)
+from packages.kernel.decision_hub_kernel.application.research_observability import (
+    ResearchObservabilityService,
+)
+from packages.kernel.decision_hub_kernel.application.research_review import (
+    independent_review_receipt_hash,
+    research_result_content_hash,
 )
 from packages.kernel.decision_hub_kernel.application.run import RunService
 from packages.kernel.decision_hub_kernel.application.snapshot import SnapshotService
@@ -205,6 +214,50 @@ class FakeResearchRuntime:
         return None
 
 
+class NativeReviewResearchRuntime(FakeResearchRuntime):
+    def __init__(self) -> None:
+        super().__init__()
+        self.native_review: ResearchReview | None = None
+
+    async def execute(
+        self, request: ResearchSessionRequest, trace_sink: Any = None
+    ) -> ResearchSessionResult:
+        del trace_sink
+        self.requests.append(request)
+        result = _result(request)
+        evidence_ref = result.evidence_candidates[0].evidence_id
+        digest = independent_review_receipt_hash(
+            role="independent_reviewer",
+            target_claim=result.causal_case.thesis if result.causal_case else "No claim.",
+            evidence_refs=[evidence_ref],
+            challenge="The immediate response may reflect prior positioning.",
+            resolution="bounded",
+            limitations=["Rates and USD confirmation remain unavailable."],
+        )
+        self.native_review = ResearchReview(
+            review_id=f"review_{digest[:32]}",
+            role="independent_reviewer",
+            target_claim=result.causal_case.thesis if result.causal_case else "No claim.",
+            evidence_refs=[evidence_ref],
+            result_hash=research_result_content_hash(result),
+            challenge="The immediate response may reflect prior positioning.",
+            resolution="bounded",
+            limitations=["Rates and USD confirmation remain unavailable."],
+            created_at=NOW,
+        )
+        return result.model_copy(update={"reviews": [self.native_review]})
+
+
+class InvalidNativeReviewResearchRuntime(NativeReviewResearchRuntime):
+    async def execute(
+        self, request: ResearchSessionRequest, trace_sink: Any = None
+    ) -> ResearchSessionResult:
+        result = await super().execute(request, trace_sink=trace_sink)
+        assert result.reviews
+        invalid = result.reviews[0].model_copy(update={"result_hash": "d" * 64})
+        return result.model_copy(update={"reviews": [invalid]})
+
+
 def _admitted_run(tmp_path: Path) -> tuple[Database, str, str]:
     database = Database(f"sqlite+pysqlite:///{tmp_path / 'worker.sqlite3'}")
     database.create_all()
@@ -294,6 +347,65 @@ def test_research_request_projects_retrospective_watch_without_faking_baseline(
     )
 
 
+def test_research_request_applies_event_family_evidence_policy(tmp_path: Path) -> None:
+    database, event_id, run_id = _admitted_run(tmp_path)
+    EventWatchService(database, clock=lambda: NOW).ensure_watch(
+        event_id=event_id,
+        source_id="manual-text",
+        event_family="geopolitical_shock",
+        scheduled_at=NOW - timedelta(days=1),
+        window_offsets=("t-5m", "t+1m"),
+    )
+
+    request = ResearchRequestFactory(
+        database,
+        pack_root=PACK_ROOT,
+        execution_mode="replay",
+        clock=lambda: NOW,
+    ).build(event_id, run_id)
+    importance = {
+        item.requirement_id: item.importance for item in request.evidence_requirements
+    }
+
+    assert importance["expectation_pricing"] == "soft"
+    assert importance["macro_transmission"] == "soft"
+    assert importance["crypto_spot_confirmation"] == "hard"
+    assert importance["derivatives_crowding"] == "hard"
+    assert request.task_policy_ref.startswith("crypto_macro.research.v1:")
+
+
+def test_research_request_uses_admitted_event_family_without_watch(tmp_path: Path) -> None:
+    database = Database(f"sqlite+pysqlite:///{tmp_path / 'geopolitical.sqlite3'}")
+    database.create_all()
+    event_id, _, admitted = AdmissionService(database, clock=lambda: NOW).admit(
+        ObservationCreate(
+            text="A geopolitical event occurred while listed US markets were closed.",
+            source_id="manual-text",
+            source_type=SourceType.transcript,
+            observed_at=NOW - timedelta(seconds=2),
+            published_at=NOW - timedelta(seconds=3),
+            language="en",
+            event_hint="geopolitical_shock",
+        )
+    )
+    assert admitted
+    run_id, _ = RunService(database).create(event_id, strategy_version="research.v1")
+
+    request = ResearchRequestFactory(
+        database,
+        pack_root=PACK_ROOT,
+        execution_mode="replay",
+        clock=lambda: NOW,
+    ).build(event_id, run_id)
+    importance = {
+        item.requirement_id: item.importance for item in request.evidence_requirements
+    }
+
+    assert request.event_watch is None
+    assert importance["expectation_pricing"] == "soft"
+    assert importance["macro_transmission"] == "soft"
+
+
 def test_research_request_bounds_long_source_excerpt_without_changing_snapshot_hash(
     tmp_path: Path,
 ) -> None:
@@ -333,8 +445,7 @@ def test_research_worker_projects_agentic_result_into_existing_ledger(tmp_path: 
         runtime,
         pack_root=PACK_ROOT,
         execution_mode="replay",
-        # Replay fixtures own their clock; wall-clock time must not change
-        # whether the deterministic next-review child is scheduled.
+        # Replay fixtures own their clock; review times remain advisory.
         clock=lambda: NOW,
     )
 
@@ -366,13 +477,78 @@ def test_research_worker_projects_agentic_result_into_existing_ledger(tmp_path: 
         assert outbox.artifact_id == report.artifact_id
         assert outbox.dedupe_key == f"artifact:{report.artifact_id}:local"
     event_types = [item.event_type for item in database.get_timeline(run_id)]
-    assert set(event_types) == {
+    assert set(event_types) >= {
         "decision.committed",
         "research.agentic.completed",
-        "research.recheck.scheduled",
+        "research.task_policy.created",
+        "research.review.created",
     }
+    task_policy = database.find_role_output(run_id, "task_policy")
+    review = database.find_role_output(run_id, "independent_reviewer")
+    assert task_policy is not None
+    assert task_policy[1]["policy_version"] == "v1"
+    assert review is not None
+    assert review[1]["result_hash"]
 
     assert asyncio.run(worker.tick()) is None
+
+
+def test_research_worker_preserves_native_dsh_review_in_result_and_role_output(
+    tmp_path: Path,
+) -> None:
+    database, _event_id, run_id = _admitted_run(tmp_path)
+    runtime = NativeReviewResearchRuntime()
+    worker = DurableResearchWorker(
+        database,
+        runtime,
+        pack_root=PACK_ROOT,
+        execution_mode="replay",
+        clock=lambda: NOW,
+    )
+
+    report = asyncio.run(worker.tick())
+
+    assert report is not None
+    assert runtime.native_review is not None
+    stored = database.find_role_output(run_id, "independent_reviewer")
+    assert stored is not None
+    stored_review = ResearchReview.model_validate(stored[1])
+    assert stored_review.model_dump(exclude={"result_hash"}) == (
+        runtime.native_review.model_dump(exclude={"result_hash"})
+    )
+    result = ResearchObservabilityService(database).get_result(run_id)
+    assert result is not None
+    assert result.reviews == [stored_review]
+    assert stored_review.result_hash == research_result_content_hash(result)
+
+
+def test_research_worker_replaces_invalid_native_review_with_bounded_review(
+    tmp_path: Path,
+) -> None:
+    database, _event_id, run_id = _admitted_run(tmp_path)
+    runtime = InvalidNativeReviewResearchRuntime()
+    worker = DurableResearchWorker(
+        database,
+        runtime,
+        pack_root=PACK_ROOT,
+        execution_mode="replay",
+        clock=lambda: NOW,
+    )
+    request = worker.factory.build(_event_id, run_id)
+    invalid_result = asyncio.run(runtime.execute(request))
+    worker.executor.execute = AsyncMock(
+        return_value={"final_result": invalid_result.model_dump(mode="json")}
+    )
+
+    report = asyncio.run(worker.tick())
+
+    assert report is not None
+    assert report.status == "research_only"
+    stored = database.find_role_output(run_id, "independent_reviewer")
+    assert stored is not None
+    stored_review = ResearchReview.model_validate(stored[1])
+    assert stored_review.resolution == "bounded"
+    assert stored_review.result_hash
 
 
 def test_research_worker_marks_runtime_failure_and_keeps_no_artifact(tmp_path: Path) -> None:
@@ -396,7 +572,8 @@ def test_research_worker_marks_runtime_failure_and_keeps_no_artifact(tmp_path: P
     with database.session() as session:
         assert session.query(OutboxRecord).count() == 0
     assert [item.event_type for item in database.get_timeline(run_id)] == [
-        "research.agentic.failed"
+        "research.task_policy.created",
+        "research.agentic.failed",
     ]
 
 
@@ -596,6 +773,68 @@ def test_manual_research_claims_ahead_of_older_automatic_and_scheduled_runs(
     assert third is not None and third.run_id == scheduled_id
 
 
+def test_priority_lane_only_claims_manual_runs(tmp_path: Path) -> None:
+    database = Database(f"sqlite+pysqlite:///{tmp_path / 'priority-lane.sqlite3'}")
+    database.create_all()
+    runs = RunService(database, clock=lambda: NOW)
+    scheduled_id, _ = runs.create(
+        "event-scheduled",
+        strategy_version="research.v1",
+        admission_origin="scheduled_recheck",
+        priority=10,
+    )
+    manual_id, _ = runs.create(
+        "event-manual",
+        strategy_version="research.v1",
+        admission_origin="manual",
+        priority=100,
+    )
+
+    claim = runs.claim_next(
+        strategy_version="research.v1",
+        worker_id="worker-priority-lane",
+        lease_seconds=60,
+        min_priority=100,
+    )
+    assert claim is not None and claim.run_id == manual_id
+    runs.set_status(manual_id, RunStatus.completed)
+    assert runs.claim_next(
+        strategy_version="research.v1",
+        worker_id="worker-priority-lane",
+        lease_seconds=60,
+        min_priority=100,
+    ) is None
+    assert database.get_run_record(scheduled_id).status == RunStatus.admitted.value
+
+
+def test_research_worker_renews_long_dsh_run_lease(tmp_path: Path) -> None:
+    database, _event_id, _run_id = _admitted_run(tmp_path)
+    worker = DurableResearchWorker(
+        database,
+        FakeResearchRuntime(),
+        pack_root=PACK_ROOT,
+        worker_id="lease-renewer",
+        lease_seconds=3,
+    )
+    calls: list[tuple[str, str, int]] = []
+
+    def renew(run_id: str, worker_id: str, *, lease_seconds: int) -> bool:
+        calls.append((run_id, worker_id, lease_seconds))
+        return False
+
+    worker.runs.renew_lease = renew  # type: ignore[method-assign]
+
+    async def exercise() -> None:
+        task = asyncio.create_task(worker._renew_lease_while_running("run-lease"))
+        await asyncio.sleep(1.2)
+        task.cancel()
+        await asyncio.gather(task, return_exceptions=True)
+
+    asyncio.run(exercise())
+
+    assert calls == [("run-lease", "lease-renewer", 3)]
+
+
 def test_equal_priority_claim_has_stable_run_id_tiebreak(tmp_path: Path) -> None:
     database = Database(f"sqlite+pysqlite:///{tmp_path / 'priority-tie.sqlite3'}")
     database.create_all()
@@ -622,7 +861,7 @@ def test_equal_priority_claim_has_stable_run_id_tiebreak(tmp_path: Path) -> None
     assert claimed == sorted(run_ids)
 
 
-def test_research_commit_schedules_one_idempotent_child_run_at_next_review(
+def test_research_commit_preserves_review_advice_without_scheduling_a_child(
     tmp_path: Path,
 ) -> None:
     database, event_id, run_id = _admitted_run(tmp_path)
@@ -637,26 +876,11 @@ def test_research_commit_schedules_one_idempotent_child_run_at_next_review(
     assert second_artifact == first_artifact
     with database.session() as session:
         children = session.query(RunRecord).filter_by(parent_run_id=run_id).all()
-    assert len(children) == 1
-    child = children[0]
-    assert child.strategy_version == "research.v1"
-    assert child.available_at == (NOW + timedelta(minutes=10)).replace(tzinfo=None)
-    assert (
-        RunService(database, clock=lambda: NOW + timedelta(minutes=9)).claim_next(
-            strategy_version="research.v1",
-            worker_id="research-before-review",
-            lease_seconds=30,
-        )
-        is None
+    assert children == []
+    claimed = RunService(database, clock=lambda: NOW + timedelta(minutes=11)).claim_next(
+        strategy_version="research.v1", worker_id="research-after-advisory", lease_seconds=30,
     )
-    claimed = RunService(
-        database, clock=lambda: NOW + timedelta(minutes=11)
-    ).claim_next(
-        strategy_version="research.v1",
-        worker_id="research-at-review",
-        lease_seconds=30,
-    )
-    assert claimed is not None and claimed.run_id == child.run_id
+    assert claimed is None
 
 
 def test_research_worker_resumes_expired_checkpoint_and_commits_once(tmp_path: Path) -> None:

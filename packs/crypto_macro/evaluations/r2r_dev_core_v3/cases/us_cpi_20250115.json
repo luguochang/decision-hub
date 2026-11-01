@@ -1,0 +1,1090 @@
+{
+  "schema_version": "research-evaluation-case.v1",
+  "case_id": "us_cpi_20250115",
+  "event_family": "inflation_release",
+  "input_text": "US CPI rose 0.4 percent in December 2024 and 2.9 percent over twelve months.",
+  "trigger_evidence": {
+    "evidence_id": "trigger_us_cpi_20250115",
+    "kind": "transcript",
+    "authority": "unverified",
+    "source_id": "evaluation-catalog",
+    "source_url": "https://www.bls.gov/news.release/archives/cpi_01152025.htm",
+    "published_at": "2025-01-15T13:30:00Z",
+    "observed_at": "2025-01-15T13:30:00Z",
+    "received_at": "2025-01-15T13:30:02Z",
+    "content_hash": "b724a68953ded604054f946e76fb172d70e353a087a4d8e4181ee0ea253de3b6",
+    "excerpt": "US CPI rose 0.4 percent in December 2024 and 2.9 percent over twelve months."
+  },
+  "evidence_requirements": [
+    {
+      "requirement_id": "event_identity",
+      "description": "Identify the primary event, speaker or document, event time and revision status.",
+      "importance": "hard",
+      "source_priority": [
+        "official",
+        "verified_web"
+      ],
+      "authority_floor": "official",
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "freshness_seconds": 604800,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "confidence_cap": 0.45,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "policy_or_data_delta",
+      "description": "Establish what changed relative to prior wording, prior value or consensus.",
+      "importance": "hard",
+      "source_priority": [
+        "official",
+        "audited_aggregator",
+        "verified_web"
+      ],
+      "authority_floor": "official",
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "freshness_seconds": 86400,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "confidence_cap": 0.5,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "expectation_pricing",
+      "description": "Observe policy expectations, rates repricing or credible positioning evidence.",
+      "importance": "hard",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "macro.expectation_pricing",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 900,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "macro.expectation_pricing",
+        "market.cross_asset",
+        "web.search",
+        "web.search.tavily"
+      ],
+      "confidence_cap": 0.55,
+      "accepted_metric_families": [
+        "macro.policy_expectation"
+      ],
+      "required_metric_families": [
+        "macro.policy_expectation"
+      ],
+      "required_fields": [
+        "level",
+        "delta"
+      ],
+      "required_event_offsets": [
+        "baseline",
+        "t-5m"
+      ],
+      "unit_policy": "field_map.v1",
+      "field_units": {
+        "level": [
+          "probability",
+          "percent",
+          "bps",
+          "yield_percent"
+        ],
+        "delta": [
+          "percentage_point",
+          "bps"
+        ]
+      },
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [
+        "realtime"
+      ],
+      "semantic_policy_ref": "crypto_macro.fact_semantics.v1#expectation_pricing"
+    },
+    {
+      "requirement_id": "macro_transmission",
+      "description": "Observe the rates and USD transmission path relevant to the event.",
+      "importance": "hard",
+      "source_priority": [
+        "official",
+        "exchange",
+        "audited_aggregator"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "macro.cross_asset_intraday",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 600,
+      "minimum_independent_sources": 2,
+      "allowed_fallbacks": [
+        "macro.cross_asset_intraday",
+        "market.cross_asset",
+        "web.search",
+        "web.search.tavily"
+      ],
+      "confidence_cap": 0.55,
+      "accepted_metric_families": [
+        "macro.rates",
+        "macro.usd"
+      ],
+      "required_metric_families": [
+        "macro.rates",
+        "macro.usd"
+      ],
+      "required_fields": [
+        "level",
+        "event_return"
+      ],
+      "required_event_offsets": [
+        "t-5m",
+        "t+1m"
+      ],
+      "unit_policy": "field_map.v1",
+      "field_units": {
+        "level": [
+          "yield_percent",
+          "index"
+        ],
+        "event_return": [
+          "bps",
+          "percent"
+        ]
+      },
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 2,
+      "allowed_delay_classes": [
+        "realtime"
+      ],
+      "semantic_policy_ref": "crypto_macro.fact_semantics.v1#macro_transmission"
+    },
+    {
+      "requirement_id": "cross_asset_confirmation",
+      "description": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation.",
+      "importance": "soft",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ],
+      "authority_floor": "verified_web",
+      "preferred_capabilities": [
+        "macro.cross_asset_intraday",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 600,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "macro.cross_asset_intraday",
+        "market.cross_asset",
+        "web.search",
+        "web.search.tavily"
+      ],
+      "confidence_cap": 0.65,
+      "accepted_metric_families": [
+        "cross_asset.equity",
+        "cross_asset.volatility",
+        "cross_asset.commodity",
+        "cross_asset.credit"
+      ],
+      "required_metric_families": [],
+      "required_fields": [
+        "level",
+        "event_return"
+      ],
+      "required_event_offsets": [
+        "t-5m",
+        "t+1m"
+      ],
+      "unit_policy": "field_map.v1",
+      "field_units": {
+        "level": [
+          "price",
+          "index",
+          "spread_bps"
+        ],
+        "event_return": [
+          "percent",
+          "bps"
+        ]
+      },
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [
+        "realtime"
+      ],
+      "semantic_policy_ref": "crypto_macro.fact_semantics.v1#cross_asset_confirmation"
+    },
+    {
+      "requirement_id": "crypto_spot_confirmation",
+      "description": "Observe BTC spot reaction, volume and the event-time comparison window.",
+      "importance": "hard",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "freshness_seconds": 600,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [],
+      "confidence_cap": 0.5,
+      "accepted_metric_families": [
+        "crypto.spot"
+      ],
+      "required_metric_families": [
+        "crypto.spot"
+      ],
+      "required_fields": [
+        "price",
+        "volume",
+        "event_return"
+      ],
+      "required_event_offsets": [
+        "t-5m",
+        "t+1m"
+      ],
+      "unit_policy": "field_map.v1",
+      "field_units": {
+        "price": [
+          "usd",
+          "usdt"
+        ],
+        "volume": [
+          "btc",
+          "usd",
+          "usdt"
+        ],
+        "event_return": [
+          "percent"
+        ]
+      },
+      "minimum_venues": 1,
+      "venue_required": true,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [
+        "realtime"
+      ],
+      "semantic_policy_ref": "crypto_macro.fact_semantics.v1#crypto_spot_confirmation"
+    },
+    {
+      "requirement_id": "derivatives_crowding",
+      "description": "Observe funding, open interest, basis and available liquidation or flow evidence.",
+      "importance": "hard",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "market.crypto_derivatives",
+        "market.crypto_crowding"
+      ],
+      "freshness_seconds": 600,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "market.crypto_crowding"
+      ],
+      "confidence_cap": 0.5,
+      "accepted_metric_families": [
+        "crypto.derivatives"
+      ],
+      "required_metric_families": [
+        "crypto.derivatives"
+      ],
+      "required_fields": [
+        "funding_rate",
+        "open_interest",
+        "open_interest_delta",
+        "basis",
+        "crowding_signal"
+      ],
+      "required_event_offsets": [
+        "t-5m",
+        "t+1m"
+      ],
+      "unit_policy": "field_map.v1",
+      "field_units": {
+        "funding_rate": [
+          "rate"
+        ],
+        "open_interest": [
+          "contracts",
+          "btc",
+          "usd",
+          "usdt"
+        ],
+        "open_interest_delta": [
+          "percent"
+        ],
+        "basis": [
+          "rate",
+          "percent"
+        ],
+        "crowding_signal": [
+          "contracts",
+          "btc",
+          "usd",
+          "usdt",
+          "ratio"
+        ]
+      },
+      "minimum_venues": 1,
+      "venue_required": true,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [
+        "realtime"
+      ],
+      "semantic_policy_ref": "crypto_macro.fact_semantics.v1#derivatives_crowding"
+    },
+    {
+      "requirement_id": "counter_thesis",
+      "description": "Build the strongest evidence-backed alternative transmission chain.",
+      "importance": "soft",
+      "source_priority": [
+        "official",
+        "exchange",
+        "verified_web"
+      ],
+      "authority_floor": "verified_web",
+      "preferred_capabilities": [
+        "official.macro",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 86400,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "confidence_cap": 0.7,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    }
+  ],
+  "expected_hard_requirement_ids": [
+    "event_identity",
+    "policy_or_data_delta",
+    "expectation_pricing",
+    "macro_transmission",
+    "crypto_spot_confirmation",
+    "derivatives_crowding"
+  ],
+  "archived_capability_fixtures": [
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "event_identity",
+      "query_aliases": [
+        "us_cpi_20250115:event_identity",
+        "Verify event identity for us_cpi_20250115"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_186a12eda30b20db6a2e4ef407cfe3c7",
+          "requirement_id": "event_identity",
+          "kind": "official",
+          "authority": "official",
+          "source_id": "bls.gov",
+          "source_url": "https://www.bls.gov/news.release/archives/cpi_01152025.htm",
+          "published_at": "2025-01-15T13:30:00Z",
+          "observed_at": "2025-01-15T13:30:01Z",
+          "received_at": "2025-01-15T13:30:02Z",
+          "content_hash": "186a12eda30b20db6a2e4ef407cfe3c7cdd53a03f58718584e34a6067f1c1a3f",
+          "excerpt": "The Bureau of Labor Statistics released December 2024 Consumer Price Index data on January 15, 2025.",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:us_cpi_20250115:event_identity",
+          "research_session_id": "archive:us_cpi_20250115",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ]
+    },
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "policy_or_data_delta",
+      "query_aliases": [
+        "us_cpi_20250115:policy_or_data_delta",
+        "Verify policy or data delta for us_cpi_20250115"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_aea256939b84353bc236380322e02cd2",
+          "requirement_id": "policy_or_data_delta",
+          "kind": "official",
+          "authority": "official",
+          "source_id": "bls.gov",
+          "source_url": "https://www.bls.gov/news.release/archives/cpi_01152025.htm",
+          "published_at": "2025-01-15T13:30:00Z",
+          "observed_at": "2025-01-15T13:30:01Z",
+          "received_at": "2025-01-15T13:30:02Z",
+          "content_hash": "aea256939b84353bc236380322e02cd28df97b3aa33eb7409cb473038432143e",
+          "excerpt": "The all-items index increased 0.4 percent in December and 2.9 percent over the twelve months ending December.",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:us_cpi_20250115:policy_or_data_delta",
+          "research_session_id": "archive:us_cpi_20250115",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ]
+    },
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "crypto_spot_confirmation",
+      "query_aliases": [
+        "us_cpi_20250115:crypto_spot_confirmation",
+        "Acquire typed crypto_spot_confirmation event-window evidence for us_cpi_20250115"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_badbe5c7b0e4b1bb3d53180d73e37183",
+          "requirement_id": "crypto_spot_confirmation",
+          "kind": "market",
+          "authority": "exchange",
+          "source_id": "binance-vision",
+          "source_url": "https://data.binance.vision/data/spot/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2025-01-15.zip",
+          "published_at": "2025-01-15T13:31:00Z",
+          "observed_at": "2025-01-15T13:31:00Z",
+          "received_at": "2025-01-15T13:31:01Z",
+          "content_hash": "badbe5c7b0e4b1bb3d53180d73e37183bad3c1173624570fe5ac568dc2daa2ff",
+          "excerpt": "{\"archive\":\"Binance Vision\",\"case_id\":\"us_cpi_20250115\",\"event_window\":{\"t+1m\":{\"price\":\"98151.97000000\",\"volume\":\"91125790.61480840\"},\"t-5m\":{\"price\":\"97224.68000000\",\"volume\":\"2152738.01277400\"}},\"reconstruction_mode\":\"reconstructed_history\",\"source_hashes\":[\"19da1082d8d1d64b38418ea0d056d3938b71c518da7cc8b7e235b7fa43401f55\"]}",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": "binance-vision://194bdc2d02b7114f0745a28036d3930830a993bd754297c7747027a966cd7318",
+          "tool_call_id": "archive:us_cpi_20250115:crypto_spot_confirmation",
+          "research_session_id": "archive:us_cpi_20250115",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ],
+      "facts": [
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_1ef5c4dc7e2f7e2702ce24b5444bd61b",
+          "evidence_id": "archive_badbe5c7b0e4b1bb3d53180d73e37183",
+          "requirement_id": "crypto_spot_confirmation",
+          "metric_family": "crypto.spot",
+          "field": "price",
+          "instrument": "BTCUSDT",
+          "venue": "binance",
+          "value": "97224.68000000",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2025-01-15T13:25:00Z",
+          "received_at": "2025-01-15T13:25:01Z",
+          "published_at": "2025-01-15T13:25:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "05590983454de7355132f13632363c38372216d15e94572548ca9c4ebfe86eca",
+          "attributes": {
+            "archive_hash": "194bdc2d02b7114f0745a28036d3930830a993bd754297c7747027a966cd7318",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_d00548c7a01bbb49a3ea4002daa371d1",
+          "evidence_id": "archive_badbe5c7b0e4b1bb3d53180d73e37183",
+          "requirement_id": "crypto_spot_confirmation",
+          "metric_family": "crypto.spot",
+          "field": "volume",
+          "instrument": "BTCUSDT",
+          "venue": "binance",
+          "value": "2152738.01277400",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2025-01-15T13:25:00Z",
+          "received_at": "2025-01-15T13:25:01Z",
+          "published_at": "2025-01-15T13:25:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "0fb5c515a2966171c90090d6eb9ff1584e0d5a9018c3a783344b185ab08bc4fc",
+          "attributes": {
+            "archive_hash": "194bdc2d02b7114f0745a28036d3930830a993bd754297c7747027a966cd7318",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_0ccecc01f5347e9c693930fed1f7928a",
+          "evidence_id": "archive_badbe5c7b0e4b1bb3d53180d73e37183",
+          "requirement_id": "crypto_spot_confirmation",
+          "metric_family": "crypto.spot",
+          "field": "price",
+          "instrument": "BTCUSDT",
+          "venue": "binance",
+          "value": "98151.97000000",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2025-01-15T13:31:00Z",
+          "received_at": "2025-01-15T13:31:01Z",
+          "published_at": "2025-01-15T13:31:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "29760be151ed3d25ca26acaf4c5962d5ad9e2a5590c71d58197c8711a8ce8586",
+          "attributes": {
+            "archive_hash": "194bdc2d02b7114f0745a28036d3930830a993bd754297c7747027a966cd7318",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_6154a74f9cf74e4d14d7f5232e3781db",
+          "evidence_id": "archive_badbe5c7b0e4b1bb3d53180d73e37183",
+          "requirement_id": "crypto_spot_confirmation",
+          "metric_family": "crypto.spot",
+          "field": "volume",
+          "instrument": "BTCUSDT",
+          "venue": "binance",
+          "value": "91125790.61480840",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2025-01-15T13:31:00Z",
+          "received_at": "2025-01-15T13:31:01Z",
+          "published_at": "2025-01-15T13:31:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "4a576da68af6975e483b224acc34a0434e01c0b0a4ece206a3a9a99db9d43af1",
+          "attributes": {
+            "archive_hash": "194bdc2d02b7114f0745a28036d3930830a993bd754297c7747027a966cd7318",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_99e22310c2f2713f3b3cec9a6e471739",
+          "evidence_id": "archive_badbe5c7b0e4b1bb3d53180d73e37183",
+          "requirement_id": "crypto_spot_confirmation",
+          "metric_family": "crypto.spot",
+          "field": "event_return",
+          "instrument": "BTCUSDT",
+          "venue": "binance",
+          "value": "0.953759888950007343814348400",
+          "unit": "percent",
+          "window_start_at": "2025-01-15T13:25:00Z",
+          "window_end_at": "2025-01-15T13:31:00Z",
+          "event_offset": "t+1m",
+          "observed_at": "2025-01-15T13:31:00Z",
+          "received_at": "2025-01-15T13:31:01Z",
+          "published_at": "2025-01-15T13:31:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "d79ef931210a0b2b41b5423598c5361228023b4b9a761a16949f8315f554d5c6",
+          "attributes": {
+            "archive_hash": "194bdc2d02b7114f0745a28036d3930830a993bd754297c7747027a966cd7318",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        }
+      ]
+    },
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "derivatives_crowding",
+      "query_aliases": [
+        "us_cpi_20250115:derivatives_crowding",
+        "Acquire typed derivatives_crowding event-window evidence for us_cpi_20250115"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_a37ec099f9f9de29ed73f5bcd6b42136",
+          "requirement_id": "derivatives_crowding",
+          "kind": "market",
+          "authority": "exchange",
+          "source_id": "binance-vision",
+          "source_url": "https://data.binance.vision/data/futures/um/daily/metrics/BTCUSDT/BTCUSDT-metrics-2025-01-15.zip",
+          "published_at": "2025-01-15T13:31:00Z",
+          "observed_at": "2025-01-15T13:31:00Z",
+          "received_at": "2025-01-15T13:31:01Z",
+          "content_hash": "a37ec099f9f9de29ed73f5bcd6b42136c85ecfc807c4567ba31b4fc1d40381d3",
+          "excerpt": "{\"archive\":\"Binance Vision\",\"case_id\":\"us_cpi_20250115\",\"event_window\":{\"t+1m\":{\"basis\":\"-0.00020854\",\"crowding_signal\":\"1.15001063\",\"funding_rate\":\"0.00008795\",\"open_interest\":\"8443326749.1270970000000000\"},\"t-5m\":{\"basis\":\"-0.00025496\",\"crowding_signal\":\"1.15506947\",\"funding_rate\":\"0.00008795\",\"open_interest\":\"8325297758.6893380000000000\"}},\"reconstruction_mode\":\"reconstructed_history\",\"source_hashes\":[\"71fdaa0c55115d266ece201d9948e65988bdeadf9b3e87b4e486b9bb98721cc3\",\"1b73bf1ea87415ae646a31075b3cf52855ef44f823e0b31920cca0a3e250414c\",\"df725010d55458866eb5a47e9ee708c6796c9d7e77b14c38342cea11f381815e\"]}",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": "binance-vision://646ce9c175e2271713c842b797dfe9a44d46744c21537a4b0bafa9e4ee38fe61",
+          "tool_call_id": "archive:us_cpi_20250115:derivatives_crowding",
+          "research_session_id": "archive:us_cpi_20250115",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ],
+      "facts": [
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_189bd23cf01cd0999ba56d9f7288b4e8",
+          "evidence_id": "archive_a37ec099f9f9de29ed73f5bcd6b42136",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "funding_rate",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "0.00008795",
+          "unit": "rate",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2025-01-15T13:25:00Z",
+          "received_at": "2025-01-15T13:25:01Z",
+          "published_at": "2025-01-15T13:25:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "79c4f95b1c128a19d05451623bab1e43b1090123350ddff6d1706cb174fc0aaa",
+          "attributes": {
+            "archive_hash": "646ce9c175e2271713c842b797dfe9a44d46744c21537a4b0bafa9e4ee38fe61",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_0741c43162bc9a991dcf803a60cf423e",
+          "evidence_id": "archive_a37ec099f9f9de29ed73f5bcd6b42136",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "open_interest",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "8325297758.6893380000000000",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2025-01-15T13:25:00Z",
+          "received_at": "2025-01-15T13:25:01Z",
+          "published_at": "2025-01-15T13:25:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "0c2195ee184c45945547e5fdf49bd54c949cb825d85050afc1317df3cbdeba50",
+          "attributes": {
+            "archive_hash": "646ce9c175e2271713c842b797dfe9a44d46744c21537a4b0bafa9e4ee38fe61",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_10808bce46cc08790914095c8334a4f0",
+          "evidence_id": "archive_a37ec099f9f9de29ed73f5bcd6b42136",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "basis",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "-0.00025496",
+          "unit": "rate",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2025-01-15T13:25:00Z",
+          "received_at": "2025-01-15T13:25:01Z",
+          "published_at": "2025-01-15T13:25:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "fce8db0bcd1f2ceea5340d234b234afe7683cf79856a94a2c3d6afccc54171e8",
+          "attributes": {
+            "archive_hash": "646ce9c175e2271713c842b797dfe9a44d46744c21537a4b0bafa9e4ee38fe61",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_05cc123cc88b20b603cc8dc4dc986f6e",
+          "evidence_id": "archive_a37ec099f9f9de29ed73f5bcd6b42136",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "crowding_signal",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "1.15506947",
+          "unit": "ratio",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2025-01-15T13:25:00Z",
+          "received_at": "2025-01-15T13:25:01Z",
+          "published_at": "2025-01-15T13:25:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "02148edb56431134df339108f8a0b8065f8ac165f0bc03793e4211064f04e354",
+          "attributes": {
+            "archive_hash": "646ce9c175e2271713c842b797dfe9a44d46744c21537a4b0bafa9e4ee38fe61",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_a7d794b047e6396c0c9ba9cb2c89361c",
+          "evidence_id": "archive_a37ec099f9f9de29ed73f5bcd6b42136",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "funding_rate",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "0.00008795",
+          "unit": "rate",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2025-01-15T13:31:00Z",
+          "received_at": "2025-01-15T13:31:01Z",
+          "published_at": "2025-01-15T13:31:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "b89065daa2e6c94ce96082d8f7364776a1c7d4659308932fa9480ec4ae663e04",
+          "attributes": {
+            "archive_hash": "646ce9c175e2271713c842b797dfe9a44d46744c21537a4b0bafa9e4ee38fe61",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_6d505b19be08a024f352fd1aed3a37ee",
+          "evidence_id": "archive_a37ec099f9f9de29ed73f5bcd6b42136",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "open_interest",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "8443326749.1270970000000000",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2025-01-15T13:31:00Z",
+          "received_at": "2025-01-15T13:31:01Z",
+          "published_at": "2025-01-15T13:31:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "c59680cd2186d53dc1f89c92b682155a40e461d9f12507757b71b6bda092292f",
+          "attributes": {
+            "archive_hash": "646ce9c175e2271713c842b797dfe9a44d46744c21537a4b0bafa9e4ee38fe61",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_21b16068e191c5d841c686a9ddb57456",
+          "evidence_id": "archive_a37ec099f9f9de29ed73f5bcd6b42136",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "basis",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "-0.00020854",
+          "unit": "rate",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2025-01-15T13:31:00Z",
+          "received_at": "2025-01-15T13:31:01Z",
+          "published_at": "2025-01-15T13:31:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "8553cb5fdd46c09c2c45352127fec11208f943a1e61399fc569b1d9b4a588f68",
+          "attributes": {
+            "archive_hash": "646ce9c175e2271713c842b797dfe9a44d46744c21537a4b0bafa9e4ee38fe61",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_7d9fff6db608877ebc81cda9f17c6b7d",
+          "evidence_id": "archive_a37ec099f9f9de29ed73f5bcd6b42136",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "crowding_signal",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "1.15001063",
+          "unit": "ratio",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2025-01-15T13:31:00Z",
+          "received_at": "2025-01-15T13:31:01Z",
+          "published_at": "2025-01-15T13:31:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "770c54ed0c7be9d1536343cab226d98979da40b779a5f69178403ad7af0da7b9",
+          "attributes": {
+            "archive_hash": "646ce9c175e2271713c842b797dfe9a44d46744c21537a4b0bafa9e4ee38fe61",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_946634ff54398a512bcb8cdbe3513c77",
+          "evidence_id": "archive_a37ec099f9f9de29ed73f5bcd6b42136",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "open_interest_delta",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "1.417714943763650455142778400",
+          "unit": "percent",
+          "window_start_at": "2025-01-15T13:25:00Z",
+          "window_end_at": "2025-01-15T13:31:00Z",
+          "event_offset": "t+1m",
+          "observed_at": "2025-01-15T13:31:00Z",
+          "received_at": "2025-01-15T13:31:01Z",
+          "published_at": "2025-01-15T13:31:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "0b68585ac0b311e2be0c1112ddd462cdcd24e98f15cb3f0de666aa9e56dc4fe4",
+          "attributes": {
+            "archive_hash": "646ce9c175e2271713c842b797dfe9a44d46744c21537a4b0bafa9e4ee38fe61",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        }
+      ]
+    },
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "expectation_pricing",
+      "query_aliases": [
+        "us_cpi_20250115:expectation_pricing",
+        "Acquire typed expectation pricing evidence for us_cpi_20250115"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_7b4ff8ea643102ce20088b57bee59b43",
+          "requirement_id": "expectation_pricing",
+          "kind": "market",
+          "authority": "exchange",
+          "source_id": "kalshi-exchange",
+          "source_url": "https://api.elections.kalshi.com/trade-api/v2/historical/markets/KXCPI-24DEC-T0.3/candlesticks?start_ts=1736753400&end_ts=1736947560&period_interval=1",
+          "published_at": "2025-01-15T13:24:00Z",
+          "observed_at": "2025-01-15T13:24:00Z",
+          "received_at": "2025-01-15T13:24:01Z",
+          "content_hash": "7b4ff8ea643102ce20088b57bee59b4303a998072994005294a38ba4e02ed1e3",
+          "excerpt": "{\"archive\":\"Kalshi historical market candlesticks\",\"delta_percentage_point\":\"-0.0300\",\"event_ticker\":\"KXCPI-24DEC\",\"market_ticker\":\"KXCPI-24DEC-T0.3\",\"market_title\":\"Will CPI rise more than 0.3% in December 2024?\",\"probability\":{\"baseline\":\"0.7100\",\"t-5m\":\"0.6800\"},\"reconstruction_mode\":\"reconstructed_history\",\"selection\":\"highest 30-hour pre-event traded volume with both offsets\",\"source_hashes\":[\"097237e0c639283f5d5e41457f6675ba3236efef838559df84b3f9ef7af078c3\",\"c7e4e41a306f041bb3a606273418654fe830324b425d6ff57be0f57710dbaab2\"]}",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": "kalshi-archive://8af48a20db17453f13e88b495f5afd590e5e05ff2f878f88b5bfad955abad762",
+          "tool_call_id": "archive:us_cpi_20250115:expectation_pricing",
+          "research_session_id": "archive:us_cpi_20250115",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ],
+      "facts": [
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_7552d2d2421f4167164a9e139eed2961",
+          "evidence_id": "archive_7b4ff8ea643102ce20088b57bee59b43",
+          "requirement_id": "expectation_pricing",
+          "metric_family": "macro.policy_expectation",
+          "field": "level",
+          "instrument": "KXCPI-24DEC-T0.3",
+          "venue": "kalshi",
+          "value": "0.7100",
+          "unit": "probability",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "baseline",
+          "observed_at": "2025-01-14T13:10:00Z",
+          "received_at": "2025-01-14T13:10:01Z",
+          "published_at": "2025-01-14T13:10:00Z",
+          "source_id": "kalshi-exchange",
+          "independence_group": "kalshi-exchange",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "bc8e956ca67ad5e29366ea6a831c0359f621e8ff1884e64730716a0aa20a5f77",
+          "attributes": {
+            "archive_hash": "8af48a20db17453f13e88b495f5afd590e5e05ff2f878f88b5bfad955abad762",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_01e3cc51e78845c5df74c4a2a595d6e9",
+          "evidence_id": "archive_7b4ff8ea643102ce20088b57bee59b43",
+          "requirement_id": "expectation_pricing",
+          "metric_family": "macro.policy_expectation",
+          "field": "level",
+          "instrument": "KXCPI-24DEC-T0.3",
+          "venue": "kalshi",
+          "value": "0.6800",
+          "unit": "probability",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2025-01-15T13:24:00Z",
+          "received_at": "2025-01-15T13:24:01Z",
+          "published_at": "2025-01-15T13:24:00Z",
+          "source_id": "kalshi-exchange",
+          "independence_group": "kalshi-exchange",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "2240370aa8184c2c9bcaf1af6234bce89ab6573d862e44c3baeefa1c07498e5e",
+          "attributes": {
+            "archive_hash": "8af48a20db17453f13e88b495f5afd590e5e05ff2f878f88b5bfad955abad762",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_ae97b3646f9e6c7fa993a98278780119",
+          "evidence_id": "archive_7b4ff8ea643102ce20088b57bee59b43",
+          "requirement_id": "expectation_pricing",
+          "metric_family": "macro.policy_expectation",
+          "field": "delta",
+          "instrument": "KXCPI-24DEC-T0.3",
+          "venue": "kalshi",
+          "value": "-0.0300",
+          "unit": "percentage_point",
+          "window_start_at": "2025-01-14T13:10:00Z",
+          "window_end_at": "2025-01-15T13:24:00Z",
+          "event_offset": "t-5m",
+          "observed_at": "2025-01-15T13:24:00Z",
+          "received_at": "2025-01-15T13:24:01Z",
+          "published_at": "2025-01-15T13:24:00Z",
+          "source_id": "kalshi-exchange",
+          "independence_group": "kalshi-exchange",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "2bb1195e3daaed061f05616be48e77130ae06bf2a300222418ef62fec99d44eb",
+          "attributes": {
+            "archive_hash": "8af48a20db17453f13e88b495f5afd590e5e05ff2f878f88b5bfad955abad762",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        }
+      ]
+    }
+  ],
+  "cutoff_at": "2025-01-15T13:35:00Z",
+  "outcome_available_at": null,
+  "outcome_labels": [],
+  "source_refs": [
+    "https://www.bls.gov/news.release/archives/cpi_01152025.htm",
+    "https://data.binance.vision/data/spot/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2025-01-15.zip",
+    "https://data.binance.vision/data/futures/um/daily/metrics/BTCUSDT/BTCUSDT-metrics-2025-01-15.zip",
+    "https://data.binance.vision/data/futures/um/daily/premiumIndexKlines/BTCUSDT/1m/BTCUSDT-1m-2025-01-15.zip",
+    "https://data.binance.vision/data/futures/um/monthly/fundingRate/BTCUSDT/BTCUSDT-fundingRate-2025-01.zip",
+    "https://api.elections.kalshi.com/trade-api/v2/historical/markets?event_ticker=KXCPI-24DEC&limit=1000",
+    "https://api.elections.kalshi.com/trade-api/v2/historical/markets/KXCPI-24DEC-T0.3/candlesticks?start_ts=1736753400&end_ts=1736947560&period_interval=1"
+  ]
+}

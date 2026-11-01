@@ -1,0 +1,46 @@
+PASS 首页渲染，主操作与最新视觉存在
+PASS 业务主导航不包含 DSH
+PASS 页面目录 38 项，Esc 关闭
+PASS 空输入 → 提交 → 排队 → 研究 → 同一 Run 报告
+PASS 双击与同窗口相同意图不重复创建任务
+PASS 离开进度页不会取消任务或强制跳走
+PASS 重新研究创建子 Run，不覆盖原报告
+PASS 失败重试保留编辑后的输入与失败原记录
+PASS 任务筛选 → 报告 → 返回，关键词与状态保持
+PASS 父子任务报告双向返回
+PASS 不存在的 Run 不替换成默认报告
+PASS 未完成 Run 不冒充完整报告
+PASS 报告与证据抽屉保留同一 Run
+PASS 事件按 ID 打开，关闭后保留市场与搜索筛选
+PASS 历史发布为 0 时不复制未来事件
+PASS 未知服务与来源页不显示绿色在线
+PASS 方向、no_trade、校准与交易授权分离
+PASS 图谱缩放与 Fit View 实际改变视口
+PASS 图谱拖拽平移有效
+PASS 图谱可通过键盘平移和缩放
+PASS Mini Map 点击定位有效
+PASS 图谱节点筛选与真实空态
+PASS 工具分组折叠后保留关联证据
+PASS 图谱列表视图提供非画布访问方式
+PASS 节点 → Evidence → 返回，节点与缩放不丢失
+PASS 退出全屏恢复报告滚动位置和触发焦点
+PASS DSH 从当前 Run 进入并返回相同技术页
+PASS 日志选择对应事件，未知结果不显示成功
+PASS 逐块审核、敏感变更阻断、原文不被覆盖
+PASS 明确确认 → 独立质量复检 → 允许接入
+PASS 资料与新研究 Run 双向关联并返回
+PASS 上传表单真实校验与演示解析状态推进
+PASS 资料硬缺口未解决时禁止进入研究
+PASS 弹层焦点锁定与 Esc 恢复
+PASS 浏览器后退与前进保持真实路由
+PASS 38 个桌面页面与状态均渲染且无整页横向溢出
+PASS 6 个移动视图无整页横向溢出
+PASS 抽样页面所有可见图标操作具备可访问名称
+PASS 测试期间无未处理 JavaScript 异常
+{
+  "runner": "Chromium + Playwright / set_content / no network",
+  "checks": 39,
+  "passed": 39,
+  "failed": 0,
+  "page_errors": []
+}

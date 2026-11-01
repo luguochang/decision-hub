@@ -1,0 +1,986 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.local/contracts/history-product-status-v2.schema.json",
+  "title": "HistoryProductContractsV2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "history-product-contracts.v2"
+    }
+  },
+  "$defs": {
+    "history_scope_status_v2": {
+      "title": "HistoryScopeStatusV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope_id",
+        "asset_label",
+        "raw_complete_days",
+        "first_known_complete_days",
+        "missing_days",
+        "excluded_days",
+        "quality"
+      ],
+      "properties": {
+        "scope_id": {
+          "type": "string",
+          "enum": [
+            "crypto:spot:okx:BTC-USDT:trade:1m",
+            "crypto:spot:okx:ETH-USDT:trade:1m"
+          ]
+        },
+        "asset_label": {
+          "type": "string",
+          "enum": [
+            "比特币",
+            "以太坊"
+          ]
+        },
+        "raw_complete_days": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 90
+        },
+        "first_known_complete_days": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 90
+        },
+        "missing_days": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 90
+        },
+        "excluded_days": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 90
+        },
+        "quality": {
+          "type": "string",
+          "enum": [
+            "unavailable",
+            "saved_metadata",
+            "last_verified_original_snapshot"
+          ]
+        }
+      }
+    },
+    "history_data_status_v2": {
+      "title": "HistoryDataStatusV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cutoff_count",
+        "known_asof",
+        "scopes",
+        "current_originals_verified",
+        "proof_label"
+      ],
+      "properties": {
+        "cutoff_count": {
+          "type": "integer",
+          "const": 90
+        },
+        "known_asof": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "scopes": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/history_scope_status_v2"
+          }
+        },
+        "current_originals_verified": {
+          "type": "boolean",
+          "const": false
+        },
+        "proof_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      }
+    },
+    "history_job_status_v2": {
+      "title": "HistoryJobStatusV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "job_id",
+        "scope_id",
+        "state",
+        "cursor",
+        "attempts",
+        "page_count",
+        "max_pages",
+        "generation",
+        "error_code"
+      ],
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "scope_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "retry",
+            "running",
+            "completed",
+            "partial",
+            "failed",
+            "unknown"
+          ]
+        },
+        "cursor": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[1-9][0-9]{0,15}$"
+        },
+        "attempts": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1200
+        },
+        "page_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 500
+        },
+        "max_pages": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1200
+        },
+        "error_code": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "history_job_page_v2": {
+      "title": "HistoryJobPageV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total",
+        "offset",
+        "limit",
+        "items"
+      ],
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1200
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1199
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 60,
+          "items": {
+            "$ref": "#/$defs/history_job_status_v2"
+          }
+        }
+      }
+    },
+    "history_collection_status_v2": {
+      "title": "HistoryCollectionStatusV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "epoch_id",
+        "state",
+        "attempts",
+        "budget",
+        "remaining_attempts",
+        "deadline_at",
+        "paused_reason",
+        "paused_reason_label",
+        "jobs"
+      ],
+      "properties": {
+        "epoch_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "active",
+            "paused",
+            "expired",
+            "completed",
+            "partial"
+          ]
+        },
+        "attempts": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1200
+        },
+        "budget": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1200
+        },
+        "remaining_attempts": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1200
+        },
+        "deadline_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "paused_reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "paused_reason_label": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "jobs": {
+          "$ref": "#/$defs/history_job_page_v2"
+        }
+      }
+    },
+    "history_model_scope_status_v2": {
+      "title": "HistoryModelScopeStatusV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope_id",
+        "state",
+        "joint_days",
+        "low_days",
+        "high_days",
+        "count_gate_met",
+        "method_qualified",
+        "model_id",
+        "model_hash",
+        "model_known_at",
+        "blocked_reason_label"
+      ],
+      "properties": {
+        "scope_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "not_fitted",
+            "blocked_insufficient_samples",
+            "available_unqualified",
+            "verification_required"
+          ]
+        },
+        "joint_days": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 90
+        },
+        "low_days": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 90
+        },
+        "high_days": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 90
+        },
+        "count_gate_met": {
+          "type": "boolean"
+        },
+        "method_qualified": {
+          "type": "boolean"
+        },
+        "model_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "model_hash": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "model_known_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "blocked_reason_label": {
+          "type": "string",
+          "maxLength": 256
+        }
+      }
+    },
+    "history_probability_values_v2": {
+      "title": "HistoryProbabilityValuesV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "baseline_long",
+        "baseline_short",
+        "conditional_long",
+        "conditional_short"
+      ],
+      "properties": {
+        "baseline_long": {
+          "type": "string",
+          "pattern": "^(0(\\.[0-9]+)?|1(\\.0+)?)$"
+        },
+        "baseline_short": {
+          "type": "string",
+          "pattern": "^(0(\\.[0-9]+)?|1(\\.0+)?)$"
+        },
+        "conditional_long": {
+          "type": "string",
+          "pattern": "^(0(\\.[0-9]+)?|1(\\.0+)?)$"
+        },
+        "conditional_short": {
+          "type": "string",
+          "pattern": "^(0(\\.[0-9]+)?|1(\\.0+)?)$"
+        }
+      }
+    },
+    "history_forecast_status_v2": {
+      "title": "HistoryForecastStatusV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "forecast_id",
+        "scope_id",
+        "cutoff_at",
+        "threshold",
+        "baseline_n",
+        "conditional_n",
+        "probabilities",
+        "blocked_reason_label"
+      ],
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "not_generated",
+            "verification_required",
+            "available_unqualified"
+          ]
+        },
+        "forecast_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "scope_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "cutoff_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "threshold": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "0.02",
+            "0.05",
+            null
+          ]
+        },
+        "baseline_n": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 90
+        },
+        "conditional_n": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 90
+        },
+        "probabilities": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/history_probability_values_v2"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "blocked_reason_label": {
+          "type": "string",
+          "maxLength": 256
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "available_unqualified"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "probabilities": {
+                "type": "object"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "probabilities": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "history_excluded_window_v2": {
+      "title": "HistoryExcludedWindowV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope_id",
+        "cutoff_at",
+        "reason_code",
+        "reason_label",
+        "missing_minutes"
+      ],
+      "properties": {
+        "scope_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "cutoff_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "reason_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "missing_minutes": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1471
+        }
+      }
+    },
+    "history_excluded_page_v2": {
+      "title": "HistoryExcludedPageV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total",
+        "offset",
+        "limit",
+        "items"
+      ],
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 180
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 179
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 60,
+          "items": {
+            "$ref": "#/$defs/history_excluded_window_v2"
+          }
+        }
+      }
+    },
+    "history_actions_v2": {
+      "title": "HistoryActionsV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "can_reconcile",
+        "can_fit",
+        "can_forecast",
+        "can_refresh"
+      ],
+      "properties": {
+        "can_reconcile": {
+          "type": "boolean"
+        },
+        "can_fit": {
+          "type": "boolean",
+          "const": false
+        },
+        "can_forecast": {
+          "type": "boolean",
+          "const": false
+        },
+        "can_refresh": {
+          "type": "boolean"
+        }
+      }
+    },
+    "history_product_status_v2": {
+      "title": "HistoryProductStatusV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "available",
+        "owner_authenticated",
+        "identity_origin",
+        "as_of",
+        "historical_pit_verified",
+        "financial_qualified",
+        "data",
+        "collection",
+        "models",
+        "forecast",
+        "excluded_windows",
+        "actions",
+        "user_message"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "history-product-status.v2"
+        },
+        "available": {
+          "type": "boolean",
+          "const": true
+        },
+        "owner_authenticated": {
+          "type": "boolean",
+          "const": true
+        },
+        "identity_origin": {
+          "type": "string",
+          "const": "history_signed_session"
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "historical_pit_verified": {
+          "type": "boolean",
+          "const": false
+        },
+        "financial_qualified": {
+          "type": "boolean",
+          "const": false
+        },
+        "data": {
+          "$ref": "#/$defs/history_data_status_v2"
+        },
+        "collection": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/history_collection_status_v2"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "models": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/history_model_scope_status_v2"
+          }
+        },
+        "forecast": {
+          "$ref": "#/$defs/history_forecast_status_v2"
+        },
+        "excluded_windows": {
+          "$ref": "#/$defs/history_excluded_page_v2"
+        },
+        "actions": {
+          "$ref": "#/$defs/history_actions_v2"
+        },
+        "user_message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    },
+    "history_owner_session_pair_v2": {
+      "title": "HistoryOwnerSessionPairV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pairing_token"
+      ],
+      "properties": {
+        "pairing_token": {
+          "type": "string",
+          "minLength": 32,
+          "maxLength": 2048
+        }
+      }
+    },
+    "history_owner_session_reply_v2": {
+      "title": "HistoryOwnerSessionReplyV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "csrf_token",
+        "expires_at"
+      ],
+      "properties": {
+        "csrf_token": {
+          "type": "string",
+          "minLength": 32,
+          "maxLength": 128
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "history_forecast_command_v2": {
+      "title": "HistoryForecastCommandV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "request_id",
+        "registration_id",
+        "scope_id",
+        "model_hash",
+        "model_known_at",
+        "cutoff_at",
+        "threshold"
+      ],
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "registration_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "scope_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "model_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "model_known_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "cutoff_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "threshold": {
+          "type": "string",
+          "enum": [
+            "0.02",
+            "0.05"
+          ]
+        }
+      }
+    },
+    "history_asset_frequency_v2": {
+      "title": "HistoryAssetFrequencyV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "threshold",
+        "baseline_n",
+        "conditional_n",
+        "probabilities"
+      ],
+      "properties": {
+        "threshold": {
+          "type": "string",
+          "enum": [
+            "0.02",
+            "0.05"
+          ]
+        },
+        "baseline_n": {
+          "type": "integer",
+          "minimum": 60,
+          "maximum": 90
+        },
+        "conditional_n": {
+          "type": "integer",
+          "minimum": 30,
+          "maximum": 90
+        },
+        "probabilities": {
+          "$ref": "#/$defs/history_probability_values_v2"
+        }
+      }
+    },
+    "history_asset_refresh_reply_v2": {
+      "title": "HistoryAssetRefreshReplyV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "owner_authenticated",
+        "asset",
+        "outcome",
+        "committed",
+        "automatic_retry",
+        "forecast_id",
+        "cutoff_at",
+        "horizon_seconds",
+        "target",
+        "financial_qualified",
+        "historical_pit_verified",
+        "fixture_mode",
+        "frequencies",
+        "user_message"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "history-asset-refresh-reply.v2"
+        },
+        "owner_authenticated": {
+          "type": "boolean",
+          "const": true
+        },
+        "asset": {
+          "type": "string",
+          "enum": [
+            "BTC",
+            "ETH"
+          ]
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "committed_verified",
+            "committed_readback_unconfirmed",
+            "unconfirmed"
+          ]
+        },
+        "committed": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "automatic_retry": {
+          "type": "boolean",
+          "const": false
+        },
+        "forecast_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "cutoff_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "horizon_seconds": {
+          "type": "integer",
+          "const": 86400
+        },
+        "target": {
+          "type": "string",
+          "const": "24h_path_mae"
+        },
+        "financial_qualified": {
+          "type": "boolean",
+          "const": false
+        },
+        "historical_pit_verified": {
+          "type": "boolean",
+          "const": false
+        },
+        "fixture_mode": {
+          "type": "boolean"
+        },
+        "frequencies": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/history_asset_frequency_v2"
+          }
+        },
+        "user_message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "const": "committed_verified"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "committed": {
+                "const": true
+              },
+              "forecast_id": {
+                "type": "string"
+              },
+              "cutoff_at": {
+                "type": "string"
+              },
+              "frequencies": {
+                "minItems": 2
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "frequencies": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

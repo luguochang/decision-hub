@@ -3,6 +3,8 @@ from __future__ import annotations
 import hashlib
 import json
 
+from sqlalchemy import text
+
 from packages.contracts_py.decision_hub_contracts.models import (
     CapabilityManifest,
     FeedbackCreate,
@@ -19,6 +21,7 @@ from packages.kernel.decision_hub_kernel.persistence.db import (
     ExperimentRecord,
     FailurePatternRecord,
     FeedbackRecord,
+    ReportRevisionRecord,
     ResearchMemoRecord,
     RunRecord,
     SnapshotRecord,
@@ -100,6 +103,7 @@ class WorkbenchAssetService:
 
     def create_feedback(self, request: FeedbackCreate) -> FeedbackView:
         with self.database.session() as session:
+            session.execute(text("BEGIN IMMEDIATE"))
             existing = (
                 session.query(FeedbackRecord).filter_by(request_id=request.request_id).one_or_none()
             )
@@ -109,9 +113,20 @@ class WorkbenchAssetService:
                     for field in ("target_type", "target_id", "created_by", "verdict", "notes")
                 ):
                     raise ValueError("workbench_request_reused")
+                if existing.target_type == "report_revision":
+                    from .revision_feedback_evaluation import (
+                        read_revision_feedback_evaluation_in_session,
+                    )
+
+                    # Authenticate an existing attachment, but leave a legacy
+                    # opinion without one exactly as it was (no backfill).
+                    read_revision_feedback_evaluation_in_session(
+                        session, existing.target_id, existing.request_id, existing.created_by,
+                    )
                 return self._feedback_view(existing)
             target = {
                 "run": RunRecord,
+                "report_revision": ReportRevisionRecord,
                 "memo": ResearchMemoRecord,
                 "experiment": ExperimentRecord,
                 "candidate": CandidateVersionRecord,
@@ -120,13 +135,20 @@ class WorkbenchAssetService:
             }.get(request.target_type)
             if target is None or session.get(target, request.target_id) is None:
                 raise ValueError("workbench_target_not_found")
+            recorded_at = utcnow()
             record = FeedbackRecord(
                 feedback_id=_stable_id("feedback", request.request_id),
-                created_at=utcnow(),
+                created_at=recorded_at,
                 **request.model_dump(),
             )
             session.add(record)
             session.flush()
+            if record.target_type == "report_revision":
+                from .revision_feedback_evaluation import (
+                    append_revision_feedback_evaluation_in_session,
+                )
+
+                append_revision_feedback_evaluation_in_session(session, record, recorded_at)
             return self._feedback_view(record)
 
     def register_capability(self, manifest: CapabilityManifest) -> CapabilityManifest:

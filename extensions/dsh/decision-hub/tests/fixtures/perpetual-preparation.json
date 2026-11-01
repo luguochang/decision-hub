@@ -1,0 +1,599 @@
+{
+  "draft": {
+    "schema_version": "perpetual-synthesis-draft.v1",
+    "as_of": "2026-01-01T00:00:00Z",
+    "known_at_max": "2026-01-01T00:00:00Z",
+    "candidate_set_id": "set-1",
+    "valid_until": "2026-01-01T01:00:00Z",
+    "assumptions": [
+      {
+        "schema_version": "decision-model-assumption.v1",
+        "assumption_id": "action_target:fixture:action-target-open_long",
+        "role": "action_target",
+        "statement": "Synthetic declared action_target assumption; no source or calibration claim.",
+        "evidence_refs": []
+      },
+      {
+        "schema_version": "decision-model-assumption.v1",
+        "assumption_id": "basis:fixture:assumptions",
+        "role": "basis",
+        "statement": "Synthetic declared basis assumption; no source or calibration claim.",
+        "evidence_refs": []
+      },
+      {
+        "schema_version": "decision-model-assumption.v1",
+        "assumption_id": "size_policy:fixture:unit-policy",
+        "role": "size_policy",
+        "statement": "Synthetic declared size_policy assumption; no source or calibration claim.",
+        "evidence_refs": []
+      },
+      {
+        "schema_version": "decision-model-assumption.v1",
+        "assumption_id": "exit_policy:fixture:exit",
+        "role": "exit_policy",
+        "statement": "Synthetic declared exit_policy assumption; no source or calibration claim.",
+        "evidence_refs": []
+      },
+      {
+        "schema_version": "decision-model-assumption.v1",
+        "assumption_id": "action_target:fixture:action-target-open_short",
+        "role": "action_target",
+        "statement": "Synthetic declared action_target assumption; no source or calibration claim.",
+        "evidence_refs": []
+      },
+      {
+        "schema_version": "decision-model-assumption.v1",
+        "assumption_id": "action_target:fixture:action-target-no_change",
+        "role": "action_target",
+        "statement": "Synthetic declared action_target assumption; no source or calibration claim.",
+        "evidence_refs": []
+      },
+      {
+        "schema_version": "decision-model-assumption.v1",
+        "assumption_id": "event_definition:synthetic:given-defined-event-E",
+        "role": "event_definition",
+        "statement": "Synthetic declared event_definition assumption; no source or calibration claim.",
+        "evidence_refs": []
+      },
+      {
+        "schema_version": "decision-model-assumption.v1",
+        "assumption_id": "occurrence_target:synthetic:occurrence-target",
+        "role": "occurrence_target",
+        "statement": "Synthetic declared occurrence_target assumption; no source or calibration claim.",
+        "evidence_refs": []
+      },
+      {
+        "schema_version": "decision-model-assumption.v1",
+        "assumption_id": "outcome_target:synthetic:event-outcome-target",
+        "role": "outcome_target",
+        "statement": "Synthetic declared outcome_target assumption; no source or calibration claim.",
+        "evidence_refs": []
+      },
+      {
+        "schema_version": "decision-model-assumption.v1",
+        "assumption_id": "observation_rule:synthetic:first-release-rule",
+        "role": "observation_rule",
+        "statement": "Synthetic declared observation_rule assumption; no source or calibration claim.",
+        "evidence_refs": []
+      },
+      {
+        "schema_version": "decision-model-assumption.v1",
+        "assumption_id": "probability_source:synthetic:subjective-assessment",
+        "role": "probability_source",
+        "statement": "Synthetic declared probability_source assumption; no source or calibration claim.",
+        "evidence_refs": []
+      },
+      {
+        "schema_version": "decision-model-assumption.v1",
+        "assumption_id": "fill_weight_assumption:synthetic:weights-preserved-if-filled-4h",
+        "role": "fill_weight_assumption",
+        "statement": "Synthetic declared fill_weight_assumption assumption; no source or calibration claim.",
+        "evidence_refs": []
+      }
+    ],
+    "candidates": [
+      {
+        "candidate_id": "open_long",
+        "action": "open",
+        "target_side": "long",
+        "position_branch": "flat",
+        "quantity_before": null,
+        "quantity_after": null,
+        "condition_refs": [],
+        "size_policy_ref": {
+          "local_id": "size_policy:fixture:unit-policy"
+        },
+        "size_mode": "unit_notional",
+        "unit_notional_usdt": "100",
+        "exit_ref": {
+          "local_id": "exit_policy:fixture:exit"
+        },
+        "cost_ref": {
+          "ref": "fixture:cost",
+          "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "funding_ref": null,
+        "margin_ref": null,
+        "fill_ref": null,
+        "target_refs": [
+          {
+            "local_id": "action_target:fixture:action-target-open_long"
+          }
+        ],
+        "basis_refs": [
+          {
+            "local_id": "basis:fixture:assumptions"
+          }
+        ],
+        "unknown_reasons": [
+          "account_size_unknown",
+          "fill_model_unavailable"
+        ],
+        "nested_candidate_id": null
+      },
+      {
+        "candidate_id": "open_short",
+        "action": "open",
+        "target_side": "short",
+        "position_branch": "flat",
+        "quantity_before": null,
+        "quantity_after": null,
+        "condition_refs": [],
+        "size_policy_ref": {
+          "local_id": "size_policy:fixture:unit-policy"
+        },
+        "size_mode": "unit_notional",
+        "unit_notional_usdt": "100",
+        "exit_ref": {
+          "local_id": "exit_policy:fixture:exit"
+        },
+        "cost_ref": {
+          "ref": "fixture:cost",
+          "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "funding_ref": null,
+        "margin_ref": null,
+        "fill_ref": null,
+        "target_refs": [
+          {
+            "local_id": "action_target:fixture:action-target-open_short"
+          }
+        ],
+        "basis_refs": [
+          {
+            "local_id": "basis:fixture:assumptions"
+          }
+        ],
+        "unknown_reasons": [
+          "account_size_unknown",
+          "fill_model_unavailable"
+        ],
+        "nested_candidate_id": null
+      },
+      {
+        "candidate_id": "no_change",
+        "action": "no_change",
+        "target_side": "flat",
+        "position_branch": "flat",
+        "quantity_before": null,
+        "quantity_after": null,
+        "condition_refs": [],
+        "size_policy_ref": {
+          "local_id": "size_policy:fixture:unit-policy"
+        },
+        "size_mode": "unit_notional",
+        "unit_notional_usdt": "100",
+        "exit_ref": {
+          "local_id": "exit_policy:fixture:exit"
+        },
+        "cost_ref": {
+          "ref": "fixture:cost",
+          "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "funding_ref": null,
+        "margin_ref": null,
+        "fill_ref": null,
+        "target_refs": [
+          {
+            "local_id": "action_target:fixture:action-target-no_change"
+          }
+        ],
+        "basis_refs": [
+          {
+            "local_id": "basis:fixture:assumptions"
+          }
+        ],
+        "unknown_reasons": [
+          "account_size_unknown",
+          "fill_model_unavailable"
+        ],
+        "nested_candidate_id": null
+      }
+    ],
+    "event_probability": {
+      "event_definition_ref": {
+        "local_id": "event_definition:synthetic:given-defined-event-E"
+      },
+      "occurrence_target_ref": {
+        "local_id": "occurrence_target:synthetic:occurrence-target"
+      },
+      "outcome_target_ref": {
+        "local_id": "outcome_target:synthetic:event-outcome-target"
+      },
+      "occurrence_distribution": {
+        "target_ref": {
+          "local_id": "occurrence_target:synthetic:occurrence-target"
+        },
+        "as_of": "2026-01-01T00:00:00Z",
+        "probabilities": null,
+        "kind": "unavailable",
+        "qualification": "research_trial",
+        "source_ref": null,
+        "model_ref": null,
+        "calibration_ref": null,
+        "conditioning_ref": null,
+        "gaps": [
+          "occurrence_not_estimated"
+        ]
+      },
+      "outcome_given_occurrence": {
+        "target_ref": {
+          "local_id": "outcome_target:synthetic:event-outcome-target"
+        },
+        "as_of": "2026-01-01T00:00:00Z",
+        "probabilities": [
+          {
+            "outcome_id": "cool",
+            "value": "0.5"
+          },
+          {
+            "outcome_id": "neutral",
+            "value": "0.3"
+          },
+          {
+            "outcome_id": "hot",
+            "value": "0.2"
+          }
+        ],
+        "kind": "subjective",
+        "qualification": "research_trial",
+        "source_ref": {
+          "local_id": "probability_source:synthetic:subjective-assessment"
+        },
+        "model_ref": null,
+        "calibration_ref": null,
+        "conditioning_ref": {
+          "local_id": "event_definition:synthetic:given-defined-event-E"
+        },
+        "gaps": [
+          "not_calibrated"
+        ]
+      },
+      "joint_partition_ref": null,
+      "observation_rule_ref": {
+        "local_id": "observation_rule:synthetic:first-release-rule"
+      }
+    },
+    "path_distribution": {
+      "kind": "assumed_complete_paths",
+      "supports_market_direction": true,
+      "fill_weight_assumption_ref": {
+        "local_id": "fill_weight_assumption:synthetic:weights-preserved-if-filled-4h"
+      },
+      "scenarios": [
+        {
+          "scenario_id": "up-path",
+          "probability": "0.435",
+          "terminal_return_fraction": "0.02"
+        },
+        {
+          "scenario_id": "neutral-path",
+          "probability": "0.295",
+          "terminal_return_fraction": "0"
+        },
+        {
+          "scenario_id": "down-path",
+          "probability": "0.270",
+          "terminal_return_fraction": "-0.04"
+        }
+      ]
+    },
+    "direction_distribution": {
+      "as_of": "2026-01-01T00:00:00Z",
+      "probabilities": [
+        {
+          "outcome_id": "up",
+          "value": "0.435"
+        },
+        {
+          "outcome_id": "neutral",
+          "value": "0.295"
+        },
+        {
+          "outcome_id": "down",
+          "value": "0.270"
+        }
+      ],
+      "kind": "subjective",
+      "qualification": "research_trial",
+      "source_ref": {
+        "local_id": "probability_source:synthetic:subjective-assessment"
+      },
+      "model_ref": null,
+      "calibration_ref": null,
+      "gaps": [
+        "not_calibrated"
+      ]
+    },
+    "market_event_conditioned": true,
+    "economic_input_refs": [
+      {
+        "ref": "fixture:cost",
+        "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    ],
+    "reasoning_refs": [
+      {
+        "ref": "review-original:frozen_input:evidence-transcript",
+        "hash": "fd5a5d19e5d82c451a1bb14b3ef7489c6b4367b3bea8b79ce1d84f0c54c2f34f"
+      }
+    ],
+    "analysis": {
+      "thesis": "主观情景：买盘可能延续，但现有证据不足以确认未来方向。",
+      "main_chain": [
+        {
+          "link_id": "main",
+          "claim_type": "inference",
+          "statement": "已观察价格是历史信息，需求延续仍是待验证机制。",
+          "evidence_refs": [
+            {
+              "ref": "review-original:frozen_input:evidence-transcript",
+              "hash": "fd5a5d19e5d82c451a1bb14b3ef7489c6b4367b3bea8b79ce1d84f0c54c2f34f"
+            }
+          ],
+          "confirmation": "目标窗口出现持续成交确认后复核。",
+          "invalidation": "价格与机制背离时撤销解释。"
+        }
+      ],
+      "opposite_chain": [
+        {
+          "link_id": "opposite",
+          "claim_type": "scenario",
+          "statement": "反向机制：流动性消退可能令走势逆转。",
+          "evidence_refs": [],
+          "confirmation": "需要新增可核验的流动性证据。",
+          "invalidation": "持续成交确认前不视为事实。"
+        }
+      ],
+      "unresolved_questions": [
+        "缺少流动性与未来成交证据；反向机制仍是假设。"
+      ]
+    },
+    "gaps": [
+      "account_unknown"
+    ]
+  },
+  "options": {
+    "request_id": "research-request:native-v2-run",
+    "binding": {
+      "opportunity_id": "opportunity",
+      "context": {
+        "owner_id": "owner",
+        "account_kind": "user_declared",
+        "account_id": "unknown-account",
+        "instrument_id": "okx:BTC-USDT-SWAP",
+        "scope_id": "crypto:perp:okx:BTC-USDT-SWAP:trade:1m",
+        "profile_ref": {
+          "ref": "fixture:paper-profile",
+          "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "horizon": "4h",
+        "instrument_ref": {
+          "ref": "fixture:instrument",
+          "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "settings_ref": {
+          "ref": "fixture:settings",
+          "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "account_ref": null,
+        "position_ref": null,
+        "utility_ref": {
+          "ref": "fixture:utility",
+          "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      },
+      "candidate_target_ref": {
+        "ref": "fixture:candidate-target",
+        "hash": "04aead9e0cfcda226bba6b80175cf2f2d5ce5e43ddb0516600db9ea2cf2b9c94"
+      },
+      "anchor_rule_ref": {
+        "ref": "fixture:anchor-rule",
+        "hash": "247c0c6ef58f06d9368f24cc3ccf0469fc8772680f147134585376cfb0023888"
+      },
+      "method_ref": {
+        "ref": "fixture:comparison-method",
+        "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "method_code_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "review_originals": {
+      "schema_version": "decision-review-originals.v1",
+      "run_id": "native-v2-run",
+      "request_hash": "53977b5ced14f53617584cb72af5457e5c5958cb8771050e831f2d7e8f988e56",
+      "as_of": "2026-01-01T00:10:00Z",
+      "originals": [
+        {
+          "source_ref": {
+            "ref": "review-original:server_material:instrument_contract",
+            "hash": "ebc1ae18e47370cdae2ac8a5b88867e51a2611b989123651cc56e3c111897e80"
+          },
+          "original_ref": null,
+          "source_kind": "server_material",
+          "role": "instrument_contract",
+          "body_json": "{\"role\":\"instrument_contract\",\"synthetic\":true}"
+        },
+        {
+          "source_ref": {
+            "ref": "review-original:server_material:execution_profile",
+            "hash": "fafe43ee51426d4ac212ecdc1ff4a3a2721a603f52e691d5e8fdb746d7d34a97"
+          },
+          "original_ref": null,
+          "source_kind": "server_material",
+          "role": "execution_profile",
+          "body_json": "{\"role\":\"execution_profile\",\"synthetic\":true}"
+        },
+        {
+          "source_ref": {
+            "ref": "review-original:server_material:comparison_method",
+            "hash": "1468bcc208575c9326c5a885b79a848d9302cebf38ba5856f6769f6d7ef96455"
+          },
+          "original_ref": null,
+          "source_kind": "server_material",
+          "role": "comparison_method",
+          "body_json": "{\"role\":\"comparison_method\",\"synthetic\":true}"
+        },
+        {
+          "source_ref": {
+            "ref": "review-original:server_material:cost_assumptions",
+            "hash": "63b17a49f2f6b8880e967f4266647bd7c4dfe5ae7311bb48ec9e336d61bd2070"
+          },
+          "original_ref": {
+            "ref": "fixture:cost",
+            "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "source_kind": "server_material",
+          "role": "cost_assumptions",
+          "body_json": "{\"role\":\"cost_assumptions\",\"synthetic\":true}"
+        },
+        {
+          "source_ref": {
+            "ref": "review-original:server_material:cost_policy",
+            "hash": "dd5d36407c80c06b25fba24b42ed5c5b1538e2532c8c2bba6f1836a50bb7e055"
+          },
+          "original_ref": null,
+          "source_kind": "server_material",
+          "role": "cost_policy",
+          "body_json": "{\"role\":\"cost_policy\",\"synthetic\":true}"
+        },
+        {
+          "source_ref": {
+            "ref": "review-original:server_material:close_window",
+            "hash": "bd007a6ef96767fefc035774f79c71904d9218084fa35fc9136acc83ceabc841"
+          },
+          "original_ref": null,
+          "source_kind": "server_material",
+          "role": "close_window",
+          "body_json": "{\"role\":\"close_window\",\"synthetic\":true}"
+        },
+        {
+          "source_ref": {
+            "ref": "review-original:server_material:candidate_target",
+            "hash": "04aead9e0cfcda226bba6b80175cf2f2d5ce5e43ddb0516600db9ea2cf2b9c94"
+          },
+          "original_ref": {
+            "ref": "fixture:candidate-target",
+            "hash": "04aead9e0cfcda226bba6b80175cf2f2d5ce5e43ddb0516600db9ea2cf2b9c94"
+          },
+          "source_kind": "server_material",
+          "role": "candidate_target",
+          "body_json": "{\"anchor\":\"publication_bound\",\"clock_policy_ref\":{\"hash\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"ref\":\"fixture:clock-policy\"},\"clock_rule\":\"strict_next_utc_minute\",\"conditioning_ref\":{\"hash\":\"7ea203e7265cbad2e220c35ef79f1fc98a4378092a8f36edc8752321603f629c\",\"ref\":\"synthetic:given-defined-event-E\"},\"duration_seconds\":14400,\"grid_seconds\":60,\"horizon\":\"4h\",\"instrument_ref\":{\"hash\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"ref\":\"fixture:instrument\"},\"invalidation_refs\":[{\"hash\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"ref\":\"fixture:probability-domain\"}],\"label_rule_ref\":{\"hash\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"ref\":\"fixture:labels\"},\"method_ref\":{\"hash\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"ref\":\"fixture:forecast-method\"},\"price_basis\":\"trade_1m_close\",\"protocol_ref\":{\"hash\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"ref\":\"fixture:protocol\"},\"schema_version\":\"pending-publication-target.v1\",\"target_family_ref\":{\"hash\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"ref\":\"fixture:family\"},\"target_id\":\"ordinary-4h\",\"threshold_fraction\":\"0.005\",\"valid_until\":\"2026-01-01T01:00:00Z\"}"
+        },
+        {
+          "source_ref": {
+            "ref": "review-original:server_material:anchor_rule",
+            "hash": "247c0c6ef58f06d9368f24cc3ccf0469fc8772680f147134585376cfb0023888"
+          },
+          "original_ref": {
+            "ref": "fixture:anchor-rule",
+            "hash": "247c0c6ef58f06d9368f24cc3ccf0469fc8772680f147134585376cfb0023888"
+          },
+          "source_kind": "server_material",
+          "role": "anchor_rule",
+          "body_json": "{\"anchor\":\"publication_bound\",\"candidate_target_ref\":{\"hash\":\"04aead9e0cfcda226bba6b80175cf2f2d5ce5e43ddb0516600db9ea2cf2b9c94\",\"ref\":\"fixture:candidate-target\"},\"clock_policy_ref\":{\"hash\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"ref\":\"fixture:clock-policy\"},\"clock_rule\":\"strict_next_utc_minute\",\"duration_seconds\":14400,\"grid_seconds\":60,\"horizon\":\"4h\",\"invalidation_refs\":[{\"hash\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"ref\":\"fixture:probability-domain\"}],\"method_ref\":{\"hash\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"ref\":\"fixture:forecast-method\"},\"price_basis\":\"trade_1m_close\",\"schema_version\":\"publication-anchor-rule.v1\",\"threshold_fraction\":\"0.005\",\"valid_until\":\"2026-01-01T01:00:00Z\"}"
+        },
+        {
+          "source_ref": {
+            "ref": "review-original:server_material:allowed_domain_policy",
+            "hash": "dcef5815b8ba44315d9d106a357632412209b44df56435b6b13a416e24b635a7"
+          },
+          "original_ref": null,
+          "source_kind": "server_material",
+          "role": "allowed_domain_policy",
+          "body_json": "{\"invalidation_refs\":[{\"hash\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"ref\":\"fixture:domain-invalid\"}],\"method_code_hash\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"method_ref\":{\"hash\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"ref\":\"fixture:comparison-method\"},\"valid_until\":\"2026-01-01T01:00:00Z\",\"variables\":[]}"
+        },
+        {
+          "source_ref": {
+            "ref": "review-original:server_material:invalidation_policy",
+            "hash": "29887de63611fc84575af9f96d9d52c59c6b9ee9998248abff50d650b3be32f5"
+          },
+          "original_ref": null,
+          "source_kind": "server_material",
+          "role": "invalidation_policy",
+          "body_json": "{\"role\":\"invalidation_policy\",\"synthetic\":true}"
+        },
+        {
+          "source_ref": {
+            "ref": "review-original:server_material:settings_revision",
+            "hash": "08b8a8a0a99f0a73608bbad2761d611882f5631233c2d7038812e9f0c958b77f"
+          },
+          "original_ref": null,
+          "source_kind": "server_material",
+          "role": "settings_revision",
+          "body_json": "{\"role\":\"settings_revision\",\"synthetic\":true}"
+        },
+        {
+          "source_ref": {
+            "ref": "review-original:server_material:account_snapshot",
+            "hash": "336990f22d5a23df0defc1edbe90fc32e449726dabfcaf50a49c245e89375eac"
+          },
+          "original_ref": null,
+          "source_kind": "server_material",
+          "role": "account_snapshot",
+          "body_json": "{\"role\":\"account_snapshot\",\"synthetic\":true}"
+        },
+        {
+          "source_ref": {
+            "ref": "review-original:server_material:position_context",
+            "hash": "f94477080c0afb418056c2be0502a672792ad8310e19ef974a11bc4bac173530"
+          },
+          "original_ref": null,
+          "source_kind": "server_material",
+          "role": "position_context",
+          "body_json": "{\"role\":\"position_context\",\"synthetic\":true}"
+        },
+        {
+          "source_ref": {
+            "ref": "review-original:server_material:utility_policy",
+            "hash": "e96ed748d862411b28a3f3dbb5b420a30b05f43cf4a1930058dc0a9697fd45ce"
+          },
+          "original_ref": null,
+          "source_kind": "server_material",
+          "role": "utility_policy",
+          "body_json": "{\"role\":\"utility_policy\",\"synthetic\":true}"
+        },
+        {
+          "source_ref": {
+            "ref": "review-original:server_material:policies",
+            "hash": "eb1dd3a44a8bda0d113d44533d88a37e51f7e708b175c8f113ed906158091f93"
+          },
+          "original_ref": null,
+          "source_kind": "server_material",
+          "role": "policies",
+          "body_json": "{\"role\":\"policies\",\"synthetic\":true}"
+        },
+        {
+          "source_ref": {
+            "ref": "review-original:frozen_input:evidence-transcript",
+            "hash": "fd5a5d19e5d82c451a1bb14b3ef7489c6b4367b3bea8b79ce1d84f0c54c2f34f"
+          },
+          "original_ref": null,
+          "source_kind": "frozen_input",
+          "role": "evidence-transcript",
+          "body_json": "{\"authority\":\"unverified\",\"content_hash\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"evidence_id\":\"evidence-transcript\",\"excerpt\":\"A central-bank official discussed inflation risks.\",\"kind\":\"transcript\",\"observed_at\":\"2025-12-31T23:59:59Z\",\"published_at\":\"2025-12-31T23:59:00Z\",\"received_at\":\"2026-01-01T00:00:00Z\",\"source_id\":\"manual-transcript\",\"source_url\":null}"
+        }
+      ]
+    },
+    "requested_at": "2026-01-01T00:10:00Z"
+  }
+}

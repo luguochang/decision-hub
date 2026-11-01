@@ -32,7 +32,7 @@ def _query(
         request_id="official-event-call-1",
         capability_id="official.macro",
         requirement_id=requirement_id,
-        query="latest Federal Reserve official speech entry",
+        query="Waller speech on 2026-09-03",
         target_url=AnyUrl(target_url),
         symbols=[],
         fields=[],
@@ -144,3 +144,52 @@ def test_official_event_parser_rejects_policy_delta_instead_of_relabelling_facts
 
     assert raised.value.error_code == "research_capability_requirement_unsupported"
     assert fetched is False
+
+
+@pytest.mark.parametrize("prefix", ["", "\ufeff"])
+def test_feed_selects_requested_event_instead_of_first_entry(prefix: str) -> None:
+    body = prefix + f'''<?xml version="1.0"?><rss><channel>
+    <item><title>Miller, Other speech</title>
+    <link>https://www.federalreserve.gov/newsevents/speech/miller20260904a.htm</link>
+    <pubDate>Fri, 4 Sep 2026 12:30:00 GMT</pubDate></item>
+    <item><title>Waller, Requested speech</title><link>{SPEECH_URL}</link>
+    <pubDate>Thu, 3 Sep 2026 12:30:00 GMT</pubDate></item>
+    </channel></rss>'''
+
+    async def fetcher(url: str) -> FetchedDocument:
+        return FetchedDocument(url, body, OBSERVED, OBSERVED)
+
+    result = asyncio.run(_adapter(fetcher).execute(_query()))
+    assert str(result.evidence_candidates[0].source_url) == SPEECH_URL
+    assert next(f.value for f in result.facts or [] if f.field == "event_actor") == "Waller"
+
+
+@pytest.mark.parametrize("query_text", ["latest official speech", "Waller speech on 2026-09-02"])
+def test_feed_does_not_bind_an_unmatched_entry_to_request_event(query_text: str) -> None:
+    body = f'''<rss><channel><item><title>Waller, Requested speech</title>
+    <link>{SPEECH_URL}</link><pubDate>Thu, 3 Sep 2026 12:30:00 GMT</pubDate>
+    </item></channel></rss>'''
+
+    async def fetcher(url: str) -> FetchedDocument:
+        return FetchedDocument(url, body, OBSERVED, OBSERVED)
+
+    query = _query().model_copy(update={"query": query_text})
+    with pytest.raises(ResearchCapabilityError) as raised:
+        asyncio.run(_adapter(fetcher).execute(query))
+    assert raised.value.error_code == "official_event_target_unresolved"
+
+
+def test_feed_rejects_ambiguous_same_actor_same_date() -> None:
+    body = '<rss><channel>' + ''.join(
+        f'''<item><title>Waller, Speech {suffix}</title>
+        <link>https://www.federalreserve.gov/newsevents/speech/waller20260903{suffix}.htm</link>
+        <pubDate>Thu, 3 Sep 2026 12:30:00 GMT</pubDate></item>'''
+        for suffix in ("a", "b")
+    ) + '</channel></rss>'
+
+    async def fetcher(url: str) -> FetchedDocument:
+        return FetchedDocument(url, body, OBSERVED, OBSERVED)
+
+    with pytest.raises(ResearchCapabilityError) as raised:
+        asyncio.run(_adapter(fetcher).execute(_query()))
+    assert raised.value.error_code == "official_event_target_unresolved"

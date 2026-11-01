@@ -10,7 +10,9 @@ from packages.kernel.decision_hub_kernel.ports.sources import SourceManifest
 from packages.source_adapters.official_feeds import (
     OfficialCalendarSource,
     OfficialFeedSource,
+    OfficialHtmlCalendarSource,
     official_source_presets,
+    parse_official_schedule_html,
 )
 from packages.source_adapters.official_feeds.adapter import extract_document_text, parse_feed
 
@@ -62,6 +64,48 @@ def test_official_calendar_fixture_becomes_text_envelope() -> None:
     assert "Consumer Price Index" in result.envelopes[0].raw_text
     assert result.envelopes[0].scheduled_at == datetime(2026, 9, 10, 12, 30, tzinfo=UTC)
     assert result.envelopes[0].observed_at <= result.envelopes[0].received_at
+    assert result.envelopes[0].macro_event is not None
+    assert result.envelopes[0].macro_event.family == "cpi"
+    assert str(result.envelopes[0].source_url) == "https://www.bls.gov/schedule/news_release/bls.ics"
+
+
+def test_official_html_schedule_extracts_day_level_policy_events() -> None:
+    body = """
+    <html><body>
+      <h2>2026 FOMC Meetings</h2>
+      <ul><li>September 15-16</li><li>October 27-28</li><li>December 8-9</li></ul>
+    </body></html>
+    """
+    parsed = parse_official_schedule_html(
+        body,
+        source_id="fed-calendar",
+        family="fomc",
+        event_title="Federal Open Market Committee meeting",
+    )
+    assert [item[1] for item in parsed] == [
+        datetime(2026, 9, 16, tzinfo=UTC),
+        datetime(2026, 10, 28, tzinfo=UTC),
+        datetime(2026, 12, 9, tzinfo=UTC),
+    ]
+
+    async def fetcher(_url: str) -> tuple[int, str]:
+        return 200, body
+
+    source = OfficialHtmlCalendarSource(
+        SourceManifest(
+            source_id="fed-calendar",
+            source_type="official_feed",
+            version="fixture.v1",
+            authority_level="official",
+        ),
+        "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+        family="fomc",
+        event_title="Federal Open Market Committee meeting",
+        fetcher=fetcher,
+    )
+    result = asyncio.run(source.poll())
+    assert result.envelopes
+    assert all(item.macro_event and item.macro_event.family == "fomc" for item in result.envelopes)
 
 
 def test_feed_parser_supports_atom_href_json_and_document_body() -> None:
@@ -175,7 +219,20 @@ def test_product_official_sources_can_exclude_unscheduled_calendar_activation() 
         "fed-speeches",
         "bls-releases",
         "bea-news",
+        "bls-public-api",
+        "cleveland-cpi-nowcast",
+        "cpi-publication-schedule",
+        "cleveland-cpi-nowcast-history",
+        "cpi-release-history",
+        "fred-daily-dgs10",
+        "fred-daily-dfii10",
+        "fred-daily-dtwexbgs",
     }
+
+
+def test_product_official_sources_include_global_policy_calendars() -> None:
+    source_ids = {source.manifest.source_id for source in official_source_presets()}
+    assert {"bls-calendar", "fed-calendar", "ecb-calendar", "boj-calendar"} <= source_ids
 
 
 def test_calendar_batch_cursor_does_not_skip_unemitted_events() -> None:

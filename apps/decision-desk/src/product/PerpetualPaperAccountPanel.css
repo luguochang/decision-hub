@@ -1,0 +1,7 @@
+@import './DecisionSettingsPanel.css';
+.paper-account-panel { margin-top: 32px; padding-top: 24px; border-top: 1px solid #d5ddd8; }
+.paper-account-summary { padding: 12px 16px; margin: 12px 0; border: 1px solid #d5ddd8; border-radius: 8px; background: #f8faf8; }
+.paper-account-summary h3 { margin-top: 0; }
+.paper-account-panel .paper-account-ack { grid-column: 1 / -1; flex-direction: row; align-items: flex-start; line-height: 1.7; }
+.paper-account-panel input[type="checkbox"] { width: auto; min-height: auto; margin-top: 5px; }
+.paper-account-panel [role="status"] { line-height: 1.7; color: #6a4a20; }

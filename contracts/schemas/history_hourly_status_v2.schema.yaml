@@ -1,0 +1,320 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.local/contracts/history-hourly-status-v2.schema.json",
+  "title": "HistoryHourlyStatusV2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "owner_authenticated",
+    "observed_at",
+    "cadence_seconds",
+    "worker_configured",
+    "automatic_retry",
+    "current_forecast_originals_verified",
+    "financial_qualified",
+    "historical_pit_verified",
+    "scopes"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "history-hourly-status.v2"
+    },
+    "owner_authenticated": {
+      "type": "boolean",
+      "const": true
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "cadence_seconds": {
+      "type": "integer",
+      "const": 3600
+    },
+    "worker_configured": {
+      "type": "boolean"
+    },
+    "automatic_retry": {
+      "type": "boolean",
+      "const": false
+    },
+    "current_forecast_originals_verified": {
+      "type": "boolean",
+      "const": false
+    },
+    "financial_qualified": {
+      "type": "boolean",
+      "const": false
+    },
+    "historical_pit_verified": {
+      "type": "boolean",
+      "const": false
+    },
+    "scopes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": false,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/history_hourly_btc_scope_v2"
+        },
+        {
+          "$ref": "#/$defs/history_hourly_eth_scope_v2"
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "history_hourly_btc_scope_v2": {
+      "title": "HistoryHourlyBtcScopeV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset",
+        "scope_id",
+        "asset_label",
+        "state",
+        "hour_at",
+        "cutoff_at",
+        "started_at",
+        "deadline_at",
+        "completed_at",
+        "slot_id",
+        "forecast_id",
+        "model_id",
+        "reason_code",
+        "reason_label",
+        "fixture_mode",
+        "fence_present"
+      ],
+      "properties": {
+        "asset": {
+          "type": "string",
+          "const": "BTC"
+        },
+        "scope_id": {
+          "type": "string",
+          "const": "crypto:spot:okx:BTC-USDT:trade:1m"
+        },
+        "asset_label": {
+          "type": "string",
+          "const": "比特币"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "not_configured",
+            "not_due",
+            "reserved",
+            "blocked",
+            "committed_verified",
+            "committed_readback_unconfirmed",
+            "unconfirmed"
+          ]
+        },
+        "hour_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "cutoff_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "started_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "deadline_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "completed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "slot_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^hhour2_[a-f0-9]{48}$"
+        },
+        "forecast_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^hforecast2_[a-f0-9]{48}$"
+        },
+        "model_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^hfit2_[a-f0-9]{48}$"
+        },
+        "reason_code": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "reason_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "fixture_mode": {
+          "type": "boolean"
+        },
+        "fence_present": {
+          "type": "boolean"
+        }
+      }
+    },
+    "history_hourly_eth_scope_v2": {
+      "title": "HistoryHourlyEthScopeV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset",
+        "scope_id",
+        "asset_label",
+        "state",
+        "hour_at",
+        "cutoff_at",
+        "started_at",
+        "deadline_at",
+        "completed_at",
+        "slot_id",
+        "forecast_id",
+        "model_id",
+        "reason_code",
+        "reason_label",
+        "fixture_mode",
+        "fence_present"
+      ],
+      "properties": {
+        "asset": {
+          "type": "string",
+          "const": "ETH"
+        },
+        "scope_id": {
+          "type": "string",
+          "const": "crypto:spot:okx:ETH-USDT:trade:1m"
+        },
+        "asset_label": {
+          "type": "string",
+          "const": "以太坊"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "not_configured",
+            "not_due",
+            "reserved",
+            "blocked",
+            "committed_verified",
+            "committed_readback_unconfirmed",
+            "unconfirmed"
+          ]
+        },
+        "hour_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "cutoff_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "started_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "deadline_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "completed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "slot_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^hhour2_[a-f0-9]{48}$"
+        },
+        "forecast_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^hforecast2_[a-f0-9]{48}$"
+        },
+        "model_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^hfit2_[a-f0-9]{48}$"
+        },
+        "reason_code": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "reason_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "fixture_mode": {
+          "type": "boolean"
+        },
+        "fence_present": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

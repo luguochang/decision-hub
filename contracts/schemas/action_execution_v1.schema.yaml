@@ -1,0 +1,3488 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.local/contracts/action-execution-v1.schema.json",
+  "title": "ActionExecutionContractsV1",
+  "description": "Immutable paper execution declarations. Wire validation never grants source authenticity, actual fill authority, or financial qualification.",
+  "$defs": {
+    "action_execution_ref_v1": {
+      "title": "ActionExecutionRefV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "ref",
+        "hash"
+      ]
+    },
+    "action_execution_target_v1": {
+      "title": "ActionExecutionTargetV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "horizon": {
+          "type": "string",
+          "enum": [
+            "30m",
+            "24h",
+            "72h"
+          ]
+        },
+        "target_spec_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "target_spec_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "horizon",
+        "target_spec_ref",
+        "target_spec_hash"
+      ]
+    },
+    "action_paper_account_values_v1": {
+      "title": "ActionPaperAccountValuesV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cash": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "quantity": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "raw_basis": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "entry_fees": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "entry_slippage": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "realized_cost": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "realized_gross": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "realized_net": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        }
+      },
+      "required": [
+        "cash",
+        "quantity",
+        "raw_basis",
+        "entry_fees",
+        "entry_slippage",
+        "realized_cost",
+        "realized_gross",
+        "realized_net"
+      ]
+    },
+    "action_execution_protocol_v1": {
+      "title": "ActionExecutionProtocolV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "action-execution-protocol.v1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "trial_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "registered_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "T0": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "T1": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "label_deadline": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "cohort": {
+          "const": "diagnostic"
+        },
+        "primary_horizon": {
+          "type": "string",
+          "enum": [
+            "30m",
+            "24h",
+            "72h"
+          ]
+        },
+        "diagnostic_horizons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "30m",
+              "24h",
+              "72h"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 2
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+          },
+          "minItems": 1,
+          "maxItems": 2
+        },
+        "methods": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/action_execution_ref_v1"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "shadow_engine",
+              "pc_visible"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 2
+        },
+        "delays": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "enum": [
+              0,
+              60,
+              300
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 3
+        },
+        "cost_policy_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "cost_policy_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "size_policy_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "size_policy_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "calculation_manifest_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "calculation_manifest_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "opening_rule_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "opening_rule_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/action_execution_target_v1"
+          },
+          "minItems": 1,
+          "maxItems": 3
+        },
+        "initial_equity": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9])$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "paper_quantity_step": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9])$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "trial_id",
+        "registered_at",
+        "T0",
+        "T1",
+        "label_deadline",
+        "cohort",
+        "primary_horizon",
+        "diagnostic_horizons",
+        "scopes",
+        "methods",
+        "channels",
+        "delays",
+        "cost_policy_ref",
+        "cost_policy_hash",
+        "size_policy_ref",
+        "size_policy_hash",
+        "calculation_manifest_ref",
+        "calculation_manifest_hash",
+        "opening_rule_ref",
+        "opening_rule_hash",
+        "targets",
+        "initial_equity",
+        "unit",
+        "paper_quantity_step",
+        "payload_hash"
+      ]
+    },
+    "action_paper_portfolio_identity_v1": {
+      "title": "ActionPaperPortfolioIdentityV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "action-paper-portfolio-identity.v1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "identity_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "protocol_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "protocol_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "trial_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "scope_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "horizon": {
+          "type": "string",
+          "enum": [
+            "30m",
+            "24h",
+            "72h"
+          ]
+        },
+        "target_spec_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "scenario": {
+          "type": "string",
+          "enum": [
+            "cash",
+            "existing_long"
+          ]
+        },
+        "method_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "method_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "channel": {
+          "type": "string",
+          "enum": [
+            "shadow_engine",
+            "pc_visible"
+          ]
+        },
+        "delay_seconds": {
+          "type": "integer",
+          "enum": [
+            0,
+            60,
+            300
+          ]
+        },
+        "owner_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "identity_hash",
+        "protocol_ref",
+        "protocol_hash",
+        "trial_id",
+        "scope_id",
+        "horizon",
+        "target_spec_hash",
+        "scenario",
+        "method_ref",
+        "method_hash",
+        "channel",
+        "delay_seconds",
+        "owner_id"
+      ]
+    },
+    "action_execution_intent_v1": {
+      "title": "ActionExecutionIntentV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "action-execution-intent.v1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "portfolio_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "identity_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "opportunity_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "plan_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "revision_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "event_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "source_kind": {
+          "type": "string",
+          "enum": [
+            "condition",
+            "quote",
+            "deadline"
+          ]
+        },
+        "source_identity": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "phase": {
+          "type": "string",
+          "enum": [
+            "entry",
+            "reduce",
+            "exit"
+          ]
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "enter_long",
+            "reduce_long",
+            "exit_long"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "condition_entry",
+            "condition_exit",
+            "invalidation",
+            "stop",
+            "target",
+            "expiry"
+          ]
+        },
+        "publication_receipt_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "publication_receipt_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "U_basis_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "U_basis_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "calculation_manifest_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "calculation_manifest_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "catalog_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "catalog_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "size_policy_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "size_policy_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "cost_policy_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "cost_policy_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "target_spec_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "target_spec_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "admission_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "admission_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "evaluation_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evaluation_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evaluation_input_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evaluation_input_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_quote_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_quote_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "episode_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "episode_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "display_receipt_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "display_receipt_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "availability_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "deadline_basis": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "x-execution-time": true,
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "risk_unit_value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9])$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "risk_unit_unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "U_measurement_end": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "U_knowledge_cutoff": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "U_known_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "channel": {
+          "type": "string",
+          "enum": [
+            "shadow_engine",
+            "pc_visible"
+          ]
+        },
+        "owner_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "publication_available_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "trigger_input_known_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "admission_valid_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "observed_committed_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "base_action_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "eligible_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "quote_deadline": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "evaluation_available_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "x-execution-time": true,
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "display_received_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "x-execution-time": true,
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "entry_valid_until": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "x-execution-time": true,
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "exit_trigger_deadline": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "x-execution-time": true,
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "delay_seconds": {
+          "type": "integer",
+          "enum": [
+            0,
+            60,
+            300
+          ]
+        },
+        "request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "portfolio_id",
+        "identity_hash",
+        "opportunity_id",
+        "plan_id",
+        "revision_id",
+        "revision_hash",
+        "event_key",
+        "source_kind",
+        "source_identity",
+        "phase",
+        "action",
+        "reason",
+        "publication_receipt_ref",
+        "publication_receipt_hash",
+        "U_basis_ref",
+        "U_basis_hash",
+        "calculation_manifest_ref",
+        "calculation_manifest_hash",
+        "catalog_ref",
+        "catalog_hash",
+        "size_policy_ref",
+        "size_policy_hash",
+        "cost_policy_ref",
+        "cost_policy_hash",
+        "target_spec_ref",
+        "target_spec_hash",
+        "admission_ref",
+        "admission_hash",
+        "evaluation_ref",
+        "evaluation_hash",
+        "evaluation_input_ref",
+        "evaluation_input_hash",
+        "source_quote_ref",
+        "source_quote_hash",
+        "episode_ref",
+        "episode_hash",
+        "display_receipt_ref",
+        "display_receipt_hash",
+        "availability_hash",
+        "deadline_basis",
+        "risk_unit_value",
+        "risk_unit_unit",
+        "U_measurement_end",
+        "U_knowledge_cutoff",
+        "U_known_at",
+        "channel",
+        "owner_id",
+        "publication_available_at",
+        "trigger_input_known_at",
+        "admission_valid_at",
+        "observed_committed_at",
+        "base_action_at",
+        "eligible_at",
+        "quote_deadline",
+        "created_at",
+        "evaluation_available_at",
+        "display_received_at",
+        "entry_valid_until",
+        "exit_trigger_deadline",
+        "delay_seconds",
+        "request_hash",
+        "payload_hash"
+      ]
+    },
+    "action_fill_v1": {
+      "title": "ActionFillV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "action-fill.v1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "intent_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "intent_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "portfolio_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "episode_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "side": {
+          "type": "string",
+          "enum": [
+            "buy",
+            "sell"
+          ]
+        },
+        "quantity": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9])$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "base_unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "quote_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "quote_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "availability_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "capture_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "capture_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "provider_observed_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "received_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "executed_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "bid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9])$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "ask": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9])$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "raw_price": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9])$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "execution_price": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9])$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "fee": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "slippage": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "cash_delta": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "gross": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cost": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "net": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cost_policy_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "cost_policy_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "account_fee_verified": {
+          "const": false
+        },
+        "execution_kind": {
+          "const": "paper"
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "intent_ref",
+        "intent_hash",
+        "portfolio_id",
+        "episode_id",
+        "side",
+        "quantity",
+        "base_unit",
+        "quote_id",
+        "quote_hash",
+        "availability_hash",
+        "capture_ref",
+        "capture_hash",
+        "provider_observed_at",
+        "received_at",
+        "available_at",
+        "executed_at",
+        "bid",
+        "ask",
+        "raw_price",
+        "execution_price",
+        "fee",
+        "slippage",
+        "cash_delta",
+        "gross",
+        "cost",
+        "net",
+        "cost_policy_ref",
+        "cost_policy_hash",
+        "account_fee_verified",
+        "execution_kind",
+        "payload_hash"
+      ]
+    },
+    "action_paper_checkpoint_v1": {
+      "title": "ActionPaperCheckpointV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "action-paper-checkpoint.v1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "portfolio_identity": {
+          "$ref": "#/$defs/action_paper_portfolio_identity_v1"
+        },
+        "portfolio_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "identity_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "previous_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "previous_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "execution_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "account_before_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "account_after": {
+          "$ref": "#/$defs/action_paper_account_values_v1"
+        },
+        "event_kind": {
+          "type": "string",
+          "enum": [
+            "opening",
+            "fill",
+            "no_fill"
+          ]
+        },
+        "opening_original_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/action_execution_ref_v1"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "intent_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "intent_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fill_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fill_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "episode_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "episode_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "disposition": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "exclusions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "portfolio_identity",
+        "portfolio_id",
+        "identity_hash",
+        "version",
+        "previous_ref",
+        "previous_hash",
+        "execution_key",
+        "request_hash",
+        "created_at",
+        "account_before_hash",
+        "account_after",
+        "event_kind",
+        "opening_original_refs",
+        "intent_ref",
+        "intent_hash",
+        "fill_ref",
+        "fill_hash",
+        "episode_ref",
+        "episode_hash",
+        "disposition",
+        "exclusions",
+        "payload_hash"
+      ]
+    },
+    "action_execution_episode_v1": {
+      "title": "ActionExecutionEpisodeV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "action-execution-episode.v1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "portfolio_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "previous_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "previous_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "opening_kind": {
+          "type": "string",
+          "enum": [
+            "buy_fill",
+            "inherited"
+          ]
+        },
+        "opening_checkpoint_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "opening_checkpoint_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "opportunity_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "plan_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "revision_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "entry_intent_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "entry_intent_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "entry_fill_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "entry_fill_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "entry_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "reference_price": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9])$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "initial_quantity": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9])$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "remaining_quantity": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "U_basis_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "U_basis_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "risk_unit_value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9])$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "initial_R": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9])$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "stop_price": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9])$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "target_price": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9])$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "original_DSL_revision_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "original_DSL_revision_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "exit_trigger_deadline": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "partially_closed",
+            "closed",
+            "unpriced",
+            "ambiguous"
+          ]
+        },
+        "last_intent_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "last_intent_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "checkpoint_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/action_execution_ref_v1"
+          },
+          "minItems": 1,
+          "maxItems": 128
+        },
+        "realized_gross": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "realized_cost": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "realized_net": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "price_coverage": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "exclusions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "portfolio_id",
+        "version",
+        "previous_ref",
+        "previous_hash",
+        "opening_kind",
+        "opening_checkpoint_ref",
+        "opening_checkpoint_hash",
+        "opportunity_id",
+        "plan_id",
+        "revision_id",
+        "revision_hash",
+        "entry_intent_ref",
+        "entry_intent_hash",
+        "entry_fill_ref",
+        "entry_fill_hash",
+        "entry_at",
+        "reference_price",
+        "initial_quantity",
+        "remaining_quantity",
+        "U_basis_ref",
+        "U_basis_hash",
+        "risk_unit_value",
+        "initial_R",
+        "stop_price",
+        "target_price",
+        "original_DSL_revision_ref",
+        "original_DSL_revision_hash",
+        "exit_trigger_deadline",
+        "status",
+        "last_intent_ref",
+        "last_intent_hash",
+        "checkpoint_refs",
+        "realized_gross",
+        "realized_cost",
+        "realized_net",
+        "price_coverage",
+        "exclusions",
+        "recorded_at",
+        "payload_hash"
+      ]
+    },
+    "action_outcome_v2": {
+      "title": "ActionOutcomeV2",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "action-outcome.v2"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "opportunity_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "plan_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "mode": {
+          "const": "paper"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "scorable",
+            "unscorable",
+            "settled"
+          ]
+        },
+        "protocol_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "protocol_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "visible_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "x-execution-time": true,
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "trigger_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "x-execution-time": true,
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "entry_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "x-execution-time": true,
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "exit_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "x-execution-time": true,
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "price_basis": {
+          "type": "string",
+          "enum": [
+            "trade",
+            "bid_ask",
+            "mark"
+          ]
+        },
+        "entry": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "exit": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "gross_pnl": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cost": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "net_pnl": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mae": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "coverage": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "price_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/action_execution_ref_v1"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "baseline_outcome_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "exclusions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "settled_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "x-execution-time": true,
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "due_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "registered_protocol_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "portfolio_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "identity_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "scope_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "horizon": {
+          "type": "string",
+          "enum": [
+            "30m",
+            "24h",
+            "72h"
+          ]
+        },
+        "scenario": {
+          "type": "string",
+          "enum": [
+            "cash",
+            "existing_long"
+          ]
+        },
+        "method_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "method_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "channel": {
+          "type": "string",
+          "enum": [
+            "shadow_engine",
+            "pc_visible"
+          ]
+        },
+        "delay_seconds": {
+          "type": "integer",
+          "enum": [
+            0,
+            60,
+            300
+          ]
+        },
+        "owner_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "execution_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "execution_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "episode_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "episode_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "previous_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "previous_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "episode_version": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "execution_status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "filled",
+            "no_fill",
+            "rejected",
+            "unknown"
+          ]
+        },
+        "quantity": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "remaining_quantity": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fee": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "slippage": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "R": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "financial_qualified": {
+          "const": false
+        },
+        "qualification_reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+          },
+          "minItems": 1,
+          "maxItems": 128
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "opportunity_id",
+        "plan_id",
+        "revision_id",
+        "mode",
+        "status",
+        "protocol_ref",
+        "protocol_hash",
+        "visible_at",
+        "trigger_at",
+        "entry_at",
+        "exit_at",
+        "price_basis",
+        "entry",
+        "exit",
+        "gross_pnl",
+        "cost",
+        "net_pnl",
+        "mae",
+        "coverage",
+        "price_refs",
+        "baseline_outcome_ref",
+        "exclusions",
+        "settled_at",
+        "payload_hash",
+        "version",
+        "due_at",
+        "registered_protocol_hash",
+        "portfolio_id",
+        "identity_hash",
+        "scope_id",
+        "horizon",
+        "scenario",
+        "method_ref",
+        "method_hash",
+        "channel",
+        "delay_seconds",
+        "owner_id",
+        "execution_ref",
+        "execution_hash",
+        "episode_ref",
+        "episode_hash",
+        "previous_ref",
+        "previous_hash",
+        "episode_version",
+        "execution_status",
+        "quantity",
+        "remaining_quantity",
+        "fee",
+        "slippage",
+        "R",
+        "financial_qualified",
+        "qualification_reasons"
+      ]
+    },
+    "action_execution_preview_v1": {
+      "title": "ActionExecutionPreviewV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "action-execution-preview.v1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "revision_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "portfolio_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "initial_scenario": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "cash",
+                "existing_long"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "scope_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "quote_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "quote_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "U_basis_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "U_basis_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "size_policy_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "size_policy_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "cost_policy_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "cost_policy_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "equity": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "holding_qty": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "risk_budget": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nominal_cap": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "suggested_quantity": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reduce_fraction": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "stop_price": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "target_price": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "price": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "limiting_constraint": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "available",
+            "insufficient",
+            "unsupported",
+            "expired"
+          ]
+        },
+        "gaps": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "paper_not_order": {
+          "const": true
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "revision_id",
+        "revision_hash",
+        "portfolio_id",
+        "initial_scenario",
+        "scope_id",
+        "as_of",
+        "expires_at",
+        "quote_ref",
+        "quote_hash",
+        "U_basis_ref",
+        "U_basis_hash",
+        "size_policy_ref",
+        "size_policy_hash",
+        "cost_policy_ref",
+        "cost_policy_hash",
+        "equity",
+        "cash",
+        "holding_qty",
+        "risk_budget",
+        "nominal_cap",
+        "suggested_quantity",
+        "reduce_fraction",
+        "stop_price",
+        "target_price",
+        "price",
+        "limiting_constraint",
+        "status",
+        "gaps",
+        "paper_not_order",
+        "payload_hash"
+      ]
+    },
+    "action_execution_receipt_v1": {
+      "title": "ActionExecutionReceiptV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "action-execution-receipt.v1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "intent_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "intent_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "portfolio_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "filled",
+            "no_fill",
+            "rejected",
+            "unknown"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "first_quote_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "first_quote_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fill_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fill_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "checkpoint_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "checkpoint_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "episode_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "episode_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outcome_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outcome_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "quote_exclusions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "decided_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "intent_ref",
+        "intent_hash",
+        "portfolio_id",
+        "request_hash",
+        "status",
+        "reason",
+        "first_quote_ref",
+        "first_quote_hash",
+        "fill_ref",
+        "fill_hash",
+        "checkpoint_ref",
+        "checkpoint_hash",
+        "episode_ref",
+        "episode_hash",
+        "outcome_ref",
+        "outcome_hash",
+        "quote_exclusions",
+        "decided_at",
+        "payload_hash"
+      ]
+    },
+    "action_fill_v2": {
+      "title": "ActionFillV2",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "action-fill.v2"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "intent_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "intent_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "portfolio_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "episode_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "side": {
+          "type": "string",
+          "enum": [
+            "buy",
+            "sell"
+          ]
+        },
+        "quantity": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9])$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "base_unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "quote_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "quote_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "availability_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "capture_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "capture_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "provider_observed_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "received_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "executed_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "bid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9])$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "ask": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9])$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "raw_price": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9])$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "execution_price": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9])$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "fee": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "slippage": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "cash_delta": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-decimal-precision": 50,
+          "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+          "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+        },
+        "gross": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cost": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "net": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "x-decimal-precision": 50,
+              "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$",
+              "description": "Canonical fixed-point Decimal string, at most 50 significant digits; no exponent, negative zero, leading integer zeros or trailing fractional zeros. No float conversion."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cost_policy_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "cost_policy_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "account_fee_verified": {
+          "const": false
+        },
+        "execution_kind": {
+          "const": "paper"
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "clock_ref": {
+          "type": "string",
+          "minLength": 70,
+          "maxLength": 128,
+          "pattern": "^clock_[a-f0-9]{64}$"
+        },
+        "clock_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "observed_local_lower": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "observed_local_upper": {
+          "type": "string",
+          "format": "date-time",
+          "x-execution-time": true,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-][0-9]{2}:[0-9]{2})$"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "intent_ref",
+        "intent_hash",
+        "portfolio_id",
+        "episode_id",
+        "side",
+        "quantity",
+        "base_unit",
+        "quote_id",
+        "quote_hash",
+        "availability_hash",
+        "capture_ref",
+        "capture_hash",
+        "provider_observed_at",
+        "received_at",
+        "available_at",
+        "executed_at",
+        "bid",
+        "ask",
+        "raw_price",
+        "execution_price",
+        "fee",
+        "slippage",
+        "cash_delta",
+        "gross",
+        "cost",
+        "net",
+        "cost_policy_ref",
+        "cost_policy_hash",
+        "account_fee_verified",
+        "execution_kind",
+        "payload_hash",
+        "clock_ref",
+        "clock_hash",
+        "observed_local_lower",
+        "observed_local_upper"
+      ],
+      "description": "Paper fill with original provider timestamp and a separately authenticated local observation interval. Wire shape alone grants no source or fill authority."
+    }
+  }
+}

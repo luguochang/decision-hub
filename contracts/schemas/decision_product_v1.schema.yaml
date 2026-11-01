@@ -1,0 +1,2922 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.local/contracts/decision-product-v1.schema.json",
+  "title": "DecisionProductContractsV1",
+  "description": "Closed action contracts. Parsing does not authenticate stored references or grant financial qualification.",
+  "$defs": {
+    "decision_basis_ref_v1": {
+      "title": "DecisionBasisRefV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "ref",
+        "hash"
+      ]
+    },
+    "decision_skill_ref_v1": {
+      "title": "DecisionSkillRefV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "version_id",
+        "hash"
+      ]
+    },
+    "decision_factor_ref_v1": {
+      "title": "DecisionFactorRefV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "known_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ref",
+        "hash",
+        "unit",
+        "known_at"
+      ]
+    },
+    "decision_gap_v1": {
+      "title": "DecisionGapV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "scope": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 192,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        }
+      },
+      "required": [
+        "scope",
+        "reason"
+      ]
+    },
+    "decision_hypothesis_v1": {
+      "title": "DecisionHypothesisV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "direction": {
+          "type": "string",
+          "enum": [
+            "long",
+            "short",
+            "range"
+          ]
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "counter_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8000,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        }
+      },
+      "required": [
+        "direction",
+        "evidence_refs",
+        "counter_refs",
+        "rationale"
+      ]
+    },
+    "decision_probability_v1": {
+      "title": "DecisionProbabilityV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "target_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "subjective",
+            "calibrated",
+            "unavailable"
+          ]
+        },
+        "provenance_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "target_id",
+        "value",
+        "kind",
+        "provenance_ref"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "unavailable"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "null"
+              },
+              "provenance_ref": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "subjective"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "provenance_ref": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "calibrated"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "provenance_ref": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "decision_condition_input_v1": {
+      "title": "DecisionConditionInputV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "metric": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 192,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        }
+      },
+      "required": [
+        "metric",
+        "scope",
+        "source",
+        "unit"
+      ]
+    },
+    "decision_condition_compare_v1": {
+      "title": "DecisionConditionCompareV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "compare"
+        },
+        "feature": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "scope_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 192,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "cmp": {
+          "type": "string",
+          "enum": [
+            "gt",
+            "gte",
+            "lt",
+            "lte"
+          ]
+        },
+        "threshold": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$"
+        },
+        "max_age_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 604800
+        }
+      },
+      "required": [
+        "op",
+        "feature",
+        "scope_id",
+        "unit",
+        "cmp",
+        "threshold",
+        "max_age_seconds"
+      ]
+    },
+    "decision_condition_expression_depth_8_v1": {
+      "title": "DecisionConditionExpressionDepth8V1",
+      "$ref": "#/$defs/decision_condition_compare_v1"
+    },
+    "decision_condition_group_depth_7_v1": {
+      "title": "DecisionConditionGroupDepth7V1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "type": "string",
+          "enum": [
+            "all",
+            "any"
+          ]
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_condition_expression_depth_8_v1"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        }
+      },
+      "required": [
+        "op",
+        "args"
+      ]
+    },
+    "decision_condition_expression_depth_7_v1": {
+      "title": "DecisionConditionExpressionDepth7V1",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/decision_condition_compare_v1"
+        },
+        {
+          "$ref": "#/$defs/decision_condition_group_depth_7_v1"
+        }
+      ],
+      "description": "Disjoint op branches; max depth eight. Total leaves <=32 is domain validation."
+    },
+    "decision_condition_group_depth_6_v1": {
+      "title": "DecisionConditionGroupDepth6V1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "type": "string",
+          "enum": [
+            "all",
+            "any"
+          ]
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_condition_expression_depth_7_v1"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        }
+      },
+      "required": [
+        "op",
+        "args"
+      ]
+    },
+    "decision_condition_expression_depth_6_v1": {
+      "title": "DecisionConditionExpressionDepth6V1",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/decision_condition_compare_v1"
+        },
+        {
+          "$ref": "#/$defs/decision_condition_group_depth_6_v1"
+        }
+      ],
+      "description": "Disjoint op branches; max depth eight. Total leaves <=32 is domain validation."
+    },
+    "decision_condition_group_depth_5_v1": {
+      "title": "DecisionConditionGroupDepth5V1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "type": "string",
+          "enum": [
+            "all",
+            "any"
+          ]
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_condition_expression_depth_6_v1"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        }
+      },
+      "required": [
+        "op",
+        "args"
+      ]
+    },
+    "decision_condition_expression_depth_5_v1": {
+      "title": "DecisionConditionExpressionDepth5V1",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/decision_condition_compare_v1"
+        },
+        {
+          "$ref": "#/$defs/decision_condition_group_depth_5_v1"
+        }
+      ],
+      "description": "Disjoint op branches; max depth eight. Total leaves <=32 is domain validation."
+    },
+    "decision_condition_group_depth_4_v1": {
+      "title": "DecisionConditionGroupDepth4V1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "type": "string",
+          "enum": [
+            "all",
+            "any"
+          ]
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_condition_expression_depth_5_v1"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        }
+      },
+      "required": [
+        "op",
+        "args"
+      ]
+    },
+    "decision_condition_expression_depth_4_v1": {
+      "title": "DecisionConditionExpressionDepth4V1",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/decision_condition_compare_v1"
+        },
+        {
+          "$ref": "#/$defs/decision_condition_group_depth_4_v1"
+        }
+      ],
+      "description": "Disjoint op branches; max depth eight. Total leaves <=32 is domain validation."
+    },
+    "decision_condition_group_depth_3_v1": {
+      "title": "DecisionConditionGroupDepth3V1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "type": "string",
+          "enum": [
+            "all",
+            "any"
+          ]
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_condition_expression_depth_4_v1"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        }
+      },
+      "required": [
+        "op",
+        "args"
+      ]
+    },
+    "decision_condition_expression_depth_3_v1": {
+      "title": "DecisionConditionExpressionDepth3V1",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/decision_condition_compare_v1"
+        },
+        {
+          "$ref": "#/$defs/decision_condition_group_depth_3_v1"
+        }
+      ],
+      "description": "Disjoint op branches; max depth eight. Total leaves <=32 is domain validation."
+    },
+    "decision_condition_group_depth_2_v1": {
+      "title": "DecisionConditionGroupDepth2V1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "type": "string",
+          "enum": [
+            "all",
+            "any"
+          ]
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_condition_expression_depth_3_v1"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        }
+      },
+      "required": [
+        "op",
+        "args"
+      ]
+    },
+    "decision_condition_expression_depth_2_v1": {
+      "title": "DecisionConditionExpressionDepth2V1",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/decision_condition_compare_v1"
+        },
+        {
+          "$ref": "#/$defs/decision_condition_group_depth_2_v1"
+        }
+      ],
+      "description": "Disjoint op branches; max depth eight. Total leaves <=32 is domain validation."
+    },
+    "decision_condition_group_depth_1_v1": {
+      "title": "DecisionConditionGroupDepth1V1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "type": "string",
+          "enum": [
+            "all",
+            "any"
+          ]
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_condition_expression_depth_2_v1"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        }
+      },
+      "required": [
+        "op",
+        "args"
+      ]
+    },
+    "decision_condition_expression_depth_1_v1": {
+      "title": "DecisionConditionExpressionDepth1V1",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/decision_condition_compare_v1"
+        },
+        {
+          "$ref": "#/$defs/decision_condition_group_depth_1_v1"
+        }
+      ],
+      "description": "Disjoint op branches; max depth eight. Total leaves <=32 is domain validation."
+    },
+    "decision_condition_v1": {
+      "title": "DecisionConditionV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "purpose": {
+          "type": "string",
+          "enum": [
+            "entry",
+            "exit",
+            "invalidation",
+            "risk_upgrade"
+          ]
+        },
+        "expression": {
+          "$ref": "#/$defs/decision_condition_expression_depth_1_v1"
+        },
+        "min_fresh_samples": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1440
+        },
+        "max_age_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 604800
+        },
+        "evaluation_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 86400
+        },
+        "calendar_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "valid_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "original_text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8000,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "input_requirements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_condition_input_v1"
+          },
+          "minItems": 1,
+          "maxItems": 32
+        }
+      },
+      "required": [
+        "id",
+        "purpose",
+        "expression",
+        "min_fresh_samples",
+        "max_age_seconds",
+        "evaluation_seconds",
+        "calendar_ref",
+        "valid_until",
+        "original_text",
+        "input_requirements"
+      ]
+    },
+    "decision_size_policy_v1": {
+      "title": "DecisionSizePolicyV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "unspecified",
+            "fixed_scenario",
+            "user_budget"
+          ]
+        },
+        "amount": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80,
+              "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "amount",
+        "unit"
+      ]
+    },
+    "decision_opportunity_v1": {
+      "title": "DecisionOpportunityV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "decision-opportunity.v1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "scope_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 192,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "horizon": {
+          "type": "string",
+          "enum": [
+            "30m",
+            "24h",
+            "72h"
+          ]
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "scheduled",
+            "event",
+            "condition"
+          ]
+        },
+        "event_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "registered_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "time_start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "time_end": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "target_spec_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "recipe_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "cohort": {
+          "type": "string",
+          "enum": [
+            "prospective",
+            "diagnostic"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "decided",
+            "missed",
+            "expired"
+          ]
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "key",
+        "scope_id",
+        "horizon",
+        "kind",
+        "event_ref",
+        "registered_at",
+        "time_start",
+        "time_end",
+        "target_spec_hash",
+        "recipe_hash",
+        "cohort",
+        "status",
+        "reason"
+      ]
+    },
+    "decision_snapshot_v1": {
+      "title": "DecisionSnapshotV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "decision-snapshot.v1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "opportunity_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "source_result_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "source_result_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "decision_cutoff_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "known_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "scope_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 192,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "horizon": {
+          "type": "string",
+          "enum": [
+            "30m",
+            "24h",
+            "72h"
+          ]
+        },
+        "hypotheses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_hypothesis_v1"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        },
+        "factor_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_factor_ref_v1"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "direction_status": {
+          "type": "string",
+          "enum": [
+            "eligible",
+            "unknown",
+            "blocked"
+          ]
+        },
+        "path_status": {
+          "type": "string",
+          "enum": [
+            "qualified",
+            "experimental",
+            "unknown"
+          ]
+        },
+        "probability": {
+          "$ref": "#/$defs/decision_probability_v1"
+        },
+        "gaps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_gap_v1"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "skill_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_skill_ref_v1"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "snapshot_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "opportunity_id",
+        "run_id",
+        "source_result_ref",
+        "source_result_hash",
+        "decision_cutoff_at",
+        "known_at",
+        "scope_id",
+        "horizon",
+        "hypotheses",
+        "factor_refs",
+        "direction_status",
+        "path_status",
+        "probability",
+        "gaps",
+        "skill_refs",
+        "snapshot_hash"
+      ]
+    },
+    "decision_action_plan_revision_v1": {
+      "title": "DecisionActionPlanRevisionV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "decision-action-plan-revision.v1"
+        },
+        "revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "plan_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "decision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "opportunity_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "revision_no": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "previous_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "scope_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 192,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "horizon": {
+          "type": "string",
+          "enum": [
+            "30m",
+            "24h",
+            "72h"
+          ]
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "published_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "valid_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "enter_long",
+            "reduce_long",
+            "exit_long",
+            "hold",
+            "wait"
+          ]
+        },
+        "position_context": {
+          "type": "string",
+          "enum": [
+            "flat",
+            "long",
+            "unknown"
+          ]
+        },
+        "advice_qualification": {
+          "type": "string",
+          "enum": [
+            "research_trial",
+            "qualified",
+            "blocked"
+          ]
+        },
+        "decision_status": {
+          "type": "string",
+          "enum": [
+            "actionable",
+            "no_edge",
+            "unknown",
+            "blocked"
+          ]
+        },
+        "entry": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_condition_v1"
+          },
+          "minItems": 0,
+          "maxItems": 16
+        },
+        "exit": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_condition_v1"
+          },
+          "minItems": 0,
+          "maxItems": 16
+        },
+        "invalidation": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_condition_v1"
+          },
+          "minItems": 0,
+          "maxItems": 16
+        },
+        "size_policy": {
+          "$ref": "#/$defs/decision_size_policy_v1"
+        },
+        "cost_policy_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "cost_policy_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "target_spec_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "target_spec_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "basis_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_basis_ref_v1"
+          },
+          "minItems": 1,
+          "maxItems": 128
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8000,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "schema_version",
+        "revision_id",
+        "plan_id",
+        "decision_id",
+        "opportunity_id",
+        "revision_no",
+        "previous_id",
+        "scope_id",
+        "horizon",
+        "as_of",
+        "published_at",
+        "valid_until",
+        "action",
+        "position_context",
+        "advice_qualification",
+        "decision_status",
+        "entry",
+        "exit",
+        "invalidation",
+        "size_policy",
+        "cost_policy_ref",
+        "cost_policy_hash",
+        "target_spec_ref",
+        "target_spec_hash",
+        "basis_refs",
+        "reason",
+        "payload_hash"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "action": {
+                "const": "enter_long"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "position_context": {
+                "const": "flat"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "action": {
+                "enum": [
+                  "reduce_long",
+                  "exit_long"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "position_context": {
+                "const": "long"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "decision_per_condition_result_v1": {
+      "title": "DecisionPerConditionResultV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "truth": {
+          "type": "string",
+          "enum": [
+            "true",
+            "false",
+            "unknown"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok",
+            "error"
+          ]
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "input_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        }
+      },
+      "required": [
+        "id",
+        "truth",
+        "status",
+        "reason",
+        "input_refs"
+      ]
+    },
+    "decision_condition_evaluation_v1": {
+      "title": "DecisionConditionEvaluationV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "decision-condition-evaluation.v1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "plan_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "tick_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "evaluated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lease_generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "input_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "input_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "truth": {
+          "type": "string",
+          "enum": [
+            "true",
+            "false",
+            "unknown"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok",
+            "error"
+          ]
+        },
+        "per_condition": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_per_condition_result_v1"
+          },
+          "minItems": 0,
+          "maxItems": 48
+        },
+        "state_before": {
+          "type": "string",
+          "enum": [
+            "proposed",
+            "armed",
+            "triggered",
+            "completed",
+            "expired",
+            "invalidated",
+            "superseded"
+          ]
+        },
+        "state_after": {
+          "type": "string",
+          "enum": [
+            "proposed",
+            "armed",
+            "triggered",
+            "completed",
+            "expired",
+            "invalidated",
+            "superseded"
+          ]
+        },
+        "evaluation_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "plan_id",
+        "revision_id",
+        "tick_at",
+        "as_of",
+        "evaluated_at",
+        "lease_generation",
+        "input_ref",
+        "input_hash",
+        "truth",
+        "status",
+        "per_condition",
+        "state_before",
+        "state_after",
+        "evaluation_hash"
+      ]
+    },
+    "decision_action_outcome_v1": {
+      "title": "DecisionActionOutcomeV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "decision-action-outcome.v1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "opportunity_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "plan_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "paper",
+            "user_reported"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "scorable",
+            "unscorable",
+            "settled"
+          ]
+        },
+        "protocol_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "protocol_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "visible_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "trigger_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "entry_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "exit_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "price_basis": {
+          "type": "string",
+          "enum": [
+            "trade",
+            "bid_ask",
+            "mark"
+          ]
+        },
+        "entry": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80,
+              "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "exit": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80,
+              "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "gross_pnl": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80,
+              "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cost": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80,
+              "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "net_pnl": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80,
+              "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mae": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80,
+              "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "coverage": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^(?:0|-?(?:[1-9][0-9]*(?:\\.[0-9]*[1-9])?|0\\.[0-9]*[1-9]))$"
+        },
+        "price_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_basis_ref_v1"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "baseline_outcome_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "exclusions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "settled_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "due_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "opportunity_id",
+        "plan_id",
+        "revision_id",
+        "mode",
+        "status",
+        "protocol_ref",
+        "protocol_hash",
+        "visible_at",
+        "trigger_at",
+        "entry_at",
+        "exit_at",
+        "price_basis",
+        "entry",
+        "exit",
+        "gross_pnl",
+        "cost",
+        "net_pnl",
+        "mae",
+        "coverage",
+        "price_refs",
+        "baseline_outcome_ref",
+        "exclusions",
+        "settled_at",
+        "payload_hash",
+        "version",
+        "due_at"
+      ]
+    },
+    "decision_action_plan_head_v1": {
+      "title": "DecisionActionPlanHeadV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "decision-action-plan-head.v1"
+        },
+        "plan_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "current_revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "state_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "proposed",
+            "armed",
+            "triggered",
+            "completed",
+            "expired",
+            "invalidated",
+            "superseded"
+          ]
+        },
+        "monitor_state": {
+          "type": "string",
+          "enum": [
+            "active",
+            "paused",
+            "degraded",
+            "stopped"
+          ]
+        },
+        "next_due": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "valid_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lease_owner": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lease_generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "lease_expires_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "last_input_watermark": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enter_streak": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "schema_version",
+        "plan_id",
+        "current_revision_id",
+        "state_version",
+        "state",
+        "monitor_state",
+        "next_due",
+        "valid_until",
+        "lease_owner",
+        "lease_generation",
+        "lease_expires_at",
+        "last_input_watermark",
+        "enter_streak"
+      ]
+    },
+    "decision_per_condition_result_v2": {
+      "title": "DecisionPerConditionResultV2",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "truth": {
+          "type": "string",
+          "enum": [
+            "true",
+            "false",
+            "unknown"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok",
+            "error"
+          ]
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000,
+              "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "input_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "raw_truth": {
+          "type": "string",
+          "enum": [
+            "true",
+            "false",
+            "unknown"
+          ]
+        },
+        "confirmation_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1440
+        },
+        "last_bar_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "confirmed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "truth",
+        "status",
+        "reason",
+        "input_refs",
+        "raw_truth",
+        "confirmation_count",
+        "last_bar_at",
+        "confirmed"
+      ]
+    },
+    "decision_condition_evaluation_v2": {
+      "title": "DecisionConditionEvaluationV2",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "decision-condition-evaluation.v2"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "plan_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "tick_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "evaluated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lease_generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "input_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+        },
+        "input_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "truth": {
+          "type": "string",
+          "enum": [
+            "true",
+            "false",
+            "unknown"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok",
+            "error"
+          ]
+        },
+        "per_condition": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_per_condition_result_v2"
+          },
+          "minItems": 0,
+          "maxItems": 48
+        },
+        "state_before": {
+          "type": "string",
+          "enum": [
+            "proposed",
+            "armed",
+            "triggered",
+            "completed",
+            "expired",
+            "invalidated",
+            "superseded"
+          ]
+        },
+        "state_after": {
+          "type": "string",
+          "enum": [
+            "proposed",
+            "armed",
+            "triggered",
+            "completed",
+            "expired",
+            "invalidated",
+            "superseded"
+          ]
+        },
+        "evaluation_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "state_version_before": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "state_version_after": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "monitor_state_before": {
+          "type": "string",
+          "enum": [
+            "active",
+            "paused",
+            "degraded",
+            "stopped"
+          ]
+        },
+        "monitor_state_after": {
+          "type": "string",
+          "enum": [
+            "active",
+            "paused",
+            "degraded",
+            "stopped"
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "plan_id",
+        "revision_id",
+        "tick_at",
+        "as_of",
+        "evaluated_at",
+        "lease_generation",
+        "input_ref",
+        "input_hash",
+        "truth",
+        "status",
+        "per_condition",
+        "state_before",
+        "state_after",
+        "evaluation_hash",
+        "state_version_before",
+        "state_version_after",
+        "monitor_state_before",
+        "monitor_state_after"
+      ]
+    },
+    "decision_ui_causal_step_v1": {
+      "title": "DecisionUiCausalStepV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "from_description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "hypothesis": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "to_description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "support_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "maxItems": 32
+        },
+        "counter_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "maxItems": 32
+        }
+      },
+      "required": [
+        "from_description",
+        "hypothesis",
+        "to_description",
+        "support_refs",
+        "counter_refs"
+      ]
+    },
+    "decision_ui_branch_v1": {
+      "title": "DecisionUiBranchV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "head": {
+          "$ref": "#/$defs/decision_action_plan_head_v1"
+        },
+        "revision": {
+          "$ref": "#/$defs/decision_action_plan_revision_v1"
+        },
+        "probability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/decision_probability_v1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "causal_steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_ui_causal_step_v1"
+          },
+          "maxItems": 128
+        },
+        "unresolved": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "maxItems": 64
+        },
+        "priced_in_status": {
+          "enum": [
+            "priced_in",
+            "not_priced_in",
+            "unknown"
+          ]
+        },
+        "next_review_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "latest_evaluation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/decision_condition_evaluation_v1"
+            },
+            {
+              "$ref": "#/$defs/decision_condition_evaluation_v2"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "first_display_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "first_ack_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expired": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "head",
+        "revision",
+        "probability",
+        "causal_steps",
+        "unresolved",
+        "priced_in_status",
+        "next_review_at",
+        "latest_evaluation",
+        "first_display_at",
+        "first_ack_at",
+        "expired"
+      ]
+    },
+    "decision_ui_current_view_v1": {
+      "title": "DecisionUiCurrentViewV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "decision-current-view.v1"
+        },
+        "scope_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 192
+        },
+        "horizon": {
+          "enum": [
+            "30m",
+            "24h",
+            "72h"
+          ]
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "availability": {
+          "enum": [
+            "disabled",
+            "unavailable",
+            "available"
+          ]
+        },
+        "latest_opportunity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/decision_opportunity_v1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "decision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/decision_snapshot_v1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "branches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_ui_branch_v1"
+          },
+          "maxItems": 3
+        },
+        "gap_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "maxItems": 32
+        },
+        "still_tracking_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "still_tracking": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_ui_tracking_item_v1"
+          },
+          "maxItems": 10
+        },
+        "tracking_next_cursor": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "scope_id",
+        "horizon",
+        "as_of",
+        "enabled",
+        "availability",
+        "latest_opportunity",
+        "decision",
+        "branches",
+        "gap_codes",
+        "still_tracking_count",
+        "still_tracking",
+        "tracking_next_cursor"
+      ]
+    },
+    "decision_ui_plan_view_v1": {
+      "title": "DecisionUiPlanViewV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "decision-plan-view.v1"
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "branch": {
+          "$ref": "#/$defs/decision_ui_branch_v1"
+        },
+        "decision": {
+          "$ref": "#/$defs/decision_snapshot_v1"
+        },
+        "opportunity": {
+          "$ref": "#/$defs/decision_opportunity_v1"
+        },
+        "evaluations": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/decision_condition_evaluation_v1"
+              },
+              {
+                "$ref": "#/$defs/decision_condition_evaluation_v2"
+              }
+            ]
+          },
+          "maxItems": 20
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "as_of",
+        "branch",
+        "decision",
+        "opportunity",
+        "evaluations",
+        "next_cursor"
+      ]
+    },
+    "decision_ui_command_v1": {
+      "title": "DecisionUiCommandV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "expected_revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "expected_state_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "operation": {
+          "enum": [
+            "pause",
+            "resume",
+            "display",
+            "ack"
+          ]
+        },
+        "payload": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "request_id",
+        "expected_revision_id",
+        "expected_state_version",
+        "operation",
+        "payload"
+      ]
+    },
+    "decision_ui_command_result_v1": {
+      "title": "DecisionUiCommandResultV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "const": "recorded"
+        },
+        "operation": {
+          "enum": [
+            "pause",
+            "resume",
+            "display",
+            "ack"
+          ]
+        },
+        "server_time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "head": {
+          "$ref": "#/$defs/decision_action_plan_head_v1"
+        }
+      },
+      "required": [
+        "status",
+        "operation",
+        "server_time",
+        "head"
+      ]
+    },
+    "decision_ui_command_receipt_v1": {
+      "title": "DecisionUiCommandReceiptV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "action-command-receipt.v1"
+        },
+        "owner_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "plan_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "operation": {
+          "enum": [
+            "pause",
+            "resume",
+            "display",
+            "ack"
+          ]
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "response": {
+          "$ref": "#/$defs/decision_ui_command_result_v1"
+        },
+        "accepted_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "receipt_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "schema_version",
+        "owner_id",
+        "request_id",
+        "plan_id",
+        "operation",
+        "payload_hash",
+        "response",
+        "accepted_at",
+        "receipt_hash"
+      ]
+    },
+    "decision_ui_tracking_item_v1": {
+      "title": "DecisionUiTrackingItemV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "plan_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "opportunity_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "enter_long",
+            "reduce_long",
+            "exit_long",
+            "hold",
+            "wait"
+          ]
+        },
+        "position_context": {
+          "type": "string",
+          "enum": [
+            "flat",
+            "long",
+            "unknown"
+          ]
+        },
+        "state": {
+          "const": "triggered"
+        },
+        "monitor_state": {
+          "type": "string",
+          "enum": [
+            "active",
+            "paused",
+            "degraded",
+            "stopped"
+          ]
+        },
+        "valid_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "last_evaluated_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "plan_id",
+        "revision_id",
+        "opportunity_id",
+        "action",
+        "position_context",
+        "state",
+        "monitor_state",
+        "valid_until",
+        "last_evaluated_at"
+      ]
+    },
+    "decision_ui_tracking_view_v1": {
+      "title": "DecisionUiTrackingViewV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "decision-tracking-view.v1"
+        },
+        "scope_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 192
+        },
+        "horizon": {
+          "enum": [
+            "30m",
+            "24h",
+            "72h"
+          ]
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_ui_tracking_item_v1"
+          },
+          "maxItems": 10
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "scope_id",
+        "horizon",
+        "as_of",
+        "count",
+        "items",
+        "next_cursor"
+      ]
+    },
+    "decision_ui_branch_v2": {
+      "title": "DecisionUiBranchV2",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "head": {
+          "$ref": "#/$defs/decision_action_plan_head_v1"
+        },
+        "revision": {
+          "$ref": "#/$defs/decision_action_plan_revision_v1"
+        },
+        "probability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/decision_probability_v1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "causal_steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_ui_causal_step_v1"
+          },
+          "maxItems": 128
+        },
+        "unresolved": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "maxItems": 64
+        },
+        "priced_in_status": {
+          "enum": [
+            "priced_in",
+            "not_priced_in",
+            "unknown"
+          ]
+        },
+        "next_review_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "latest_evaluation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/decision_condition_evaluation_v1"
+            },
+            {
+              "$ref": "#/$defs/decision_condition_evaluation_v2"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "first_display_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "first_ack_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expired": {
+          "type": "boolean"
+        },
+        "decision": {
+          "$ref": "#/$defs/decision_snapshot_v1"
+        }
+      },
+      "required": [
+        "head",
+        "revision",
+        "probability",
+        "causal_steps",
+        "unresolved",
+        "priced_in_status",
+        "next_review_at",
+        "latest_evaluation",
+        "first_display_at",
+        "first_ack_at",
+        "expired",
+        "decision"
+      ]
+    },
+    "decision_ui_current_view_v2": {
+      "title": "DecisionUiCurrentViewV2",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "decision-current-view.v2"
+        },
+        "scope_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 192
+        },
+        "horizon": {
+          "enum": [
+            "30m",
+            "24h",
+            "72h"
+          ]
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "availability": {
+          "enum": [
+            "disabled",
+            "unavailable",
+            "available"
+          ]
+        },
+        "latest_opportunity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/decision_opportunity_v1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "decision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/decision_snapshot_v1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "branches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_ui_branch_v2"
+          },
+          "maxItems": 3
+        },
+        "gap_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "maxItems": 32
+        },
+        "still_tracking_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "still_tracking": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision_ui_tracking_item_v1"
+          },
+          "maxItems": 10
+        },
+        "tracking_next_cursor": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "scope_id",
+        "horizon",
+        "as_of",
+        "enabled",
+        "availability",
+        "latest_opportunity",
+        "decision",
+        "branches",
+        "gap_codes",
+        "still_tracking_count",
+        "still_tracking",
+        "tracking_next_cursor"
+      ]
+    }
+  }
+}

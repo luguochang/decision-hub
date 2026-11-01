@@ -1,0 +1,692 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.local/contracts/provider_input.schema.json",
+  "title": "ResearchProviderInputContracts",
+  "description": "Closed wire shapes. Server source authentication, owner fences, raw-byte checks and exact native call linkage remain necessary; DTO parsing grants no research or financial qualification.",
+  "$defs": {
+    "research_provider_input_ref": {
+      "title": "ResearchProviderInputRef",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "output_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "output_id",
+        "payload_hash"
+      ]
+    },
+    "research_provider_callback_reference": {
+      "title": "ResearchProviderCallbackReference",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "output_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "schema_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        }
+      },
+      "required": [
+        "output_id",
+        "role",
+        "schema_version",
+        "payload_hash",
+        "recorded_at"
+      ],
+      "description": "Server-assigned immutable role-row identity; shape alone is not authentication."
+    },
+    "research_provider_host_scope": {
+      "title": "ResearchProviderHostScope",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "host_instance_id": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$"
+        },
+        "process_id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "hub_base_url": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "workspace_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "workspace_cwd_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "host_instance_id",
+        "process_id",
+        "started_at",
+        "hub_base_url",
+        "workspace_id",
+        "workspace_cwd_hash"
+      ],
+      "description": "Actual existing Bridge scope; started_at is Bridge creation time, not OS process ticks."
+    },
+    "research_provider_input_submit": {
+      "title": "ResearchProviderInputSubmit",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "research-provider-input-submit.v1"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "root_session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "execution_session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "dispatch_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "plugin_build_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "parent_session_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "provider": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "reasoning_effort": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "temperature": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "max_tokens": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "stop_sequences_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "input_json": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8388608
+        },
+        "input_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "previous_input_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/research_provider_input_ref"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "host_scope": {
+          "$ref": "#/$defs/research_provider_host_scope"
+        }
+      },
+      "required": [
+        "schema_version",
+        "run_id",
+        "generation",
+        "root_session_id",
+        "execution_session_id",
+        "dispatch_id",
+        "request_hash",
+        "plugin_build_hash",
+        "parent_session_id",
+        "provider",
+        "model",
+        "reasoning_effort",
+        "temperature",
+        "max_tokens",
+        "stop_sequences_hash",
+        "input_json",
+        "input_hash",
+        "previous_input_ref",
+        "host_scope"
+      ],
+      "description": "Authenticated Host submission only. Server rereads event/rpc/Task/Method/Prompt/Selection and enforces UTF8 bytes/hash; no caller authentication or financial flags."
+    },
+    "research_provider_input_recorded": {
+      "title": "ResearchProviderInputRecorded",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "research-provider-input-recorded.v1"
+        },
+        "reference": {
+          "$ref": "#/$defs/research_provider_callback_reference"
+        },
+        "dispatch_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "input_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "known_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "producer_authenticated": {
+          "type": "boolean",
+          "const": true
+        },
+        "proof_scope": {
+          "type": "string",
+          "const": "dsh_llm_generate_options"
+        }
+      },
+      "required": [
+        "schema_version",
+        "reference",
+        "dispatch_id",
+        "input_hash",
+        "known_at",
+        "producer_authenticated",
+        "proof_scope"
+      ],
+      "description": "Server response after authenticated callback and source checks. Literal true does not grant authority by DTO parsing; not provider-wire, comprehension or finance proof."
+    },
+    "research_provider_tool_emission_submit": {
+      "title": "ResearchProviderToolEmissionSubmit",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "research-provider-tool-emission-submit.v1"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "root_session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "execution_session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "dispatch_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "plugin_build_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "input_ref": {
+          "$ref": "#/$defs/research_provider_input_ref"
+        },
+        "call_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "tool_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "raw_arguments_json": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000000
+        },
+        "raw_arguments_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "arguments_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "block_index": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "schema_version",
+        "run_id",
+        "generation",
+        "root_session_id",
+        "execution_session_id",
+        "dispatch_id",
+        "request_hash",
+        "plugin_build_hash",
+        "input_ref",
+        "call_id",
+        "tool_name",
+        "raw_arguments_json",
+        "raw_arguments_hash",
+        "arguments_hash",
+        "block_index"
+      ],
+      "description": "Actual complete block-end tool call before yielding; server checks exact input/call/raw and canonical args, calculates selected candidate hash if applicable."
+    },
+    "research_provider_tool_emission_recorded": {
+      "title": "ResearchProviderToolEmissionRecorded",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "research-provider-tool-emission-recorded.v1"
+        },
+        "reference": {
+          "$ref": "#/$defs/research_provider_callback_reference"
+        },
+        "input_ref": {
+          "$ref": "#/$defs/research_provider_input_ref"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "root_session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "execution_session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "dispatch_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "call_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "tool_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "raw_arguments_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "arguments_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "candidate_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "proof_scope": {
+          "type": "string",
+          "const": "dsh_llm_generate_options"
+        }
+      },
+      "required": [
+        "schema_version",
+        "reference",
+        "input_ref",
+        "run_id",
+        "generation",
+        "root_session_id",
+        "execution_session_id",
+        "dispatch_id",
+        "call_id",
+        "tool_name",
+        "raw_arguments_hash",
+        "arguments_hash",
+        "candidate_hash",
+        "proof_scope"
+      ]
+    },
+    "research_provider_finish_submit": {
+      "title": "ResearchProviderFinishSubmit",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "research-provider-finish-submit.v1"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "root_session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "execution_session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "dispatch_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "plugin_build_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "input_ref": {
+          "$ref": "#/$defs/research_provider_input_ref"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "completed",
+            "error",
+            "cancelled",
+            "interrupted"
+          ]
+        },
+        "finish_json": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000000
+        },
+        "finish_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "run_id",
+        "generation",
+        "root_session_id",
+        "execution_session_id",
+        "dispatch_id",
+        "request_hash",
+        "plugin_build_hash",
+        "input_ref",
+        "status",
+        "finish_json",
+        "finish_hash",
+        "error_code"
+      ],
+      "description": "Actual stream termination metadata; SDK usage may remain null inside retained JSON, unknown USD is not zero, reasoning text is not archived."
+    },
+    "research_provider_finish_recorded": {
+      "title": "ResearchProviderFinishRecorded",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "research-provider-finish-recorded.v1"
+        },
+        "reference": {
+          "$ref": "#/$defs/research_provider_callback_reference"
+        },
+        "input_ref": {
+          "$ref": "#/$defs/research_provider_input_ref"
+        },
+        "dispatch_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "finish_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "completed",
+            "error",
+            "cancelled",
+            "interrupted"
+          ]
+        },
+        "known_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "proof_scope": {
+          "type": "string",
+          "const": "dsh_llm_generate_options"
+        }
+      },
+      "required": [
+        "schema_version",
+        "reference",
+        "input_ref",
+        "dispatch_id",
+        "finish_hash",
+        "status",
+        "known_at",
+        "proof_scope"
+      ]
+    },
+    "research_provider_callback_ack": {
+      "title": "ResearchProviderCallbackAck",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "research-provider-callback-ack.v1"
+        },
+        "reference": {
+          "$ref": "#/$defs/research_provider_callback_reference"
+        }
+      },
+      "required": [
+        "schema_version",
+        "reference"
+      ]
+    }
+  }
+}

@@ -1,0 +1,16 @@
+[
+  {"name":"prompt-astral-legal-half-boundary","definition":"research_execution_prompt_v2","seed":"valid-shape-research_execution_prompt_v2","field_path":["prompt"],"character":"🧪","repeat":131073,"expected":true},
+  {"name":"prompt-astral-exact-codepoint-boundary","definition":"research_execution_prompt_v2","seed":"valid-shape-research_execution_prompt_v2","field_path":["prompt"],"character":"🧪","repeat":262144,"expected":true},
+  {"name":"prompt-astral-one-codepoint-over","definition":"research_execution_prompt_v2","seed":"valid-shape-research_execution_prompt_v2","field_path":["prompt"],"character":"🧪","repeat":262145,"expected":false},
+  {"name":"prompt-empty","definition":"research_execution_prompt_v2","seed":"valid-shape-research_execution_prompt_v2","field_path":["prompt"],"character":"🧪","repeat":0,"expected":false},
+  {"name":"run-id-astral-exact-boundary","definition":"research_execution_prompt_v2","seed":"valid-shape-research_execution_prompt_v2","field_path":["run_id"],"character":"🧪","repeat":128,"expected":true},
+  {"name":"run-id-astral-over-boundary","definition":"research_execution_prompt_v2","seed":"valid-shape-research_execution_prompt_v2","field_path":["run_id"],"character":"🧪","repeat":129,"expected":false},
+  {"name":"allof-host-version-astral-boundary","definition":"research_execution_method_definition_v2","seed":"valid-shape-research_execution_method_definition_v2","field_path":["upstream_identity","source_version"],"character":"🧪","repeat":128,"expected":true},
+  {"name":"allof-host-version-astral-over-boundary","definition":"research_execution_method_definition_v2","seed":"valid-shape-research_execution_method_definition_v2","field_path":["upstream_identity","source_version"],"character":"🧪","repeat":129,"expected":false},
+  {"name":"nullable-repair-text-astral-boundary","definition":"research_execution_request_receipt_v2","seed":"valid-shape-research_execution_request_receipt_v2","field_path":["request","repair_instructions"],"character":"🧪","repeat":4000,"expected":true},
+  {"name":"nullable-repair-text-astral-over-boundary","definition":"research_execution_request_receipt_v2","seed":"valid-shape-research_execution_request_receipt_v2","field_path":["request","repair_instructions"],"character":"🧪","repeat":4001,"expected":false},
+  {"name":"prepared-binding-version-astral-boundary","definition":"research_execution_method_definition_v2","seed":"valid-shape-research_execution_method_definition_v2","field_path":["policy_binding","compiler_version"],"character":"🧪","repeat":128,"expected":true},
+  {"name":"prepared-binding-version-astral-over-boundary","definition":"research_execution_method_definition_v2","seed":"valid-shape-research_execution_method_definition_v2","field_path":["policy_binding","compiler_version"],"character":"🧪","repeat":129,"expected":false},
+  {"name":"bmp-ascii-prompt-boundary","definition":"research_execution_prompt_v2","seed":"valid-shape-research_execution_prompt_v2","field_path":["prompt"],"character":"a","repeat":262144,"expected":true},
+  {"name":"bmp-ascii-prompt-over-boundary","definition":"research_execution_prompt_v2","seed":"valid-shape-research_execution_prompt_v2","field_path":["prompt"],"character":"a","repeat":262145,"expected":false}
+]

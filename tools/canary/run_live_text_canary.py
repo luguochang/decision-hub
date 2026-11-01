@@ -7,6 +7,7 @@ import json
 import os
 import re
 import tempfile
+from contextlib import ExitStack
 from pathlib import Path
 
 from packages.contracts_py.decision_hub_contracts.models import ObservationCreate
@@ -68,12 +69,18 @@ async def run_canary(text: str) -> dict[str, object]:
         raise RuntimeError("Set OPENAI_BASE_URL (for example, https://codexai.club/v1).")
     model = os.getenv("DECISION_HUB_MODEL")
     if not model:
-        raise RuntimeError("Set DECISION_HUB_MODEL (for example, gpt-5.5).")
+        raise RuntimeError("Set DECISION_HUB_MODEL (for example, gpt-6.1-sol).")
     if not text.strip():
         raise ValueError("Canary text must not be empty.")
 
-    with tempfile.TemporaryDirectory(prefix="decision-hub-live-canary-") as temp_dir:
+    with (
+        tempfile.TemporaryDirectory(prefix="decision-hub-live-canary-") as temp_dir,
+        ExitStack() as cleanup,
+    ):
         database = Database(f"sqlite+pysqlite:///{Path(temp_dir) / 'canary.sqlite3'}")
+        # Release pooled SQLite handles before TemporaryDirectory removes files
+        # on Windows, including failure paths, so cleanup cannot mask the result.
+        cleanup.callback(database.engine.dispose)
         database.create_all()
         service = build_analyze_text_service(database, LangGraphAgentRuntime())
         event_id, run_id, admitted = await service.submit_and_run(

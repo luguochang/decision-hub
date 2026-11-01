@@ -1,0 +1,1090 @@
+{
+  "schema_version": "research-evaluation-case.v1",
+  "case_id": "us_jobs_20250307",
+  "event_family": "labor_release",
+  "input_text": "US nonfarm payroll employment rose by 151,000 in February 2025 and unemployment edged up to 4.1 percent.",
+  "trigger_evidence": {
+    "evidence_id": "trigger_us_jobs_20250307",
+    "kind": "transcript",
+    "authority": "unverified",
+    "source_id": "evaluation-catalog",
+    "source_url": "https://www.bls.gov/news.release/archives/empsit_03072025.htm",
+    "published_at": "2025-03-07T13:30:00Z",
+    "observed_at": "2025-03-07T13:30:00Z",
+    "received_at": "2025-03-07T13:30:02Z",
+    "content_hash": "f889b32ed9b561cab2f552dfc9c222231e5d8b0448af3c04073ccf7351c44eee",
+    "excerpt": "US nonfarm payroll employment rose by 151,000 in February 2025 and unemployment edged up to 4.1 percent."
+  },
+  "evidence_requirements": [
+    {
+      "requirement_id": "event_identity",
+      "description": "Identify the primary event, speaker or document, event time and revision status.",
+      "importance": "hard",
+      "source_priority": [
+        "official",
+        "verified_web"
+      ],
+      "authority_floor": "official",
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "freshness_seconds": 604800,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "confidence_cap": 0.45,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "policy_or_data_delta",
+      "description": "Establish what changed relative to prior wording, prior value or consensus.",
+      "importance": "hard",
+      "source_priority": [
+        "official",
+        "audited_aggregator",
+        "verified_web"
+      ],
+      "authority_floor": "official",
+      "preferred_capabilities": [
+        "official.macro",
+        "web.fetch",
+        "web.search"
+      ],
+      "freshness_seconds": 86400,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.fetch",
+        "web.search"
+      ],
+      "confidence_cap": 0.5,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    },
+    {
+      "requirement_id": "expectation_pricing",
+      "description": "Observe policy expectations, rates repricing or credible positioning evidence.",
+      "importance": "hard",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "macro.expectation_pricing",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 900,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "macro.expectation_pricing",
+        "market.cross_asset",
+        "web.search",
+        "web.search.tavily"
+      ],
+      "confidence_cap": 0.55,
+      "accepted_metric_families": [
+        "macro.policy_expectation"
+      ],
+      "required_metric_families": [
+        "macro.policy_expectation"
+      ],
+      "required_fields": [
+        "level",
+        "delta"
+      ],
+      "required_event_offsets": [
+        "baseline",
+        "t-5m"
+      ],
+      "unit_policy": "field_map.v1",
+      "field_units": {
+        "level": [
+          "probability",
+          "percent",
+          "bps",
+          "yield_percent"
+        ],
+        "delta": [
+          "percentage_point",
+          "bps"
+        ]
+      },
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [
+        "realtime"
+      ],
+      "semantic_policy_ref": "crypto_macro.fact_semantics.v1#expectation_pricing"
+    },
+    {
+      "requirement_id": "macro_transmission",
+      "description": "Observe the rates and USD transmission path relevant to the event.",
+      "importance": "hard",
+      "source_priority": [
+        "official",
+        "exchange",
+        "audited_aggregator"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "macro.cross_asset_intraday",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 600,
+      "minimum_independent_sources": 2,
+      "allowed_fallbacks": [
+        "macro.cross_asset_intraday",
+        "market.cross_asset",
+        "web.search",
+        "web.search.tavily"
+      ],
+      "confidence_cap": 0.55,
+      "accepted_metric_families": [
+        "macro.rates",
+        "macro.usd"
+      ],
+      "required_metric_families": [
+        "macro.rates",
+        "macro.usd"
+      ],
+      "required_fields": [
+        "level",
+        "event_return"
+      ],
+      "required_event_offsets": [
+        "t-5m",
+        "t+1m"
+      ],
+      "unit_policy": "field_map.v1",
+      "field_units": {
+        "level": [
+          "yield_percent",
+          "index"
+        ],
+        "event_return": [
+          "bps",
+          "percent"
+        ]
+      },
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 2,
+      "allowed_delay_classes": [
+        "realtime"
+      ],
+      "semantic_policy_ref": "crypto_macro.fact_semantics.v1#macro_transmission"
+    },
+    {
+      "requirement_id": "cross_asset_confirmation",
+      "description": "Check at least one independent risk or liquidity-sensitive cross-asset confirmation.",
+      "importance": "soft",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator",
+        "verified_web"
+      ],
+      "authority_floor": "verified_web",
+      "preferred_capabilities": [
+        "macro.cross_asset_intraday",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 600,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "macro.cross_asset_intraday",
+        "market.cross_asset",
+        "web.search",
+        "web.search.tavily"
+      ],
+      "confidence_cap": 0.65,
+      "accepted_metric_families": [
+        "cross_asset.equity",
+        "cross_asset.volatility",
+        "cross_asset.commodity",
+        "cross_asset.credit"
+      ],
+      "required_metric_families": [],
+      "required_fields": [
+        "level",
+        "event_return"
+      ],
+      "required_event_offsets": [
+        "t-5m",
+        "t+1m"
+      ],
+      "unit_policy": "field_map.v1",
+      "field_units": {
+        "level": [
+          "price",
+          "index",
+          "spread_bps"
+        ],
+        "event_return": [
+          "percent",
+          "bps"
+        ]
+      },
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [
+        "realtime"
+      ],
+      "semantic_policy_ref": "crypto_macro.fact_semantics.v1#cross_asset_confirmation"
+    },
+    {
+      "requirement_id": "crypto_spot_confirmation",
+      "description": "Observe BTC spot reaction, volume and the event-time comparison window.",
+      "importance": "hard",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "market.crypto_derivatives"
+      ],
+      "freshness_seconds": 600,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [],
+      "confidence_cap": 0.5,
+      "accepted_metric_families": [
+        "crypto.spot"
+      ],
+      "required_metric_families": [
+        "crypto.spot"
+      ],
+      "required_fields": [
+        "price",
+        "volume",
+        "event_return"
+      ],
+      "required_event_offsets": [
+        "t-5m",
+        "t+1m"
+      ],
+      "unit_policy": "field_map.v1",
+      "field_units": {
+        "price": [
+          "usd",
+          "usdt"
+        ],
+        "volume": [
+          "btc",
+          "usd",
+          "usdt"
+        ],
+        "event_return": [
+          "percent"
+        ]
+      },
+      "minimum_venues": 1,
+      "venue_required": true,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [
+        "realtime"
+      ],
+      "semantic_policy_ref": "crypto_macro.fact_semantics.v1#crypto_spot_confirmation"
+    },
+    {
+      "requirement_id": "derivatives_crowding",
+      "description": "Observe funding, open interest, basis and available liquidation or flow evidence.",
+      "importance": "hard",
+      "source_priority": [
+        "exchange",
+        "audited_aggregator"
+      ],
+      "authority_floor": "exchange",
+      "preferred_capabilities": [
+        "market.crypto_derivatives",
+        "market.crypto_crowding"
+      ],
+      "freshness_seconds": 600,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "market.crypto_crowding"
+      ],
+      "confidence_cap": 0.5,
+      "accepted_metric_families": [
+        "crypto.derivatives"
+      ],
+      "required_metric_families": [
+        "crypto.derivatives"
+      ],
+      "required_fields": [
+        "funding_rate",
+        "open_interest",
+        "open_interest_delta",
+        "basis",
+        "crowding_signal"
+      ],
+      "required_event_offsets": [
+        "t-5m",
+        "t+1m"
+      ],
+      "unit_policy": "field_map.v1",
+      "field_units": {
+        "funding_rate": [
+          "rate"
+        ],
+        "open_interest": [
+          "contracts",
+          "btc",
+          "usd",
+          "usdt"
+        ],
+        "open_interest_delta": [
+          "percent"
+        ],
+        "basis": [
+          "rate",
+          "percent"
+        ],
+        "crowding_signal": [
+          "contracts",
+          "btc",
+          "usd",
+          "usdt",
+          "ratio"
+        ]
+      },
+      "minimum_venues": 1,
+      "venue_required": true,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [
+        "realtime"
+      ],
+      "semantic_policy_ref": "crypto_macro.fact_semantics.v1#derivatives_crowding"
+    },
+    {
+      "requirement_id": "counter_thesis",
+      "description": "Build the strongest evidence-backed alternative transmission chain.",
+      "importance": "soft",
+      "source_priority": [
+        "official",
+        "exchange",
+        "verified_web"
+      ],
+      "authority_floor": "verified_web",
+      "preferred_capabilities": [
+        "official.macro",
+        "market.cross_asset",
+        "web.search"
+      ],
+      "freshness_seconds": 86400,
+      "minimum_independent_sources": 1,
+      "allowed_fallbacks": [
+        "web.search"
+      ],
+      "confidence_cap": 0.7,
+      "accepted_metric_families": [],
+      "required_metric_families": [],
+      "required_fields": [],
+      "required_event_offsets": [],
+      "unit_policy": null,
+      "field_units": {},
+      "minimum_venues": 1,
+      "venue_required": false,
+      "minimum_independence_groups": 1,
+      "allowed_delay_classes": [],
+      "semantic_policy_ref": null
+    }
+  ],
+  "expected_hard_requirement_ids": [
+    "event_identity",
+    "policy_or_data_delta",
+    "expectation_pricing",
+    "macro_transmission",
+    "crypto_spot_confirmation",
+    "derivatives_crowding"
+  ],
+  "archived_capability_fixtures": [
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "event_identity",
+      "query_aliases": [
+        "us_jobs_20250307:event_identity",
+        "Verify event identity for us_jobs_20250307"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_78a51bbdd656b8f70e944c7455fc6774",
+          "requirement_id": "event_identity",
+          "kind": "official",
+          "authority": "official",
+          "source_id": "bls.gov",
+          "source_url": "https://www.bls.gov/news.release/archives/empsit_03072025.htm",
+          "published_at": "2025-03-07T13:30:00Z",
+          "observed_at": "2025-03-07T13:30:01Z",
+          "received_at": "2025-03-07T13:30:02Z",
+          "content_hash": "78a51bbdd656b8f70e944c7455fc67745ed374a9e454f33e50435cb01b632f07",
+          "excerpt": "The Bureau of Labor Statistics released the February 2025 Employment Situation on March 7, 2025.",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:us_jobs_20250307:event_identity",
+          "research_session_id": "archive:us_jobs_20250307",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ]
+    },
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "policy_or_data_delta",
+      "query_aliases": [
+        "us_jobs_20250307:policy_or_data_delta",
+        "Verify policy or data delta for us_jobs_20250307"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_d9147af781355425d4dcd7a22f036ba7",
+          "requirement_id": "policy_or_data_delta",
+          "kind": "official",
+          "authority": "official",
+          "source_id": "bls.gov",
+          "source_url": "https://www.bls.gov/news.release/archives/empsit_03072025.htm",
+          "published_at": "2025-03-07T13:30:00Z",
+          "observed_at": "2025-03-07T13:30:01Z",
+          "received_at": "2025-03-07T13:30:02Z",
+          "content_hash": "d9147af781355425d4dcd7a22f036ba7d302c612e45d309964aa8b4534eca198",
+          "excerpt": "Total nonfarm payroll employment rose by 151,000 and the unemployment rate edged up to 4.1 percent.",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": null,
+          "tool_call_id": "archive:us_jobs_20250307:policy_or_data_delta",
+          "research_session_id": "archive:us_jobs_20250307",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ]
+    },
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "crypto_spot_confirmation",
+      "query_aliases": [
+        "us_jobs_20250307:crypto_spot_confirmation",
+        "Acquire typed crypto_spot_confirmation event-window evidence for us_jobs_20250307"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_de859631c15a9fb8b185e161f6ce0809",
+          "requirement_id": "crypto_spot_confirmation",
+          "kind": "market",
+          "authority": "exchange",
+          "source_id": "binance-vision",
+          "source_url": "https://data.binance.vision/data/spot/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2025-03-07.zip",
+          "published_at": "2025-03-07T13:31:00Z",
+          "observed_at": "2025-03-07T13:31:00Z",
+          "received_at": "2025-03-07T13:31:01Z",
+          "content_hash": "de859631c15a9fb8b185e161f6ce08093c18d65c3a08c6cfdcb922aa209bf2ff",
+          "excerpt": "{\"archive\":\"Binance Vision\",\"case_id\":\"us_jobs_20250307\",\"event_window\":{\"t+1m\":{\"price\":\"90096.90000000\",\"volume\":\"45647137.21333490\"},\"t-5m\":{\"price\":\"89493.89000000\",\"volume\":\"2098987.62099260\"}},\"reconstruction_mode\":\"reconstructed_history\",\"source_hashes\":[\"eb3a01fc4f3bf608d6fc4eb655bb506032e744693e8a1856d7fb5064d393239e\"]}",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": "binance-vision://7514327d3907554ca2a19fa8e877b4e679ded49a2616abc477ca7b8ce8113a01",
+          "tool_call_id": "archive:us_jobs_20250307:crypto_spot_confirmation",
+          "research_session_id": "archive:us_jobs_20250307",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ],
+      "facts": [
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_538829af4a7eb7fb6365a6500b4f8115",
+          "evidence_id": "archive_de859631c15a9fb8b185e161f6ce0809",
+          "requirement_id": "crypto_spot_confirmation",
+          "metric_family": "crypto.spot",
+          "field": "price",
+          "instrument": "BTCUSDT",
+          "venue": "binance",
+          "value": "89493.89000000",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2025-03-07T13:25:00Z",
+          "received_at": "2025-03-07T13:25:01Z",
+          "published_at": "2025-03-07T13:25:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "e4c9a1fea2da7307b2ce342ceb9a1a2385d0ec8bdf339998b65bd9b376745277",
+          "attributes": {
+            "archive_hash": "7514327d3907554ca2a19fa8e877b4e679ded49a2616abc477ca7b8ce8113a01",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_ef19e33c25d0b54d00d7ebad94754423",
+          "evidence_id": "archive_de859631c15a9fb8b185e161f6ce0809",
+          "requirement_id": "crypto_spot_confirmation",
+          "metric_family": "crypto.spot",
+          "field": "volume",
+          "instrument": "BTCUSDT",
+          "venue": "binance",
+          "value": "2098987.62099260",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2025-03-07T13:25:00Z",
+          "received_at": "2025-03-07T13:25:01Z",
+          "published_at": "2025-03-07T13:25:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "9273ffc0a551cce85f41a088c5868f101282a7986f89c5464bb6bad80f67b107",
+          "attributes": {
+            "archive_hash": "7514327d3907554ca2a19fa8e877b4e679ded49a2616abc477ca7b8ce8113a01",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_e465e42dfb3ceb284c56d20b84be4a74",
+          "evidence_id": "archive_de859631c15a9fb8b185e161f6ce0809",
+          "requirement_id": "crypto_spot_confirmation",
+          "metric_family": "crypto.spot",
+          "field": "price",
+          "instrument": "BTCUSDT",
+          "venue": "binance",
+          "value": "90096.90000000",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2025-03-07T13:31:00Z",
+          "received_at": "2025-03-07T13:31:01Z",
+          "published_at": "2025-03-07T13:31:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "db6804add13ba28f8d34da9c423d51a5bbe9093d1a188c5d8dec6d14b289e221",
+          "attributes": {
+            "archive_hash": "7514327d3907554ca2a19fa8e877b4e679ded49a2616abc477ca7b8ce8113a01",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_4f9f52b682591d74d8171363a666f959",
+          "evidence_id": "archive_de859631c15a9fb8b185e161f6ce0809",
+          "requirement_id": "crypto_spot_confirmation",
+          "metric_family": "crypto.spot",
+          "field": "volume",
+          "instrument": "BTCUSDT",
+          "venue": "binance",
+          "value": "45647137.21333490",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2025-03-07T13:31:00Z",
+          "received_at": "2025-03-07T13:31:01Z",
+          "published_at": "2025-03-07T13:31:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "b3e985c345785bc4d20b6b90159c49aaac699ceadab8eebd0dd789ff767923a0",
+          "attributes": {
+            "archive_hash": "7514327d3907554ca2a19fa8e877b4e679ded49a2616abc477ca7b8ce8113a01",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_d59c001887f59bd8e5228856e5092e0d",
+          "evidence_id": "archive_de859631c15a9fb8b185e161f6ce0809",
+          "requirement_id": "crypto_spot_confirmation",
+          "metric_family": "crypto.spot",
+          "field": "event_return",
+          "instrument": "BTCUSDT",
+          "venue": "binance",
+          "value": "0.673800189040838430422456800",
+          "unit": "percent",
+          "window_start_at": "2025-03-07T13:25:00Z",
+          "window_end_at": "2025-03-07T13:31:00Z",
+          "event_offset": "t+1m",
+          "observed_at": "2025-03-07T13:31:00Z",
+          "received_at": "2025-03-07T13:31:01Z",
+          "published_at": "2025-03-07T13:31:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "427279e850119274ff5ddd19318de5215d5513346e4708b66897cac781d1cc64",
+          "attributes": {
+            "archive_hash": "7514327d3907554ca2a19fa8e877b4e679ded49a2616abc477ca7b8ce8113a01",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        }
+      ]
+    },
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "derivatives_crowding",
+      "query_aliases": [
+        "us_jobs_20250307:derivatives_crowding",
+        "Acquire typed derivatives_crowding event-window evidence for us_jobs_20250307"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_14d9f86be2591bbb78119609b30a59a4",
+          "requirement_id": "derivatives_crowding",
+          "kind": "market",
+          "authority": "exchange",
+          "source_id": "binance-vision",
+          "source_url": "https://data.binance.vision/data/futures/um/daily/metrics/BTCUSDT/BTCUSDT-metrics-2025-03-07.zip",
+          "published_at": "2025-03-07T13:31:00Z",
+          "observed_at": "2025-03-07T13:31:00Z",
+          "received_at": "2025-03-07T13:31:01Z",
+          "content_hash": "14d9f86be2591bbb78119609b30a59a465f80997b6232ee1c5237a0bfb6524df",
+          "excerpt": "{\"archive\":\"Binance Vision\",\"case_id\":\"us_jobs_20250307\",\"event_window\":{\"t+1m\":{\"basis\":\"0.00026821\",\"crowding_signal\":\"1.69247147\",\"funding_rate\":\"-0.00001539\",\"open_interest\":\"6109662963.3840000000000000\"},\"t-5m\":{\"basis\":\"-0.00059625\",\"crowding_signal\":\"1.65391421\",\"funding_rate\":\"-0.00001539\",\"open_interest\":\"6084837429.8903140000000000\"}},\"reconstruction_mode\":\"reconstructed_history\",\"source_hashes\":[\"94b968e72f30b7ba878424b1d6f088bb5e5fb0315e807cba968c4a1152f84143\",\"a9598152a12bfaa58a9adb3327017a066ef9279c7971353047357828147946a3\",\"a3b95cfb315641fbfddc61eb32adf2a2588afb7a3973a61f464aca007ad43e3f\"]}",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": "binance-vision://0a4b2c9d65dec2f4f5dd4de7f9d5c4408d7f67a962565ea184803d4afcae2f39",
+          "tool_call_id": "archive:us_jobs_20250307:derivatives_crowding",
+          "research_session_id": "archive:us_jobs_20250307",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ],
+      "facts": [
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_0f137fdfa918723ca075d96673cd0045",
+          "evidence_id": "archive_14d9f86be2591bbb78119609b30a59a4",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "funding_rate",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "-0.00001539",
+          "unit": "rate",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2025-03-07T13:25:00Z",
+          "received_at": "2025-03-07T13:25:01Z",
+          "published_at": "2025-03-07T13:25:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "c89c9d8f5f2ad62922acca3349bf7c03b23bd9c22590b9265e2ed2ba4c324733",
+          "attributes": {
+            "archive_hash": "0a4b2c9d65dec2f4f5dd4de7f9d5c4408d7f67a962565ea184803d4afcae2f39",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_ddf2ae66977f8c635a29c37eb69acae3",
+          "evidence_id": "archive_14d9f86be2591bbb78119609b30a59a4",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "open_interest",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "6084837429.8903140000000000",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2025-03-07T13:25:00Z",
+          "received_at": "2025-03-07T13:25:01Z",
+          "published_at": "2025-03-07T13:25:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "05f4fbc4e66f1dec56accf3d445c00b877452621aa457fdd3309bf48d904c5ce",
+          "attributes": {
+            "archive_hash": "0a4b2c9d65dec2f4f5dd4de7f9d5c4408d7f67a962565ea184803d4afcae2f39",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_b4ce76b903788e0f39b18208347ce138",
+          "evidence_id": "archive_14d9f86be2591bbb78119609b30a59a4",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "basis",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "-0.00059625",
+          "unit": "rate",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2025-03-07T13:25:00Z",
+          "received_at": "2025-03-07T13:25:01Z",
+          "published_at": "2025-03-07T13:25:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "3c7d50332b34781887e65f1b16594c478a128fa0f8abcf80b43576175b82dedc",
+          "attributes": {
+            "archive_hash": "0a4b2c9d65dec2f4f5dd4de7f9d5c4408d7f67a962565ea184803d4afcae2f39",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_0a1fc2822b3d341bf20fb133b04d6093",
+          "evidence_id": "archive_14d9f86be2591bbb78119609b30a59a4",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "crowding_signal",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "1.65391421",
+          "unit": "ratio",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2025-03-07T13:25:00Z",
+          "received_at": "2025-03-07T13:25:01Z",
+          "published_at": "2025-03-07T13:25:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "d4d0b5e7a3c68065a9961ebe7bc33a551da43e2ba04c2409ec16dd233c4d55a4",
+          "attributes": {
+            "archive_hash": "0a4b2c9d65dec2f4f5dd4de7f9d5c4408d7f67a962565ea184803d4afcae2f39",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_4fdbd7770d1d89139f4a3970dcf09de1",
+          "evidence_id": "archive_14d9f86be2591bbb78119609b30a59a4",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "funding_rate",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "-0.00001539",
+          "unit": "rate",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2025-03-07T13:31:00Z",
+          "received_at": "2025-03-07T13:31:01Z",
+          "published_at": "2025-03-07T13:31:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "cf00a3ec0d3fce45201b2491f2cd7882d1fbef4dcc072374ce89572d89803c1e",
+          "attributes": {
+            "archive_hash": "0a4b2c9d65dec2f4f5dd4de7f9d5c4408d7f67a962565ea184803d4afcae2f39",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_673c8e5bbdfe442e2bdf77981f644739",
+          "evidence_id": "archive_14d9f86be2591bbb78119609b30a59a4",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "open_interest",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "6109662963.3840000000000000",
+          "unit": "usdt",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2025-03-07T13:31:00Z",
+          "received_at": "2025-03-07T13:31:01Z",
+          "published_at": "2025-03-07T13:31:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "e76aa11077a98782d5e49d681fa1be3a492248ada6dbfa8261cdc7303fb603f2",
+          "attributes": {
+            "archive_hash": "0a4b2c9d65dec2f4f5dd4de7f9d5c4408d7f67a962565ea184803d4afcae2f39",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_c3f6611bdc08e19f627f7528c4a6851c",
+          "evidence_id": "archive_14d9f86be2591bbb78119609b30a59a4",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "basis",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "0.00026821",
+          "unit": "rate",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2025-03-07T13:31:00Z",
+          "received_at": "2025-03-07T13:31:01Z",
+          "published_at": "2025-03-07T13:31:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "0549e3c5d62ea58001a4bc7096fb74a4f8bcd2259c3c6ff02f3fb04e07f5de28",
+          "attributes": {
+            "archive_hash": "0a4b2c9d65dec2f4f5dd4de7f9d5c4408d7f67a962565ea184803d4afcae2f39",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_e30f00c53e6d4b558fdb64601d6fb4c1",
+          "evidence_id": "archive_14d9f86be2591bbb78119609b30a59a4",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "crowding_signal",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "1.69247147",
+          "unit": "ratio",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t+1m",
+          "observed_at": "2025-03-07T13:31:00Z",
+          "received_at": "2025-03-07T13:31:01Z",
+          "published_at": "2025-03-07T13:31:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "ed2a1bd5af00583d521934525e7fc704554462a08eaa4be82621042736224e68",
+          "attributes": {
+            "archive_hash": "0a4b2c9d65dec2f4f5dd4de7f9d5c4408d7f67a962565ea184803d4afcae2f39",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_bedbeeba2edf7585084a5dca3978f4c2",
+          "evidence_id": "archive_14d9f86be2591bbb78119609b30a59a4",
+          "requirement_id": "derivatives_crowding",
+          "metric_family": "crypto.derivatives",
+          "field": "open_interest_delta",
+          "instrument": "BTCUSDT-PERP",
+          "venue": "binance",
+          "value": "0.407990086501514108755409300",
+          "unit": "percent",
+          "window_start_at": "2025-03-07T13:25:00Z",
+          "window_end_at": "2025-03-07T13:31:00Z",
+          "event_offset": "t+1m",
+          "observed_at": "2025-03-07T13:31:00Z",
+          "received_at": "2025-03-07T13:31:01Z",
+          "published_at": "2025-03-07T13:31:00Z",
+          "source_id": "binance-vision",
+          "independence_group": "binance-vision",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "0b736e99cda5d64f01e89ca21a52aec60733faaf378c4fe278c25b49ce4252be",
+          "attributes": {
+            "archive_hash": "0a4b2c9d65dec2f4f5dd4de7f9d5c4408d7f67a962565ea184803d4afcae2f39",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        }
+      ]
+    },
+    {
+      "capability_id": "replay.research",
+      "requirement_id": "expectation_pricing",
+      "query_aliases": [
+        "us_jobs_20250307:expectation_pricing",
+        "Acquire typed expectation pricing evidence for us_jobs_20250307"
+      ],
+      "evidence_candidates": [
+        {
+          "evidence_id": "archive_f1f68c0743cf8aa507f32643d86b343c",
+          "requirement_id": "expectation_pricing",
+          "kind": "market",
+          "authority": "exchange",
+          "source_id": "kalshi-exchange",
+          "source_url": "https://api.elections.kalshi.com/trade-api/v2/historical/markets/KXPAYROLLS-25FEB-T0/candlesticks?start_ts=1741159800&end_ts=1741353960&period_interval=1",
+          "published_at": "2025-03-07T13:25:00Z",
+          "observed_at": "2025-03-07T13:25:00Z",
+          "received_at": "2025-03-07T13:25:01Z",
+          "content_hash": "f1f68c0743cf8aa507f32643d86b343cb45899497ba06b7ea4f72259a82c191e",
+          "excerpt": "{\"archive\":\"Kalshi historical market candlesticks\",\"delta_percentage_point\":\"0.0800\",\"event_ticker\":\"KXPAYROLLS-25FEB\",\"market_ticker\":\"KXPAYROLLS-25FEB-T0\",\"market_title\":\"Will above 0 jobs be added in February 2025?\",\"probability\":{\"baseline\":\"0.8600\",\"t-5m\":\"0.9400\"},\"reconstruction_mode\":\"reconstructed_history\",\"selection\":\"highest 30-hour pre-event traded volume with both offsets\",\"source_hashes\":[\"087bf07e6b41a53c61a04173f053402440a7e0b3d476b185e5200e54ba68dc43\",\"d7f0f456321092628654cff6f5decdf6d7eae2ca46c06a449a0d0a8e72695e84\"]}",
+          "content_ref": null,
+          "source_content_hash": null,
+          "parser_ref": null,
+          "structured_payload_ref": "kalshi-archive://4321e55c9d11c6b46c4f86c9bb2c133cffc29d5ed01ce411efc2b620652536d0",
+          "tool_call_id": "archive:us_jobs_20250307:expectation_pricing",
+          "research_session_id": "archive:us_jobs_20250307",
+          "round": 1,
+          "quality": "candidate",
+          "freshness_status": "unknown",
+          "conflict_group": null
+        }
+      ],
+      "facts": [
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_b42db684518c5886c40254165b608cf1",
+          "evidence_id": "archive_f1f68c0743cf8aa507f32643d86b343c",
+          "requirement_id": "expectation_pricing",
+          "metric_family": "macro.policy_expectation",
+          "field": "level",
+          "instrument": "KXPAYROLLS-25FEB-T0",
+          "venue": "kalshi",
+          "value": "0.8600",
+          "unit": "probability",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "baseline",
+          "observed_at": "2025-03-06T13:29:00Z",
+          "received_at": "2025-03-06T13:29:01Z",
+          "published_at": "2025-03-06T13:29:00Z",
+          "source_id": "kalshi-exchange",
+          "independence_group": "kalshi-exchange",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "163b01116d15f4ebc42c7d0ab239b8b3a86e8c667c4db76b6b7b49e4dea8ac7e",
+          "attributes": {
+            "archive_hash": "4321e55c9d11c6b46c4f86c9bb2c133cffc29d5ed01ce411efc2b620652536d0",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_6b364cd5c44182e6088cfc03d4dd78f7",
+          "evidence_id": "archive_f1f68c0743cf8aa507f32643d86b343c",
+          "requirement_id": "expectation_pricing",
+          "metric_family": "macro.policy_expectation",
+          "field": "level",
+          "instrument": "KXPAYROLLS-25FEB-T0",
+          "venue": "kalshi",
+          "value": "0.9400",
+          "unit": "probability",
+          "window_start_at": null,
+          "window_end_at": null,
+          "event_offset": "t-5m",
+          "observed_at": "2025-03-07T13:25:00Z",
+          "received_at": "2025-03-07T13:25:01Z",
+          "published_at": "2025-03-07T13:25:00Z",
+          "source_id": "kalshi-exchange",
+          "independence_group": "kalshi-exchange",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "e0dfd67009b5c34705e2cfc7fe870757c8597d93d187012d108c7bb93a77e287",
+          "attributes": {
+            "archive_hash": "4321e55c9d11c6b46c4f86c9bb2c133cffc29d5ed01ce411efc2b620652536d0",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        },
+        {
+          "schema_version": "fact-envelope.v1",
+          "fact_id": "fact_4be32bd692a4a7553e140dde3fbb9c74",
+          "evidence_id": "archive_f1f68c0743cf8aa507f32643d86b343c",
+          "requirement_id": "expectation_pricing",
+          "metric_family": "macro.policy_expectation",
+          "field": "delta",
+          "instrument": "KXPAYROLLS-25FEB-T0",
+          "venue": "kalshi",
+          "value": "0.0800",
+          "unit": "percentage_point",
+          "window_start_at": "2025-03-06T13:29:00Z",
+          "window_end_at": "2025-03-07T13:25:00Z",
+          "event_offset": "t-5m",
+          "observed_at": "2025-03-07T13:25:00Z",
+          "received_at": "2025-03-07T13:25:01Z",
+          "published_at": "2025-03-07T13:25:00Z",
+          "source_id": "kalshi-exchange",
+          "independence_group": "kalshi-exchange",
+          "quality": "candidate",
+          "delay_class": "realtime",
+          "payload_schema_ref": "reconstructed-market-event-window.v1",
+          "payload_hash": "69b5582c7e957d4fe5aa1c09de970034386aa2b3a77a352cf4ef3020d08c4ba9",
+          "attributes": {
+            "archive_hash": "4321e55c9d11c6b46c4f86c9bb2c133cffc29d5ed01ce411efc2b620652536d0",
+            "reconstruction_mode": "reconstructed_history"
+          }
+        }
+      ]
+    }
+  ],
+  "cutoff_at": "2025-03-07T13:35:00Z",
+  "outcome_available_at": null,
+  "outcome_labels": [],
+  "source_refs": [
+    "https://www.bls.gov/news.release/archives/empsit_03072025.htm",
+    "https://data.binance.vision/data/spot/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2025-03-07.zip",
+    "https://data.binance.vision/data/futures/um/daily/metrics/BTCUSDT/BTCUSDT-metrics-2025-03-07.zip",
+    "https://data.binance.vision/data/futures/um/daily/premiumIndexKlines/BTCUSDT/1m/BTCUSDT-1m-2025-03-07.zip",
+    "https://data.binance.vision/data/futures/um/monthly/fundingRate/BTCUSDT/BTCUSDT-fundingRate-2025-03.zip",
+    "https://api.elections.kalshi.com/trade-api/v2/historical/markets?event_ticker=KXPAYROLLS-25FEB&limit=1000",
+    "https://api.elections.kalshi.com/trade-api/v2/historical/markets/KXPAYROLLS-25FEB-T0/candlesticks?start_ts=1741159800&end_ts=1741353960&period_interval=1"
+  ]
+}

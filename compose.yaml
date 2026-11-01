@@ -5,11 +5,13 @@ x-hub-environment: &hub-environment
   DECISION_HUB_LLM_ENABLED: "${DECISION_HUB_LLM_ENABLED:-0}"
   DECISION_HUB_LLM_API_MODE: "${DECISION_HUB_LLM_API_MODE:-responses}"
   DECISION_HUB_LLM_CANARY_STATUS: "${DECISION_HUB_LLM_CANARY_STATUS:-not_run}"
+  DECISION_HUB_SEARCH_CANARY_STATUS: "${DECISION_HUB_SEARCH_CANARY_STATUS:-not_run}"
   DECISION_HUB_PROVIDER_ID: "${DECISION_HUB_PROVIDER_ID:-openai-compatible}"
   DECISION_HUB_MODEL: "${DECISION_HUB_MODEL:-deepseek-chat}"
   DECISION_HUB_SOURCES_ENABLED: "${DECISION_HUB_SOURCES_ENABLED:-0}"
   DECISION_HUB_MARKET_ENABLED: "${DECISION_HUB_MARKET_ENABLED:-0}"
   DECISION_HUB_HEARTBEAT_INTERVAL: "${DECISION_HUB_HEARTBEAT_INTERVAL:-5}"
+  DECISION_HUB_DOCUMENT_BUNDLE_ROOT: /app/data/decision-hub/document-bundles
   OPENAI_BASE_URL: "${OPENAI_BASE_URL:-}"
   OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
   DEEPSEEK_API_KEY: "${DEEPSEEK_API_KEY:-}"
@@ -96,6 +98,9 @@ services:
       DECISION_HUB_RESEARCH_CAPABILITIES: "${DECISION_HUB_RESEARCH_CAPABILITIES:-replay.research}"
       DECISION_HUB_RESEARCH_REPLAY_FIXTURES: "${DECISION_HUB_RESEARCH_REPLAY_FIXTURES:-/app/packs/crypto_macro/evaluations/r2r_pit_v1/cases/powell_stanford_20240403.json}"
       DECISION_HUB_SEARCH_MODEL: "${DECISION_HUB_SEARCH_MODEL:-gpt-5.5}"
+      DECISION_HUB_SEARCH_PROVIDER: "${DECISION_HUB_SEARCH_PROVIDER:-dsh_native}"
+      DECISION_HUB_SEARCH_API_KEY: "${DECISION_HUB_SEARCH_API_KEY:-}"
+      DECISION_HUB_SEARCH_BASE_URL: "${DECISION_HUB_SEARCH_BASE_URL:-}"
       DECISION_HUB_SEARCH_ESTIMATED_COST_PER_CALL_USD: "${DECISION_HUB_SEARCH_ESTIMATED_COST_PER_CALL_USD:-0.01}"
     expose:
       - "8002"
@@ -138,6 +143,20 @@ services:
         condition: service_healthy
       research-mcp:
         condition: service_started
+
+  hub-documents-worker:
+    build:
+      context: .
+    command: ["python", "-m", "apps.hub_worker.main", "--role", "documents", "--interval", "2"]
+    environment:
+      <<: *hub-environment
+      DECISION_HUB_INSTANCE_ID: compose-documents
+    volumes:
+      - decision-hub-data:/app/data/decision-hub
+    restart: unless-stopped
+    depends_on:
+      hub-api:
+        condition: service_healthy
 
 volumes:
   decision-hub-data:

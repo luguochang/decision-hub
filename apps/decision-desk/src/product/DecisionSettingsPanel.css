@@ -1,0 +1,23 @@
+.decision-settings { max-width: 1000px; }
+.decision-settings > p { line-height: 1.7; }
+.decision-settings fieldset { border: 0; margin: 20px 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; }
+.decision-settings label { display: flex; flex-direction: column; gap: 7px; color: #56635e; font-size: 13px; }
+.decision-settings input, .decision-settings select { width: 100%; box-sizing: border-box; min-height: 40px; padding: 9px 12px; border: 1px solid #d5ddd8; border-radius: 7px; background: #fff; color: #263c33; }
+.decision-settings input[type="checkbox"] { width: 16px; min-height: 16px; padding: 0; margin: 2px 0 0; flex-shrink: 0; }
+.decision-settings label:has(> input[type="checkbox"]) { flex-direction: row; align-items: flex-start; grid-column: 1 / -1; }
+.decision-settings fieldset > p { grid-column: 1 / -1; margin: 0; color: #69716f; }
+.decision-settings button { min-height: 36px; padding: 8px 12px; margin: 4px 8px 4px 0; }
+.decision-settings button:disabled { opacity: .5; cursor: not-allowed; }
+.decision-settings [role="alert"] { color: #9a3d25; }
+.decision-settings details { margin-top: 20px; overflow-wrap: anywhere; color: #69716f; }
+@media (max-width: 720px) { .decision-settings fieldset { grid-template-columns: 1fr; } }
+
+.product-card.decision-settings button { border: 1px solid #cbd4df; border-radius: 6px; background: #fff; color: #40536b; font: inherit; cursor: pointer; }
+.product-card.decision-settings button:hover:not(:disabled) { border-color: #8fa1b6; background: #f8fafc; }
+.product-card.decision-settings button[data-save], .product-card.decision-settings button[data-research-start] { border-color: #214a77; background: #214a77; color: #fff; }
+.product-card.decision-settings button[data-save]:hover:not(:disabled), .product-card.decision-settings button[data-research-start]:hover:not(:disabled) { background: #183a60; }
+.product-card.decision-settings button:focus-visible, .product-card.decision-settings summary:focus-visible { outline: 2px solid var(--blue, #2877d2); outline-offset: 3px; }
+.product-card.decision-settings button:disabled { cursor: not-allowed; }
+.product-card.decision-settings summary { cursor: pointer; color: #40536b; }
+.product-card.decision-settings [data-research-history] > div { padding: 8px 0; border-bottom: 1px solid var(--line, #e1e6ed); }
+.product-card.decision-settings [data-research-history] p { margin: 2px 0; font-size: 12px; }

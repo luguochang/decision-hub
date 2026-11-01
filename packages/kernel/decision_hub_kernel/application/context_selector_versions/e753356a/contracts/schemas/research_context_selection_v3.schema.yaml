@@ -1,0 +1,421 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.local/contracts/research_context_selection_v3.schema.json",
+  "title": "ResearchContextSelectionV3Contracts",
+  "description": "Selection declarations with an exact original Graph prior-row anchor; no clock sampling, SQL origin, execution or publication permission proof.",
+  "$defs": {
+    "research_context_graph_prior_ref_v3": {
+      "title": "ResearchContextGraphPriorRefV3",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "graph_round_admission"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "graph_round": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9
+        },
+        "row": {
+          "$ref": "#/$defs/research_context_graph_row_ref_v3"
+        }
+      },
+      "required": [
+        "kind",
+        "run_id",
+        "graph_round",
+        "row"
+      ]
+    },
+    "research_context_selection_receipt_v3": {
+      "title": "ResearchContextSelectionReceiptV3",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "research-context-selection.v3"
+        },
+        "receipt_state": {
+          "type": "string",
+          "const": "context_selected"
+        },
+        "selection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 71,
+          "pattern": "^ctxsel_[a-f0-9]{64}$"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "graph_round": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "attempt_no": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "attempt_basis": {
+          "type": "string",
+          "enum": [
+            "initial_round",
+            "next_round",
+            "explicit_reselection"
+          ]
+        },
+        "parent_selection_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 71,
+              "pattern": "^ctxsel_[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "task_anchor": {
+          "$ref": "research_context_selection.schema.yaml#/$defs/research_context_task_anchor_v1"
+        },
+        "prepared_bundle_identity": {
+          "anyOf": [
+            {
+              "$ref": "research_execution_binding.schema.yaml#/$defs/research_prepared_bundle_identity"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "execution_mode": {
+          "type": "string",
+          "enum": [
+            "live",
+            "replay"
+          ]
+        },
+        "original_pit_cutoff_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "live_selection_clock_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "effective_eligibility_cutoff_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "cutoff_basis": {
+          "type": "string",
+          "enum": [
+            "live_clock_min_original_pit",
+            "replay_original_pit"
+          ]
+        },
+        "decision_cutoff_before_selection": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "decision_cutoff_basis": {
+          "type": "string",
+          "enum": [
+            "original_task_max_received",
+            "replay_original_pit",
+            "graph_state_declared"
+          ]
+        },
+        "decision_basis_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/research_context_graph_prior_ref_v3"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "selector_identity": {
+          "$ref": "research_context_selection_v2.schema.yaml#/$defs/research_context_selector_identity_v2"
+        },
+        "context_policy": {
+          "$ref": "agentic_research.schema.yaml#/$defs/research_task_policy"
+        },
+        "considered_inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "research_context_selection.schema.yaml#/$defs/research_context_input_witness_v1"
+          },
+          "minItems": 1,
+          "maxItems": 2050
+        },
+        "inherited_exclusions": {
+          "type": "array",
+          "items": {
+            "$ref": "agentic_research.schema.yaml#/$defs/context_exclusion"
+          },
+          "maxItems": 50
+        },
+        "projected_request": {
+          "$ref": "agentic_research.schema.yaml#/$defs/research_session_request"
+        },
+        "current_full_request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "current_full_request_hash_kind": {
+          "type": "string",
+          "const": "canonical_research_session_request.v1"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        },
+        "selection_payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "selection_payload_hash_kind": {
+          "type": "string",
+          "const": "canonical_context_selection.v3"
+        }
+      },
+      "required": [
+        "schema_version",
+        "receipt_state",
+        "selection_id",
+        "run_id",
+        "event_id",
+        "graph_round",
+        "attempt_no",
+        "attempt_basis",
+        "parent_selection_id",
+        "task_anchor",
+        "prepared_bundle_identity",
+        "execution_mode",
+        "original_pit_cutoff_at",
+        "live_selection_clock_at",
+        "effective_eligibility_cutoff_at",
+        "cutoff_basis",
+        "decision_cutoff_before_selection",
+        "decision_cutoff_basis",
+        "decision_basis_ref",
+        "selector_identity",
+        "context_policy",
+        "considered_inputs",
+        "inherited_exclusions",
+        "projected_request",
+        "current_full_request_hash",
+        "current_full_request_hash_kind",
+        "recorded_at",
+        "selection_payload_hash",
+        "selection_payload_hash_kind"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "execution_mode": {
+                "const": "live"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "live_selection_clock_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+              },
+              "cutoff_basis": {
+                "type": "string",
+                "const": "live_clock_min_original_pit"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "execution_mode": {
+                "const": "replay"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "live_selection_clock_at": {
+                "type": "null"
+              },
+              "cutoff_basis": {
+                "type": "string",
+                "const": "replay_original_pit"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "graph_round": {
+                "const": 1
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "decision_basis_ref": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "decision_basis_ref": {
+                "$ref": "#/$defs/research_context_graph_prior_ref_v3"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "attempt_basis": {
+                "const": "initial_round"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "graph_round": {
+                "const": 1
+              },
+              "attempt_no": {
+                "const": 1
+              },
+              "parent_selection_id": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "attempt_basis": {
+                "const": "next_round"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "graph_round": {
+                "minimum": 2
+              },
+              "attempt_no": {
+                "const": 1
+              },
+              "parent_selection_id": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "attempt_basis": {
+                "const": "explicit_reselection"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "attempt_no": {
+                "minimum": 2
+              },
+              "parent_selection_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ],
+      "x-max-canonical-utf8-bytes": 16777216
+    },
+    "research_context_graph_row_ref_v3": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "output_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "role": {
+          "type": "string",
+          "pattern": "^research_graph_round:[1-9]$"
+        },
+        "schema_version": {
+          "type": "string",
+          "const": "research-graph-round-admission.v1"
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+        }
+      },
+      "required": [
+        "output_id",
+        "role",
+        "schema_version",
+        "payload_hash",
+        "recorded_at"
+      ],
+      "title": "ResearchContextGraphRowRefV3"
+    }
+  }
+}

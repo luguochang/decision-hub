@@ -9,6 +9,9 @@ required_capabilities:
 allowed_tools:
   - web.search
   - web.fetch
+  - browser.readback
+  - document.readback
+  - data.historical
   - official.macro
   - market.cross_asset
   - macro.cross_asset_intraday

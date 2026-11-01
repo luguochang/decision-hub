@@ -1,5 +1,19 @@
 # 实施状态
 
+> 2026-09-22 本轮交付核验：以冻结方案 [`PREDICTIVE_RESEARCH_UPGRADE_PLAN_2026-09-21.md`](plan/PREDICTIVE_RESEARCH_UPGRADE_PLAN_2026-09-21.md) 为当前执行依据。核心链路已完成一次真实 live canary：`run_957038f927b44f6ab42ed6350546bc45` 取得 12 条 accepted Evidence，完成 DSH 研究、主/反因果链、119 条规范化轨迹、9 个角色证据包、观点变化记录和全屏分析图，终态为 `research_only`。7d 输出为可复算的价格规则偏多基线，24h/72h 情景为 long，30m 为 no_trade；概率仍 `unavailable/uncalibrated`，交易授权为 `false`，不能把本次工程交付表述为盈利或自动交易产品。`G2-AF-05` 前瞻价值观察仍是产品价值验证阶段，不属于本轮核心链路缺失。
+
+> 本轮还修复了真实运行中“同一 DSH generation 内部 round 编号变化导致后续工具调用被拒绝”的网关问题，并通过 `783 passed, 4 skipped` 全量 Python 测试复核。受管运行时目前 Hub、realtime、research、priority research 和来源采集在线；BEA/BLS 仍 degraded，evolution worker 按设计为 owner-triggered、当前 offline。
+
+> 2026-09-15 最新产品裁决：[`CORE_DECISION_VALUE_VALIDATION_2026-09-15.md`](plan/CORE_DECISION_VALUE_VALIDATION_2026-09-15.md) 已用 12 个冻结案例、36 个周期和真实 Binance Vision outcome 验证方向价值。DSH 只产生 1/36 个方向判断，全部概率未校准，结论为 `STOP_PRODUCT_LAYER_INVESTMENT`。停止 DSH 页面、角色、PPT、调度和交易扩展；保留 Provider、Evidence/PIT、Review、Gate、账本和查询组件。
+
+> 2026-09-15 网关核心目标：[`GATEWAY_RELIABILITY_CORE_FLOW_2026-09-15.md`](plan/GATEWAY_RELIABILITY_CORE_FLOW_2026-09-15.md) 已完成，状态为 `GATEWAY_CORE_RELIABILITY_READY`。范围限定为拒绝可审计、Evidence/Fact 原子落库、Provider deadline/fallback 和 domain allowlist；不要把本目标的工程通过误读为交易价值通过。
+
+> 2026-09-14 核心交付记录：[`CORE_VALUE_DELIVERY_EXECUTION_2026-09-14.md`](plan/CORE_VALUE_DELIVERY_EXECUTION_2026-09-14.md) 记录安全、证据和可读性改造及三次真实主链验收，结论为 `LIMITED（仅研究）/ NO-GO（交易与扩展）`。[`CORE_VALUE_RECOVERY_DECISION_2026-09-14.md`](plan/CORE_VALUE_RECOVERY_DECISION_2026-09-14.md) 只保留为前置裁决。
+
+3 次固定输入的真实验收已原样记录：首次证明单一 OKX 无法满足 hard Gate，第二次保留 synthesis 失败，第三次在引入 Binance 第二 venue 和有界表达修复后完成证据链，但因实时宏观/跨资产缺口、概率未校准和 bounded Review 仅允许 `do_not_trade`。使用入口见 [当前 BTC/USDT 研究使用说明](user-guides/DECISION_HUB_CORE_RESEARCH_GUIDE_2026-09-14.md)。
+
+以下内容保留为历史记录，不覆盖上述最终决定。
+
 日期：2026-09-05（Asia/Shanghai）
 当前 PD 收口：`PD-00..03 completed / PD-04..06 runtime closeout completed / PD-07 observation pending`。
 PD-04..06 的本轮运行收口已完成：隔离 Compose、DSH Host readiness、同一 Session 的 Report/Trace/Inbox
@@ -396,3 +410,9 @@ DSH-NATIVE-CORE: NATIVE-00..05、NC-01..07 engineering acceptance complete；NAT
 - 修正后完整 LangGraph canary 成功完成三次角色调用、结构化解析、Artifact 和三个 Forecast；本次结果为 `status=degraded`、`gate_status=research_only`，原因是模型选择了 `no_trade`，不是 Provider 协议失败。
 
 因此当前结论是“Provider 的 Chat 和 Responses 基础接口均可用，Decision Hub 三角色结构化 Agent 的 Responses 路径已通过兼容性验证，但业务 Gate 仍正确拒绝无方向候选”。这不代表预测准确率、盈利能力或生产稳定性已证明；准确性仍需时间切分回放和 holdout 评测，正常 CI 仍禁止触网。
+
+## 2026-09-09 核心价值连续执行补充
+
+本轮唯一执行计划与最终证据见 [`docs/plan/IMPLEMENTATION_CHECKLIST.md`](plan/IMPLEMENTATION_CHECKLIST.md)。CV1/CV2 已有真实正文回读和三个月 DataJob 证据；CV3 增加版本化 TaskPolicy、ContextManifest、结构化 Review 和严格 relationship gate；CV4 已冻结六例开发集与六例留出集，并把 `completed/degraded` 与 `quality_success`、引用支持和人工返工分开统计。真实 Fixed/DSH Web 对照最终给出 `retain_baseline`，没有因为证据数量增加就宣称通过。
+
+DSH 工作台现在在同一页面呈现输入、Inbox、报告、证据/上下文清单、Review、失败和 DataJob 覆盖，用户流中的 Decision Desk 链接已移除。Windows 缺少锁定 runtime wheel 的问题已通过仓库锁定的原生 DSH Web Host 路径绕过；完整 dev/holdout 都已用真实 `gpt-5.5` candidate 运行。最终 holdout 中 DSH 6/6 完成并取得 12 条 Evidence、35 次 durable tool calls 和 6 个 reviewer，但质量成功仍为 0/6、人工返工仍为 6/6，且 P95 延迟约 268 秒。G1 因此为 `retain_baseline`，M04/M05 不启动；精确结果和外部故障记录以唯一 checklist 为准。

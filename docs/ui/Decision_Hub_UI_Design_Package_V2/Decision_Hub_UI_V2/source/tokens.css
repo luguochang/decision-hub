@@ -1,0 +1,10 @@
+:root{
+ --brand:#2563eb;--brand-bright:#2563ff;--brand-hover:#1d4ed8;--brand-soft:#edf4ff;
+ --canvas:#f3f8ff;--surface:#fff;--ink:#122247;--secondary:#516585;--muted:#637593;--line:#dfE9f7;
+ --green:#087a55;--green-soft:#eafaf4;--amber:#9c5907;--amber-soft:#fff5e5;--red:#bc3049;--red-soft:#fff0f3;--purple:#703cd2;--purple-soft:#f2edff;--teal:#087e85;--teal-soft:#eafaFA;
+ --shadow-sm:0 3px 13px #2f65a008;--shadow-card:0 6px 24px #437aba0b;--shadow-overlay:0 20px 70px #12316d26;
+ --radius-control:8px;--radius-card:12px;--radius-modal:16px;--sidebar:208px;--header:60px;
+ --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;
+ --font:'Segoe UI','PingFang SC','Microsoft YaHei','Noto Sans CJK SC',sans-serif;
+ --hero-image:url('../assets/backgrounds/hero-landscape.png');
+}

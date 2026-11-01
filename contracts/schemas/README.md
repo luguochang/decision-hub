@@ -13,6 +13,11 @@ R2 的 `workbench_assets.schema.yaml` 一次锁定 ResearchMemo、Capability、D
 
 Workbench/Evolution 的列表接口可以组合这些实体形成 Query/View DTO（例如 `WorkbenchOverviewView`），但组合 View 不得复制或改变实体字段语义。
 
+`read_command_receipt.schema.yaml` 新增原已读请求的准确回执；command/result引用原
+`product_delivery` 定义，保留旧四字段回执及旧审计行。`stored_command_hash` 表示
+服务端已用冻结的Owner、报告版本、request_id及read意图核对原审计指纹并返回原result。
+当前列表的read_at不是请求回执；历史已读回执也不得覆盖后来恢复未读的状态。
+
 R2-R 的 `agentic_research.schema.yaml` 是研究智能体跨边界契约真源，覆盖
 Product Extension、Domain Pack、Role Profile、Research Capability、Evidence
 Gap/Round、CausalCase、独立 HorizonDecision、Trace/StopReason 和前端

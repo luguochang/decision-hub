@@ -1,0 +1,681 @@
+{
+  "scope": "Read-only DB snapshot, GET probes, pure parser reproductions; no ingestion or new model run",
+  "database": {
+    "captured_at": "2026-09-29T12:41:15.021149+00:00",
+    "database": "E:\\project\\study\\codex\\dsh\\decision-hub\\data\\core-live-20260913\\db\\decision_hub.sqlite3",
+    "sqlite_runtime": "3.53.1",
+    "journal_mode": "wal",
+    "counts": {
+      "active_pointers": 0,
+      "alembic_version": 1,
+      "analyst_claims": 1,
+      "artifacts": 536,
+      "candidate_versions": 0,
+      "capability_manifests": 0,
+      "data_jobs": 189,
+      "dsh_session_links": 621,
+      "dsh_session_prompts": 726,
+      "evaluation_datasets": 0,
+      "evaluations": 10,
+      "event_watches": 10,
+      "event_window_samples": 80,
+      "events": 91,
+      "evolution_jobs": 0,
+      "experiences": 0,
+      "experiment_results": 0,
+      "experiments": 0,
+      "failure_patterns": 0,
+      "forecasts": 1608,
+      "gate_decisions": 3182,
+      "macro_event_vintages": 10,
+      "macro_events": 10,
+      "observations": 91,
+      "outbox": 530,
+      "outcomes": 10,
+      "promotion_decisions": 0,
+      "research_commands": 10,
+      "research_document_blocks": 1,
+      "research_document_corrections": 1,
+      "research_document_versions": 1,
+      "research_documents": 1,
+      "research_evidence": 6619,
+      "research_facts": 19566,
+      "research_memos": 0,
+      "research_results": 528,
+      "research_run_scopes": 1,
+      "research_tool_call_reservations": 5617,
+      "research_trace_events": 47529,
+      "research_value_evaluations": 608,
+      "review_schedules": 1155,
+      "run_calls": 24,
+      "run_events": 3312,
+      "run_role_outputs": 1180,
+      "run_steps": 32,
+      "runs": 1115,
+      "service_heartbeats": 5,
+      "snapshots": 1159,
+      "source_acquisition_receipts": 6,
+      "source_poll_attempts": 2265,
+      "source_states": 8,
+      "strategy_calibrations": 0,
+      "workbench_feedback": 0
+    },
+    "queries": {
+      "run_groups": [
+        {
+          "admission_origin": "automatic",
+          "strategy_version": "baseline.v1",
+          "status": "admitted",
+          "n": 10
+        },
+        {
+          "admission_origin": "automatic",
+          "strategy_version": "baseline.v1",
+          "status": "completed",
+          "n": 2
+        },
+        {
+          "admission_origin": "automatic",
+          "strategy_version": "baseline.v1",
+          "status": "degraded",
+          "n": 6
+        },
+        {
+          "admission_origin": "automatic",
+          "strategy_version": "research.v1",
+          "status": "failed",
+          "n": 1
+        },
+        {
+          "admission_origin": "manual",
+          "strategy_version": "research.v1",
+          "status": "cancelled",
+          "n": 7
+        },
+        {
+          "admission_origin": "manual",
+          "strategy_version": "research.v1",
+          "status": "completed",
+          "n": 11
+        },
+        {
+          "admission_origin": "manual",
+          "strategy_version": "research.v1",
+          "status": "degraded",
+          "n": 64
+        },
+        {
+          "admission_origin": "manual",
+          "strategy_version": "research.v1",
+          "status": "failed",
+          "n": 18
+        },
+        {
+          "admission_origin": "scheduled_recheck",
+          "strategy_version": "research.v1",
+          "status": "cancelled",
+          "n": 480
+        },
+        {
+          "admission_origin": "scheduled_recheck",
+          "strategy_version": "research.v1",
+          "status": "degraded",
+          "n": 453
+        },
+        {
+          "admission_origin": "scheduled_recheck",
+          "strategy_version": "research.v1",
+          "status": "failed",
+          "n": 62
+        },
+        {
+          "admission_origin": "scheduled_recheck",
+          "strategy_version": "research.v1",
+          "status": "running",
+          "n": 1
+        }
+      ],
+      "automatic_research": [
+        {
+          "run_id": "run_359e3a068ddd448b85c5b3b5f1ed7814",
+          "status": "failed",
+          "error_code": "provider_timeout",
+          "created_at": "2026-09-22 14:20:30.439885"
+        }
+      ],
+      "review_groups": [
+        {
+          "status": "admitted",
+          "failure_code": null,
+          "n": 1
+        },
+        {
+          "status": "completed",
+          "failure_code": null,
+          "n": 453
+        },
+        {
+          "status": "failed",
+          "failure_code": "dsh_host_unavailable",
+          "n": 39
+        },
+        {
+          "status": "failed",
+          "failure_code": "dsh_protocol_invalid",
+          "n": 2
+        },
+        {
+          "status": "failed",
+          "failure_code": "dsh_turn_error",
+          "n": 1
+        },
+        {
+          "status": "failed",
+          "failure_code": "dsh_turn_interrupted",
+          "n": 1
+        },
+        {
+          "status": "failed",
+          "failure_code": "provider_timeout",
+          "n": 3
+        },
+        {
+          "status": "failed",
+          "failure_code": "research_worker_failed",
+          "n": 16
+        },
+        {
+          "status": "planned",
+          "failure_code": null,
+          "n": 1
+        },
+        {
+          "status": "skipped",
+          "failure_code": null,
+          "n": 257
+        },
+        {
+          "status": "skipped",
+          "failure_code": "superseded_by_newer_root",
+          "n": 381
+        }
+      ],
+      "window_groups": [
+        {
+          "status": "pending",
+          "n": 80,
+          "first_target": "2027-05-06 23:30:00.000000",
+          "last_target": "2028-01-29 00:00:00.000000"
+        }
+      ],
+      "outbox_groups": [
+        {
+          "channel": "local",
+          "status": "sent",
+          "n": 530
+        }
+      ],
+      "forecast_groups": [
+        {
+          "horizon": "24h",
+          "direction": "long",
+          "n": 1
+        },
+        {
+          "horizon": "24h",
+          "direction": "neutral",
+          "n": 5
+        },
+        {
+          "horizon": "24h",
+          "direction": "no_trade",
+          "n": 526
+        },
+        {
+          "horizon": "24h",
+          "direction": "short",
+          "n": 4
+        },
+        {
+          "horizon": "30m",
+          "direction": "long",
+          "n": 1
+        },
+        {
+          "horizon": "30m",
+          "direction": "neutral",
+          "n": 8
+        },
+        {
+          "horizon": "30m",
+          "direction": "no_trade",
+          "n": 523
+        },
+        {
+          "horizon": "30m",
+          "direction": "short",
+          "n": 4
+        },
+        {
+          "horizon": "72h",
+          "direction": "long",
+          "n": 1
+        },
+        {
+          "horizon": "72h",
+          "direction": "neutral",
+          "n": 5
+        },
+        {
+          "horizon": "72h",
+          "direction": "no_trade",
+          "n": 529
+        },
+        {
+          "horizon": "72h",
+          "direction": "short",
+          "n": 1
+        }
+      ],
+      "outcome_groups": [
+        {
+          "quality_status": "estimated",
+          "n": 10
+        }
+      ],
+      "macro_events": [
+        {
+          "macro_event_id": "macro_73f364b8eee2bcde8ca49c1e381f5403",
+          "source_id": "boj-calendar",
+          "family": "boj_mpm",
+          "scheduled_at": "2027-05-07 00:00:00.000000",
+          "status": "scheduled"
+        },
+        {
+          "macro_event_id": "macro_59999d84428cb752f04c18fb06a7c3ca",
+          "source_id": "boj-calendar",
+          "family": "boj_mpm",
+          "scheduled_at": "2027-05-12 00:00:00.000000",
+          "status": "scheduled"
+        },
+        {
+          "macro_event_id": "macro_ad913fbba03b661a1ecf1e3abab5007d",
+          "source_id": "boj-calendar",
+          "family": "boj_mpm",
+          "scheduled_at": "2027-06-10 00:00:00.000000",
+          "status": "scheduled"
+        },
+        {
+          "macro_event_id": "macro_2ea06c5b31abb0b854b72f3acc6472d5",
+          "source_id": "boj-calendar",
+          "family": "boj_mpm",
+          "scheduled_at": "2027-06-16 00:00:00.000000",
+          "status": "scheduled"
+        },
+        {
+          "macro_event_id": "macro_df63089957ef762fd32ab20e10f3d6a5",
+          "source_id": "boj-calendar",
+          "family": "boj_mpm",
+          "scheduled_at": "2027-06-21 00:00:00.000000",
+          "status": "scheduled"
+        },
+        {
+          "macro_event_id": "macro_a68580225a87f027b478ebd9f0e41aea",
+          "source_id": "boj-calendar",
+          "family": "boj_mpm",
+          "scheduled_at": "2027-07-21 00:00:00.000000",
+          "status": "scheduled"
+        },
+        {
+          "macro_event_id": "macro_bb292aded32b8df155654d35c257347d",
+          "source_id": "boj-calendar",
+          "family": "boj_mpm",
+          "scheduled_at": "2027-07-22 00:00:00.000000",
+          "status": "scheduled"
+        },
+        {
+          "macro_event_id": "macro_28d07082aeb6da3a2bec19c182477679",
+          "source_id": "boj-calendar",
+          "family": "boj_mpm",
+          "scheduled_at": "2027-07-27 00:00:00.000000",
+          "status": "scheduled"
+        },
+        {
+          "macro_event_id": "macro_1f9375c01c9b4c51039a269012c38f7d",
+          "source_id": "boj-calendar",
+          "family": "boj_mpm",
+          "scheduled_at": "2027-07-30 00:00:00.000000",
+          "status": "scheduled"
+        },
+        {
+          "macro_event_id": "macro_aace152afe1d14662c47d6dd112dded9",
+          "source_id": "fed-calendar",
+          "family": "fomc",
+          "scheduled_at": "2028-01-26 00:00:00.000000",
+          "status": "scheduled"
+        }
+      ],
+      "evidence_lineage": [
+        {
+          "n": 6619,
+          "with_receipt": 0,
+          "with_content_ref": 581,
+          "distinct_content_hashes": 3837
+        }
+      ],
+      "evidence_quality": [
+        {
+          "quality": "accepted",
+          "freshness_status": "fresh",
+          "n": 6438
+        },
+        {
+          "quality": "candidate",
+          "freshness_status": "fresh",
+          "n": 10
+        },
+        {
+          "quality": "stale",
+          "freshness_status": "stale",
+          "n": 171
+        }
+      ],
+      "facts_quality": [
+        {
+          "quality": "accepted",
+          "n": 19305
+        },
+        {
+          "quality": "stale",
+          "n": 261
+        }
+      ],
+      "orphan_facts": [
+        {
+          "n": 0
+        }
+      ],
+      "cross_run_fact_links": [
+        {
+          "n": 0
+        }
+      ],
+      "data_jobs": [
+        {
+          "status": "completed",
+          "n": 86
+        },
+        {
+          "status": "failed",
+          "n": 99
+        },
+        {
+          "status": "running",
+          "n": 4
+        }
+      ],
+      "document_adapters": [
+        {
+          "correction_model_ref": "financial-correction.deterministic.v1",
+          "quality_status": "ready_for_correction",
+          "n": 1
+        }
+      ]
+    },
+    "query_errors": {}
+  },
+  "parser": {
+    "probe_time": "2026-09-29T12:41:15.482900+00:00",
+    "cursor_insert_and_revision": {
+      "first_emitted": 1,
+      "expected_second_emitted": 2,
+      "actual_second_emitted": 0,
+      "defect_reproduced": true,
+      "cursor": "2028-11-15T00:00:00+00:00|audit-calendar:FOMC:2028-11-15"
+    },
+    "split_month_and_day": {
+      "expected_meetings": 1,
+      "parsed_meetings": 0
+    },
+    "official_pages": {
+      "fed-calendar": {
+        "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+        "fetched_at": "2026-09-29T12:41:16.154516+00:00",
+        "status": 200,
+        "sha256": "1a585f42529357ec6b5a334b298b2f76c4ae6e7e26b5afab90821e606db36901",
+        "parsed_count": 1,
+        "parsed": [
+          {
+            "id": "fed-calendar:FOMC:2028-01-26",
+            "scheduled_at": "2028-01-26T00:00:00+00:00",
+            "text": "FOMC: Note: A two-day meeting is scheduled for January 25-26, 2028. Each meeting date is tentative until confirmed at the meeting immediately preceding it."
+          }
+        ]
+      },
+      "boj-calendar": {
+        "url": "https://www.boj.or.jp/en/mopo/mpmsche_minu/",
+        "fetched_at": "2026-09-29T12:41:16.604488+00:00",
+        "status": 200,
+        "sha256": "cc3a67e6da300edde7aaed23316c7d37d855087780ee6fa7b9285a1f731340e4",
+        "parsed_count": 16,
+        "parsed": [
+          {
+            "id": "boj-calendar:BOJ:2026-05-07",
+            "scheduled_at": "2026-05-07T00:00:00+00:00",
+            "text": "BOJ: Mar. 18 (Wed.), 19 (Thurs.) [PDF 134KB] - Mar. 30 (Mon.) [PDF 210KB] May 7 (Thurs.) [PDF 266KB]"
+          },
+          {
+            "id": "boj-calendar:BOJ:2026-05-12",
+            "scheduled_at": "2026-05-12T00:00:00+00:00",
+            "text": "BOJ: Apr. 27 (Mon.), 28 (Tues.) [PDF 92KB] Apr. 28 (Tues.) [PDF 1,407KB] May 12 (Tues.) [PDF 175KB] June 19 (Fri.) [PDF 336KB]"
+          },
+          {
+            "id": "boj-calendar:BOJ:2026-06-15",
+            "scheduled_at": "2026-06-15T00:00:00+00:00",
+            "text": "BOJ: June 15 (Mon.), 16 (Tues.) [PDF 187KB] - June 24 (Wed.) [PDF 212KB] Aug. 5 (Wed.) [PDF 313KB]"
+          },
+          {
+            "id": "boj-calendar:BOJ:2026-06-19",
+            "scheduled_at": "2026-06-19T00:00:00+00:00",
+            "text": "BOJ: Apr. 27 (Mon.), 28 (Tues.) [PDF 92KB] Apr. 28 (Tues.) [PDF 1,407KB] May 12 (Tues.) [PDF 175KB] June 19 (Fri.) [PDF 336KB]"
+          },
+          {
+            "id": "boj-calendar:BOJ:2026-06-24",
+            "scheduled_at": "2026-06-24T00:00:00+00:00",
+            "text": "BOJ: June 15 (Mon.), 16 (Tues.) [PDF 187KB] - June 24 (Wed.) [PDF 212KB] Aug. 5 (Wed.) [PDF 313KB]"
+          },
+          {
+            "id": "boj-calendar:BOJ:2026-07-30",
+            "scheduled_at": "2026-07-30T00:00:00+00:00",
+            "text": "BOJ: July 30 (Thurs.), 31 (Fri.) [PDF 160KB] July 31 (Fri.) [PDF 1,330KB] Aug. 10 (Mon.) [PDF 175KB] Sept. 28 (Mon.) [PDF 353KB]"
+          },
+          {
+            "id": "boj-calendar:BOJ:2026-07-31",
+            "scheduled_at": "2026-07-31T00:00:00+00:00",
+            "text": "BOJ: July 30 (Thurs.), 31 (Fri.) [PDF 160KB] July 31 (Fri.) [PDF 1,330KB] Aug. 10 (Mon.) [PDF 175KB] Sept. 28 (Mon.) [PDF 353KB]"
+          },
+          {
+            "id": "boj-calendar:BOJ:2027-05-07",
+            "scheduled_at": "2027-05-07T00:00:00+00:00",
+            "text": "BOJ: Mar. 17 (Wed.), 18 (Thurs.) - Mar. 29 (Mon.) May 7 (Fri.)"
+          },
+          {
+            "id": "boj-calendar:BOJ:2027-05-12",
+            "scheduled_at": "2027-05-12T00:00:00+00:00",
+            "text": "BOJ: Apr. 27 (Tues.), 28 (Wed.) Apr. 28 (Wed.) May 12 (Wed.) June 16 (Wed.)"
+          },
+          {
+            "id": "boj-calendar:BOJ:2027-06-10",
+            "scheduled_at": "2027-06-10T00:00:00+00:00",
+            "text": "BOJ: June 10 (Thurs.), 11 (Fri.) - June 21 (Mon.) July 27 (Tues.)"
+          },
+          {
+            "id": "boj-calendar:BOJ:2027-06-16",
+            "scheduled_at": "2027-06-16T00:00:00+00:00",
+            "text": "BOJ: Apr. 27 (Tues.), 28 (Wed.) Apr. 28 (Wed.) May 12 (Wed.) June 16 (Wed.)"
+          },
+          {
+            "id": "boj-calendar:BOJ:2027-06-21",
+            "scheduled_at": "2027-06-21T00:00:00+00:00",
+            "text": "BOJ: June 10 (Thurs.), 11 (Fri.) - June 21 (Mon.) July 27 (Tues.)"
+          },
+          {
+            "id": "boj-calendar:BOJ:2027-07-21",
+            "scheduled_at": "2027-07-21T00:00:00+00:00",
+            "text": "BOJ: July 21 (Wed.), 22 (Thurs.) July 22 (Thurs.) July 30 (Fri.) Sept. 28 (Tues.)"
+          },
+          {
+            "id": "boj-calendar:BOJ:2027-07-22",
+            "scheduled_at": "2027-07-22T00:00:00+00:00",
+            "text": "BOJ: July 21 (Wed.), 22 (Thurs.) July 22 (Thurs.) July 30 (Fri.) Sept. 28 (Tues.)"
+          },
+          {
+            "id": "boj-calendar:BOJ:2027-07-27",
+            "scheduled_at": "2027-07-27T00:00:00+00:00",
+            "text": "BOJ: June 10 (Thurs.), 11 (Fri.) - June 21 (Mon.) July 27 (Tues.)"
+          },
+          {
+            "id": "boj-calendar:BOJ:2027-07-30",
+            "scheduled_at": "2027-07-30T00:00:00+00:00",
+            "text": "BOJ: July 21 (Wed.), 22 (Thurs.) July 22 (Thurs.) July 30 (Fri.) Sept. 28 (Tues.)"
+          }
+        ]
+      }
+    }
+  },
+  "api": {
+    "/health/ready": {
+      "status": 200,
+      "content_type": "application/json"
+    },
+    "/v1/health": {
+      "status": 200,
+      "content_type": "application/json"
+    },
+    "/v1/sources": {
+      "status": 200,
+      "content_type": "application/json"
+    },
+    "/v1/macro-events": {
+      "status": 200,
+      "content_type": "application/json"
+    },
+    "/v1/source-acquisitions": {
+      "status": 200,
+      "content_type": "application/json"
+    }
+  },
+  "macro_event_api_example": {
+    "schema_version": "macro-event-view.v1",
+    "macro_event_id": "macro_73f364b8eee2bcde8ca49c1e381f5403",
+    "family": "boj_mpm",
+    "scheduled_at": "2027-05-07T00:00:00",
+    "source_id": "boj-calendar",
+    "source_url": "https://www.boj.or.jp/en/mopo/mpmsche_minu/",
+    "source_authority": "official",
+    "unit": null,
+    "prior_value": null,
+    "consensus_value": null,
+    "actual_value": null,
+    "surprise": null,
+    "surprise_z": null,
+    "revision_flag": false,
+    "status": "scheduled",
+    "updated_at": "2026-09-19T15:50:47.952943"
+  },
+  "health_body": {
+    "status": "degraded",
+    "running_runs": 1,
+    "failed_runs": 81,
+    "sources": [
+      {
+        "source_id": "bea-news",
+        "status": "healthy",
+        "cursor": "2026-09-24T12:30:00+00:00|https://bea.gov/news/2026/us-international-transactions-and-investment-position-2nd-quarter-2026",
+        "last_success_at": "2026-09-29T12:41:12.194181Z",
+        "last_error_at": "2026-09-26T22:17:54.616885Z",
+        "consecutive_failures": 0,
+        "latency_ms": 1290,
+        "error_code": null,
+        "next_poll_at": "2026-09-29T12:42:12.194181Z"
+      },
+      {
+        "source_id": "bls-calendar",
+        "status": "degraded",
+        "cursor": null,
+        "last_success_at": null,
+        "last_error_at": "2026-09-29T12:32:45.884510Z",
+        "consecutive_failures": 344,
+        "latency_ms": 976,
+        "error_code": "source_unavailable",
+        "next_poll_at": "2026-09-29T12:47:45.883515Z"
+      },
+      {
+        "source_id": "bls-releases",
+        "status": "degraded",
+        "cursor": null,
+        "last_success_at": null,
+        "last_error_at": "2026-09-29T12:32:41.694873Z",
+        "consecutive_failures": 346,
+        "latency_ms": 1965,
+        "error_code": "source_unavailable",
+        "next_poll_at": "2026-09-29T12:47:41.692861Z"
+      },
+      {
+        "source_id": "boj-calendar",
+        "status": "healthy",
+        "cursor": "2027-07-30T00:00:00+00:00|boj-calendar:boj_mpm:2027-07-30",
+        "last_success_at": "2026-09-29T12:32:52.963700Z",
+        "last_error_at": "2026-09-20T03:51:05.672711Z",
+        "consecutive_failures": 0,
+        "latency_ms": 2047,
+        "error_code": null,
+        "next_poll_at": "2026-09-29T18:32:52.962699Z"
+      },
+      {
+        "source_id": "ecb-calendar",
+        "status": "healthy",
+        "cursor": null,
+        "last_success_at": "2026-09-29T12:32:50.914049Z",
+        "last_error_at": "2026-09-21T04:37:54.993979Z",
+        "consecutive_failures": 0,
+        "latency_ms": 2870,
+        "error_code": null,
+        "next_poll_at": "2026-09-29T18:32:50.914049Z"
+      },
+      {
+        "source_id": "fed-calendar",
+        "status": "healthy",
+        "cursor": "2028-01-26T00:00:00+00:00|fed-calendar:fomc:2028-01-26",
+        "last_success_at": "2026-09-29T12:32:48.041952Z",
+        "last_error_at": "2026-09-19T15:50:38.467971Z",
+        "consecutive_failures": 0,
+        "latency_ms": 2154,
+        "error_code": null,
+        "next_poll_at": "2026-09-29T18:32:48.041952Z"
+      },
+      {
+        "source_id": "fed-press",
+        "status": "healthy",
+        "cursor": "2026-09-25T20:30:00+00:00|https://www.federalreserve.gov/newsevents/pressreleases/orders20260925a.htm",
+        "last_success_at": "2026-09-29T12:41:10.538130Z",
+        "last_error_at": "2026-09-29T05:29:01.683140Z",
+        "consecutive_failures": 0,
+        "latency_ms": 484,
+        "error_code": null,
+        "next_poll_at": "2026-09-29T12:42:10.537128Z"
+      },
+      {
+        "source_id": "fed-speeches",
+        "status": "healthy",
+        "cursor": "2026-09-28T17:25:00+00:00|https://www.federalreserve.gov/newsevents/speech/cook20260928a.htm",
+        "last_success_at": "2026-09-29T12:41:10.901274Z",
+        "last_error_at": "2026-09-26T19:17:10.627353Z",
+        "consecutive_failures": 0,
+        "latency_ms": 361,
+        "error_code": null,
+        "next_poll_at": "2026-09-29T12:42:10.900268Z"
+      }
+    ]
+  }
+}

@@ -29,19 +29,22 @@ async def _run() -> dict[str, object]:
     started = asyncio.get_running_loop().time()
     try:
         server = create_server()
-        async with asyncio.timeout(25):
+        async with asyncio.timeout(65):
             raw = await server.call_tool(
                 "research_capability_execute",
                 {
                     "request_id": "r2-r-06a-responses-search-canary",
                     "capability_id": "web.search",
                     "requirement_id": "event_identity",
-                    "query": "latest Federal Reserve speech page in August 2026",
+                    "query": (
+                        f"As of {now.date()}, find the latest Federal Reserve monetary policy "
+                        "statement release. Search once and cite the exact release URL."
+                    ),
                     "research_session_id": "r2-r-06a-search-session",
                     "round": 1,
                     "mode": "live",
                     "observed_at": now.isoformat(),
-                    "cutoff_at": (now + timedelta(seconds=30)).isoformat(),
+                    "cutoff_at": (now + timedelta(seconds=70)).isoformat(),
                     "allowed_domains": ["federalreserve.gov"],
                     "max_results": 5,
                     "max_cost_usd": 0.10,
@@ -90,7 +93,11 @@ async def _run() -> dict[str, object]:
         }
     )
     passed = (
-        all(domain and domain.endswith("federalreserve.gov") for domain in domains)
+        bool(domains)
+        and all(
+            domain == "federalreserve.gov" or domain.endswith(".federalreserve.gov")
+            for domain in domains
+        )
         and authorities == ["search_derived"]
         and isinstance(payload.get("cost_usd"), (int, float))
         and float(payload["cost_usd"]) <= 0.10
@@ -102,6 +109,12 @@ async def _run() -> dict[str, object]:
         "domains": domains,
         "authorities": authorities,
         "estimated_cost_usd": payload.get("cost_usd"),
+        "evidence_semantics": "search_locators_require_fetch",
+        "source_urls": [
+            str(item["source_url"])
+            for item in evidence
+            if isinstance(item, dict) and item.get("source_url")
+        ],
     }
 
 

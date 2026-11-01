@@ -1,4 +1,7 @@
+from .browser_readback import BrowserFallbackWebFetchAdapter, BrowserReadbackResearchAdapter
 from .discovery import CryptoMacroDiscoveryPolicy
+from .document_readback import DocumentReadbackResearchAdapter
+from .document_store import ContentAddressedDocumentStore, StoredDocument
 from .documents import FetchedDocument, HttpDocumentResearchAdapter
 from .fact_pack import CryptoMacroFactPack, FactPackAssessment, FactRequirement
 from .g2_replay import FactReplayManifest, FactReplayVariant
@@ -19,6 +22,11 @@ __all__ = [
     "CryptoMacroDiscoveryPolicy",
     "FetchedDocument",
     "HttpDocumentResearchAdapter",
+    "ContentAddressedDocumentStore",
+    "StoredDocument",
+    "DocumentReadbackResearchAdapter",
+    "BrowserReadbackResearchAdapter",
+    "BrowserFallbackWebFetchAdapter",
     "ReplayResearchCapabilityAdapter",
     "ReplayResearchArchive",
     "WebSearchResearchAdapter",

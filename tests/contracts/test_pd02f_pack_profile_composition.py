@@ -61,10 +61,7 @@ def test_candidate_macro_routes_are_not_default_executable() -> None:
         "macro.expectation_pricing",
     }
     launcher = (ROOT / "infra/dsh/run-product.sh").read_text(encoding="utf-8")
-    match = re.search(
-        r'research_capabilities="\$\{DECISION_HUB_RESEARCH_CAPABILITIES:-([^}]*)\}"',
-        launcher,
-    )
+    match = re.search(r'^default_capabilities="([^"]*)"$', launcher, re.MULTILINE)
     assert match is not None
     default_live = {item for item in match.group(1).split(",") if item}
     approved = {
@@ -82,7 +79,7 @@ def test_dsh_preset_has_one_hub_research_tool_and_keeps_native_web_tools() -> No
     )
     assert preset.count("@decision-hub/dsh-plugin/research-tool") == 1
     assert "@deepseek-ai/dsh-tool-web" in preset
-    assert "search: true" in preset
+    assert "DECISION_HUB_SEARCH_CANARY_STATUS === 'passed'" in preset
     assert "fetch: true" in preset
 
 

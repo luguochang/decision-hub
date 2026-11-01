@@ -1,0 +1,34 @@
+{
+  "schema_version": "history-forecast-index.v2",
+  "owner_authenticated": true,
+  "observed_at": "2026-10-09T16:00:00Z",
+  "current_originals_verified": false,
+  "financial_qualified": false,
+  "historical_pit_verified": false,
+  "scopes": [
+    {
+      "asset": "BTC",
+      "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+      "asset_label": "比特币",
+      "model_id": "hfit2_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "state": "verification_required",
+      "forecast_id": "hforecast2_4cc86e57e1144eb6497fa1d4596d81f90b90784fa9549642",
+      "cutoff_at": "2026-10-09T15:37:00Z",
+      "recorded_at": "2026-10-09T15:38:00Z",
+      "reason_label": "已保存比特币记录，原件待核验。",
+      "probabilities": null
+    },
+    {
+      "asset": "ETH",
+      "scope_id": "crypto:spot:okx:ETH-USDT:trade:1m",
+      "asset_label": "以太坊",
+      "model_id": "hfit2_eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "state": "verification_required",
+      "forecast_id": "hforecast2_eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "cutoff_at": "2026-10-09T15:37:00Z",
+      "recorded_at": "2026-10-09T15:39:00Z",
+      "reason_label": "已保存以太坊记录，原件待核验。",
+      "probabilities": null
+    }
+  ]
+}

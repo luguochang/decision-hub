@@ -65,6 +65,13 @@ class MissingWindowProvider:
         return None
 
 
+class FailingWindowProvider:
+    async def window(
+        self, instrument: str, emitted_at: datetime, expires_at: datetime
+    ) -> PriceWindow | None:
+        raise ConnectionError("market endpoint unavailable")
+
+
 def _expired_forecast(database: Database, text: str) -> ForecastRecord:
     service = build_analyze_text_service(database, FakeAgentRuntime())
     asyncio.run(service.submit_and_run(ObservationCreate(text=text)))
@@ -130,6 +137,47 @@ def test_no_trade_and_missing_market_window_do_not_fabricate_outcomes(tmp_path: 
     assert asyncio.run(DueOutcomeService(database, FixtureWindowProvider()).process_due()) == 0
     with database.session() as session:
         assert session.query(OutcomeRecord).count() == 0
+
+
+def test_non_directional_forecasts_do_not_exhaust_due_batch(tmp_path: Path) -> None:
+    database = Database(f"sqlite+pysqlite:///{tmp_path / 'due-batch.sqlite3'}")
+    database.create_all()
+    actionable_id = _expired_forecast(database, "Powell says higher for longer.").forecast_id
+    now = datetime.now(UTC)
+    with database.session() as session:
+        actionable = session.get(ForecastRecord, actionable_id)
+        assert actionable is not None
+        actionable.direction = "short"
+        actionable.expires_at = now - timedelta(minutes=1)
+        non_directional = (
+            session.query(ForecastRecord)
+            .filter(ForecastRecord.forecast_id != actionable_id)
+            .order_by(ForecastRecord.horizon.asc())
+            .all()
+        )
+        assert len(non_directional) == 2
+        for index, (forecast, direction) in enumerate(
+            zip(non_directional, ("no_trade", "neutral"), strict=True)
+        ):
+            forecast.direction = direction
+            forecast.expires_at = now - timedelta(minutes=3 - index)
+
+    due = DueOutcomeService(database, FixtureWindowProvider())
+    assert asyncio.run(due.process_due(limit=1)) == 1
+    assert asyncio.run(due.process_due(limit=1)) == 0
+    with database.session() as session:
+        outcomes = session.query(OutcomeRecord).all()
+    assert [outcome.forecast_id for outcome in outcomes] == [actionable_id]
+
+
+def test_market_provider_failure_keeps_forecast_pending_and_worker_safe(tmp_path: Path) -> None:
+    database = Database(f"sqlite+pysqlite:///{tmp_path / 'provider-failure.sqlite3'}")
+    database.create_all()
+    forecast = _expired_forecast(database, "Powell says higher for longer.")
+
+    assert asyncio.run(DueOutcomeService(database, FailingWindowProvider()).process_due()) == 0
+    with database.session() as session:
+        assert session.query(OutcomeRecord).filter_by(forecast_id=forecast.forecast_id).count() == 0
 
     _expired_forecast(database, "Powell says higher for longer.")
     assert asyncio.run(DueOutcomeService(database, MissingWindowProvider()).process_due()) == 0

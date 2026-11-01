@@ -37,3 +37,137 @@ $defs:
       attributes:
         type: object
         additionalProperties: {type: [number, string, boolean, 'null']}
+
+  raw_capture_view:
+    type: object
+    additionalProperties: false
+    properties:
+      capture_id: &id001
+        type: string
+      url: *id001
+      body_ref: &id002
+        type:
+        - string
+        - 'null'
+      body_hash: *id002
+      status_code:
+        type:
+        - integer
+        - 'null'
+      byte_count: &id004
+        type: integer
+        minimum: 0
+      media_type: *id001
+      started_at: &id003
+        type: string
+        format: date-time
+      completed_at: *id003
+    required:
+    - capture_id
+    - url
+    - body_ref
+    - body_hash
+    - status_code
+    - byte_count
+    - media_type
+    - started_at
+    - completed_at
+  run_input_view:
+    type: object
+    additionalProperties: false
+    properties:
+      run_id: *id001
+      fact_id: *id001
+      use_mode:
+        type: string
+        enum:
+        - fresh
+        - reused
+        - legacy
+      as_of: *id003
+      adopted_at: *id003
+    required:
+    - run_id
+    - fact_id
+    - use_mode
+    - as_of
+    - adopted_at
+  fact_version_view:
+    type: object
+    additionalProperties: false
+    properties:
+      structured_payload_ref: {type: [string, "null"], default: null}
+      fact_version_id: *id001
+      semantic_key: *id001
+      market: *id001
+      scope_instrument: *id001
+      known_at: *id003
+      recorded_at: *id003
+      fact:
+        $ref: '#/$defs/fact_envelope'
+      parsed_version_id: *id001
+      archive_status:
+        type: string
+        enum:
+        - captured
+        - reference_only
+        - legacy_unarchived
+        - unarchived
+        - missing
+      parser_version: *id001
+      content_ref: *id002
+      acquisition_receipt_id: *id002
+      raw_captures:
+        type: array
+        items:
+          $ref: '#/$defs/raw_capture_view'
+      run_inputs:
+        type: array
+        items:
+          $ref: '#/$defs/run_input_view'
+        default: []
+    required:
+    - fact_version_id
+    - semantic_key
+    - market
+    - scope_instrument
+    - known_at
+    - recorded_at
+    - fact
+    - parsed_version_id
+    - archive_status
+    - parser_version
+    - content_ref
+    - acquisition_receipt_id
+    - raw_captures
+  fact_version_list_view:
+    type: object
+    additionalProperties: false
+    properties:
+      items:
+        type: array
+        items:
+          $ref: '#/$defs/fact_version_view'
+      total: *id004
+      limit:
+        type: integer
+        minimum: 1
+        maximum: 100
+      offset: *id004
+      as_of: *id003
+    required:
+    - items
+    - total
+    - limit
+    - offset
+    - as_of
+
+  archived_input_view:
+    type: object
+    additionalProperties: false
+    required: [kind, ref, verified, payload]
+    properties:
+      kind: {type: string, enum: [coverage_manifest, historical_partition, event_window, original_text]}
+      ref: {type: string}
+      verified: {type: boolean}
+      payload: {type: object, additionalProperties: true}

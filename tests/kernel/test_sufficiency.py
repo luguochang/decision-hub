@@ -250,7 +250,20 @@ def test_complete_semantic_fact_set_covers_requirement() -> None:
         semantic_policy_ref="crypto_macro.fact_semantics.v1#rates",
     )
     facts = [
-        _fact(fact_id="baseline", field="level", event_offset="t-5m"),
+        _fact(
+            fact_id="baseline",
+            field="level",
+            event_offset="t-5m",
+            window_start_at=NOW - timedelta(minutes=5),
+            window_end_at=NOW - timedelta(minutes=5),
+        ),
+        _fact(
+            fact_id="post-level",
+            field="level",
+            event_offset="t+1m",
+            window_start_at=NOW + timedelta(minutes=1),
+            window_end_at=NOW + timedelta(minutes=1),
+        ),
         _fact(fact_id="reaction", field="event_return", unit="bps", event_offset="t+1m"),
     ]
     result = assess_evidence_sufficiency(
@@ -258,3 +271,81 @@ def test_complete_semantic_fact_set_covers_requirement() -> None:
     )
     assert result.status == "sufficient"
     assert result.covered_requirement_ids == ["rates"]
+
+
+def test_event_window_cannot_mix_instruments_for_baseline_and_after() -> None:
+    requirement = _requirement(
+        accepted_metric_families=["macro.rates"],
+        required_metric_families=["macro.rates"],
+        required_fields=["level", "event_return"],
+        required_event_offsets=["t-5m", "t+1m"],
+        field_units={"level": ["yield_percent"], "event_return": ["bps"]},
+        allowed_delay_classes=["realtime"],
+        semantic_policy_ref="crypto_macro.fact_semantics.v1#rates",
+    )
+    baseline = _fact(
+        fact_id="baseline",
+        field="level",
+        event_offset="t-5m",
+        instrument="US2Y",
+    )
+    after = _fact(
+        fact_id="after",
+        field="level",
+        event_offset="t+1m",
+        instrument="US10Y",
+    )
+    reaction = _fact(
+        fact_id="reaction",
+        field="event_return",
+        unit="bps",
+        event_offset="t+1m",
+        instrument="US10Y",
+    )
+
+    result = assess_evidence_sufficiency(
+        [requirement], [_evidence()], facts=[baseline, after, reaction], cutoff_at=NOW
+    )
+
+    assert result.status == "insufficient"
+    assert result.gaps[0].reason_code == "semantic_mismatch"
+
+
+def test_event_window_cannot_mix_event_ids_for_baseline_and_after() -> None:
+    requirement = _requirement(
+        accepted_metric_families=["macro.rates"],
+        required_metric_families=["macro.rates"],
+        required_fields=["level", "event_return"],
+        required_event_offsets=["t-5m", "t+1m"],
+        field_units={"level": ["yield_percent"], "event_return": ["bps"]},
+        allowed_delay_classes=["realtime"],
+        semantic_policy_ref="crypto_macro.fact_semantics.v1#rates",
+    )
+    baseline = _fact(
+        fact_id="baseline",
+        field="level",
+        event_offset="t-5m",
+        attributes={"event_id": "event-a"},
+    )
+    after = _fact(
+        fact_id="after",
+        field="level",
+        event_offset="t+1m",
+        window_start_at=NOW + timedelta(minutes=1),
+        window_end_at=NOW + timedelta(minutes=1),
+        attributes={"event_id": "event-b"},
+    )
+    reaction = _fact(
+        fact_id="reaction",
+        field="event_return",
+        unit="bps",
+        event_offset="t+1m",
+        attributes={"event_id": "event-b"},
+    )
+
+    result = assess_evidence_sufficiency(
+        [requirement], [_evidence()], facts=[baseline, after, reaction], cutoff_at=NOW
+    )
+
+    assert result.status == "insufficient"
+    assert result.gaps[0].reason_code == "semantic_mismatch"

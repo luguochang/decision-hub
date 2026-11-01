@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 from collections.abc import Callable, Iterable
@@ -7,6 +8,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Literal, cast
 
 from pydantic import BaseModel, ConfigDict
+from sqlalchemy.dialects.sqlite import insert
 from sqlalchemy.orm import Session
 
 from packages.contracts_py.decision_hub_contracts import (
@@ -16,6 +18,8 @@ from packages.contracts_py.decision_hub_contracts import (
 )
 from packages.kernel.decision_hub_kernel.persistence.db import (
     Database,
+    EventOccurrenceRecord,
+    EventWatchLinkRecord,
     EventWatchRecord,
     EventWindowSampleRecord,
     as_utc,
@@ -101,11 +105,49 @@ class EventWatchService:
         now = _aware(self.clock())
         watch_id = _watch_id(event_id, scheduled)
         with self.database.session() as session:
+            occurrence = session.get(EventOccurrenceRecord, event_id)
+            linked = session.get(EventWatchLinkRecord, event_id)
+            if linked:
+                previous = session.get(EventWatchRecord, linked.watch_id)
+            elif occurrence:
+                previous = (
+                    session.query(EventWatchRecord)
+                    .join(
+                        EventOccurrenceRecord,
+                        EventOccurrenceRecord.event_id == EventWatchRecord.event_id,
+                    )
+                    .filter(
+                        EventOccurrenceRecord.occurrence_id == occurrence.occurrence_id,
+                        EventWatchRecord.scheduled_at == scheduled,
+                        EventWatchRecord.status != "cancelled",
+                    )
+                    .order_by(EventWatchRecord.created_at)
+                    .first()
+                )
+            else:
+                previous = None
+            if previous:
+                if (
+                    _stored_utc(previous.scheduled_at) != scheduled
+                    or previous.source_id != source_id
+                    or previous.event_family != event_family
+                ):
+                    raise ValueError("event_watch_identity_conflict")
+                if tuple(json.loads(previous.window_offsets_json)) != offsets:
+                    raise ValueError("event_watch_window_conflict")
+                session.execute(
+                    insert(EventWatchLinkRecord)
+                    .values(
+                        event_id=event_id,
+                        watch_id=previous.watch_id,
+                        linked_at=now,
+                    )
+                    .on_conflict_do_nothing()
+                )
+                return _watch_model(previous)
             existing = session.get(EventWatchRecord, watch_id)
             if existing is None:
-                by_event = (
-                    session.query(EventWatchRecord).filter_by(event_id=event_id).first()
-                )
+                by_event = session.query(EventWatchRecord).filter_by(event_id=event_id).first()
                 if by_event is not None:
                     if (
                         _stored_utc(by_event.scheduled_at) != scheduled
@@ -160,6 +202,15 @@ class EventWatchService:
                 if persisted_offsets != offsets:
                     raise ValueError("event_watch_window_conflict")
             _refresh(existing, session, now)
+            session.execute(
+                insert(EventWatchLinkRecord)
+                .values(
+                    event_id=event_id,
+                    watch_id=existing.watch_id,
+                    linked_at=now,
+                )
+                .on_conflict_do_nothing()
+            )
             return _watch_model(existing)
 
     def advance(self, *, now: datetime | None = None) -> tuple[EventWatch, ...]:
@@ -224,6 +275,7 @@ class EventWatchService:
         sampler: EventWindowSamplerPort,
         *,
         now: datetime | None = None,
+        timeout_seconds: float = 20,
     ) -> EventWindowSamplingReport:
         current = _aware(now or self.clock())
         self.advance(now=current)
@@ -232,7 +284,8 @@ class EventWatchService:
         failed = 0
         for sample in due:
             try:
-                result = await sampler.capture(sample)
+                async with asyncio.timeout(timeout_seconds):
+                    result = await sampler.capture(sample)
                 if result is None:
                     self.record_error(sample.sample_id, "event_window_provider_unavailable")
                     failed += 1
@@ -242,7 +295,9 @@ class EventWatchService:
             except Exception as exc:
                 self.record_error(
                     sample.sample_id,
-                    getattr(exc, "error_code", None) or "event_window_capture_failed",
+                    "event_window_capture_timeout"
+                    if isinstance(exc, TimeoutError)
+                    else getattr(exc, "error_code", None) or "event_window_capture_failed",
                 )
                 failed += 1
         return EventWindowSamplingReport(
@@ -272,10 +327,11 @@ class EventWatchService:
         """Return the durable watch for one event without exposing SQL rows."""
 
         with self.database.session() as session:
+            linked = session.get(EventWatchLinkRecord, event_id)
             row = (
-                session.query(EventWatchRecord)
-                .filter_by(event_id=event_id)
-                .one_or_none()
+                session.get(EventWatchRecord, linked.watch_id)
+                if linked
+                else (session.query(EventWatchRecord).filter_by(event_id=event_id).one_or_none())
             )
             return _watch_model(row) if row is not None else None
 
@@ -291,15 +347,8 @@ class EventWatchService:
 
     def list_event_samples(self, event_id: str) -> tuple[EventWindowSample, ...]:
         """Project samples by event id for adapters and the Gateway boundary."""
-
-        with self.database.session() as session:
-            rows = (
-                session.query(EventWindowSampleRecord)
-                .filter_by(event_id=event_id)
-                .order_by(EventWindowSampleRecord.target_at, EventWindowSampleRecord.offset)
-                .all()
-            )
-            return tuple(_sample_model(item) for item in rows)
+        watch = self.get_watch_by_event_id(event_id)
+        return self.list_samples(watch.watch_id) if watch else ()
 
     def _due_samples(self) -> tuple[EventWindowSample, ...]:
         with self.database.session() as session:
@@ -332,6 +381,9 @@ def _refresh(
     *,
     samples: list[EventWindowSampleRecord] | None = None,
 ) -> None:
+    if watch.status == "cancelled":
+        watch.next_tick_at = None
+        return
     rows = samples or (
         session.query(EventWindowSampleRecord)
         .filter_by(watch_id=watch.watch_id)
@@ -356,9 +408,7 @@ def _refresh(
     elif watch.status != "cancelled":
         window_started = any(item.status in {"due", "captured"} for item in rows)
         watch.status = (
-            "active"
-            if window_started or now >= _stored_utc(watch.scheduled_at)
-            else "scheduled"
+            "active" if window_started or now >= _stored_utc(watch.scheduled_at) else "scheduled"
         )
     terminal_sample_statuses = {"captured", "missing", "baseline_unavailable"}
     if rows and all(item.status in terminal_sample_statuses for item in rows):

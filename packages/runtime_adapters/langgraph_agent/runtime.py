@@ -5,6 +5,7 @@ import os
 import time
 from datetime import UTC, datetime
 from typing import Any
+from urllib.parse import urlsplit
 
 from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
@@ -17,6 +18,7 @@ from packages.kernel.decision_hub_kernel.ports.runtime import (
     AgentUsage,
 )
 from packages.runtime_adapters.errors import map_runtime_error
+from packages.runtime_adapters.execution_recipe import canonical_recipe, recipe_hash
 from packages.runtime_adapters.fake_runtime.runtime import FakeAgentRuntime
 from packages.runtime_adapters.langgraph_agent.provider_config import (
     ProviderConfig,
@@ -79,6 +81,32 @@ class LangGraphAgentRuntime:
         self._agent: Any = None
         if self.enabled:
             self._agent = self._build_agent()
+        self._recipe_json = canonical_recipe(self._current_recipe())
+
+    def _current_recipe(self) -> dict:
+        config = self.provider_config.model_dump(mode="json")
+        endpoint = config.pop("base_url")
+        parts = urlsplit(endpoint or "")
+        auditable = bool(endpoint and not (parts.username or parts.password
+                                          or parts.query or parts.fragment))
+        # Endpoint credentials are never put into the receipt, even as a hash.
+        config["endpoint_hash"] = recipe_hash(endpoint) if auditable else None
+        return {"schema_version": "execution-recipe.v1",
+                "runtime_id": self.effective_runtime_id,
+                "runtime_version": self.effective_runtime_version,
+                "live_attestable": self.enabled and auditable,
+                "provider": config, "system_prompt": self.system_prompt,
+                "response_schema": self.response_model.model_json_schema(),
+                "request_template_version": "role-evidence-instructions-text.v1",
+                "temperature": 0, "sdk_retries": 0, "tools": [],
+                "max_attempts": self.max_attempts, "cost_budget": self.cost_budget}
+
+    def execution_recipe(self) -> dict:
+        import json
+
+        if canonical_recipe(self._current_recipe()) != self._recipe_json:
+            raise AgentExecutionError("runtime_recipe_changed", "runtime configuration changed")
+        return json.loads(self._recipe_json)
 
     @property
     def effective_runtime_id(self) -> str:
@@ -143,6 +171,7 @@ class LangGraphAgentRuntime:
         )
 
     async def execute(self, request: AgentRequest) -> AgentResult:
+        self.execution_recipe()
         if not self.enabled:
             return await self._fallback.execute(request)
         started = time.perf_counter()

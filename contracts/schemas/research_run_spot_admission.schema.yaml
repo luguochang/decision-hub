@@ -1,0 +1,380 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.local/contracts/research_run_spot_admission.schema.json",
+  "title": "ResearchRunSpotAdmissionContracts",
+  "$defs": {
+    "EffectiveSpotRecipe": {
+      "additionalProperties": false,
+      "description": "Trusted server projection of the actual installed closure, never a client DTO.",
+      "properties": {
+        "research_scope_id": {
+          "enum": [
+            "btc-spot-macro.v1",
+            "eth-spot-macro.v1"
+          ],
+          "title": "Research Scope Id",
+          "type": "string"
+        },
+        "instrument": {
+          "enum": [
+            "BTC-USDT",
+            "ETH-USDT"
+          ],
+          "title": "Instrument",
+          "type": "string"
+        },
+        "domain_pack_ref": {
+          "const": "crypto_macro.v1",
+          "default": "crypto_macro.v1",
+          "title": "Domain Pack Ref",
+          "type": "string"
+        },
+        "recipe": {
+          "$ref": "#/$defs/HashedResource"
+        },
+        "pack": {
+          "$ref": "#/$defs/HashedResource"
+        },
+        "installed_pointer": {
+          "$ref": "#/$defs/HashedResource"
+        },
+        "plugin_build_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Plugin Build Hash",
+          "type": "string"
+        },
+        "required_capability_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Required Capability Ids",
+          "type": "array"
+        },
+        "routes": {
+          "items": {
+            "$ref": "#/$defs/SpotCapabilityRoute"
+          },
+          "minItems": 1,
+          "title": "Routes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "research_scope_id",
+        "instrument",
+        "recipe",
+        "pack",
+        "installed_pointer",
+        "plugin_build_hash",
+        "required_capability_ids",
+        "routes"
+      ],
+      "title": "EffectiveSpotRecipe",
+      "type": "object"
+    },
+    "FrozenSpotPathProof": {
+      "additionalProperties": false,
+      "properties": {
+        "scope_id": {
+          "title": "Scope Id",
+          "type": "string"
+        },
+        "start_at": {
+          "format": "date-time",
+          "title": "Start At",
+          "type": "string"
+        },
+        "end_at": {
+          "format": "date-time",
+          "title": "End At",
+          "type": "string"
+        },
+        "known_at": {
+          "format": "date-time",
+          "title": "Known At",
+          "type": "string"
+        },
+        "semantic_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Semantic Hash",
+          "type": "string"
+        },
+        "manifest_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Manifest Hash",
+          "type": "string"
+        },
+        "capture_hashes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Capture Hashes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "scope_id",
+        "start_at",
+        "end_at",
+        "known_at",
+        "semantic_hash",
+        "manifest_hash",
+        "capture_hashes"
+      ],
+      "title": "FrozenSpotPathProof",
+      "type": "object"
+    },
+    "HashedResource": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "minLength": 1,
+          "title": "Ref",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "sha256"
+      ],
+      "title": "HashedResource",
+      "type": "object"
+    },
+    "MarketPathScope": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "market-path-scope.v1",
+          "default": "market-path-scope.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "scope_id": {
+          "minLength": 1,
+          "title": "Scope Id",
+          "type": "string"
+        },
+        "asset_class": {
+          "default": "crypto",
+          "title": "Asset Class",
+          "type": "string"
+        },
+        "instrument_kind": {
+          "default": "spot",
+          "enum": [
+            "spot",
+            "perpetual_swap"
+          ],
+          "title": "Instrument Kind",
+          "type": "string"
+        },
+        "venue": {
+          "minLength": 1,
+          "title": "Venue",
+          "type": "string"
+        },
+        "instrument": {
+          "minLength": 1,
+          "title": "Instrument",
+          "type": "string"
+        },
+        "quote_currency": {
+          "minLength": 1,
+          "title": "Quote Currency",
+          "type": "string"
+        },
+        "price_type": {
+          "default": "trade",
+          "enum": [
+            "trade",
+            "mark",
+            "index"
+          ],
+          "title": "Price Type",
+          "type": "string"
+        },
+        "price_unit": {
+          "minLength": 1,
+          "title": "Price Unit",
+          "type": "string"
+        },
+        "volume_unit": {
+          "minLength": 1,
+          "title": "Volume Unit",
+          "type": "string"
+        },
+        "timezone": {
+          "const": "UTC",
+          "default": "UTC",
+          "title": "Timezone",
+          "type": "string"
+        },
+        "calendar_ref": {
+          "default": "crypto-24x7.v1",
+          "title": "Calendar Ref",
+          "type": "string"
+        },
+        "interval_seconds": {
+          "const": 60,
+          "default": 60,
+          "title": "Interval Seconds",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "scope_id",
+        "venue",
+        "instrument",
+        "quote_currency",
+        "price_unit",
+        "volume_unit"
+      ],
+      "title": "MarketPathScope",
+      "type": "object"
+    },
+    "SpotCapabilityRoute": {
+      "additionalProperties": false,
+      "properties": {
+        "capability_id": {
+          "minLength": 1,
+          "title": "Capability Id",
+          "type": "string"
+        },
+        "asset_mode": {
+          "enum": [
+            "global_macro",
+            "instrument"
+          ],
+          "title": "Asset Mode",
+          "type": "string"
+        },
+        "instrument": {
+          "anyOf": [
+            {
+              "enum": [
+                "BTC-USDT",
+                "ETH-USDT"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Instrument"
+        },
+        "manifest": {
+          "$ref": "#/$defs/HashedResource"
+        },
+        "route": {
+          "$ref": "#/$defs/HashedResource"
+        }
+      },
+      "required": [
+        "capability_id",
+        "asset_mode",
+        "manifest",
+        "route"
+      ],
+      "title": "SpotCapabilityRoute",
+      "type": "object"
+    },
+    "research_run_spot_admission_v1": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-run-spot-admission.v1",
+          "default": "research-run-spot-admission.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "run_id": {
+          "title": "Run Id",
+          "type": "string"
+        },
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "study_id": {
+          "title": "Study Id",
+          "type": "string"
+        },
+        "market": {
+          "const": "crypto",
+          "default": "crypto",
+          "title": "Market",
+          "type": "string"
+        },
+        "instrument": {
+          "enum": [
+            "BTC-USDT",
+            "ETH-USDT"
+          ],
+          "title": "Instrument",
+          "type": "string"
+        },
+        "horizon_scope": {
+          "title": "Horizon Scope",
+          "type": "string"
+        },
+        "identity_basis": {
+          "title": "Identity Basis",
+          "type": "string"
+        },
+        "scope": {
+          "$ref": "#/$defs/MarketPathScope"
+        },
+        "admission_id": {
+          "title": "Admission Id",
+          "type": "string"
+        },
+        "admission_proof_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Admission Proof Hash",
+          "type": "string"
+        },
+        "effective_binding_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Effective Binding Hash",
+          "type": "string"
+        },
+        "effective": {
+          "$ref": "#/$defs/EffectiveSpotRecipe"
+        },
+        "path": {
+          "$ref": "#/$defs/FrozenSpotPathProof"
+        },
+        "admitted_at": {
+          "format": "date-time",
+          "title": "Admitted At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "run_id",
+        "event_id",
+        "study_id",
+        "instrument",
+        "horizon_scope",
+        "identity_basis",
+        "scope",
+        "admission_id",
+        "admission_proof_hash",
+        "effective_binding_hash",
+        "effective",
+        "path",
+        "admitted_at"
+      ],
+      "title": "FrozenRunSpotAdmission",
+      "type": "object"
+    }
+  }
+}

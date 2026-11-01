@@ -10,6 +10,7 @@ Evidence 入账和双 Snapshot 由 Kernel 的 `ResearchCapabilityGatewayService`
   不允许 provider 自行晋升 authority。
 - `documents.py` 提供 allowlist 后的 Web/Official 文档抓取；默认只读 HTTPS，只接受显式文本媒体。
   未配置专用 parser 时 PDF/二进制响应稳定拒绝，不能把乱码保存为 Evidence。
+  M01 优先 HTML 主体并保留段落，按 query 选择最长 4000 字符的连续原文窗口，允许新查询读到后半段；词面相关性不能代替引用支持校验，完整文档归档仍待本轮接通。
 - `replay.py` 只返回已归档 fixture，禁止在 replay 中回退到 live network。
 
 任何新增 adapter 都必须通过同一 canonical contract、permission、PIT、timeout、

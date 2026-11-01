@@ -8,6 +8,7 @@ class DecisionState(TypedDict, total=False):
     event_id: str
     snapshot_id: str
     deadline_at: str
+    lease_owner: str | None
     policy_output_id: str
     counter_output_id: str
     candidate_output_id: str

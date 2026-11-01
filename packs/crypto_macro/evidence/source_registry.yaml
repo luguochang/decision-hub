@@ -9,13 +9,15 @@ sources:
     independence_group: federal-reserve
     domains: [federalreserve.gov]
     allowed_paths: [/feeds/, /newsevents/speech/, /newsevents/pressreleases/, /monetarypolicy/]
-    requirement_ids: [event.identity, policy.delta, counter.thesis]
+    requirement_ids: [event.identity, policy.delta, counter.thesis, market.narrative]
     allow_search: true
     allow_fetch: true
     allow_evidence: true
     parser_ref: official-event.v1
     license_status: approved
-    retention_policy: hash_excerpt
+    # Public Federal Reserve releases are retained as immutable originals so
+    # citations and baselines can be re-read without trusting a changed page.
+    retention_policy: full_text
     audit_status: approved
     redirect_policy: same_source_only
   - source_ref: bls.releases
@@ -25,7 +27,39 @@ sources:
     independence_group: bls
     domains: [bls.gov]
     allowed_paths: [/]
-    requirement_ids: [event.identity, policy.delta]
+    requirement_ids: [event.identity, policy.delta, market.narrative]
+    allow_search: true
+    allow_fetch: true
+    allow_evidence: true
+    parser_ref: official-event.v1
+    license_status: approved
+    retention_policy: hash_excerpt
+    audit_status: approved
+    redirect_policy: same_source_only
+  - source_ref: ecb.monetary_policy
+    tier: P0
+    publisher: European Central Bank
+    authority: official
+    independence_group: european-central-bank
+    domains: [ecb.europa.eu]
+    allowed_paths: [/press/calendars/, /press/pr/date/, /press/pressconf/]
+    requirement_ids: [event.identity, policy.delta, counter.thesis, market.narrative]
+    allow_search: true
+    allow_fetch: true
+    allow_evidence: true
+    parser_ref: official-event.v1
+    license_status: approved
+    retention_policy: hash_excerpt
+    audit_status: approved
+    redirect_policy: same_source_only
+  - source_ref: boj.monetary_policy
+    tier: P0
+    publisher: Bank of Japan
+    authority: official
+    independence_group: bank-of-japan
+    domains: [boj.or.jp]
+    allowed_paths: [/en/mopo/mpmsche_minu/, /en/mopo/mpmdeci/]
+    requirement_ids: [event.identity, policy.delta, counter.thesis, market.narrative]
     allow_search: true
     allow_fetch: true
     allow_evidence: true
@@ -41,7 +75,7 @@ sources:
     independence_group: bea
     domains: [bea.gov]
     allowed_paths: [/]
-    requirement_ids: [event.identity, policy.delta]
+    requirement_ids: [event.identity, policy.delta, market.narrative]
     allow_search: true
     allow_fetch: true
     allow_evidence: true
@@ -73,6 +107,7 @@ sources:
     independence_group: fred
     domains: [fred.stlouisfed.org]
     allowed_paths: [/]
+    excluded_paths: [/series/WRESBAL, /series/DFII10, /series/T10YIE]
     requirement_ids: [expectation.pricing, macro.transmission, cross_asset.confirmation]
     allow_search: true
     allow_fetch: true
@@ -114,12 +149,47 @@ sources:
     retention_policy: hash_only
     audit_status: candidate
     redirect_policy: same_source_only
+  # https://www.tradingnews.com/about/terms-and-conditions permits personal
+  # non-commercial access; it does not grant this product full-text retention.
+  # An explicit candidate records that gap without silently authorizing fetch.
+  - source_ref: tradingnews.market_analysis
+    tier: P2
+    publisher: TradingNEWS / October Media
+    authority: unverified
+    independence_group: tradingnews-october-media
+    domains: [tradingnews.com]
+    allowed_paths: [/news/]
+    requirement_ids: [market.narrative, counter.thesis]
+    allow_search: true
+    allow_fetch: false
+    allow_evidence: false
+    parser_ref: null
+    license_status: review_required
+    retention_policy: hash_only
+    audit_status: candidate
+    redirect_policy: same_source_only
+  - source_ref: alternative.me.crypto_sentiment
+    tier: P2
+    publisher: Alternative.me Fear and Greed Index
+    authority: audited_aggregator
+    independence_group: alternative-me
+    domains: [api.alternative.me]
+    allowed_paths: [/fng/]
+    requirement_ids: [market.narrative]
+    allow_search: false
+    allow_fetch: true
+    allow_evidence: true
+    parser_ref: hash_excerpt
+    license_status: approved
+    retention_policy: hash_excerpt
+    audit_status: approved
+    redirect_policy: same_source_only
   - source_ref: crypto.exchange_market
     tier: P0
     publisher: Audited crypto exchanges
     authority: exchange
     independence_group: crypto-exchange
-    domains: [okx.com, api.coinex.com, deribit.com, bybit.com]
+    domains: [okx.com, api.binance.com, fapi.binance.com, api.coinex.com, api.gateio.ws, api.huobi.pro, api.hbdm.com, api.hbdm.vn, api.btcgateway.pro, deribit.com, bybit.com]
     allowed_paths: [/]
     requirement_ids: [crypto.spot, crypto.derivatives]
     allow_search: false
@@ -145,6 +215,22 @@ sources:
     license_status: review_required
     retention_policy: hash_only
     audit_status: candidate
+    redirect_policy: deny
+  - source_ref: yahoo.daily_market
+    tier: P2
+    publisher: Yahoo Finance chart service
+    authority: audited_aggregator
+    independence_group: yahoo-finance
+    domains: [query1.finance.yahoo.com]
+    allowed_paths: [/v8/finance/chart/]
+    requirement_ids: [macro.transmission, cross_asset.confirmation]
+    allow_search: false
+    allow_fetch: false
+    allow_evidence: false
+    parser_ref: typed-provider-only.v1
+    license_status: approved
+    retention_policy: hash_only
+    audit_status: approved
     redirect_policy: deny
   - source_ref: general.finance_discovery
     tier: P3
@@ -178,3 +264,64 @@ sources:
     retention_policy: hash_only
     audit_status: denied
     redirect_policy: deny
+  - source_ref: fred.current_macro
+    tier: P0
+    publisher: Federal Reserve Bank of St. Louis
+    authority: official
+    independence_group: federal-reserve
+    domains: [fred.stlouisfed.org]
+    allowed_paths: [/series/WRESBAL, /series/DFII10, /series/T10YIE]
+    match_paths_exactly: true
+    requirement_ids: [usd.reserves, rates.real_10y, inflation.compensation_10y]
+    allow_search: false
+    allow_fetch: true
+    allow_evidence: true
+    parser_ref: official-fred-current-series.v1
+    license_status: approved
+    retention_policy: full_text
+    audit_status: approved
+    redirect_policy: same_source_only
+
+  - source_ref: cepr.voxeu.excerpts
+    tier: P1
+    publisher: VoxEU / CEPR
+    authority: unverified
+    independence_group: cepr-voxeu
+    domains:
+    - cepr.org
+    allowed_paths:
+    - /voxeu/columns/new-coins-block-digital-currencies-and-financial-system
+    match_paths_exactly: true
+    requirement_ids:
+    - market.narrative
+    - counter.thesis
+    allow_search: false
+    allow_fetch: false
+    allow_evidence: false
+    parser_ref: public-opinion-excerpt.verbatim.v1
+    license_status: approved
+    retention_policy: hash_excerpt
+    audit_status: approved
+    redirect_policy: same_source_only
+
+  - source_ref: cepr.voxeu.current_excerpts
+    tier: P1
+    publisher: VoxEU / CEPR
+    authority: unverified
+    independence_group: cepr-voxeu
+    domains:
+    - cepr.org
+    allowed_paths:
+    - /voxeu/columns/not-all-geopolitical-shocks-are-inflationary
+    match_paths_exactly: true
+    requirement_ids:
+    - market.narrative
+    - counter.thesis
+    allow_search: false
+    allow_fetch: false
+    allow_evidence: false
+    parser_ref: public-opinion-excerpt.verbatim.v1
+    license_status: approved
+    retention_policy: hash_excerpt
+    audit_status: approved
+    redirect_policy: same_source_only

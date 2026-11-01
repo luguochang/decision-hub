@@ -79,7 +79,7 @@ class FakeEvolutionAgentRuntime(FakeAgentRuntime):
     """Deterministic CandidateProposal fallback for offline evolution runs."""
 
     runtime_id = "fake-evolution"
-    runtime_version = "fake-evolution.v1"
+    runtime_version = "fake-evolution.v2"
 
     async def execute(self, request: AgentRequest) -> AgentResult:
         started = time.perf_counter()
@@ -87,6 +87,8 @@ class FakeEvolutionAgentRuntime(FakeAgentRuntime):
             (request.text + "\n" + "\n".join(request.evidence)).encode()
         ).hexdigest()[:16]
         proposal = CandidateProposal(
+            execution_scope="directional_synthesis",
+            execution_rules=["examine_counter_evidence"],
             proposal_id=f"proposal:{identity}",
             candidate_type="strategy",
             version=f"candidate.fake.{identity}",

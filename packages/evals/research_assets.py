@@ -10,14 +10,15 @@ from packages.contracts_py.decision_hub_contracts import (
     CandidateVersion,
     ExperimentManifest,
     ExperimentResultView,
+    ResearchRuntimeCaseReport,
     ResearchRuntimeComparison,
 )
+from packages.evals.research_comparison import SCORER_VERSION, validate_comparison_scores
 from packages.evals.research_dataset import ResearchEvaluationDataset
 from packages.kernel.decision_hub_kernel.application.evolution import (
     EvolutionAssetService,
 )
 
-SCORER_VERSION = "research-runtime-comparison.v1"
 BASELINE_CANDIDATE_PREFIX = "runtime.fixed-baseline"
 DSH_CANDIDATE_PREFIX = "runtime.dsh.decision-research"
 
@@ -41,6 +42,17 @@ class ResearchComparisonAssetRecorder:
         max_cost_usd: float | None,
         created_at: datetime,
     ) -> tuple[ExperimentManifest, tuple[ExperimentResultView, ExperimentResultView]]:
+        validate_comparison_scores(dataset, comparison)
+        for report in comparison.case_reports:
+            path = output_dir / report.case_id / f"{report.runtime_id}.json"
+            if not path.resolve().is_relative_to(output_dir.resolve()):
+                raise ValueError("research_comparison_report_ref_invalid")
+            try:
+                saved = ResearchRuntimeCaseReport.model_validate_json(path.read_bytes())
+            except (OSError, ValueError) as exc:
+                raise ValueError("research_comparison_report_unavailable") from exc
+            if saved.model_dump() != report.model_dump():
+                raise ValueError("research_comparison_report_mismatch")
         self.assets.register_dataset(dataset.manifest)
         baseline = self.assets.register_candidate(
             _candidate(
@@ -70,6 +82,7 @@ class ResearchComparisonAssetRecorder:
         )
         experiment = self.assets.register_experiment(
             ExperimentManifest(
+                execution_scope="research_harness",
                 experiment_id=comparison.experiment_id,
                 dataset_id=dataset.manifest.dataset_id,
                 baseline_ref=baseline.candidate_id,
@@ -78,7 +91,7 @@ class ResearchComparisonAssetRecorder:
                 created_at=created_at,
                 strategy_version="crypto_macro.v1",
                 runtime_id="fixed-vs-dsh",
-                runtime_version="research-runtime-comparison.v1",
+                runtime_version=SCORER_VERSION,
                 provider_id=provider_id,
                 model=model,
                 schema_version="experiment.v1",
@@ -123,6 +136,7 @@ def _candidate(
     created_at: datetime,
 ) -> CandidateVersion:
     semantic = {
+        "execution_scope": "research_harness",
         "model": model,
         "profile_ref": profile_ref,
         "provider_id": provider_id,
@@ -133,6 +147,7 @@ def _candidate(
         json.dumps(semantic, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()
     return CandidateVersion(
+        execution_scope="research_harness",
         candidate_id=f"{candidate_prefix}.{content_hash[:16]}",
         candidate_type="runtime",
         content_hash=content_hash,

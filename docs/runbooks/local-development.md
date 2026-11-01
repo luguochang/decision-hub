@@ -1,5 +1,9 @@
 # 本机运行手册
 
+> **2026-10-28 Windows 开发入口：** 日常开发与正式发布现按 [开发工作流](../diagnosis-2026-10-23/DEVELOPMENT_WORKFLOW.md) 分离；其中记录 pwsh 开发启动/停止、局部测试、快速 manifest 预检及实际通过情况。下方为通用/历史操作，不应据旧正式启动说明要求每次功能测试都跑完整存证。正式数据库、历史归档和发布资格规则继续保留。
+
+> 2026-10-17入口说明：本篇保留通用开发、容器和历史DSH命令，不代表当前正式PC启动配置。当前Windows产品沿`infra/dsh/build-product.ps1/run-product.ps1/stop-product.ps1`及候选manifest，准确入口由T08实际交付；当前要求模型为`gpt-6.1-sol`，下方`gpt-5.5`只是历史示例，不应复制为新默认。当前按用户要求暂停实施，见[00](../design/decision-product-control-2026-10-17/00_MASTER_CONTROL.md)；配置/多存储恢复与交接规范见[03](../design/decision-product-control-2026-10-17/03_RUNTIME_AND_DATA_CONTRACTS.md)及[12](../design/decision-product-control-2026-10-17/12_ENGINEERING_READINESS_AND_DELIVERY.md)。
+
 容器的 Web 构建阶段使用 AWS Public ECR 上的 Docker Library 官方 Node 镜像，
 Python 阶段使用 GHCR 官方 uv 镜像；两者都固定不可变 digest。这样不依赖本机当前
 不可达的 Docker Hub，同时不改变上游镜像内容。离线或企业镜像环境可以通过 build

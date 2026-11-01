@@ -1,0 +1,36 @@
+.history-status-page .history-section { margin-top: 18px; }
+.history-status-page .history-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.history-status-page .history-summary strong { display: block; margin: 10px 0 6px; font-size: 18px; }
+.history-status-page .history-summary p, .history-status-page .history-section > p { line-height: 1.6; color: var(--muted, #657083); }
+.history-status-page .history-table { width: 100%; border-collapse: collapse; }
+.history-status-page .history-table th, .history-status-page .history-table td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border, #dce2eb); vertical-align: top; }
+.history-status-page .history-table th { font-weight: 600; color: var(--muted, #657083); }
+.history-status-page .history-section h2 { margin: 0 0 10px; font-size: 19px; }
+.history-status-page .history-pair { display: flex; align-items: end; gap: 12px; margin: 14px 0; }
+.history-status-page .history-pair label { display: grid; gap: 7px; }
+.history-status-page .history-pair input { min-width: 280px; padding: 10px 12px; border: 1px solid var(--border, #dce2eb); border-radius: 7px; background: var(--panel, #fff); color: inherit; }
+.history-status-page .history-pair input:focus-visible, .history-status-page button:focus-visible { outline: 2px solid var(--accent, #345dc1); outline-offset: 3px; }
+.history-status-page .history-pagination { display: flex; align-items: center; justify-content: end; gap: 12px; margin-top: 14px; }
+.history-status-page .history-detail { margin-top: 12px; color: var(--muted, #657083); }
+.history-status-page .history-detail summary { cursor: pointer; }
+.history-status-page .history-detail code { overflow-wrap: anywhere; }
+.history-status-page .history-risk-values { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+.history-status-page .history-risk-values div { padding: 14px; border: 1px solid var(--border, #dce2eb); border-radius: 8px; }
+.history-status-page .history-risk-values dt { color: var(--muted, #657083); }
+.history-status-page .history-risk-values dd { margin: 6px 0 0; font-size: 22px; font-weight: 600; }
+.history-status-page .history-frequency { margin-top: 20px; }
+.history-status-page .history-probability-bar { display: block; height: 6px; margin-top: 12px; border-radius: 4px; background: var(--border, #dce2eb); overflow: hidden; }
+.history-status-page .history-probability-bar > span { display: block; height: 100%; background: var(--accent, #345dc1); }
+.history-status-page .history-proof { padding: 12px 16px; border-left: 3px solid #c49324; background: #fff9eb; color: #6d551d; line-height: 1.6; }
+@media (max-width: 1000px) { .history-status-page .history-summary { grid-template-columns: 1fr; } .history-status-page .history-pair { flex-wrap: wrap; } }
+.history-status-page .history-hourly-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.history-status-page .history-hourly-heading p { margin-bottom: 8px; color: var(--muted, #657083); line-height: 1.6; }
+.history-status-page .history-hourly-assets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 18px; }
+.history-status-page .history-forecast-assets { display: flex; gap: 12px; margin-top: 12px; }
+.history-status-page .history-hourly-asset { border: 1px solid var(--border, #dce2eb); border-radius: 10px; padding: 18px; min-width: 0; }
+.history-status-page .history-hourly-asset h3 { margin: 0 0 10px; }
+.history-status-page .history-hourly-asset p { line-height: 1.6; color: var(--muted, #657083); }
+.history-status-page .history-hourly-times { margin: 16px 0; }
+.history-status-page .history-hourly-times > div { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 8px; margin: 8px 0; }
+.history-status-page .history-hourly-times dt { color: var(--muted, #657083); }
+.history-status-page .history-hourly-times dd { margin: 0; }

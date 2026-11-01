@@ -9,7 +9,46 @@ from sqlalchemy import create_engine, inspect, text
 from packages.kernel.decision_hub_kernel.persistence.db import Database
 
 ROOT = Path(__file__).resolve().parents[2]
-CURRENT_HEAD = "0030_research_value_evaluations"
+CURRENT_HEAD = "0064_evolution_planning_decisions"
+
+
+def test_0057_preserves_registered_trial(tmp_path):
+    path = tmp_path / "pair-upgrade.sqlite3"
+    upgrade(path, "0056_prospective_trials")
+    engine = create_engine(f"sqlite+pysqlite:///{path}")
+    with engine.begin() as connection:
+        connection.execute(text(
+            "INSERT INTO prospective_trials "
+            "(trial_id,request_id,definition_hash,definition_json,registered_at) "
+            "VALUES ('registered','request','hash','{}',CURRENT_TIMESTAMP)"
+        ))
+        before = connection.execute(text("SELECT * FROM prospective_trials")).all()
+    upgrade(path, CURRENT_HEAD)
+    with engine.connect() as connection:
+        assert connection.execute(text("SELECT * FROM prospective_trials")).all() == before
+        assert connection.execute(text("SELECT count(*) FROM prospective_pairs")).scalar() == 0
+        assert connection.execute(text("SELECT count(*) FROM prospective_arms")).scalar() == 0
+
+
+def test_0056_adds_trial_storage_without_touching_existing_rows(tmp_path):
+    path = tmp_path / "trial-upgrade.sqlite3"
+    upgrade(path, "0055_usage_collection")
+    engine = create_engine(f"sqlite+pysqlite:///{path}")
+    with engine.begin() as connection:
+        connection.execute(text(
+            "INSERT INTO events "
+            "(event_id, event_type, occurred_at, received_at, generation, status) "
+            "VALUES ('kept-event', 'macro_event', "
+            "CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1, 'active')"
+        ))
+        before = connection.execute(text("SELECT * FROM events")).all()
+    upgrade(path, CURRENT_HEAD)
+    with engine.connect() as connection:
+        assert connection.execute(text("SELECT * FROM events")).all() == before
+        assert connection.execute(text("SELECT count(*) FROM prospective_trials")).scalar() == 0
+    assert {"trial_id", "definition_hash", "registered_at", "definition_json"}.issubset(
+        columns(path, "prospective_trials")
+    )
 
 
 def upgrade(path: Path, revision: str) -> None:
@@ -38,6 +77,15 @@ def test_r0_schema_snapshot_does_not_leak_r1_tables(tmp_path: Path) -> None:
     tables = inspect(create_engine(f"sqlite+pysqlite:///{path}")).get_table_names()
     assert "source_states" not in tables
     assert {"next_attempt_at", "failed_at", "last_error_code"}.isdisjoint(columns(path, "outbox"))
+
+
+def test_tool_reservations_gain_query_identity_on_upgrade(tmp_path: Path) -> None:
+    path = tmp_path / "query-identity.sqlite3"
+    upgrade(path, "0032_historical_data_jobs")
+    assert "query_hash" not in columns(path, "research_tool_call_reservations")
+    Database(f"sqlite+pysqlite:///{path}").initialize()
+    assert "query_hash" in columns(path, "research_tool_call_reservations")
+    assert revision(path) == CURRENT_HEAD
 
 
 def test_r0_0007_upgrades_to_current_head(tmp_path: Path) -> None:
@@ -100,9 +148,7 @@ def test_r1_0009_upgrades_to_current_head(tmp_path: Path) -> None:
         "upstream_identity_json",
         "last_seq",
         "deadline_at",
-    }.issubset(
-        columns(path, "dsh_session_links")
-    )
+    }.issubset(columns(path, "dsh_session_links"))
     assert "dsh_session_prompts" in tables
     assert {"generation", "dsh_session_id", "request_id", "request_hash", "prompt"}.issubset(
         columns(path, "dsh_session_prompts")
@@ -110,6 +156,26 @@ def test_r1_0009_upgrades_to_current_head(tmp_path: Path) -> None:
     assert "scheduled_at" in columns(path, "observations")
     assert {"admission_origin", "priority"}.issubset(columns(path, "runs"))
     assert "research_value_evaluations" in tables
+    assert {"content_ref", "source_content_hash", "parser_ref"}.issubset(
+        columns(path, "research_evidence")
+    )
+    assert "data_jobs" in tables
+    assert {"macro_events", "macro_event_vintages"}.issubset(tables)
+    assert {"strategy_calibrations", "review_schedules"}.issubset(tables)
+    assert {
+        "forecasted_at",
+        "as_of",
+        "strategy_version",
+        "input_fingerprint",
+        "calibration_receipt_id",
+    }.issubset(columns(path, "forecasts"))
+    assert {
+        "parent_run_id",
+        "trigger_type",
+        "trigger_hash",
+        "status",
+        "child_run_id",
+    }.issubset(columns(path, "review_schedules"))
     assert {
         "run_id",
         "artifact_id",
@@ -144,13 +210,17 @@ def test_0025_preserves_historical_run_and_marks_it_legacy(tmp_path: Path) -> No
     upgrade(path, CURRENT_HEAD)
 
     with engine.connect() as connection:
-        row = connection.execute(
-            text(
-                "SELECT run_id, status, strategy_version, runtime_version, "
-                "admission_origin, priority "
-                "FROM runs WHERE run_id = 'run-legacy'"
+        row = (
+            connection.execute(
+                text(
+                    "SELECT run_id, status, strategy_version, runtime_version, "
+                    "admission_origin, priority "
+                    "FROM runs WHERE run_id = 'run-legacy'"
+                )
             )
-        ).mappings().one()
+            .mappings()
+            .one()
+        )
     assert dict(row) == {
         "run_id": "run-legacy",
         "status": "completed",
@@ -159,3 +229,52 @@ def test_0025_preserves_historical_run_and_marks_it_legacy(tmp_path: Path) -> No
         "admission_origin": "legacy",
         "priority": 0,
     }
+
+
+def test_0053_preserves_scope_without_granting_retrospective_remote_consent(tmp_path):
+    path = tmp_path / "library-consent.sqlite3"
+    upgrade(path, "0052_product_receipts")
+    engine = create_engine(f"sqlite+pysqlite:///{path}")
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "INSERT INTO research_run_scopes (run_id,research_family,domain_pack_ref,"
+                "instrument_scope_json,library_context_mode,selected_version_ids_json,created_at) "
+                "VALUES ('old-run','crypto_macro','crypto_macro.research','[]','selected',"
+                "'[\"docver_old\"]',CURRENT_TIMESTAMP)"
+            )
+        )
+    upgrade(path, CURRENT_HEAD)
+    with engine.connect() as connection:
+        row = connection.execute(
+            text(
+                "SELECT selected_version_ids_json,allow_remote_library_content,request_hash "
+                "FROM research_run_scopes WHERE run_id='old-run'"
+            )
+        ).one()
+    assert row[0] == '["docver_old"]'
+    assert not row[1]
+    assert row[2] is None
+
+
+def test_0059_keeps_old_session_budgets_unknown(tmp_path):
+    path = tmp_path / "watchdog-migration.sqlite3"
+    upgrade(path, "0058_prospective_labels")
+    engine = create_engine(f"sqlite+pysqlite:///{path}")
+    with engine.begin() as connection:
+        connection.execute(text("""
+            INSERT INTO dsh_session_links
+            (run_id,dsh_session_id,request_hash,state,generation,upstream_identity_json,
+             plugin_build_hash,last_seq,created_at,updated_at,tool_calls_started)
+            VALUES ('old-run','old-session','hash','completed',1,'{}','build',12,
+                    CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,9)
+        """))
+    upgrade(path, CURRENT_HEAD)
+    upgrade(path, CURRENT_HEAD)
+    with engine.connect() as connection:
+        row = connection.execute(text(
+            "SELECT state,last_seq,tool_calls_started,model_step_timeout_ms "
+            "FROM dsh_session_links WHERE run_id='old-run'"
+        )).one()
+    assert tuple(row) == ("completed", 12, 9, None)
+    engine.dispose()

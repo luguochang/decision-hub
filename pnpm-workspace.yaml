@@ -1,5 +1,6 @@
 packages:
   - apps/decision-desk
+  - apps/source_acquisition_worker
   - extensions/dsh/decision-hub
   - packages/contracts_ts
 allowBuilds:

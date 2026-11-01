@@ -1,5 +1,7 @@
 # ADR 目录
 
+- [2026-10-17事前产品基线与文档适用范围](ADR-20261017-decision-product-baseline-and-document-authority.md)：review-4及OKX业务选择已批准，review-5补审条款proposed，按最新要求暂停实施；说明旧阶段/规则的继承与替代，不修改旧原件。
+
 - [ADR-0019：耐久工具预算与 Session Prompt 就绪边界](ADR-0019-durable-tool-budget-and-session-readiness.md)：`accepted`，把原始工具预算持久化到 Session link，以数据库 reservation 在 adapter 前原子限额，并要求 Hub accepted/link 先于业务 Prompt。
 - [ADR-0020：DSH Research Tool 受信运行身份](ADR-0020-trusted-dsh-tool-session-context.md)：`accepted`，模型不再填写 Session ID；DSH Native Tool 只从 `exec.agent.id` 注入身份，原始 MCP tool 不作为 decision-research Agent 的旁路。
 
@@ -31,6 +33,7 @@
 - [ADR-0022 DSH 原生 Search 与 Hub Search Provider 的路由边界（accepted）](ADR-0022-search-provider-route-boundary.md)
 - [ADR-0023 同一 DSH_HOME 的单写者启动边界（accepted）](ADR-0023-single-writer-dsh-home.md)
 - [ADR-0024 语义事实与事件窗口边界（accepted）](ADR-0024-semantic-fact-and-event-window-boundary.md)
+- [ADR-0025 Decision Desk 日常入口与 DSH 技术审计边界](ADR-0025-decision-desk-daily-entry-and-dsh-audit.md)
 
 ## 模板
 
@@ -47,3 +50,7 @@
 受影响契约：
 受影响测试：
 ```
+
+- [正式研究方法身份与演进版本生效](ADR-20260930-research-method-activation.md)：明确当前演进指针未被正式DSH消费；执行前方法凭据已接入，完整部署仍待实现。
+
+- [完整研究任务与单轮执行请求分层](ADR-20261001-full-task-and-round-request.md)：完整请求先于执行落库，历史原始检查点核验恢复，单轮子集不代替全量覆盖。

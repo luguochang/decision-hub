@@ -568,6 +568,7 @@ def _window_fact(
     attributes: dict[str, float | str | bool | None] = {
         "provider_id": observation.provider_id,
         "venue": observation.venue,
+        "event_id": query.event_id,
     }
     payload_schema_ref = "crypto-event-window-payload.v1"
     payload_hash = research_fact_payload_hash(
@@ -663,6 +664,7 @@ def _derived_facts(
             "venue": venue,
             "baseline_offset": _BASELINE_OFFSET,
             "post_offset": _POST_OFFSET,
+            "event_id": query.event_id,
         }
         payload_schema_ref = "crypto-event-window-payload.v1"
         payload_hash = research_fact_payload_hash(

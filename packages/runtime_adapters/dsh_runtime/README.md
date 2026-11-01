@@ -1,7 +1,7 @@
 # DSH Research Runtime
 
-本模块是 DeepSeek Harness Python SDK 到 `ResearchHarnessRuntime` 的唯一
-适配层。当前固定 Python SDK/Runtime 为 `0.1.1rc1`；官方 npm CLI 的
+本模块包含 Python SDK 和 Web Host 到 `ResearchHarnessRuntime` 的适配层。
+下方 SDK 说明对应固定 Python SDK/Runtime `0.1.1rc1`；官方 npm CLI 的
 `0.1.1-rc.2` 不是同一个可直接替换的 Python 发布物。
 
 ## 职责
@@ -20,6 +20,9 @@
 - `tool_result_attestation.py`：从成功的 canonical MCP Tool Result 提取证据；最终
   `EvidenceCandidate` 缺失、篡改、跨 Session 或越权时以
   `dsh_evidence_unattested` fail-closed，且不持久化 raw Tool Result。
+- `session_archive.py`：有界读取 DSH JSONL/Zstandard Session 归档，以首条 Session
+  header 校验并绑定原始事件身份，再复用在线链相同的 Tool/证据/审查回读规则；拒绝
+  header 冲突、超限归档和被追加内容的 canonical request。
 - `runtime.py`：实现 Kernel 的 `ResearchHarnessRuntime` port。
 - `health.py`：本地 bundled runtime/profile handshake；不调用外部模型。
 
@@ -63,6 +66,31 @@ R2-R-06C 将模型输出边界收缩为 synthesis-only，并将无人值守评�
 
 ```bash
 DECISION_HUB_DSH_LIVE_CANARY=1 \
-DECISION_HUB_DSH_MODEL=gpt-5.5 \
+DECISION_HUB_DSH_MODEL=gpt-6.1-sol \
 ./.venv/bin/python -m tools.canary.run_dsh_research_canary
 ```
+
+## Web Host 取消与恢复（W6.4i）
+
+`web_host_client.py` 保留原提交接口，另提供可选的冻结绑定 status/result/cancel。
+恢复不构造新的 `DshSessionSubmit`，不发 PUT、不执行模型或创建后续 Run。
+
+`cancellation_projection.py` 使用专用文件 SQLite NullPool/50ms busy wait；每个
+runtime 最多2个真正未完成线程。等待超时后，slot 要到线程实际结束才释放。
+`close()` 阻止新工作，但不宣称强制停止 SQLite/磁盘线程或远端 Host。
+Kernel `DshSessionLinkService.complete` 在同一个写事务内核对身份、代次和终态。
+
+`cancelled_recovery.py` 仅扫描产品已经 cancelled、DSH link 尚非终态的任务。
+完整任务输入和筛选后的实际轮次输入分别冻结；prompt、实际请求和完整性回执
+通过同事务关联。恢复核对原 Task/Method、首轮及当前 prompt/执行请求、原 deadline
+和预算，RPC前与最终写入时再核对。旧记录缺原凭据时跳过，不从当前 Pack或当前时间
+填充。Host返回 completed 时准确保存link completed，产品Run仍 cancelled，不发布报告。
+
+General research lane 每15秒维护一次，默认每次最多4个Run/2秒协作预算；每Run
+失败退避30～300秒，cursor避免旧缺凭据任务一直挡住后面的任务。Priority lane
+不重复扫描，`--once` 仅维护一轮。无可选接口的 SDK/replay保持原生命周期。
+Live执行的取消路径依赖本进程最后实际submission和持久Run/link身份；重启恢复
+才要求完整冻结凭据，不能将两者的保证范围混用。
+
+最终实际门及首次失败见 `data/product-local/remediation/W6/pc-cancellation-atomicity/`，
+唯一进度在执行台账。代码测试不证明真实付费Host物理停止或新版本已部署。

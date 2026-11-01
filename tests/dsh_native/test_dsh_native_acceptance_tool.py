@@ -4,6 +4,11 @@ from pathlib import Path
 
 import pytest
 
+from packages.contracts_py.decision_hub_contracts import FactEnvelope
+from packages.kernel.decision_hub_kernel.application.fact_store import (
+    research_fact_instance_id,
+    research_fact_payload_hash,
+)
 from tools.dsh_native_acceptance import (
     ScenarioResult,
     ScenarioRuntime,
@@ -74,6 +79,35 @@ def test_success_fixture_contains_all_required_authority_classes() -> None:
         "exchange",
         "verified_web",
     }
+
+
+def test_success_fixture_facts_use_canonical_payload_and_instance_hashes() -> None:
+    archive = research_archive("success")
+    for query in archive["queries"]:
+        for raw_fact in query.get("facts", []):
+            fact = FactEnvelope.model_validate(raw_fact)
+            payload_hash = research_fact_payload_hash(
+                requirement_id=fact.requirement_id,
+                metric_family=fact.metric_family,
+                field=fact.field,
+                instrument=fact.instrument,
+                venue=fact.venue,
+                value=fact.value,
+                unit=fact.unit,
+                window_start_at=fact.window_start_at,
+                window_end_at=fact.window_end_at,
+                event_offset=fact.event_offset,
+                published_at=fact.published_at,
+                source_id=fact.source_id,
+                independence_group=fact.independence_group,
+                delay_class=fact.delay_class,
+                payload_schema_ref=fact.payload_schema_ref,
+                attributes=fact.attributes,
+            )
+            assert fact.payload_hash == payload_hash
+            assert fact.fact_id == research_fact_instance_id(
+                evidence_id=fact.evidence_id, payload_hash=payload_hash
+            )
 
 
 def test_worker_composition_is_explicitly_dsh_web_replay(tmp_path: Path) -> None:

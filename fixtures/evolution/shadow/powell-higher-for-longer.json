@@ -12,8 +12,8 @@
     "published_at": "2026-08-25T08:59:00Z"
   },
   "outcomes": [
-    {"horizon": "30m", "available_at": "2026-08-25T09:31:00Z", "return_pct": -0.8, "direction_correct": true, "fees": 0.1, "slippage": 0.1, "quality_status": "fixture"},
-    {"horizon": "24h", "available_at": "2026-08-26T09:01:00Z", "return_pct": -1.4, "direction_correct": true, "fees": 0.1, "slippage": 0.1, "quality_status": "fixture"},
-    {"horizon": "72h", "available_at": "2026-08-28T09:01:00Z", "return_pct": 0.4, "direction_correct": false, "fees": 0.1, "slippage": 0.1, "quality_status": "fixture"}
+    {"horizon": "30m", "available_at": "2026-08-25T09:31:00Z", "return_basis": "market", "return_pct": -0.8, "direction_correct": true, "fees": 0.1, "slippage": 0.1, "quality_status": "fixture"},
+    {"horizon": "24h", "available_at": "2026-08-26T09:01:00Z", "return_basis": "market", "return_pct": -1.4, "direction_correct": true, "fees": 0.1, "slippage": 0.1, "quality_status": "fixture"},
+    {"horizon": "72h", "available_at": "2026-08-28T09:01:00Z", "return_basis": "market", "return_pct": 0.4, "direction_correct": false, "fees": 0.1, "slippage": 0.1, "quality_status": "fixture"}
   ]
 }

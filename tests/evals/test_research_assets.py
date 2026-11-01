@@ -58,6 +58,11 @@ async def test_research_comparison_registers_existing_evolution_assets(tmp_path:
     )
 
     assert experiment.status == "completed"
+    assert experiment.execution_scope == "research_harness"
+    assert all(
+        item.execution_scope == "research_harness"
+        for item in EvolutionAssetService(database).overview().candidates
+    )
     assert experiment.randomness_policy == "provider_default"
     assert experiment.random_seed is None
     assert {item.sample_count for item in results} == {12}

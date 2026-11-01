@@ -18,6 +18,7 @@ RUN --mount=type=cache,id=decision-hub-pnpm,target=/root/.local/share/pnpm/store
     pnpm install --frozen-lockfile
 COPY apps/decision-desk apps/decision-desk
 COPY packages/contracts_ts packages/contracts_ts
+COPY contracts/presentation contracts/presentation
 RUN pnpm --dir apps/decision-desk build
 
 FROM ${UV_IMAGE}

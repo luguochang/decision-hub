@@ -43,16 +43,31 @@ from tools.replay.run_fixture import run_fixture
 NOW = datetime(2026, 8, 28, 12, 0, tzinfo=UTC)
 
 
-def candidate(candidate_id: str, version: str) -> CandidateVersion:
+def candidate(candidate_id: str, version: str, *, artifact_root=None) -> CandidateVersion:
+    content_ref = None
+    content_hash = hashlib.sha256(candidate_id.encode()).hexdigest()
+    if artifact_root is not None:
+        payload = {"schema_version": "candidate-artifact.v1", "proposal": {
+            "proposal_id": candidate_id, "candidate_type": "strategy", "version": version,
+            "parent_version": None, "summary": "test rules", "changes": ["test rules"],
+            "rationale": "isolated test", "evidence_refs": [],
+            "execution_scope": "directional_synthesis",
+            "execution_rules": ["examine_counter_evidence"],
+        }}
+        body = json.dumps(payload).encode()
+        path = artifact_root / f"{candidate_id}.json"
+        path.write_bytes(body)
+        content_hash, content_ref = hashlib.sha256(body).hexdigest(), str(path)
     return CandidateVersion(
+        execution_scope="directional_synthesis",
         candidate_id=candidate_id,
         candidate_type="strategy",
-        content_hash=hashlib.sha256(candidate_id.encode()).hexdigest(),
+        content_hash=content_hash,
         version=version,
         parent_version=None,
         status="candidate",
         created_at=NOW - timedelta(days=40),
-        content_ref=None,
+        content_ref=content_ref,
         source="owner",
     )
 
@@ -65,17 +80,20 @@ def make_dataset(
     start: datetime = NOW - timedelta(days=60),
     end: datetime = NOW - timedelta(days=30),
     families: dict[str, int] | None = None,
+    input_count: int = 1,
 ) -> EvaluationDatasetManifest:
     families = families or {"policy": 30}
     cutoff_rule = "published_at <= observed_at <= received_at"
     fixture_ref = f"fixture:{dataset_id}"
-    fixture_hashes = {fixture_ref: hashlib.sha256(fixture_ref.encode()).hexdigest()}
+    fixture_refs = ([fixture_ref] if input_count == 1 else
+                    [f"{fixture_ref}:{index}" for index in range(input_count)])
+    fixture_hashes = {ref: hashlib.sha256(ref.encode()).hexdigest() for ref in fixture_refs}
     return EvaluationDatasetManifest(
         dataset_id=dataset_id,
         split=split,
         manifest_hash=dataset_manifest_hash(
             split,
-            (fixture_ref,),
+            fixture_refs,
             cutoff_rule,
             fixture_hashes=fixture_hashes,
             source_mode=source_mode,
@@ -83,7 +101,7 @@ def make_dataset(
             window_end_at=end,
             event_family_counts=families,
         ),
-        fixture_refs=[fixture_ref],
+        fixture_refs=fixture_refs,
         fixture_hashes=fixture_hashes,
         cutoff_rule=cutoff_rule,
         label_rule="outcomes.available_at > received_at",
@@ -108,10 +126,12 @@ def add_stage(
     tag: str = "v1",
 ) -> list[str]:
     dataset = service.register_dataset(
-        make_dataset(split, f"{split}.{tag}", source_mode=source_mode)
+        make_dataset(split, f"{split}.{tag}", source_mode=source_mode,
+                     input_count=100, families={"policy": 100})
     )
     experiment = service.register_experiment(
         ExperimentManifest(
+            execution_scope="directional_synthesis",
             experiment_id=f"exp.{split}.{tag}",
             dataset_id=dataset.dataset_id,
             baseline_ref=baseline.candidate_id,
@@ -143,14 +163,14 @@ def add_stage(
                 cost_usd=1.0 if item is baseline else 1.2,
                 p95_latency_ms=10_000,
                 safety_violations=0,
-                event_family_counts={"policy": 30},
+                event_family_counts={"policy": 100},
                 created_at=NOW - timedelta(days=29),
                 stage=split,
                 failure_counts={},
                 evidence_coverage=1,
                 directional_accuracy=1,
                 raw_artifact_refs=[f"artifact:{result_id}"],
-                scorer_version="fixture.v1",
+                scorer_version="evaluation.aggregate.v3",
             )
         )
         if item is challenger:
@@ -195,8 +215,8 @@ def test_promotion_requires_replay_holdout_shadow_and_is_idempotent(tmp_path: Pa
     database = Database(f"sqlite+pysqlite:///{tmp_path / 'promotion.sqlite3'}")
     database.create_all()
     service = EvolutionAssetService(database, clock=lambda: NOW)
-    baseline = service.register_candidate(candidate("baseline", "baseline.v1"))
-    challenger = service.register_candidate(candidate("challenger", "challenger.v1"))
+    baseline = service.register_candidate(candidate("baseline", "baseline.v1", artifact_root=tmp_path))
+    challenger = service.register_candidate(candidate("challenger", "challenger.v1", artifact_root=tmp_path))
 
     replay_refs = add_stage(service, baseline, challenger, "replay")
     holdout_refs = add_stage(service, baseline, challenger, "holdout")
@@ -252,9 +272,9 @@ def test_reject_does_not_change_pointer_and_rollback_requires_history(tmp_path: 
     database = Database(f"sqlite+pysqlite:///{tmp_path / 'rollback.sqlite3'}")
     database.create_all()
     service = EvolutionAssetService(database, clock=lambda: NOW)
-    seed = service.register_candidate(candidate("seed", "seed.v1"))
-    baseline = service.register_candidate(candidate("baseline", "baseline.v1"))
-    challenger = service.register_candidate(candidate("challenger", "challenger.v1"))
+    seed = service.register_candidate(candidate("seed", "seed.v1", artifact_root=tmp_path))
+    baseline = service.register_candidate(candidate("baseline", "baseline.v1", artifact_root=tmp_path))
+    challenger = service.register_candidate(candidate("challenger", "challenger.v1", artifact_root=tmp_path))
     seed_replay = add_stage(service, seed, baseline, "replay", tag="seed")
     seed_holdout = add_stage(service, seed, baseline, "holdout", tag="seed")
     seed_shadow = add_stage(
@@ -328,7 +348,7 @@ def test_reject_does_not_change_pointer_and_rollback_requires_history(tmp_path: 
         assert rolled_back_candidate is not None and rolled_back_candidate.status == "active"
         assert prior_candidate is not None and prior_candidate.status == "eligible"
 
-    unknown = service.register_candidate(candidate("unknown", "unknown.v1"))
+    unknown = service.register_candidate(candidate("unknown", "unknown.v1", artifact_root=tmp_path))
     with pytest.raises(PermissionError, match="rollback_target_not_verified"):
         service.decide(
             "crypto_macro.v1",
@@ -359,8 +379,8 @@ def test_concurrent_first_promotion_has_one_atomic_cas_winner(tmp_path: Path) ->
             return eligible
 
     service = ConcurrentPromotionService(database, clock=lambda: NOW)
-    baseline = service.register_candidate(candidate("concurrent-baseline", "baseline.v1"))
-    challenger = service.register_candidate(candidate("concurrent-challenger", "challenger.v1"))
+    baseline = service.register_candidate(candidate("concurrent-baseline", "baseline.v1", artifact_root=tmp_path))
+    challenger = service.register_candidate(candidate("concurrent-challenger", "challenger.v1", artifact_root=tmp_path))
     refs = [
         *add_stage(service, baseline, challenger, "replay", tag="concurrent"),
         *add_stage(service, baseline, challenger, "holdout", tag="concurrent"),
@@ -409,8 +429,8 @@ def test_promotion_transaction_rolls_back_pointer_candidate_and_audit(tmp_path: 
     database = Database(f"sqlite+pysqlite:///{tmp_path / 'promotion-rollback.sqlite3'}")
     database.create_all()
     service = EvolutionAssetService(database, clock=lambda: NOW)
-    baseline = service.register_candidate(candidate("failure-baseline", "baseline.v1"))
-    challenger = service.register_candidate(candidate("failure-challenger", "challenger.v1"))
+    baseline = service.register_candidate(candidate("failure-baseline", "baseline.v1", artifact_root=tmp_path))
+    challenger = service.register_candidate(candidate("failure-challenger", "challenger.v1", artifact_root=tmp_path))
     refs = [
         *add_stage(service, baseline, challenger, "replay", tag="failure"),
         *add_stage(service, baseline, challenger, "holdout", tag="failure"),
@@ -534,3 +554,33 @@ def test_experience_requires_traceable_evidence_outcome_and_evaluation(tmp_path:
                 }
             )
         )
+
+
+@pytest.mark.parametrize("legacy_scorer", ["evaluation.aggregate.v1", "evaluation.aggregate.v2"])
+def test_legacy_aggregate_cannot_be_used_for_new_promotion(tmp_path, legacy_scorer):
+    from packages.kernel.decision_hub_kernel.persistence.db import ExperimentResultRecord
+
+    database = Database(f"sqlite+pysqlite:///{tmp_path / 'legacy-count.sqlite3'}")
+    database.create_all()
+    service = EvolutionAssetService(database, clock=lambda: NOW)
+    baseline = service.register_candidate(candidate("baseline", "baseline.v1", artifact_root=tmp_path))
+    challenger = service.register_candidate(candidate("challenger", "challenger.v1", artifact_root=tmp_path))
+    refs = [
+        *add_stage(service, baseline, challenger, "replay"),
+        *add_stage(service, baseline, challenger, "holdout"),
+        *add_stage(service, baseline, challenger, "shadow", source_mode="prospective"),
+    ]
+    assert service.promotion_eligible(challenger.candidate_id, refs)
+    with database.session() as session:
+        session.get(ExperimentResultRecord, refs[0]).scorer_version = legacy_scorer
+    assert not service.promotion_eligible(challenger.candidate_id, refs)
+    with pytest.raises(PermissionError, match="promotion_gate_failed"):
+        service.decide("crypto_macro.v1", PromotionDecisionCreate(
+            request_id="legacy-must-not-promote", candidate_id=challenger.candidate_id,
+            owner="owner", decision="promote", reason="unit test", evaluation_refs=refs,
+            expected_generation=0,
+        ))
+    assert service.active_pointer("crypto_macro.v1") is None
+    with database.session() as session:
+        stored = session.get(ExperimentResultRecord, refs[0])
+        assert stored.scorer_version == legacy_scorer

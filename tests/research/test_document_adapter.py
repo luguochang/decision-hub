@@ -12,6 +12,7 @@ from packages.contracts_py.decision_hub_contracts import ResearchCapabilityQuery
 from packages.kernel.decision_hub_kernel.application.research_evidence import (
     ResearchCapabilityError,
 )
+from packages.provider_adapters.research.document_store import ContentAddressedDocumentStore
 from packages.provider_adapters.research.documents import (
     FetchedDocument,
     HttpDocumentResearchAdapter,
@@ -69,6 +70,42 @@ def test_web_fetch_uses_publisher_domain_as_source_identity() -> None:
     assert result.provider == "reuters.com"
     assert candidate.authority == "verified_web"
     assert candidate.received_at == RECEIVED
+
+
+def test_document_query_can_read_relevant_content_after_four_thousand_characters() -> None:
+    async def fetcher(url: str) -> FetchedDocument:
+        return FetchedDocument(
+            url,
+            ('Unrelated background paragraph.\n\n' * 250)
+            + 'Reaction function: inflation reversing would justify tighter policy.\n\n'
+            + 'This is a conditional statement, not a commitment to a rate hike.',
+            OBSERVED, RECEIVED,
+        )
+
+    adapter = HttpDocumentResearchAdapter(
+        capability_id="web.fetch", kind="web", authority="verified_web",
+        source_id="web-fetch", fetcher=fetcher,
+    )
+    query = _query("https://example.com/speech").model_copy(
+        update={"query": "reaction function conditional commitment inflation"}
+    )
+    result = asyncio.run(adapter.execute(query))
+    excerpt = result.evidence_candidates[0].excerpt
+    assert "inflation reversing" in excerpt
+    assert "not a commitment" in excerpt
+    assert len(excerpt) <= 4000
+
+
+def test_html_extraction_preserves_main_paragraphs_without_navigation() -> None:
+    response = httpx.Response(
+        200, headers={"content-type": "text/html"},
+        text='<html><nav>Unrelated navigation</nav><main><h1>Policy outlook</h1>'
+             '<p>First condition.</p><p>Second condition.</p></main></html>',
+        request=httpx.Request("GET", "https://example.com/speech"),
+    )
+    text = _extract_response_text(response)
+    assert "Unrelated navigation" not in text
+    assert "First condition.\n" in text
 
 
 def test_typed_official_fetch_keeps_declared_source_identity() -> None:
@@ -216,3 +253,35 @@ def test_registry_backed_web_fetch_uses_approved_authority_and_evidence_policy()
             )
         )
     assert raised.value.error_code == "research_source_not_approved"
+
+
+def test_excerpt_only_source_policy_does_not_archive_full_text(tmp_path: Path) -> None:
+    async def fetcher(url: str) -> FetchedDocument:
+        return FetchedDocument(
+            source_url=url,
+            text="BLS public release body.",
+            observed_at=OBSERVED,
+            received_at=RECEIVED,
+        )
+
+    adapter = HttpDocumentResearchAdapter(
+        capability_id="web.fetch",
+        kind="web",
+        authority="verified_web",
+        source_id="web-fetch",
+        fetcher=fetcher,
+        source_registry=ResearchSourceRegistry.from_pack(PACK_ROOT),
+        document_store=ContentAddressedDocumentStore(tmp_path / "documents"),
+    )
+    result = asyncio.run(
+        adapter.execute(
+            _query(
+                "https://www.bls.gov/news.release/cpi.htm",
+                requirement_id="event_identity",
+            )
+        )
+    )
+
+    candidate = result.evidence_candidates[0]
+    assert candidate.content_ref is None
+    assert list((tmp_path / "documents").iterdir()) == []

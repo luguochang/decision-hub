@@ -176,6 +176,10 @@ class _Adapter:
         return self.result
 
 
+class _DeadlineAwareAdapter(_Adapter):
+    uses_capability_deadline = True
+
+
 def _gateway(
     *,
     manifest: ResearchCapabilityManifest | None = None,
@@ -210,9 +214,7 @@ async def test_gateway_owns_live_observation_time_and_keeps_model_time_diagnosti
         enabled_capabilities=["official.macro"],
         clock=lambda: server_time,
     )
-    query = _query().model_copy(
-        update={"observed_at": CUTOFF + timedelta(days=365)}
-    )
+    query = _query().model_copy(update={"observed_at": CUTOFF + timedelta(days=365)})
 
     result = await gateway.execute(query)
 
@@ -221,6 +223,55 @@ async def test_gateway_owns_live_observation_time_and_keeps_model_time_diagnosti
     assert result.completed_at == server_time
     assert result.evidence_candidates[0].observed_at == server_time
     assert result.evidence_candidates[0].received_at == server_time
+
+
+@pytest.mark.asyncio
+async def test_gateway_clamps_router_deadline_to_run_remaining_with_finalize_reserve() -> None:
+    adapter = _DeadlineAwareAdapter()
+    server_time = NOW + timedelta(seconds=4)
+    original_deadline = server_time + timedelta(seconds=3)
+    manifest = _manifest().model_copy(update={"timeout_seconds": 10})
+    gateway = ResearchCapabilityGatewayService(
+        [manifest],
+        [adapter],
+        enabled_capabilities=[manifest.capability_id],
+        clock=lambda: server_time,
+    )
+
+    await gateway.execute(_query().model_copy(update={"deadline_at": original_deadline}))
+
+    # min(10s capability timeout, 3s Run remainder) minus the bounded 10%
+    # finalization reserve passed to deadline-aware routers.
+    assert adapter.last_query.deadline_at == server_time + timedelta(seconds=2.7)
+    assert adapter.last_query.deadline_at < original_deadline
+
+
+def test_durable_adapter_audit_accepts_only_gateway_owned_deadline_clamp() -> None:
+    from packages.workbench_adapters.durable_research_gateway import (
+        _effective_adapter_query_matches,
+    )
+
+    server_time = NOW + timedelta(seconds=4)
+    admitted = _query().model_copy(update={"deadline_at": server_time + timedelta(seconds=10)})
+    clamped = admitted.model_copy(
+        update={
+            "requested_observed_at": admitted.observed_at,
+            "observed_at": server_time,
+            "deadline_at": server_time + timedelta(seconds=9.5),
+        }
+    )
+
+    assert _effective_adapter_query_matches(admitted, clamped, server_time)
+    assert not _effective_adapter_query_matches(
+        admitted,
+        clamped.model_copy(update={"deadline_at": admitted.deadline_at + timedelta(seconds=1)}),
+        server_time,
+    )
+    assert not _effective_adapter_query_matches(
+        admitted,
+        clamped.model_copy(update={"symbols": ["ETH-USDT"]}),
+        server_time,
+    )
 
 
 @pytest.mark.asyncio
@@ -244,7 +295,7 @@ async def test_gateway_reports_server_owned_pit_failure_with_provenance() -> Non
     assert error.provenance().model_dump(mode="json") == {
         "error_code": "research_pit_violation",
         "origin": "pit",
-        "cause_code": None,
+        "cause_code": "live_request_after_cutoff",
         "capability_id": "official.macro",
         "tool_call_id": "capability-request-1",
         "retryable": False,
@@ -285,8 +336,9 @@ class _BlockingAdapter(_Adapter):
 
 
 @pytest.mark.asyncio
-async def test_gateway_preserves_provider_error_code_instead_of_mapping_everything_to_timeout(
-) -> None:
+async def test_gateway_preserves_provider_error_code_instead_of_mapping_everything_to_timeout() -> (
+    None
+):
     with pytest.raises(ResearchCapabilityError) as raised:
         await ResearchCapabilityGatewayService(
             [_manifest()],
@@ -303,8 +355,9 @@ async def test_gateway_preserves_provider_error_code_instead_of_mapping_everythi
 
 
 @pytest.mark.asyncio
-async def test_gateway_preserves_cancellation_instead_of_mapping_shutdown_to_provider_failure(
-) -> None:
+async def test_gateway_preserves_cancellation_instead_of_mapping_shutdown_to_provider_failure() -> (
+    None
+):
     with pytest.raises(asyncio.CancelledError):
         await ResearchCapabilityGatewayService(
             [_manifest()],
@@ -544,9 +597,7 @@ async def test_web_search_adapter_uses_conservative_publisher_identity_for_suffi
         cutoff_at=CUTOFF,
     )
 
-    assert {item.source_id for item in result.evidence_candidates} == {
-        "federalreserve.gov"
-    }
+    assert {item.source_id for item in result.evidence_candidates} == {"federalreserve.gov"}
     assert all(item.authority == "search_derived" for item in accepted)
     assert coverage.status == "insufficient"
     assert coverage.gaps[0].reason_code == "insufficient_sources"
@@ -621,6 +672,91 @@ async def test_okx_adapter_produces_typed_derivatives_candidates() -> None:
     assert len(result.evidence_candidates) == 4
     assert {item.authority for item in result.evidence_candidates} == {"exchange"}
     assert all(item.source_id == "okx-public" for item in result.evidence_candidates)
+
+
+@pytest.mark.asyncio
+async def test_okx_adapter_covers_spot_index_and_basis_fields_used_by_live_playbook() -> None:
+    async def fetch(url: str) -> Mapping[str, object]:
+        if "index-tickers" in url:
+            return {
+                "code": "0",
+                "data": [{"instId": "BTC-USDT", "idxPx": "79000", "ts": "1787976000000"}],
+            }
+        if "funding-rate" in url:
+            return {
+                "code": "0",
+                "data": [
+                    {"instId": "BTC-USDT-SWAP", "fundingRate": "0.0001", "ts": "1787976000000"}
+                ],
+            }
+        if "open-interest" in url:
+            return {
+                "code": "0",
+                "data": [{"instId": "BTC-USDT-SWAP", "oiCcy": "924.564", "ts": "1787976000000"}],
+            }
+        if "mark-price" in url:
+            return {
+                "code": "0",
+                "data": [{"instId": "BTC-USDT-SWAP", "markPx": "79062", "ts": "1787976000000"}],
+            }
+        return {
+            "code": "0",
+            "data": [
+                {
+                    "instId": "BTC-USDT",
+                    "last": "79043",
+                    "vol24h": "430.64519066",
+                    "ts": "1787976000000",
+                }
+            ],
+        }
+
+    query = _query(
+        capability_id="market.crypto_derivatives",
+        domains=[],
+        target_url=None,
+        symbols=["BTCUSDT"],
+        fields=[
+            "spot_price",
+            "spot_volume",
+            "funding_rate",
+            "open_interest",
+            "mark_price",
+            "index_price",
+            "basis",
+        ],
+    ).model_copy(update={"requirement_id": "crypto.derivatives"})
+
+    result = await OKXDerivativesResearchAdapter(fetcher=fetch).execute(query)
+
+    assert len(result.evidence_candidates) == 7
+    values = {
+        item.excerpt.split('"field":"', 1)[1].split('"', 1)[0]: item.excerpt
+        for item in result.evidence_candidates
+    }
+    assert '"field":"spot_price"' in values["spot_price"]
+    assert '"field":"spot_volume"' in values["spot_volume"]
+    assert any(
+        fact.field == "basis" and float(str(fact.value)) == pytest.approx((79062 - 79000) / 79000)
+        for fact in result.facts
+    )
+    assert {fact.field for fact in result.facts} >= {
+        "price",
+        "volume",
+        "funding_rate",
+        "open_interest",
+        "mark_price",
+        "index_price",
+        "basis",
+    }
+    assert {fact.metric_family for fact in result.facts if fact.field in {"price", "volume"}} == {
+        "crypto.spot"
+    }
+    assert {
+        fact.metric_family
+        for fact in result.facts
+        if fact.field in {"funding_rate", "open_interest", "mark_price", "index_price", "basis"}
+    } == {"crypto.derivatives"}
 
 
 @pytest.mark.asyncio
@@ -723,7 +859,7 @@ async def _never_called() -> Mapping[str, object]:
 
 
 @pytest.mark.asyncio
-async def test_fred_adapter_selects_latest_pit_eligible_row() -> None:
+async def test_fred_adapter_selects_latest_observation_without_inventing_publication() -> None:
     async def fetch(_url: str) -> str:
         return "DATE,DGS2\n2026-08-27,4.12\n2026-08-28,4.20\n2026-08-30,9.99\n"
 
@@ -733,12 +869,14 @@ async def test_fred_adapter_selects_latest_pit_eligible_row() -> None:
         target_url=None,
         symbols=["DGS2"],
     )
-    result = await FredSeriesResearchAdapter(fetcher=fetch).execute(query)
+    result = await FredSeriesResearchAdapter(fetcher=fetch, clock=lambda: NOW).execute(query)
 
     candidate = result.evidence_candidates[0]
     assert '"value":"4.20"' in candidate.excerpt
     assert "9.99" not in candidate.excerpt
-    assert candidate.published_at == datetime(2026, 8, 28, tzinfo=UTC)
+    assert candidate.published_at is None
+    assert result.facts[0].attributes["observation_date"] == "2026-08-28"
+    assert result.facts[0].attributes["minute_forward_eligible"] is False
 
 
 @pytest.mark.asyncio

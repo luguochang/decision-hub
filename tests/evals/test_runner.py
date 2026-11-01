@@ -95,9 +95,9 @@ def test_runner_keeps_candidates_in_independent_databases(tmp_path: Path) -> Non
     assert len(result.report_paths) == 2
     assert (tmp_path / experiment.experiment_id / "baseline.sqlite3").exists()
     assert (tmp_path / experiment.experiment_id / "candidate.sqlite3").exists()
-    assert result.results[0].sample_count == 3
+    assert result.results[0].sample_count == 1
     assert result.results[0].raw_artifact_refs
-    assert result.results[0].scorer_version == "evaluation.aggregate.v1"
+    assert result.results[0].scorer_version == "evaluation.aggregate.v3"
 
 
 @pytest.mark.parametrize("leakage", ["tampered_hash", "future_label", "wrong_split"])
@@ -209,3 +209,38 @@ def test_runner_rejects_runtime_set_or_missing_fixture(tmp_path: Path) -> None:
         assert str(exc) == "evaluation_fixture_required"
     else:  # pragma: no cover
         raise AssertionError("runner accepted an empty fixture set")
+
+
+def test_horizons_and_failed_reports_do_not_inflate_independent_sample_count():
+    path = Path("fixtures/replay/powell-higher-for-longer.json")
+    dataset = evaluation_dataset(path)
+    reports = [
+        {"evaluation_count": 3, "event_family": "powell", "status": "completed"},
+        {"evaluation_count": 0, "event_family": "powell", "status": "failed"},
+    ]
+    result = EvaluationRunner._aggregate(evaluation_experiment(dataset), dataset,
+                                         "candidate", reports, [Path("unit-report.json")])
+    assert result.sample_count == 1
+    assert result.event_family_counts == {"powell": 1}
+    assert result.safety_violations == 1
+
+
+def test_runner_rejects_renamed_duplicate_before_executing(tmp_path):
+    path = Path("fixtures/replay/powell-higher-for-longer.json")
+    duplicate = tmp_path / "renamed.json"
+    payload = json.loads(path.read_text())
+    payload["fixture_id"] = "renamed"
+    payload["observation"]["source_id"] = "renamed-source"
+    duplicate.write_text(json.dumps(payload), encoding="utf-8")
+    dataset = evaluation_dataset(path).model_copy(update={
+        "fixture_refs": [str(path), str(duplicate)],
+        "fixture_hashes": {str(p): hashlib.sha256(p.read_bytes()).hexdigest()
+                           for p in (path, duplicate)},
+        "event_family_counts": {"powell": 2},
+    })
+    with pytest.raises(ValueError, match="evaluation_duplicate_sample"):
+        asyncio.run(EvaluationRunner(tmp_path / "output").run(
+            evaluation_experiment(dataset), dataset, (path, duplicate),
+            {"baseline": FakeAgentRuntime(), "candidate": FakeAgentRuntime()},
+        ))
+    assert not (tmp_path / "output").exists()

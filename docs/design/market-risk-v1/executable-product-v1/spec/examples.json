@@ -1,0 +1,63 @@
+{
+  "data_kind": "synthetic_contract_fixture",
+  "not_market_advice": true,
+  "plan": {
+    "schema_version": "decision-action.spec.v1",
+    "plan_id": "fixture_plan_btc",
+    "revision": 1,
+    "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m",
+    "horizon_seconds": 86400,
+    "as_of": "2026-01-01T08:00:00Z",
+    "valid_until": "2026-01-02T08:00:00Z",
+    "action": "enter_long",
+    "position_context": "flat",
+    "advice_qualification": "research_trial",
+    "probability": {"kind": "subjective", "target": "return_positive", "value": 0.6, "calibration_ref": null},
+    "condition": {"op": "compare", "feature": "fixture.close", "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m", "unit": "USDT/BTC", "cmp": "gt", "threshold": "100", "max_age_seconds": 180},
+    "evidence_refs": ["fixture:price:1", "fixture:counter:1"],
+    "policy_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "facts": {
+    "fixture.close": {"scope_id": "crypto:spot:okx:BTC-USDT:trade:1m", "unit": "USDT/BTC", "value": "101", "quality": "accepted", "observed_at": "2026-01-01T07:59:00Z", "known_at": "2026-01-01T07:59:02Z"}
+  },
+  "quotes": [
+    {"ref": "fixture:old_low", "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m", "observed_at": "2026-01-01T07:59:59Z", "known_at": "2026-01-01T08:00:00Z", "bid": "89", "ask": "90", "quality": "accepted"},
+    {"ref": "fixture:first_eligible", "scope_id": "crypto:spot:okx:BTC-USDT:trade:1m", "observed_at": "2026-01-01T08:00:03Z", "known_at": "2026-01-01T08:00:04Z", "bid": "100", "ask": "101", "quality": "accepted"}
+  ],
+  "cases": [
+    {"id": "C01", "kind": "plan", "patch": {}, "expected": "valid"},
+    {"id": "C02", "kind": "plan", "patch": {"probability.kind": "unavailable", "probability.value": null}, "expected": "valid"},
+    {"id": "C03", "kind": "plan", "patch": {"probability.kind": "unavailable", "probability.value": 0.5}, "expected": "schema_error"},
+    {"id": "C04", "kind": "plan", "patch": {"probability.kind": "calibrated"}, "expected": "schema_error"},
+    {"id": "C05", "kind": "plan", "patch": {"action": "reduce_long"}, "expected": "POSITION_CONTEXT_REQUIRED"},
+    {"id": "C06", "kind": "plan", "patch": {"valid_until": "2026-01-01T08:00:00Z"}, "expected": "INVALID_VALIDITY_WINDOW"},
+    {"id": "C07", "kind": "evaluate", "patch": {}, "expected": "true"},
+    {"id": "C08", "kind": "evaluate", "patch": {"value": "100"}, "expected": "false"},
+    {"id": "C09", "kind": "evaluate", "patch": {"known_at": "2026-01-01T08:00:01Z"}, "expected": "unknown"},
+    {"id": "C10", "kind": "evaluate", "patch": {"observed_at": "2026-01-01T07:56:59Z"}, "expected": "unknown"},
+    {"id": "C11", "kind": "evaluate", "patch": {"scope_id": "gold:spot:XAU-USD"}, "expected": "FEATURE_BINDING_MISMATCH"},
+    {"id": "C12", "kind": "evaluate", "patch": {"unit": "percent"}, "expected": "FEATURE_BINDING_MISMATCH"},
+    {"id": "C13", "kind": "evaluate", "patch": {"quality": "unverified"}, "expected": "unknown"},
+    {"id": "C14", "kind": "logic", "op": "all", "values": ["false", "unknown"], "expected": "false"},
+    {"id": "C15", "kind": "logic", "op": "all", "values": ["true", "unknown"], "expected": "unknown"},
+    {"id": "C16", "kind": "logic", "op": "any", "values": ["true", "unknown"], "expected": "true"},
+    {"id": "C17", "kind": "streak", "previous": 1, "last": "2026-01-01T08:00:00Z", "bar": "2026-01-01T08:00:00Z", "truth": "true", "expected": [1, false]},
+    {"id": "C18", "kind": "streak", "previous": 1, "last": "2026-01-01T08:00:00Z", "bar": "2026-01-01T08:01:00Z", "truth": "true", "expected": [2, true]},
+    {"id": "C19", "kind": "streak", "previous": 1, "last": "2026-01-01T08:00:00Z", "bar": "2026-01-01T08:02:00Z", "truth": "true", "expected": [1, false]},
+    {"id": "C20", "kind": "streak", "previous": 1, "last": "2026-01-01T08:00:00Z", "bar": "2026-01-01T08:01:00Z", "truth": "unknown", "expected": [0, false]},
+    {"id": "C21", "kind": "transition", "state": "expired", "event": "trigger", "expected": "ILLEGAL_PLAN_TRANSITION"},
+    {"id": "C22", "kind": "transition", "state": "armed", "event": "trigger", "expected": "triggered"},
+    {"id": "C23", "kind": "expiry", "expected": "expire"},
+    {"id": "C24", "kind": "quote", "expected": {"quote_ref": "fixture:first_eligible", "price": "101"}},
+    {"id": "C25", "kind": "ambiguous_bar", "expected": "ambiguous"},
+    {"id": "C26", "kind": "ev", "expected": "-0.25"},
+    {"id": "C27", "kind": "net_return", "expected": "-0.001998"},
+    {"id": "C28", "kind": "persistence", "expected": "idempotent_atomic_immutable"},
+    {"id": "C29", "kind": "logic", "op": "any", "values": ["false", "unknown"], "expected": "unknown"},
+    {"id": "C30", "kind": "plan", "patch": {"action": "enter_short"}, "expected": "schema_error"},
+    {"id": "C31", "kind": "transition", "state": "triggered", "event": "expire", "expected": "completed"},
+    {"id": "C32", "kind": "complexity", "expected": "CONDITION_COMPLEXITY_EXCEEDED"},
+    {"id": "C33", "kind": "blocked", "expected": null},
+    {"id": "C34", "kind": "nonfinite_probability", "expected": "NONFINITE_NUMBER"}
+  ]
+}

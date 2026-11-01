@@ -1,0 +1,30 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://decision-hub.local/contracts/source-acquisition.schema.json
+title: SourceAcquisition
+type: object
+additionalProperties: false
+required: [schema_version, receipt_id, source_id, url, access_mode, status, observed_at, status_code, artifacts, error_code]
+properties:
+  schema_version: {type: string, const: acquisition-receipt.v1}
+  receipt_id: {type: string, minLength: 1}
+  source_id: {type: string, minLength: 1}
+  url: {type: string, format: uri}
+  access_mode: {type: string, enum: [http, playwright, screenshot_vision]}
+  status: {type: string, enum: [succeeded, failed, partial]}
+  request_started_at: {type: [string, 'null'], format: date-time, default: null}
+  request_completed_at: {type: [string, 'null'], format: date-time, default: null}
+  observed_at: {type: [string, 'null'], format: date-time}
+  received_at: {type: [string, 'null'], format: date-time, default: null}
+  status_code: {type: [integer, 'null'], minimum: 100, maximum: 599}
+  artifacts:
+    type: array
+    maxItems: 20
+    items:
+      type: object
+      additionalProperties: false
+      required: [kind, path, content_hash]
+      properties:
+        kind: {type: string, enum: [html, dom, network, screenshot, trace, ocr, json, download]}
+        path: {type: string, minLength: 1}
+        content_hash: {type: string, pattern: '^[a-f0-9]{64}$'}
+  error_code: {type: [string, 'null'], maxLength: 200}

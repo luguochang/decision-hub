@@ -18,7 +18,13 @@ from packages.contracts_py.decision_hub_contracts import (
     ResearchStopReason,
     ResearchTask,
 )
-from packages.evals.research_comparison import ResearchComparisonRunner
+from packages.evals.research_comparison import (
+    ResearchComparisonRunner,
+    _manual_rework_flags,
+    _request_for,
+    evidence_for_scoring,
+    facts_for_scoring,
+)
 from packages.evals.research_dataset import load_research_evaluation_dataset
 from packages.kernel.decision_hub_kernel.application.research_evidence import (
     research_evidence_instance_id,
@@ -69,6 +75,10 @@ class CandidateRuntimeFixture:
                 ),
                 "tool_call_id": f"tool:{request.request_id}",
                 "research_session_id": session_id,
+                # This fixture models evidence already admitted by the Kernel;
+                # raw replay candidates are tested separately as unadmitted.
+                "quality": "accepted",
+                "freshness_status": "fresh",
             }
         )
         coverage = assess_evidence_sufficiency(
@@ -209,6 +219,110 @@ _DATASET = load_research_evaluation_dataset(DATASET)
 _DATASET_BY_ID = {case.case_id: case for case in _DATASET.cases}
 
 
+def test_scoring_keeps_typed_expectation_baseline_without_freshening_old_snapshots() -> None:
+    dataset = load_research_evaluation_dataset(
+        Path("packs/crypto_macro/evaluations/r2r_dev_core_v2/manifest.json")
+    )
+    case = next(item for item in dataset.cases if item.case_id == "fomc_cut_25bp_20241218")
+    fixture = next(
+        item
+        for item in case.archived_capability_fixtures
+        if item.requirement_id == "expectation_pricing"
+    )
+    template = fixture.evidence_candidates[0]
+    baseline_id = f"{template.evidence_id}:baseline"
+    current_id = f"{template.evidence_id}:t-5m"
+    baseline_at = case.cutoff_at - timedelta(hours=24)
+    current_at = case.cutoff_at - timedelta(minutes=5)
+    baseline = template.model_copy(
+        update={
+            "evidence_id": baseline_id,
+            "published_at": baseline_at,
+            "observed_at": baseline_at,
+            "received_at": case.cutoff_at,
+            "quality": "accepted",
+        }
+    )
+    current = template.model_copy(
+        update={
+            "evidence_id": current_id,
+            "published_at": current_at,
+            "observed_at": current_at,
+            "received_at": case.cutoff_at,
+            "quality": "accepted",
+        }
+    )
+    facts = [
+        fact.model_copy(
+            update={
+                "evidence_id": baseline_id if fact.event_offset == "baseline" else current_id,
+                "published_at": baseline_at
+                if fact.event_offset == "baseline"
+                else current_at,
+                "observed_at": baseline_at
+                if fact.event_offset == "baseline"
+                else current_at,
+                "received_at": case.cutoff_at,
+                "quality": "accepted",
+            }
+        )
+        for fact in (fixture.facts or [])
+    ]
+    expectation = next(
+        item
+        for item in case.evidence_requirements
+        if item.requirement_id == "expectation_pricing"
+    )
+
+    scored = evidence_for_scoring(case, [baseline, current], facts)
+    assert {item.evidence_id: item.quality for item in scored} == {
+        baseline_id: "accepted",
+        current_id: "accepted",
+    }
+    coverage = assess_evidence_sufficiency(
+        [expectation],
+        scored,
+        cutoff_at=case.cutoff_at,
+        facts=facts_for_scoring(facts, scored),
+    )
+    assert coverage.status == "sufficient"
+
+    unlabeled = evidence_for_scoring(case, [baseline])
+    assert unlabeled[0].quality == "stale"
+
+
+@pytest.mark.asyncio
+async def test_dsh_quality_requires_a_trusted_independent_review_receipt() -> None:
+    case = _DATASET.cases[0]
+    request = _request_for(case, "review-gate", "candidate-test", BUDGET)
+    result = await CandidateRuntimeFixture().execute(request)
+    result = result.model_copy(
+        update={
+            "runtime_id": "dsh",
+            "status": "completed",
+            "reviews": [],
+            "stop_reason": ResearchStopReason(
+                code="sufficient",
+                detail="All required evidence is available.",
+                bounded=False,
+                remaining_hard_gaps=[],
+            ),
+        }
+    )
+
+    flags = _manual_rework_flags(
+        result=result,
+        status="completed",
+        failure_code=None,
+        hard_gap_count=0,
+        pit_violations=0,
+        citation_support_ratio=1.0,
+        horizon_distinct=True,
+    )
+
+    assert flags == ["independent_review_receipt"]
+
+
 @pytest.mark.asyncio
 async def test_runner_writes_all_raw_reports_before_aggregate(tmp_path: Path) -> None:
     comparison = await ResearchComparisonRunner(
@@ -228,9 +342,19 @@ async def test_runner_writes_all_raw_reports_before_aggregate(tmp_path: Path) ->
     assert summaries["candidate-test"].hard_coverage_mean > (
         summaries["fixed-baseline"].hard_coverage_mean
     )
-    assert summaries["fixed-baseline"].horizon_distinct_count == 0
+    # v3 accepts its three different time boundaries. This does not certify
+    # independent causal views or turn its degraded research into usable work.
+    assert summaries["fixed-baseline"].horizon_distinct_count == 12
     assert summaries["candidate-test"].horizon_distinct_count == 12
-    assert comparison.conclusion == "pending"
+    assert summaries["candidate-test"].quality_success_count == 0
+    assert summaries["candidate-test"].manual_rework_count == 12
+    assert all(
+        not item.quality_success
+        and item.manual_rework_flags
+        for item in comparison.case_reports
+        if item.runtime_id == "candidate-test"
+    )
+    assert comparison.conclusion == "retain_baseline"
 
 
 @pytest.mark.asyncio

@@ -2,6 +2,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Callable
+from datetime import datetime
+
+from sqlalchemy.orm import Session
 
 from packages.contracts_py.decision_hub_contracts.models import TextEnvelope
 from packages.kernel.decision_hub_kernel.persistence.db import (
@@ -14,8 +18,9 @@ from packages.kernel.decision_hub_kernel.persistence.db import (
 
 
 class SnapshotService:
-    def __init__(self, database: Database) -> None:
+    def __init__(self, database: Database, *, clock: Callable[[], datetime] = utcnow) -> None:
         self.database = database
+        self.clock = clock
 
     def freeze(self, event_id: str, envelope: TextEnvelope) -> tuple[str, list[str]]:
         if envelope.observed_at > envelope.received_at or (
@@ -29,9 +34,7 @@ class SnapshotService:
                 source_id=envelope.source_id,
                 source_type=envelope.source_type.value,
                 observed_at=envelope.observed_at.isoformat(),
-                published_at=(
-                    envelope.published_at.isoformat() if envelope.published_at else None
-                ),
+                published_at=(envelope.published_at.isoformat() if envelope.published_at else None),
                 received_at=envelope.received_at.isoformat(),
                 cutoff_at=cutoff.isoformat(),
                 content_hash=envelope.content_hash,
@@ -49,71 +52,84 @@ class SnapshotService:
                     evidence_json=json.dumps(evidence, ensure_ascii=False),
                     snapshot_type="trigger",
                     generation=1,
-                    created_at=utcnow(),
+                    created_at=self.clock(),
                 )
             )
         return snapshot_id, [str(evidence[0]["evidence_id"])]
 
     def freeze_for_run(self, run_id: str, event_id: str) -> tuple[str, list[str]]:
         with self.database.session() as session:
-            run = session.get(RunRecord, run_id)
-            if not run:
-                raise KeyError(run_id)
-            if run.snapshot_id:
-                snapshot = session.get(SnapshotRecord, run.snapshot_id)
-                if not snapshot:
-                    raise KeyError(run.snapshot_id)
-                evidence = json.loads(snapshot.evidence_json)
-                return snapshot.snapshot_id, [str(item["evidence_id"]) for item in evidence]
-            observation = (
-                session.query(ObservationRecord)
-                .filter_by(event_id=event_id)
-                .order_by(ObservationRecord.received_at.asc())
-                .first()
+            return self.freeze_for_run_in_session(session, run_id, event_id)
+
+    def freeze_for_run_in_session(
+        self, session: Session, run_id: str, event_id: str
+    ) -> tuple[str, list[str]]:
+        """Borrow the caller's transaction; never begin, commit or close it."""
+        run = session.get(RunRecord, run_id, populate_existing=True)
+        if not run:
+            raise KeyError(run_id)
+        if run.snapshot_id:
+            snapshot = session.get(SnapshotRecord, run.snapshot_id)
+            if not snapshot:
+                raise KeyError(run.snapshot_id)
+            evidence = json.loads(snapshot.evidence_json)
+            return snapshot.snapshot_id, [str(item["evidence_id"]) for item in evidence]
+        observation = (
+            session.query(ObservationRecord)
+            .filter_by(event_id=event_id)
+            .order_by(ObservationRecord.received_at.asc())
+            .first()
+        )
+        if not observation:
+            raise KeyError(event_id)
+        if observation.observed_at > observation.received_at or (
+            observation.published_at is not None
+            and observation.published_at > observation.received_at
+        ):
+            raise ValueError("pit_future_information")
+        evidence = [
+            _evidence_item(
+                text=observation.text,
+                source_id=observation.source_id,
+                source_type=observation.source_type,
+                observed_at=observation.observed_at.isoformat(),
+                published_at=(
+                    observation.published_at.isoformat() if observation.published_at else None
+                ),
+                received_at=observation.received_at.isoformat(),
+                cutoff_at=observation.received_at.isoformat(),
+                content_hash=observation.content_hash,
             )
-            if not observation:
-                raise KeyError(event_id)
-            if observation.observed_at > observation.received_at or (
-                observation.published_at is not None
-                and observation.published_at > observation.received_at
-            ):
-                raise ValueError("pit_future_information")
-            evidence = [
-                _evidence_item(
-                    text=observation.text,
-                    source_id=observation.source_id,
-                    source_type=observation.source_type,
-                    observed_at=observation.observed_at.isoformat(),
-                    published_at=(
-                        observation.published_at.isoformat()
-                        if observation.published_at
-                        else None
-                    ),
-                    received_at=observation.received_at.isoformat(),
-                    cutoff_at=observation.received_at.isoformat(),
-                    content_hash=observation.content_hash,
-                )
-            ]
-            snapshot_hash = hashlib.sha256(
-                json.dumps(evidence, sort_keys=True).encode()
-            ).hexdigest()
-            snapshot_id = _run_snapshot_id(run_id, snapshot_hash)
-            session.add(
-                SnapshotRecord(
-                    snapshot_id=snapshot_id,
-                    event_id=event_id,
-                    cutoff_at=observation.received_at,
-                    snapshot_hash=snapshot_hash,
-                    evidence_json=json.dumps(evidence, ensure_ascii=False),
-                    snapshot_type="trigger",
-                    run_id=run_id,
-                    generation=1,
-                    created_at=utcnow(),
-                )
+        ]
+        snapshot_hash = hashlib.sha256(json.dumps(evidence, sort_keys=True).encode()).hexdigest()
+        snapshot_id = _run_snapshot_id(run_id, snapshot_hash)
+        session.add(
+            SnapshotRecord(
+                snapshot_id=snapshot_id,
+                event_id=event_id,
+                cutoff_at=observation.received_at,
+                snapshot_hash=snapshot_hash,
+                evidence_json=json.dumps(evidence, ensure_ascii=False),
+                snapshot_type="trigger",
+                run_id=run_id,
+                generation=1,
+                created_at=self.clock(),
             )
-            run.snapshot_id = snapshot_id
-            run.updated_at = utcnow()
-            return snapshot_id, [str(evidence[0]["evidence_id"])]
+        )
+        run.snapshot_id = snapshot_id
+        run.updated_at = self.clock()
+        return snapshot_id, [str(evidence[0]["evidence_id"])]
+
+    @staticmethod
+    def read_evidence_in_session(session: Session, snapshot_id: str) -> list[dict[str, object]]:
+        """Use the same shape check as the existing database evidence reader."""
+        snapshot = session.get(SnapshotRecord, snapshot_id, populate_existing=True)
+        if snapshot is None:
+            raise KeyError(snapshot_id)
+        payload = json.loads(snapshot.evidence_json)
+        if not isinstance(payload, list) or not all(isinstance(item, dict) for item in payload):
+            raise ValueError("snapshot evidence is invalid")
+        return payload
 
 
 def _evidence_item(

@@ -1,0 +1,361 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: harness_comparison.schema.yaml
+title: Harness comparison contracts
+$defs:
+  harness_comparison_start:
+    type: object
+    additionalProperties: false
+    properties:
+      catalog_ref: &id001
+        type: string
+        minLength: 1
+        maxLength: 256
+      candidate_ref: *id001
+      request_id: *id001
+    required:
+    - catalog_ref
+    - candidate_ref
+    - request_id
+  harness_comparison_cancel:
+    type: object
+    additionalProperties: false
+    properties:
+      request_id: *id001
+    required:
+    - request_id
+  harness_owner_session_pair:
+    type: object
+    additionalProperties: false
+    properties:
+      pairing_token:
+        type: string
+        minLength: 32
+        maxLength: 2048
+    required:
+    - pairing_token
+  harness_owner_session_reply:
+    type: object
+    additionalProperties: false
+    properties:
+      csrf_token: *id001
+      expires_at: &id002
+        type: string
+        format: date-time
+    required:
+    - csrf_token
+    - expires_at
+  harness_comparison_source:
+    type: object
+    additionalProperties: false
+    properties:
+      catalog_ref: *id001
+      source_run_id: *id001
+      event_title:
+        type: string
+        maxLength: 4000
+      pit_cutoff_at: *id002
+      source_mode:
+        const: frozen_run
+      evidence_count:
+        type: integer
+        minimum: 0
+        maximum: 512
+      fact_count:
+        type: integer
+        minimum: 0
+        maximum: 512
+    required:
+    - catalog_ref
+    - source_run_id
+    - event_title
+    - pit_cutoff_at
+    - source_mode
+    - evidence_count
+    - fact_count
+  harness_comparison_method:
+    type: object
+    additionalProperties: false
+    properties:
+      candidate_ref: *id001
+      label: *id001
+      artifact_sha256: &id003
+        type: string
+        pattern: ^[a-f0-9]{64}$
+    required:
+    - candidate_ref
+    - label
+    - artifact_sha256
+  harness_comparison_budget:
+    type: object
+    additionalProperties: false
+    properties:
+      per_arm_max_cost_usd:
+        type: number
+        minimum: 0
+      total_max_cost_usd:
+        type: number
+        minimum: 0
+      total_deadline_seconds:
+        type: integer
+        minimum: 1
+        maximum: 1800
+    required:
+    - per_arm_max_cost_usd
+    - total_max_cost_usd
+    - total_deadline_seconds
+  harness_comparison_trace:
+    type: object
+    additionalProperties: false
+    properties:
+      trace_id: *id001
+      event_type: *id001
+      status: *id001
+      summary:
+        type: string
+        maxLength: 8000
+      created_at: *id002
+    required:
+    - trace_id
+    - event_type
+    - status
+    - summary
+    - created_at
+  harness_comparison_arm:
+    type: object
+    additionalProperties: false
+    properties:
+      arm:
+        enum:
+        - baseline
+        - candidate
+      label: *id001
+      artifact_sha256: *id003
+      run_id: *id001
+      status: *id001
+      error_code:
+        anyOf:
+        - *id001
+        - type: 'null'
+      result_json:
+        anyOf:
+        - type: string
+          maxLength: 2000000
+        - type: 'null'
+      result_payload_sha256:
+        anyOf:
+        - *id003
+        - type: 'null'
+      proof_status:
+        enum:
+        - pending
+        - verified
+        - blocked
+      proof_reason:
+        anyOf:
+        - *id001
+        - type: 'null'
+      method_payload_sha256:
+        anyOf:
+        - *id003
+        - type: 'null'
+      consumption_payload_sha256:
+        anyOf:
+        - *id003
+        - type: 'null'
+      root_witness_sha256:
+        anyOf:
+        - *id003
+        - type: 'null'
+      traces:
+        type: array
+        items:
+          $ref: '#/$defs/harness_comparison_trace'
+        maxItems: 100
+    required:
+    - arm
+    - label
+    - artifact_sha256
+    - run_id
+    - status
+    - error_code
+    - result_json
+    - result_payload_sha256
+    - proof_status
+    - proof_reason
+    - method_payload_sha256
+    - consumption_payload_sha256
+    - root_witness_sha256
+    - traces
+  harness_frozen_original_row:
+    type: object
+    additionalProperties: false
+    properties:
+      table_name:
+        enum:
+        - run_role_outputs
+        - snapshots
+        - research_evidence
+        - research_facts
+        - run_input_refs
+        - fact_versions
+        - evidence_parsed_links
+        - parsed_versions
+        - raw_captures
+        - source_acquisition_receipts
+        - product_commands
+      primary_key: *id001
+      payload_json:
+        type: string
+        maxLength: 1000000
+      payload_sha256: *id003
+    required:
+    - table_name
+    - primary_key
+    - payload_json
+    - payload_sha256
+  harness_frozen_context_graph_ref:
+    type: object
+    additionalProperties: false
+    properties:
+      output_id: *id001
+      role: *id001
+      schema_version: *id001
+      payload_sha256: *id003
+      created_at: *id002
+    required:
+    - output_id
+    - role
+    - schema_version
+    - payload_sha256
+    - created_at
+  harness_frozen_run_case_v1:
+    type: object
+    additionalProperties: false
+    properties:
+      schema_version:
+        const: harness-frozen-run-case.v1
+      source_mode:
+        const: frozen_run
+      catalog_ref: *id001
+      source_run_id: *id001
+      source_event_id: *id001
+      source_study_id: *id001
+      pit_cutoff_at: *id002
+      original_pack_json:
+        type: string
+        maxLength: 1000000
+      original_task_json:
+        type: string
+        maxLength: 1000000
+      original_compiled_json:
+        type: string
+        maxLength: 1000000
+      original_rows:
+        type: array
+        items:
+          $ref: '#/$defs/harness_frozen_original_row'
+        maxItems: 4096
+      world_sha256: *id003
+      source_collection_sha256: *id003
+      original_owner_identity: *id001
+      native_execution_proof:
+        const: unverified
+      eligible_for_deployment:
+        const: false
+      original_context_graph_refs:
+        type: array
+        items:
+          $ref: '#/$defs/harness_frozen_context_graph_ref'
+        maxItems: 256
+    required:
+    - schema_version
+    - source_mode
+    - catalog_ref
+    - source_run_id
+    - source_event_id
+    - source_study_id
+    - pit_cutoff_at
+    - original_pack_json
+    - original_task_json
+    - original_compiled_json
+    - original_rows
+    - world_sha256
+    - source_collection_sha256
+    - original_owner_identity
+    - native_execution_proof
+    - eligible_for_deployment
+    - original_context_graph_refs
+  harness_comparison_catalog:
+    type: object
+    additionalProperties: false
+    properties:
+      schema_version:
+        const: harness-comparison-catalog.v1
+      available:
+        type: boolean
+      blocked_reason:
+        anyOf:
+        - *id001
+        - type: 'null'
+      owner_authenticated:
+        type: boolean
+      sources:
+        type: array
+        items:
+          $ref: '#/$defs/harness_comparison_source'
+        maxItems: 8
+      methods:
+        type: array
+        items:
+          $ref: '#/$defs/harness_comparison_method'
+        maxItems: 8
+      budget:
+        $ref: '#/$defs/harness_comparison_budget'
+      eligible_for_deployment:
+        const: false
+    required:
+    - schema_version
+    - available
+    - blocked_reason
+    - owner_authenticated
+    - sources
+    - methods
+    - budget
+    - eligible_for_deployment
+  harness_comparison_view:
+    type: object
+    additionalProperties: false
+    properties:
+      schema_version:
+        const: harness-comparison-view.v1
+      assignment_id: *id001
+      request_id: *id001
+      catalog_ref: *id001
+      candidate_ref: *id001
+      source_run_id: *id001
+      source_mode:
+        const: frozen_run
+      pit_cutoff_at: *id002
+      created_at: *id002
+      baseline:
+        $ref: '#/$defs/harness_comparison_arm'
+      candidate:
+        $ref: '#/$defs/harness_comparison_arm'
+      eligible_for_deployment:
+        const: false
+      evolution_pointer_consumed:
+        const: false
+    required:
+    - schema_version
+    - assignment_id
+    - request_id
+    - catalog_ref
+    - candidate_ref
+    - source_run_id
+    - source_mode
+    - pit_cutoff_at
+    - created_at
+    - baseline
+    - candidate
+    - eligible_for_deployment
+    - evolution_pointer_consumed

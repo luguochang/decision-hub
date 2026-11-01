@@ -10,6 +10,7 @@ class DecisionExecutionRequest:
     run_id: str
     event_id: str
     deadline_at: datetime
+    lease_owner: str | None = None
 
 
 class DecisionWorkflowExecutor(Protocol):

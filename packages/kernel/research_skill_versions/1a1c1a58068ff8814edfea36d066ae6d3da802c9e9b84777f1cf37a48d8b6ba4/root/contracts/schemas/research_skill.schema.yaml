@@ -1,0 +1,2507 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decision-hub.local/contracts/research_skill.schema.json",
+  "title": "ResearchSkillContractsV1",
+  "$defs": {
+    "research_skill_list_item_v1": {
+      "title": "ResearchSkillListItemV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "use_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "skill_version_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "version_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "package_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "workflow_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "compiled_plan_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "use_id",
+        "skill_version_id",
+        "version_hash",
+        "package_hash",
+        "workflow_hash",
+        "compiled_plan_hash"
+      ]
+    },
+    "research_skill_list_response_v1": {
+      "title": "ResearchSkillListResponseV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-skill-list.v1"
+        },
+        "status": {
+          "const": "selected"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/research_skill_list_item_v1"
+          },
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "stage_receipts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/research_skill_stage_receipt_v1"
+          },
+          "minItems": 0,
+          "maxItems": 8
+        }
+      },
+      "required": [
+        "schema_version",
+        "status",
+        "items",
+        "stage_receipts"
+      ]
+    },
+    "research_skill_load_response_v1": {
+      "title": "ResearchSkillLoadResponseV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-skill-load.v1"
+        },
+        "status": {
+          "const": "delivered"
+        },
+        "use_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "skill_version_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "version_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "package_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "workflow_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "compiled_plan_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "method_body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 262144
+        },
+        "method_body_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "schema_version",
+        "status",
+        "use_id",
+        "skill_version_id",
+        "version_hash",
+        "package_hash",
+        "workflow_hash",
+        "compiled_plan_hash",
+        "method_body",
+        "method_body_hash"
+      ]
+    },
+    "research_skill_resource_v1": {
+      "title": "ResearchSkillResourceV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240,
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*[\\\\:]).+\\.(?:md|json)$"
+        },
+        "body_ref": {
+          "type": "string",
+          "pattern": "^raw://sha256/[a-f0-9]{64}$"
+        },
+        "body_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        }
+      },
+      "required": [
+        "path",
+        "body_ref",
+        "body_hash",
+        "size_bytes"
+      ]
+    },
+    "research_skill_schema_binding_v1": {
+      "title": "ResearchSkillSchemaBindingV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contract_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "resource_path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "schema_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "contract_ref",
+        "resource_path",
+        "schema_hash"
+      ]
+    },
+    "research_skill_component_version_ref_v1": {
+      "title": "ResearchSkillComponentVersionRefV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "version_id",
+        "payload_hash"
+      ]
+    },
+    "research_skill_component_audit_ref_v1": {
+      "title": "ResearchSkillComponentAuditRefV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "audit_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "audit_id",
+        "payload_hash"
+      ]
+    },
+    "research_skill_gateway_reservation_ref_v1": {
+      "title": "ResearchSkillGatewayReservationRefV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "research_session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "capability_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "query_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "result_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "run_id",
+        "request_id",
+        "research_session_id",
+        "generation",
+        "capability_id",
+        "query_hash",
+        "result_hash"
+      ]
+    },
+    "research_skill_capability_surface_v1": {
+      "title": "ResearchSkillCapabilitySurfaceV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "capability_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "protocol_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "adapter_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "adapter_code_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "input_schema_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "output_schema_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "scope_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "crypto:spot:okx:BTC-USDT:trade:1m",
+              "crypto:spot:okx:ETH-USDT:trade:1m"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true
+        },
+        "unit_bindings_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "controlled_routes_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "controlled_routes_ref": {
+          "type": "string",
+          "pattern": "^raw://sha256/[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "capability_id",
+        "protocol_ref",
+        "adapter_version",
+        "adapter_code_hash",
+        "input_schema_hash",
+        "output_schema_hash",
+        "scope_ids",
+        "unit_bindings_hash",
+        "controlled_routes_hash",
+        "controlled_routes_ref"
+      ]
+    },
+    "research_skill_version_v1": {
+      "title": "ResearchSkillVersionV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-skill-version.v1"
+        },
+        "skill_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "version_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "parent_version_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "enum": [
+            "method_workflow",
+            "method_readonly"
+          ]
+        },
+        "domain_pack_ref": {
+          "const": "crypto_macro.v1"
+        },
+        "scope_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "crypto:spot:okx:BTC-USDT:trade:1m",
+              "crypto:spot:okx:ETH-USDT:trade:1m"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true
+        },
+        "horizon": {
+          "const": "24h"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/research_skill_resource_v1"
+          },
+          "minItems": 1,
+          "maxItems": 128
+        },
+        "input_contract": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "output_contract": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "schema_bindings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/research_skill_schema_binding_v1"
+          },
+          "minItems": 1,
+          "maxItems": 128
+        },
+        "workflow_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "minLength": 64,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "compiler_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "required_capability_surface_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "capability_surfaces": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/research_skill_capability_surface_v1"
+          },
+          "minItems": 0,
+          "maxItems": 16
+        },
+        "component_manifest_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/research_skill_component_version_ref_v1"
+          },
+          "minItems": 0,
+          "maxItems": 16
+        },
+        "evaluation_protocol_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "origin_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "provider_input.schema.yaml#/$defs/research_provider_callback_reference"
+          },
+          "minItems": 0,
+          "maxItems": 32
+        },
+        "first_known_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|\\+00:00)$"
+        }
+      },
+      "required": [
+        "schema_version",
+        "skill_id",
+        "version_id",
+        "parent_version_id",
+        "kind",
+        "domain_pack_ref",
+        "scope_ids",
+        "horizon",
+        "files",
+        "input_contract",
+        "output_contract",
+        "schema_bindings",
+        "workflow_hash",
+        "compiler_hash",
+        "required_capability_surface_hash",
+        "capability_surfaces",
+        "component_manifest_refs",
+        "evaluation_protocol_hash",
+        "origin_refs",
+        "first_known_at"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "method_workflow"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "workflow_hash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$",
+                "minLength": 64,
+                "maxLength": 64
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "workflow_hash": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "research_skill_workflow_schema_id_v2": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.:-]+$",
+      "minLength": 1
+    },
+    "research_skill_workflow_node_id_v2": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+    },
+    "research_skill_workflow_pointer_v2": {
+      "type": "string",
+      "pattern": "^(?:/[A-Za-z_][A-Za-z0-9_]*)*$"
+    },
+    "research_skill_workflow_binding_v2": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "from",
+            "pointer"
+          ],
+          "properties": {
+            "from": {
+              "const": "workflow_input"
+            },
+            "pointer": {
+              "$ref": "#/$defs/research_skill_workflow_pointer_v2"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "from",
+            "node_id",
+            "pointer"
+          ],
+          "properties": {
+            "from": {
+              "const": "node_output"
+            },
+            "node_id": {
+              "$ref": "#/$defs/research_skill_workflow_node_id_v2"
+            },
+            "pointer": {
+              "$ref": "#/$defs/research_skill_workflow_pointer_v2"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "from",
+            "value"
+          ],
+          "properties": {
+            "from": {
+              "const": "literal"
+            },
+            "value": {}
+          }
+        }
+      ]
+    },
+    "research_skill_workflow_node_v2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "op",
+        "depends_on",
+        "input_schema",
+        "inputs",
+        "output_schema",
+        "capability_id",
+        "component_ref"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/research_skill_workflow_node_id_v2"
+        },
+        "op": {
+          "enum": [
+            "fact.select",
+            "evidence.acquire",
+            "component.compute",
+            "case.retrieve",
+            "hypothesis.check",
+            "decision.compose",
+            "monitor.propose"
+          ]
+        },
+        "depends_on": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/research_skill_workflow_node_id_v2"
+          }
+        },
+        "input_schema": {
+          "$ref": "#/$defs/research_skill_workflow_schema_id_v2"
+        },
+        "inputs": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/research_skill_workflow_binding_v2"
+          }
+        },
+        "output_schema": {
+          "$ref": "#/$defs/research_skill_workflow_schema_id_v2"
+        },
+        "capability_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "component_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "op": {
+                "const": "evidence.acquire"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "capability_id": {
+                "type": "string"
+              },
+              "component_ref": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "capability_id": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "op": {
+                "const": "component.compute"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "component_ref": {
+                "type": "string"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "component_ref": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "research_skill_workflow_v2": {
+      "title": "ResearchSkillWorkflowV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "workflow_id",
+        "version_id",
+        "scope_id",
+        "input_schema",
+        "output_schema",
+        "required_capability_surface_hash",
+        "required_capabilities",
+        "nodes",
+        "exports",
+        "horizon"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "skill-workflow.v2"
+        },
+        "workflow_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope_id": {
+          "type": "string",
+          "enum": [
+            "crypto:spot:okx:BTC-USDT:trade:1m",
+            "crypto:spot:okx:ETH-USDT:trade:1m"
+          ]
+        },
+        "input_schema": {
+          "$ref": "#/$defs/research_skill_workflow_schema_id_v2"
+        },
+        "output_schema": {
+          "$ref": "#/$defs/research_skill_workflow_schema_id_v2"
+        },
+        "required_capabilities": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "nodes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {
+            "$ref": "#/$defs/research_skill_workflow_node_v2"
+          }
+        },
+        "exports": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "$ref": "#/$defs/research_skill_workflow_binding_v2"
+          }
+        },
+        "horizon": {
+          "const": "24h"
+        },
+        "required_capability_surface_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      }
+    },
+    "research_skill_selection_v1": {
+      "title": "ResearchSkillSelectionV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-skill-selection.v1"
+        },
+        "selection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "use_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "task_request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "compiled_task_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "method_binding_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "scope_id": {
+          "type": "string",
+          "enum": [
+            "crypto:spot:okx:BTC-USDT:trade:1m",
+            "crypto:spot:okx:ETH-USDT:trade:1m"
+          ]
+        },
+        "horizon": {
+          "const": "24h"
+        },
+        "producer_cutoff_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|\\+00:00)$"
+        },
+        "skill_version_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "version_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "package_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "workflow_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "compiled_plan_ref": {
+          "type": "string",
+          "pattern": "^raw://sha256/[a-f0-9]{64}$"
+        },
+        "compiled_plan_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "required_capability_surface_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "execution_catalog_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "selection_origin": {
+          "enum": [
+            "baseline_registered",
+            "qualified_pointer"
+          ]
+        },
+        "component_manifest_ref": {
+          "$ref": "#/$defs/research_skill_component_version_ref_v1"
+        },
+        "activation_audit_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/research_skill_component_audit_ref_v1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pointer_generation": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "method_first_known_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|\\+00:00)$"
+        },
+        "selected_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|\\+00:00)$"
+        }
+      },
+      "required": [
+        "schema_version",
+        "selection_id",
+        "use_id",
+        "run_id",
+        "generation",
+        "task_request_hash",
+        "compiled_task_hash",
+        "method_binding_hash",
+        "scope_id",
+        "horizon",
+        "producer_cutoff_at",
+        "skill_version_id",
+        "version_hash",
+        "package_hash",
+        "workflow_hash",
+        "compiled_plan_ref",
+        "compiled_plan_hash",
+        "required_capability_surface_hash",
+        "execution_catalog_hash",
+        "selection_origin",
+        "component_manifest_ref",
+        "activation_audit_ref",
+        "pointer_generation",
+        "method_first_known_at",
+        "selected_at"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "selection_origin": {
+                "const": "qualified_pointer"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "activation_audit_ref": {
+                "$ref": "#/$defs/research_skill_component_audit_ref_v1"
+              },
+              "pointer_generation": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "activation_audit_ref": {
+                "type": "null"
+              },
+              "pointer_generation": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "research_skill_event_ref_v1": {
+      "title": "ResearchSkillEventRefV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "event_id",
+        "payload_hash"
+      ]
+    },
+    "research_skill_stage_receipt_v1": {
+      "title": "ResearchSkillStageReceiptV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stage": {
+          "enum": [
+            "selected",
+            "loaded",
+            "executed",
+            "consumed"
+          ]
+        },
+        "node_id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "event_ref": {
+          "$ref": "#/$defs/research_skill_event_ref_v1"
+        },
+        "first_known_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|\\+00:00)$"
+        }
+      },
+      "required": [
+        "stage",
+        "node_id",
+        "event_ref",
+        "first_known_at"
+      ]
+    },
+    "research_skill_node_output_ref_v1": {
+      "title": "ResearchSkillNodeOutputRefV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "node_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "event_ref": {
+          "$ref": "#/$defs/research_skill_event_ref_v1"
+        },
+        "output_contract": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "output_ref": {
+          "type": "string",
+          "pattern": "^raw://sha256/[a-f0-9]{64}$"
+        },
+        "output_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "node_id",
+        "event_ref",
+        "output_contract",
+        "output_ref",
+        "output_hash"
+      ]
+    },
+    "research_skill_native_tool_witness_v1": {
+      "title": "ResearchSkillNativeToolWitnessV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "observation_ref": {
+          "$ref": "provider_input.schema.yaml#/$defs/research_provider_callback_reference"
+        },
+        "tool_call_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "tool_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "call_sequence": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "result_sequence": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "call_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "result_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "result_json_pointer": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "observation_ref",
+        "tool_call_id",
+        "tool_name",
+        "call_sequence",
+        "result_sequence",
+        "call_hash",
+        "result_hash",
+        "result_json_pointer"
+      ]
+    },
+    "research_skill_transport_occurrence_v1": {
+      "title": "ResearchSkillTransportOccurrenceV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "native_transport.v1"
+        },
+        "witness": {
+          "$ref": "#/$defs/research_skill_native_tool_witness_v1"
+        }
+      },
+      "required": [
+        "kind",
+        "witness"
+      ]
+    },
+    "research_skill_provider_transcript_v1": {
+      "title": "ResearchSkillProviderTranscriptV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "provider_input_transcript.v1"
+        },
+        "input_ref": {
+          "$ref": "provider_input.schema.yaml#/$defs/research_provider_callback_reference"
+        },
+        "dispatch_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "call_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "tool_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "call_json_pointer": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "result_json_pointer": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "call_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "result_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "kind",
+        "input_ref",
+        "dispatch_id",
+        "call_id",
+        "tool_name",
+        "call_json_pointer",
+        "result_json_pointer",
+        "call_hash",
+        "result_hash"
+      ]
+    },
+    "research_skill_tool_occurrence_proof_v1": {
+      "title": "ResearchSkillToolOccurrenceProofV1",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/research_skill_transport_occurrence_v1"
+        },
+        {
+          "$ref": "#/$defs/research_skill_provider_transcript_v1"
+        }
+      ]
+    },
+    "research_skill_selected_details_v1": {
+      "title": "ResearchSkillSelectedDetailsV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stage": {
+          "const": "selected"
+        },
+        "selection_ref": {
+          "$ref": "provider_input.schema.yaml#/$defs/research_provider_callback_reference"
+        },
+        "selection_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "execution_catalog_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "required_capability_surface_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "stage",
+        "selection_ref",
+        "selection_hash",
+        "execution_catalog_hash",
+        "required_capability_surface_hash"
+      ]
+    },
+    "research_skill_loaded_details_v1": {
+      "title": "ResearchSkillLoadedDetailsV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stage": {
+          "const": "loaded"
+        },
+        "selected_event": {
+          "$ref": "#/$defs/research_skill_event_ref_v1"
+        },
+        "native_load": {
+          "$ref": "#/$defs/research_skill_tool_occurrence_proof_v1"
+        },
+        "provider_input_ref": {
+          "$ref": "provider_input.schema.yaml#/$defs/research_provider_callback_reference"
+        },
+        "dispatch_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "method_body_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "delivered_package_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "provider_input_method_loci": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "minItems": 1,
+          "maxItems": 16
+        },
+        "provider_input_result_loci": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "minItems": 1,
+          "maxItems": 16
+        }
+      },
+      "required": [
+        "stage",
+        "selected_event",
+        "native_load",
+        "provider_input_ref",
+        "dispatch_id",
+        "method_body_hash",
+        "delivered_package_hash",
+        "provider_input_method_loci",
+        "provider_input_result_loci"
+      ]
+    },
+    "research_skill_gateway_execution_proof_v1": {
+      "title": "ResearchSkillGatewayExecutionProofV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "gateway"
+        },
+        "native_research_call": {
+          "$ref": "#/$defs/research_skill_tool_occurrence_proof_v1"
+        },
+        "provider_emission_ref": {
+          "$ref": "provider_input.schema.yaml#/$defs/research_provider_callback_reference"
+        },
+        "gateway_invocation_ref": {
+          "$ref": "#/$defs/research_skill_gateway_reservation_ref_v1"
+        },
+        "gateway_result_ref": {
+          "$ref": "provider_input.schema.yaml#/$defs/research_provider_callback_reference"
+        },
+        "effective_query_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "adapter_result_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "kind",
+        "native_research_call",
+        "provider_emission_ref",
+        "gateway_invocation_ref",
+        "gateway_result_ref",
+        "effective_query_hash",
+        "adapter_result_hash"
+      ]
+    },
+    "research_skill_component_execution_proof_v1": {
+      "title": "ResearchSkillComponentExecutionProofV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "component"
+        },
+        "component_manifest_ref": {
+          "$ref": "#/$defs/research_skill_component_version_ref_v1"
+        },
+        "component_audit_ref": {
+          "$ref": "#/$defs/research_skill_component_audit_ref_v1"
+        },
+        "component_manifest_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "kind",
+        "component_manifest_ref",
+        "component_audit_ref",
+        "component_manifest_hash"
+      ]
+    },
+    "research_skill_reader_execution_proof_v1": {
+      "title": "ResearchSkillReaderExecutionProofV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "original_reader"
+        },
+        "reader_protocol_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "reader_code_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "reader_receipt_ref": {
+          "$ref": "provider_input.schema.yaml#/$defs/research_provider_callback_reference"
+        },
+        "input_originals": {
+          "type": "array",
+          "items": {
+            "$ref": "provider_input.schema.yaml#/$defs/research_provider_callback_reference"
+          },
+          "minItems": 1,
+          "maxItems": 128
+        }
+      },
+      "required": [
+        "kind",
+        "reader_protocol_ref",
+        "reader_code_hash",
+        "reader_receipt_ref",
+        "input_originals"
+      ]
+    },
+    "research_skill_reasoning_execution_proof_v1": {
+      "title": "ResearchSkillReasoningExecutionProofV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "dsh_reasoning"
+        },
+        "native_step_call": {
+          "$ref": "#/$defs/research_skill_tool_occurrence_proof_v1"
+        },
+        "provider_emission_ref": {
+          "$ref": "provider_input.schema.yaml#/$defs/research_provider_callback_reference"
+        },
+        "typed_result_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "kind",
+        "native_step_call",
+        "provider_emission_ref",
+        "typed_result_hash"
+      ]
+    },
+    "research_skill_executed_details_v1": {
+      "title": "ResearchSkillExecutedDetailsV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stage": {
+          "const": "executed"
+        },
+        "loaded_event": {
+          "$ref": "#/$defs/research_skill_event_ref_v1"
+        },
+        "op": {
+          "enum": [
+            "fact.select",
+            "evidence.acquire",
+            "component.compute",
+            "case.retrieve",
+            "hypothesis.check",
+            "decision.compose",
+            "monitor.propose"
+          ]
+        },
+        "parent_outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/research_skill_node_output_ref_v1"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "input_contract": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "input_ref": {
+          "type": "string",
+          "pattern": "^raw://sha256/[a-f0-9]{64}$"
+        },
+        "input_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "output_contract": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "output_ref": {
+          "type": "string",
+          "pattern": "^raw://sha256/[a-f0-9]{64}$"
+        },
+        "output_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "proof": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/research_skill_gateway_execution_proof_v1"
+            },
+            {
+              "$ref": "#/$defs/research_skill_component_execution_proof_v1"
+            },
+            {
+              "$ref": "#/$defs/research_skill_reader_execution_proof_v1"
+            },
+            {
+              "$ref": "#/$defs/research_skill_reasoning_execution_proof_v1"
+            }
+          ]
+        },
+        "method_first_known_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|\\+00:00)$"
+        },
+        "market_inputs_known_through": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|\\+00:00)$"
+        },
+        "completed_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|\\+00:00)$"
+        }
+      },
+      "required": [
+        "stage",
+        "loaded_event",
+        "op",
+        "parent_outputs",
+        "input_contract",
+        "input_ref",
+        "input_hash",
+        "output_contract",
+        "output_ref",
+        "output_hash",
+        "proof",
+        "method_first_known_at",
+        "market_inputs_known_through",
+        "completed_at"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "op": {
+                "enum": [
+                  "evidence.acquire"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "proof": {
+                "$ref": "#/$defs/research_skill_gateway_execution_proof_v1"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "op": {
+                "enum": [
+                  "component.compute"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "proof": {
+                "$ref": "#/$defs/research_skill_component_execution_proof_v1"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "op": {
+                "enum": [
+                  "fact.select",
+                  "case.retrieve"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "proof": {
+                "$ref": "#/$defs/research_skill_reader_execution_proof_v1"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "op": {
+                "enum": [
+                  "hypothesis.check",
+                  "decision.compose",
+                  "monitor.propose"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "proof": {
+                "$ref": "#/$defs/research_skill_reasoning_execution_proof_v1"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "research_skill_consumption_locus_v1": {
+      "title": "ResearchSkillConsumptionLocusV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "node_output": {
+          "$ref": "#/$defs/research_skill_node_output_ref_v1"
+        },
+        "consumer_json_pointer": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "node_output",
+        "consumer_json_pointer"
+      ]
+    },
+    "research_skill_consumed_details_v1": {
+      "title": "ResearchSkillConsumedDetailsV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stage": {
+          "const": "consumed"
+        },
+        "loaded_event": {
+          "$ref": "#/$defs/research_skill_event_ref_v1"
+        },
+        "consumer_node_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "consumer_op": {
+          "enum": [
+            "hypothesis.check",
+            "decision.compose"
+          ]
+        },
+        "consumer_event": {
+          "$ref": "#/$defs/research_skill_event_ref_v1"
+        },
+        "consumer_output_ref": {
+          "type": "string",
+          "pattern": "^raw://sha256/[a-f0-9]{64}$"
+        },
+        "consumer_output_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "provider_emission_ref": {
+          "$ref": "provider_input.schema.yaml#/$defs/research_provider_callback_reference"
+        },
+        "uses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/research_skill_consumption_locus_v1"
+          },
+          "minItems": 1,
+          "maxItems": 128
+        },
+        "method_first_known_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|\\+00:00)$"
+        },
+        "market_inputs_known_through": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|\\+00:00)$"
+        }
+      },
+      "required": [
+        "stage",
+        "loaded_event",
+        "consumer_node_id",
+        "consumer_op",
+        "consumer_event",
+        "consumer_output_ref",
+        "consumer_output_hash",
+        "provider_emission_ref",
+        "uses",
+        "method_first_known_at",
+        "market_inputs_known_through"
+      ]
+    },
+    "research_skill_failed_details_v1": {
+      "title": "ResearchSkillFailedDetailsV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stage": {
+          "const": "failed"
+        },
+        "attempted_stage": {
+          "enum": [
+            "selected",
+            "loaded",
+            "executed",
+            "consumed"
+          ]
+        },
+        "error_code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "prior_events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/research_skill_event_ref_v1"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "failure_original_ref": {
+          "$ref": "provider_input.schema.yaml#/$defs/research_provider_callback_reference"
+        }
+      },
+      "required": [
+        "stage",
+        "attempted_stage",
+        "error_code",
+        "retryable",
+        "prior_events",
+        "failure_original_ref"
+      ]
+    },
+    "research_skill_use_event_v1": {
+      "title": "ResearchSkillUseEventV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-skill-use-event.v1"
+        },
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "use_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "root_session_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "execution_session_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "skill_version_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "package_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "workflow_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "method_binding_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "stage": {
+          "enum": [
+            "selected",
+            "loaded",
+            "executed",
+            "consumed",
+            "failed"
+          ]
+        },
+        "node_id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "stage_request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "parent_event": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/research_skill_event_ref_v1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "original": {
+          "$ref": "provider_input.schema.yaml#/$defs/research_provider_callback_reference"
+        },
+        "first_known_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|\\+00:00)$"
+        },
+        "details": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/research_skill_selected_details_v1"
+            },
+            {
+              "$ref": "#/$defs/research_skill_loaded_details_v1"
+            },
+            {
+              "$ref": "#/$defs/research_skill_executed_details_v1"
+            },
+            {
+              "$ref": "#/$defs/research_skill_consumed_details_v1"
+            },
+            {
+              "$ref": "#/$defs/research_skill_failed_details_v1"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "event_id",
+        "use_id",
+        "run_id",
+        "generation",
+        "root_session_id",
+        "execution_session_id",
+        "skill_version_id",
+        "package_hash",
+        "workflow_hash",
+        "method_binding_hash",
+        "stage",
+        "node_id",
+        "stage_request_id",
+        "parent_event",
+        "original",
+        "first_known_at",
+        "details"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "stage": {
+                "const": "selected"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "details": {
+                "$ref": "#/$defs/research_skill_selected_details_v1"
+              },
+              "node_id": {
+                "const": ""
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "stage": {
+                "const": "loaded"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "details": {
+                "$ref": "#/$defs/research_skill_loaded_details_v1"
+              },
+              "node_id": {
+                "const": ""
+              },
+              "root_session_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "execution_session_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "stage": {
+                "const": "executed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "details": {
+                "$ref": "#/$defs/research_skill_executed_details_v1"
+              },
+              "root_session_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "execution_session_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "node_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "stage": {
+                "const": "consumed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "details": {
+                "$ref": "#/$defs/research_skill_consumed_details_v1"
+              },
+              "node_id": {
+                "const": ""
+              },
+              "root_session_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "execution_session_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "stage": {
+                "const": "failed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "details": {
+                "$ref": "#/$defs/research_skill_failed_details_v1"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "research_skill_gateway_intent_v1": {
+      "title": "ResearchSkillGatewayIntentV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "requirement_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "query": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "target_url": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uri",
+              "maxLength": 2048
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "symbols": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "minItems": 0,
+          "maxItems": 20
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "minItems": 1,
+          "maxItems": 50
+        },
+        "allowed_domains": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "minItems": 0,
+          "maxItems": 100
+        },
+        "max_results": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        }
+      },
+      "required": [
+        "requirement_id",
+        "query",
+        "target_url",
+        "symbols",
+        "fields",
+        "allowed_domains",
+        "max_results"
+      ]
+    },
+    "research_skill_hypothesis_input_v1": {
+      "title": "ResearchSkillHypothesisInputV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "scope_id": {
+          "type": "string",
+          "enum": [
+            "crypto:spot:okx:BTC-USDT:trade:1m",
+            "crypto:spot:okx:ETH-USDT:trade:1m"
+          ]
+        },
+        "horizon": {
+          "const": "24h"
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|\\+00:00)$"
+        },
+        "executed_outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/research_skill_node_output_ref_v1"
+          },
+          "minItems": 2,
+          "maxItems": 128
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "minItems": 1,
+          "maxItems": 200
+        },
+        "claim_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "minItems": 0,
+          "maxItems": 64
+        },
+        "missing_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "minItems": 0,
+          "maxItems": 64
+        }
+      },
+      "required": [
+        "scope_id",
+        "horizon",
+        "as_of",
+        "executed_outputs",
+        "evidence_refs",
+        "claim_refs",
+        "missing_codes"
+      ]
+    },
+    "research_skill_hypothesis_output_v1": {
+      "title": "ResearchSkillHypothesisOutputV1",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-skill-hypothesis-output.v1"
+        },
+        "scope_id": {
+          "type": "string",
+          "enum": [
+            "crypto:spot:okx:BTC-USDT:trade:1m",
+            "crypto:spot:okx:ETH-USDT:trade:1m"
+          ]
+        },
+        "horizon": {
+          "const": "24h"
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|\\+00:00)$"
+        },
+        "mechanism_review": {
+          "$ref": "research_signal.schema.yaml#/$defs/research_mechanism_review_v1"
+        },
+        "used_outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/research_skill_consumption_locus_v1"
+          },
+          "minItems": 2,
+          "maxItems": 128
+        },
+        "unresolved": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "minItems": 0,
+          "maxItems": 64
+        }
+      },
+      "required": [
+        "schema_version",
+        "scope_id",
+        "horizon",
+        "as_of",
+        "mechanism_review",
+        "used_outputs",
+        "unresolved"
+      ]
+    },
+    "research_skill_host_identity_v1": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "request_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "root_session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "execution_session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "run_id",
+        "generation",
+        "request_hash",
+        "root_session_id",
+        "execution_session_id"
+      ],
+      "title": "ResearchSkillHostIdentityV1"
+    },
+    "research_skill_business_args_v1": {
+      "title": "ResearchSkillBusinessArgsV1",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "operation": {
+              "const": "list"
+            }
+          },
+          "required": [
+            "operation"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "operation": {
+              "const": "load"
+            },
+            "skill_version_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          "required": [
+            "operation",
+            "skill_version_id"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "operation": {
+              "const": "execute_step"
+            },
+            "skill_version_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "node_id": {
+              "enum": [
+                "spot_evidence",
+                "features",
+                "hypothesis"
+              ]
+            },
+            "input": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "operation",
+            "skill_version_id",
+            "node_id",
+            "input"
+          ]
+        }
+      ]
+    },
+    "research_skill_tool_request_v1": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-skill-tool-request.v1"
+        },
+        "identity": {
+          "$ref": "#/$defs/research_skill_host_identity_v1"
+        },
+        "call_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "arguments": {
+          "$ref": "#/$defs/research_skill_business_args_v1"
+        },
+        "research_occurrence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/research_skill_provider_transcript_v1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "identity",
+        "call_id",
+        "arguments",
+        "research_occurrence"
+      ],
+      "title": "ResearchSkillToolRequestV1"
+    },
+    "research_skill_record_request_v1": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "research-skill-record-request.v1"
+        },
+        "identity": {
+          "$ref": "#/$defs/research_skill_host_identity_v1"
+        },
+        "stage": {
+          "enum": [
+            "loaded",
+            "consumed"
+          ]
+        },
+        "stage_request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "proof": {
+          "$ref": "#/$defs/research_skill_provider_transcript_v1"
+        }
+      },
+      "required": [
+        "schema_version",
+        "identity",
+        "stage",
+        "stage_request_id",
+        "proof"
+      ],
+      "title": "ResearchSkillRecordRequestV1"
+    }
+  },
+  "description": "Staged canonical contracts. Parsing is not native trust, activation, execution proof or financial qualification; UTC and cross-field original readers remain mandatory."
+}
